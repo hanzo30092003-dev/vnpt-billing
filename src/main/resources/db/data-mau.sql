@@ -233,9 +233,50 @@ INSERT INTO ky_cuoc (id, thang, nam, ngay_bat_dau, ngay_ket_thuc, trang_thai,
 (1, 6, 2026, '2026-06-01', '2026-06-30', 'MO', NULL, 0, 0, 0);
 
 -- ---------------------------------------------------------------------
--- 8. CHUA tao du lieu cho cac bang sau - thuoc pham vi cac phase ke tiep:
+-- 8. lich_su_thue_bao - lich su bien dong trang thai
+-- ---------------------------------------------------------------------
+-- Du lieu mau co 15 thue bao khong o trang thai HOAT_DONG. Neu bang nay
+-- rong thi mo tab "Lich su bien dong" cua chung se trong tron - vo ly ve
+-- mat nghiep vu, vi trang thai hien tai phai den tu mot thao tac nao do.
+--
+-- Moi thue bao do duoc cap it nhat 1 dong giai thich trang thai hien tai.
+-- Rieng 4 thue bao (id 8, 24, 26, 45) duoc dung lich su NHIEU BUOC de man
+-- hinh timeline co du lieu phong phu khi demo.
+--
+-- nguoi_thuc_hien_id = 2 (nhanvien01). ID ghi tuong minh de giu tinh
+-- idempotent cua script.
+-- ---------------------------------------------------------------------
+INSERT INTO lich_su_thue_bao (id, thue_bao_id, trang_thai_cu, trang_thai_moi, ly_do, nguoi_thuc_hien_id, thoi_gian) VALUES
+-- 8 thue bao tam ngung mot chieu
+( 1,  5, 'HOAT_DONG', 'TAM_NGUNG_1C', 'Tạm ngừng theo yêu cầu khách hàng',  2, '2026-02-10 09:15:00'),
+( 2, 12, 'HOAT_DONG', 'TAM_NGUNG_1C', 'Tạm ngừng do nợ cước quá hạn',       2, '2026-02-24 14:30:00'),
+( 3, 20, 'HOAT_DONG', 'TAM_NGUNG_1C', 'Tạm ngừng theo yêu cầu khách hàng',  2, '2026-03-06 10:05:00'),
+( 4, 28, 'HOAT_DONG', 'TAM_NGUNG_1C', 'Tạm ngừng do nợ cước quá hạn',       2, '2026-03-19 16:45:00'),
+( 5, 39, 'HOAT_DONG', 'TAM_NGUNG_1C', 'Tạm ngừng theo yêu cầu khách hàng',  2, '2026-04-02 08:50:00'),
+( 6, 47, 'HOAT_DONG', 'TAM_NGUNG_1C', 'Tạm ngừng do nợ cước quá hạn',       2, '2026-04-21 11:20:00'),
+( 7, 58, 'HOAT_DONG', 'TAM_NGUNG_1C', 'Tạm ngừng theo yêu cầu khách hàng',  2, '2026-05-08 15:10:00'),
+( 8, 70, 'HOAT_DONG', 'TAM_NGUNG_1C', 'Tạm ngừng do nợ cước quá hạn',       2, '2026-05-27 09:40:00'),
+-- 2 thue bao tam ngung hai chieu (2 cai con lai co lich su nhieu buoc ben duoi)
+( 9, 51, 'HOAT_DONG', 'TAM_NGUNG_2C', 'Tạm ngừng hai chiều do nợ cước quá hạn', 2, '2026-06-04 13:25:00'),
+(10, 66, 'HOAT_DONG', 'TAM_NGUNG_2C', 'Tạm ngừng hai chiều do nợ cước quá hạn', 2, '2026-06-18 10:55:00'),
+-- 3 thue bao da thanh ly - thoi_gian khop voi ngay_huy trong bang thue_bao
+(11, 15, 'HOAT_DONG', 'DA_THANH_LY',  'Khách hàng yêu cầu thanh lý', 2, '2026-03-15 14:00:00'),
+(12, 74, 'HOAT_DONG', 'DA_THANH_LY',  'Khách hàng yêu cầu thanh lý', 2, '2026-04-30 16:20:00'),
+(13, 33, 'HOAT_DONG', 'DA_THANH_LY',  'Khách hàng yêu cầu thanh lý', 2, '2026-05-20 09:30:00'),
+-- Lich su NHIEU BUOC: thue bao 8 va 24 di qua 1 chieu roi moi len 2 chieu
+(14,  8, 'HOAT_DONG',    'TAM_NGUNG_1C', 'Tạm ngừng do nợ cước quá hạn', 2, '2026-03-02 09:00:00'),
+(15,  8, 'TAM_NGUNG_1C', 'TAM_NGUNG_2C', 'Quá 30 ngày chưa thanh toán, chuyển tạm ngừng hai chiều', 2, '2026-04-02 09:00:00'),
+(16, 24, 'HOAT_DONG',    'TAM_NGUNG_1C', 'Tạm ngừng do nợ cước quá hạn', 2, '2026-04-15 10:30:00'),
+(17, 24, 'TAM_NGUNG_1C', 'TAM_NGUNG_2C', 'Quá 30 ngày chưa thanh toán, chuyển tạm ngừng hai chiều', 2, '2026-05-15 10:30:00'),
+-- Lich su NHIEU BUOC: thue bao 26 va 45 da tung bi tam ngung roi duoc khoi phuc
+(18, 26, 'HOAT_DONG',    'TAM_NGUNG_1C', 'Tạm ngừng theo yêu cầu khách hàng', 2, '2026-02-16 08:20:00'),
+(19, 26, 'TAM_NGUNG_1C', 'HOAT_DONG',    'Khách hàng yêu cầu khôi phục dịch vụ', 2, '2026-03-16 08:20:00'),
+(20, 45, 'HOAT_DONG',    'TAM_NGUNG_1C', 'Tạm ngừng do nợ cước quá hạn', 2, '2026-05-05 14:45:00'),
+(21, 45, 'TAM_NGUNG_1C', 'HOAT_DONG',    'Khách hàng đã thanh toán, khôi phục dịch vụ', 2, '2026-06-05 14:45:00');
+
+-- ---------------------------------------------------------------------
+-- 9. CHUA tao du lieu cho cac bang sau - thuoc pham vi cac phase ke tiep:
 --    chi_tiet_su_dung (CDR)  -> Phase 3
 --    hoa_don, chi_tiet_hoa_don, thanh_toan -> Phase 4, 5
---    nap_tien, giam_tru, lich_su_thue_bao, nhat_ky_he_thong -> phat sinh
---    trong qua trinh van hanh
+--    nap_tien, giam_tru, nhat_ky_he_thong -> phat sinh trong van hanh
 -- ---------------------------------------------------------------------

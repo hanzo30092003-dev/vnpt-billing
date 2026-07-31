@@ -28,12 +28,19 @@ spring:
         format_sql: true
 
   # ---------------------------------------------------------------
-  # Script khoi tao CSDL: schema.sql tao bang, data-mau.sql chen du
-  # lieu mau. O Phase 0 hai file nay con rong (chi co chu thich).
+  # Script khoi tao CSDL: schema.sql tao bang, data-mau.sql chen du lieu mau.
+  #
+  # mode=never la MAC DINH ke tu Phase 2. Ly do: schema.sql mo dau bang
+  # DROP TABLE IF EXISTS, neu de mode=always thi moi lan khoi dong ung dung
+  # se xoa sach CSDL, lam mat toan bo du lieu nguoi dung nhap qua giao dien.
+  #
+  # Khi can nap lai du lieu mau tu dau, chay voi profile "reset":
+  #     .\mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
+  # Profile do nam trong application-reset.yml va chi dat lai mode=always.
   # ---------------------------------------------------------------
   sql:
     init:
-      mode: always
+      mode: never
       schema-locations: classpath:db/schema.sql
       data-locations: classpath:db/data-mau.sql
       encoding: UTF-8

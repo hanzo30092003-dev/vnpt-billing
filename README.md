@@ -95,22 +95,47 @@ $env:MYSQL_PASSWORD = "matkhau_root_cua_ban"
 
 ---
 
-## 4. Chạy dự án
+## 4. Chạy ứng dụng
+
+### 4.1. Chạy bình thường — giữ nguyên dữ liệu
 
 ```bash
-mvn clean compile
+mvnw spring-boot:run
 ```
 
-```bash
-mvn spring-boot:run
-```
+Đây là cách chạy hằng ngày. `spring.sql.init.mode` mặc định là `never`, nên các
+script `schema.sql` / `data-mau.sql` **không** chạy lại và mọi dữ liệu nhập qua giao
+diện được giữ nguyên qua các lần khởi động.
 
 Mở trình duyệt: <http://localhost:8080>
 
-Đóng gói thành file JAR chạy độc lập:
+### 4.2. Nạp lại dữ liệu mẫu — profile `reset`
 
 ```bash
-mvn clean package
+mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
+```
+
+> ### ⚠️ CẢNH BÁO
+> **Profile `reset` sẽ XOÁ TOÀN BỘ dữ liệu đang có trong CSDL.**
+>
+> Profile này bật `spring.sql.init.mode=always`, khiến `schema.sql` chạy lại. File đó
+> mở đầu bằng `DROP TABLE IF EXISTS` cho cả 15 bảng, nên mọi khách hàng, thuê bao,
+> giao dịch bạn đã nhập qua giao diện đều **mất sạch** và CSDL trở về đúng bộ dữ liệu
+> mẫu ban đầu (50 khách hàng / 80 thuê bao / 5 gói cước).
+>
+> Chỉ dùng khi bạn **chủ đích** muốn làm mới CSDL, ví dụ trước khi demo hoặc khi dữ
+> liệu thử nghiệm đã lộn xộn.
+
+### 4.3. Chạy kiểm thử
+
+```bash
+mvnw test
+```
+
+### 4.4. Đóng gói và chạy độc lập
+
+```bash
+mvnw clean package
 ```
 
 ```bash

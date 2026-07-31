@@ -1,0 +1,17 @@
+# =====================================================================
+# Profile "reset" - NAP LAI DU LIEU MAU TU DAU
+# =====================================================================
+# Cach dung:
+#     .\mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
+#
+# CANH BAO: profile nay bat lai spring.sql.init.mode=always, khien
+# schema.sql chay lai. Ma schema.sql mo dau bang DROP TABLE IF EXISTS
+# nen TOAN BO DU LIEU DANG CO SE BI XOA, ke ca du lieu nhap qua giao dien.
+# Chi dung khi co chu dinh dua CSDL ve dung bo du lieu mau ban dau.
+#
+# Chay binh thuong (khong kem profile) thi mode=never, du lieu duoc giu nguyen.
+# =====================================================================
+spring:
+  sql:
+    init:
+      mode: always
