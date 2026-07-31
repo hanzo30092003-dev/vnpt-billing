@@ -132,3 +132,84 @@ body {
         font-size: .85rem;
     }
 }
+
+/* ---------- Trang dang nhap (khong dung layout sidebar) ---------- */
+.trang-dang-nhap {
+    background: linear-gradient(160deg, #14304d 0%, #1e88e5 100%);
+    min-height: 100vh;
+}
+
+.dang-nhap-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1.5rem;
+}
+
+.dang-nhap-card {
+    width: 100%;
+    max-width: 430px;
+}
+
+/* ---------- Badge trang thai ---------- */
+/* Bootstrap khong co mau cam san, tu dinh nghia cho TAM_NGUNG_2C */
+.badge.bg-orange {
+    background-color: #fd7e14 !important;
+    color: #fff;
+}
+
+/* ---------- Timeline lich su bien dong trang thai ---------- */
+.timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 1.75rem;
+    position: relative;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: .45rem;
+    top: .35rem;
+    bottom: .35rem;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.25rem;
+}
+
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -1.55rem;
+    top: .35rem;
+    width: .8rem;
+    height: .8rem;
+    border-radius: 50%;
+    background-color: #1e88e5;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-time {
+    font-size: .8rem;
+    color: #6c757d;
+}
+
+/* ---------- Tien ich ---------- */
+.bang-du-lieu td,
+.bang-du-lieu th {
+    vertical-align: middle;
+}
+
+.o-tim-kiem {
+    max-width: 320px;
+}

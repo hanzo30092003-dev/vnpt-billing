@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Không đủ quyền', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang" class="text-center py-5">
+    <i class="bi bi-shield-lock display-1 text-warning"></i>
+    <h2 class="h3 mt-3">403 &mdash; Không đủ quyền truy cập</h2>
+    <p class="text-secondary mb-1">
+        Tài khoản của bạn không được phép mở chức năng này.
+    </p>
+    <p class="text-secondary">
+        Nếu cần sử dụng, vui lòng liên hệ quản trị viên để được cấp quyền.
+    </p>
+    <a class="btn btn-primary" th:href="@{/}">
+        <i class="bi bi-house-door me-1"></i> Về trang chủ
+    </a>
+</div>
+
+</body>
+</html>

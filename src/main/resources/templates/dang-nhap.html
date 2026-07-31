@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!--/*
+    Trang đăng nhập dùng template riêng, KHÔNG lồng vào fragments/layout.html,
+    vì lúc này người dùng chưa đăng nhập nên không có sidebar và header.
+*/-->
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng nhập | Quản lý thuê bao &amp; tính cước</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="trang-dang-nhap">
+
+<div class="dang-nhap-wrap">
+    <div class="card shadow-sm dang-nhap-card">
+        <div class="card-body p-4">
+
+            <div class="text-center mb-4">
+                <i class="bi bi-broadcast-pin display-5 text-primary"></i>
+                <h1 class="h5 mt-2 mb-1">HỆ THỐNG QUẢN LÝ THUÊ BAO &amp; TÍNH CƯỚC</h1>
+                <p class="text-secondary small mb-0">Đồ án Thực tập nghề nghiệp</p>
+            </div>
+
+            <!--/* Thông báo đăng nhập thất bại: Spring Security chuyển về /dang-nhap?loi */-->
+            <div class="alert alert-danger d-flex align-items-center py-2" th:if="${param.loi != null}">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span>Tên đăng nhập hoặc mật khẩu không đúng, hoặc tài khoản đã bị khoá.</span>
+            </div>
+
+            <div class="alert alert-success d-flex align-items-center py-2" th:if="${param.dathoat != null}">
+                <i class="bi bi-check-circle me-2"></i>
+                <span>Bạn đã đăng xuất khỏi hệ thống.</span>
+            </div>
+
+            <!--/* Thymeleaf tự chèn input ẩn chứa CSRF token vào form này */-->
+            <form th:action="@{/dang-nhap}" method="post">
+                <div class="mb-3">
+                    <label class="form-label" for="tenDangNhap">Tên đăng nhập</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="tenDangNhap" name="tenDangNhap"
+                               required autofocus autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" for="matKhau">Mật khẩu</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="matKhau" name="matKhau"
+                               required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                </button>
+            </form>
+
+            <hr class="my-4">
+
+            <!--/*
+                Đây là hệ thống DEMO phục vụ học tập, dữ liệu hoàn toàn là dữ liệu mẫu
+                tự sinh. Vì vậy ghi công khai tài khoản dùng thử để hội đồng và người
+                chấm đăng nhập được ngay. Hệ thống thật KHÔNG BAO GIỜ làm như vậy.
+            */-->
+            <div class="alert alert-warning py-2 mb-2">
+                <i class="bi bi-info-circle me-1"></i>
+                <strong>Hệ thống demo học tập</strong> — dữ liệu là dữ liệu mẫu tự sinh.
+            </div>
+
+            <p class="small text-secondary mb-2">Tài khoản dùng thử (mật khẩu đều là <code>123456</code>):</p>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered align-middle mb-0 small">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Tên đăng nhập</th>
+                        <th>Vai trò</th>
+                        <th>Phạm vi</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><code>admin</code></td>
+                        <td>Quản trị viên</td>
+                        <td>Toàn quyền</td>
+                    </tr>
+                    <tr>
+                        <td><code>nhanvien01</code></td>
+                        <td>Nhân viên giao dịch</td>
+                        <td>Khách hàng, thuê bao</td>
+                    </tr>
+                    <tr>
+                        <td><code>ketoan01</code></td>
+                        <td>Kế toán</td>
+                        <td>Hóa đơn, thanh toán, công nợ</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

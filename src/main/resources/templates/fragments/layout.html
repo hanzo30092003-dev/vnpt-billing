@@ -4,8 +4,13 @@
     Cách dùng ở trang con:
         <html th:replace="~{fragments/layout :: layout('Tiêu đề trang', ~{::noiDungTrang})}">
     Trong đó ~{::noiDungTrang} trỏ tới th:fragment="noiDungTrang" của trang con.
+
+    Sidebar dùng sec:authorize để ẩn/hiện từng nhóm menu theo vai trò. Đây chỉ là
+    lớp che giao diện cho gọn mắt; chốt chặn thật nằm ở SecurityConfig, nên gõ
+    thẳng URL không có quyền vẫn bị chặn và trả về trang 403.
 */-->
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:fragment="layout(tieuDe, noiDung)">
 <head>
     <meta charset="UTF-8">
@@ -30,23 +35,50 @@
         </div>
 
         <nav class="sidebar-nav">
-            <a class="nav-item" href="#"><i class="bi bi-house-door"></i> Trang chủ</a>
+            <a class="nav-item" th:href="@{/}"
+               th:classappend="${duongDanHienTai == '/'} ? 'active'">
+                <i class="bi bi-house-door"></i> Trang chủ
+            </a>
 
-            <div class="nav-group">Danh mục</div>
-            <a class="nav-item" href="#"><i class="bi bi-people"></i> Khách hàng</a>
-            <a class="nav-item" href="#"><i class="bi bi-sim"></i> Thuê bao</a>
-            <a class="nav-item" href="#"><i class="bi bi-box-seam"></i> Gói cước</a>
-            <a class="nav-item" href="#"><i class="bi bi-tags"></i> Bảng giá</a>
+            <!--/* Quầy giao dịch: nhân viên và quản trị viên */-->
+            <div sec:authorize="hasAnyRole('NHAN_VIEN','ADMIN')">
+                <div class="nav-group">Quầy giao dịch</div>
+                <a class="nav-item" th:href="@{/khach-hang}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/khach-hang')} ? 'active'">
+                    <i class="bi bi-people"></i> Khách hàng
+                </a>
+                <a class="nav-item" th:href="@{/thue-bao}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/thue-bao')} ? 'active'">
+                    <i class="bi bi-sim"></i> Thuê bao
+                </a>
+            </div>
 
-            <div class="nav-group">Nghiệp vụ</div>
-            <a class="nav-item" href="#"><i class="bi bi-file-earmark-text"></i> CDR</a>
-            <a class="nav-item" href="#"><i class="bi bi-calculator"></i> Tính cước</a>
-            <a class="nav-item" href="#"><i class="bi bi-receipt"></i> Hóa đơn</a>
-            <a class="nav-item" href="#"><i class="bi bi-cash-coin"></i> Thanh toán</a>
+            <!--/* Danh mục và tính cước: chỉ quản trị viên. Các mục còn để # vì thuộc Phase 3-4 */-->
+            <div sec:authorize="hasRole('ADMIN')">
+                <div class="nav-group">Danh mục &amp; tính cước</div>
+                <a class="nav-item" href="#"><i class="bi bi-box-seam"></i> Gói cước</a>
+                <a class="nav-item" href="#"><i class="bi bi-tags"></i> Bảng giá</a>
+                <a class="nav-item" href="#"><i class="bi bi-file-earmark-text"></i> CDR</a>
+                <a class="nav-item" href="#"><i class="bi bi-calculator"></i> Tính cước</a>
+            </div>
 
-            <div class="nav-group">Hệ thống</div>
-            <a class="nav-item" href="#"><i class="bi bi-bar-chart-line"></i> Báo cáo</a>
-            <a class="nav-item" href="#"><i class="bi bi-gear"></i> Quản trị</a>
+            <!--/* Kế toán */-->
+            <div sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
+                <div class="nav-group">Kế toán</div>
+                <a class="nav-item" href="#"><i class="bi bi-receipt"></i> Hóa đơn</a>
+                <a class="nav-item" href="#"><i class="bi bi-cash-coin"></i> Thanh toán</a>
+                <a class="nav-item" href="#"><i class="bi bi-wallet2"></i> Công nợ</a>
+            </div>
+
+            <!--/* Báo cáo: mọi vai trò đã đăng nhập đều xem được */-->
+            <div class="nav-group">Báo cáo</div>
+            <a class="nav-item" href="#"><i class="bi bi-bar-chart-line"></i> Báo cáo thống kê</a>
+
+            <!--/* Quản trị hệ thống: chỉ quản trị viên */-->
+            <div sec:authorize="hasRole('ADMIN')">
+                <div class="nav-group">Hệ thống</div>
+                <a class="nav-item" href="#"><i class="bi bi-gear"></i> Quản trị</a>
+            </div>
         </nav>
     </aside>
 
@@ -56,15 +88,39 @@
         <header class="topbar">
             <h1 class="topbar-title">HỆ THỐNG QUẢN LÝ THUÊ BAO &amp; TÍNH CƯỚC</h1>
 
-            <!--/* Phase 0 chưa bật đăng nhập nên hiển thị người dùng mặc định */-->
-            <div class="topbar-user">
-                <i class="bi bi-person-circle"></i>
-                <span>Khách</span>
+            <div class="topbar-user" sec:authorize="isAuthenticated()">
+                <i class="bi bi-person-circle fs-5"></i>
+                <span class="fw-semibold" th:text="${#authentication.principal.hoTen}">Họ tên</span>
+                <span class="badge text-bg-primary"
+                      th:text="${#authentication.principal.vaiTro.nhan}">Vai trò</span>
+
+                <!--/* Đăng xuất phải gửi bằng POST vì CSRF đang bật */-->
+                <form th:action="@{/dang-xuat}" method="post" class="d-inline ms-2">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                    </button>
+                </form>
             </div>
         </header>
 
         <!--/* ================= NỘI DUNG TRANG ================= */-->
         <main class="content">
+
+            <!--/* Thông báo truyền qua RedirectAttributes, tự ẩn sau 5 giây (xem app.js) */-->
+            <div class="alert alert-success alert-dismissible fade show tu-an" role="alert"
+                 th:if="${thongBaoThanhCong}">
+                <i class="bi bi-check-circle me-2"></i>
+                <span th:text="${thongBaoThanhCong}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="alert alert-danger alert-dismissible fade show tu-an" role="alert"
+                 th:if="${thongBaoLoi}">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span th:text="${thongBaoLoi}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
             <div th:replace="${noiDung}">Nội dung của trang con sẽ được chèn vào đây.</div>
         </main>
 
@@ -76,5 +132,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
 </body>
 </html>

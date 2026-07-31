@@ -57,6 +57,12 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Cho phep dung sec:authorize / sec:authentication trong Thymeleaf -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
         <!-- Driver MySQL 8 -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -88,6 +94,29 @@
 
     <build>
         <plugins>
+            <!--
+                Khai bao Lombok lam annotation processor MOT CACH TUONG MINH.
+
+                Tu JDK 23 tro di, javac khong con tu dong kich hoat annotation
+                processing khi chi thay processor nam tren classpath (truoc day
+                JDK 21/22 van chay nhung co canh bao). Neu khong khai bao o day,
+                Lombok se im lang khong sinh getter/setter/@Slf4j nao ca, va loi
+                chi lo ra khi co code that su goi den chung.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
