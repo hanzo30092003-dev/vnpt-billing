@@ -173,9 +173,15 @@ Chưa làm (thuộc các phase sau):
 
 Báo cáo chi tiết quá trình và kết quả: [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md)
 
-> `src/main/resources/db/schema.sql` và `data-mau.sql` hiện chỉ chứa chú thích.
-> Hai file **bắt buộc phải tồn tại** vì `application.yml` trỏ tới chúng — nếu xóa,
-> ứng dụng sẽ báo lỗi `No SQL scripts found at location` khi khởi động.
+> **Về hai file `src/main/resources/db/schema.sql` và `data-mau.sql`:** hiện mỗi file
+> chỉ có chú thích kèm một câu lệnh no-op `SELECT 1;`.
+>
+> - Hai file **bắt buộc phải tồn tại** vì `application.yml` trỏ tới chúng — nếu xoá,
+>   ứng dụng báo `No SQL scripts found at location` khi khởi động.
+> - Câu `SELECT 1;` **không được xoá** khi file chưa có lệnh SQL nào khác. Spring bóc
+>   hết chú thích trước khi chạy script, nên file chỉ có chú thích sẽ thành chuỗi rỗng
+>   và gây lỗi `'script' must not be null or empty`.
+> - Phase 1 sẽ xoá `SELECT 1;` khi thêm các lệnh `CREATE TABLE` và `INSERT` thật.
 
 ---
 

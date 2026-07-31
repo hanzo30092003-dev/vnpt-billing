@@ -3,7 +3,7 @@
 **Đề tài:** Xây dựng phần mềm quản lý thuê bao và tính cước điện thoại
 **Môn học:** Thực tập nghề nghiệp
 **Ngày thực hiện:** 31/07/2026
-**Trạng thái:** Hoàn thành, còn 1 việc tồn đọng cần thao tác thủ công (mục 7)
+**Trạng thái:** ✅ Hoàn thành — đã nghiệm thu đủ 4/4 tiêu chí với MySQL thật
 
 > Toàn bộ dữ liệu trong hệ thống là dữ liệu mẫu tự sinh phục vụ học tập.
 > Hệ thống không sử dụng dữ liệu thật của bất kỳ nhà mạng nào.
@@ -94,11 +94,20 @@ Lợi ích: không cần cài Maven vào hệ thống, và **máy nào clone d�
 - Phần Lưu ý: **không** tạo bảng CSDL ở Phase 0
 
 Nếu hai file không tồn tại, Spring Boot ném lỗi `No SQL scripts found at location`
-ngay khi khởi động. Cách xử lý: tạo hai file **chỉ chứa chú thích**, không có câu
-lệnh SQL nào. Script chạy nhưng không thực thi gì, ứng dụng khởi động bình thường,
-và vẫn đúng cam kết "chưa tạo bảng".
+ngay khi khởi động. Nên hai file **bắt buộc phải tồn tại**.
 
-Đã ghi cảnh báo trong `README.md` để tránh bị xoá nhầm ở các phase sau.
+Phương án ban đầu là để hai file **chỉ chứa chú thích**. Phương án này **sai** và đã
+bị phát hiện khi nghiệm thu với MySQL thật — chi tiết ở mục 5.4. Cách làm đúng: mỗi
+file phải chứa **ít nhất một câu lệnh SQL hợp lệ**, ở đây dùng `SELECT 1;` làm no-op:
+
+```sql
+-- (chú thích giải thích)
+SELECT 1;
+```
+
+`SELECT 1` không tạo bảng, không đổi dữ liệu, nên vẫn đúng cam kết "chưa tạo bảng"
+của Phase 0. Phase 1 sẽ xoá dòng này khi thêm các lệnh `CREATE TABLE` và `INSERT`
+thật. Đã ghi cảnh báo trong `README.md` để hai file không bị xoá nhầm.
 
 ### 3.5. Spring Security mở toàn bộ
 
@@ -160,7 +169,7 @@ Tổng cộng: **3 lớp Java**, **4 template Thymeleaf**, **1 file CSS**, **2 s
 | # | Tiêu chí | Kết quả | Bằng chứng |
 |---|---|---|---|
 | 1 | `mvn clean compile` không lỗi | ✅ Đạt | `BUILD SUCCESS`, `javac [debug parameters release 21]`, 18.1s |
-| 2 | `mvn spring-boot:run` khởi động | ⚠️ Xem mục 6 | Đạt ở đường dẫn ASCII; lỗi ở đường dẫn có dấu |
+| 2 | `mvn spring-boot:run` khởi động | ✅ Đạt | `Started BillingApplication in 2.059 seconds`, với MySQL thật — xem mục 5.4 |
 | 3 | localhost:8080 có sidebar + header | ✅ Đạt | HTTP 200, 3596 bytes |
 | 4 | Không có exception trong log | ✅ Đạt | Chỉ 1 WARN chuẩn của Spring Security |
 
@@ -197,21 +206,67 @@ Using generated security password: 1e4748c3-f4f8-4610-a161-b42e0647f369
 đang để `permitAll` nên mật khẩu này không được dùng tới. Thông báo sẽ tự mất ở
 Phase 2 khi cấu hình đăng nhập thật. **Không phải exception.**
 
-### 5.4. Giới hạn của lần nghiệm thu này
+### 5.4. Nghiệm thu bổ sung với MySQL thật
 
-Máy chưa cài MySQL (port 3306 đóng), nên quá trình chạy thử được thực hiện với tầng
-CSDL bị loại tạm thời **thông qua biến môi trường, không chỉnh sửa file cấu hình nào**:
+Ở lần nghiệm thu đầu, máy chưa cài MySQL nên phải chạy thử với tầng CSDL bị loại tạm
+thời qua biến môi trường (`SPRING_AUTOCONFIGURE_EXCLUDE`, `SPRING_SQL_INIT_MODE`),
+và báo cáo đã ghi rõ **việc khởi động đầy đủ với MySQL thật chưa được kiểm chứng**.
+
+Sau khi cài MySQL 8.4.9, lần nghiệm thu đầy đủ đã được thực hiện tại đúng đường dẫn
+`D:\KGU\TTNN\APP\vnpt-billing`, **không dùng bất kỳ biến loại trừ nào**.
+
+#### Lỗi phát hiện được — hai file SQL chỉ chứa chú thích
+
+Lần chạy đầu tiên với DataSource thật **thất bại**:
 
 ```
-SPRING_AUTOCONFIGURE_EXCLUDE = DataSourceAutoConfiguration,
-                               HibernateJpaAutoConfiguration,
-                               DataSourceTransactionManagerAutoConfiguration
-SPRING_SQL_INIT_MODE         = never
+BeanCreationException: Error creating bean with name 'dataSourceScriptDatabaseInitializer'
+  Failed to execute database script from resource [class path resource [db/schema.sql]]
+Caused by: java.lang.IllegalArgumentException: 'script' must not be null or empty
+    at org.springframework.jdbc.datasource.init.ScriptUtils.splitSqlScript
 ```
 
-Do đó **việc khởi động đầy đủ với MySQL thật chưa được kiểm chứng**. Đây là hạng mục
-cần xác nhận lại sau khi cài MySQL 8 và đặt biến môi trường `MYSQL_PASSWORD`
-(xem mục 7.3).
+Nguyên nhân: `ScriptUtils` **bóc bỏ toàn bộ chú thích trước khi thực thi**. Hai file
+chỉ có chú thích nên phần còn lại là chuỗi rỗng, và `Assert.hasText` ném lỗi.
+
+Giả định ban đầu "file chỉ chứa chú thích sẽ chạy như một no-op" là **sai**. Nó không
+bị phát hiện ở lần nghiệm thu đầu vì đường dẫn khởi tạo CSDL đã bị vô hiệu hoá — đúng
+là hạng mục mà báo cáo đã đánh dấu là chưa kiểm chứng. Đây là ví dụ cho thấy vì sao
+phải ghi rõ giới hạn của phép thử thay vì tuyên bố đạt.
+
+Đã sửa bằng cách thêm `SELECT 1;` vào mỗi file (xem mục 3.4).
+
+#### Cảnh báo Hibernate được dọn
+
+Khi JPA khởi tạo thật, log xuất hiện thêm cảnh báo:
+
+```
+WARN org.hibernate.orm.deprecation : HHH90000025: MySQLDialect does not need to be
+specified explicitly using 'hibernate.dialect'
+```
+
+Dòng `hibernate.dialect` trong `application.yml` là thừa vì Hibernate tự nhận diện
+MySQL qua driver. Đã xoá, cảnh báo biến mất.
+
+#### Kết quả nghiệm thu đầy đủ
+
+| Hạng mục kiểm tra | Kết quả |
+|---|---|
+| `ClassNotFoundException` | ✅ Không còn — xác nhận việc đổi tên thư mục đã xử lý triệt để sự cố argfile ở mục 6 |
+| HikariCP | ✅ `HikariPool-1 - Start completed` |
+| Tự tạo database | ✅ `vnpt_billing` được tạo nhờ `createDatabaseIfNotExist=true` (trước đó chưa tồn tại) |
+| Khởi động | ✅ `Started BillingApplication in 2.059 seconds` |
+| `GET /` | ✅ 200, đủ 11/11 mục menu, có sidebar, header và ghi chú dữ liệu mẫu |
+| `GET /duong-dan-khong-ton-tai` | ✅ 404, render `error/404.html` kèm layout |
+| `GET /css/app.css` | ✅ 200, 2409 bytes |
+| Khởi động lần thứ hai liên tiếp | ✅ `Started BillingApplication in 2.133 seconds` |
+| Exception trong log | ✅ Không có |
+| Số bảng trong `vnpt_billing` sau 2 lần chạy | ✅ **0 bảng** — đúng cam kết Phase 0 chưa tạo bảng |
+
+Ghi chú về cách lấy mật khẩu khi nghiệm thu: `setx` ghi biến vào registry người dùng,
+nhưng tiến trình đang mở giữ bản môi trường cũ nên không thấy biến mới. Giá trị được
+đọc trực tiếp từ `HKCU:\Environment` rồi nạp vào tiến trình con — đúng cơ chế mà một
+terminal mới dùng để lấy biến, nên kết quả phản ánh trung thực.
 
 ---
 
@@ -263,9 +318,9 @@ classpath vẫn buộc plugin fork tiến trình.
 Phương án đã chọn: **đổi tên `D:\HỌC` thành `D:\KGU`**, đưa dự án về
 `D:\KGU\TTNN\APP\vnpt-billing` — đường dẫn thuần ASCII.
 
-> ✅ **Đã thực hiện xong.** Thư mục đã được đổi tên, dự án hiện nằm tại
-> `D:\KGU\TTNN\APP\vnpt-billing`. Việc chạy lại `spring-boot:run` tại đường dẫn mới
-> để nghiệm thu vẫn đang chờ cài MySQL — xem mục 7.3.
+> ✅ **Đã thực hiện xong và đã kiểm chứng.** Dự án hiện nằm tại
+> `D:\KGU\TTNN\APP\vnpt-billing`. `mvnw spring-boot:run` chạy tại đường dẫn mới đã
+> khởi động thành công, không còn `ClassNotFoundException` — xem mục 5.4.
 
 Hai cách chạy dưới đây là phương án dự phòng khi buộc phải giữ đường dẫn có dấu
 (đã kiểm chứng hoạt động bình thường):
@@ -328,15 +383,26 @@ Nhờ vậy mã nguồn đẩy lên GitHub không mang theo mật khẩu. `.giti
 `.env`, `.env.*`, `application-local.yml` và `application-local.properties`.
 Hướng dẫn đặt biến môi trường bằng `setx` đã được bổ sung vào `README.md` mục 3.2.
 
-### 7.4. Cài đặt MySQL 8 — ⏳ ĐANG CHỜ
+### 7.4. Cài đặt MySQL 8 — ✅ ĐÃ XONG
 
-Máy chưa cài MySQL (không tìm thấy service nào, port 3306 đóng) và cũng chưa có
-Docker. Việc cài đặt cần quyền quản trị và có bước cấu hình tương tác nên không
-tự động hoá được.
+| Hạng mục | Giá trị |
+|---|---|
+| Phiên bản | MySQL 8.4.9 |
+| Service | `MySQL84`, Status **Running**, StartType **Automatic** |
+| Cổng | 3306 mở |
+| Thư mục dữ liệu | `C:\ProgramData\MySQL\MySQL Server 8.4\Data` |
+| Xác thực | Strong Password Encryption (`caching_sha2_password`) |
 
-Sau khi cài xong cần đặt biến `MYSQL_PASSWORD`, rồi chạy lại `mvnw spring-boot:run`
-tại `D:\KGU\TTNN\APP\vnpt-billing` để xác nhận **tiêu chí nghiệm thu số 2** trong
-điều kiện đầy đủ — đây là hạng mục duy nhất còn chưa đạt của Phase 0.
+Một điểm dễ nhầm khi cài: lệnh `winget install Oracle.MySQL` chỉ chạy bộ cài MSI, nó
+**không** khởi tạo thư mục dữ liệu và **không** tạo Windows service. Sau bước này
+`winget list` đã báo "MySQL Server 8.4" nhưng máy vẫn chưa có service nào và port
+3306 vẫn đóng. Phải chạy thêm `mysql_configurator.exe` với quyền quản trị thì server
+mới thực sự hoạt động.
+
+Lo ngại về lỗi `Public Key Retrieval is not allowed` khi dùng `caching_sha2_password`
+đã **không xảy ra**, vì MySQL 8 bật sẵn TLS và Connector/J mặc định `sslMode=PREFERRED`
+nên quá trình bắt tay diễn ra trên kênh mã hoá. Chuỗi JDBC giữ nguyên, không cần thêm
+`allowPublicKeyRetrieval`.
 
 ### 7.5. Đẩy mã nguồn lên GitHub — ✅ ĐÃ XONG
 
@@ -379,8 +445,10 @@ Dự án gồm 8 phase (Phase 0–7). Phase 0 là phần đã trình bày trong 
 
 ## 9. Tổng kết
 
-Phase 0 đạt mục tiêu: bộ khung dự án hoàn chỉnh, biên dịch và đóng gói thành công,
-giao diện chạy đúng với đầy đủ sidebar, header, trang chủ và hai trang lỗi.
+Phase 0 đạt mục tiêu và **đã nghiệm thu đủ 4/4 tiêu chí**: bộ khung dự án hoàn chỉnh,
+biên dịch và đóng gói thành công, khởi động đầy đủ với MySQL 8.4.9 thật tại đúng
+đường dẫn dự án, giao diện chạy đúng với đầy đủ sidebar, header, trang chủ và hai
+trang lỗi.
 
 Ba điểm lệch môi trường (thiếu JDK 21, thiếu Maven, thiếu MySQL) đều đã được xử lý
 hoặc ghi nhận rõ ràng. Sự cố đường dẫn tiếng Việt đã được chẩn đoán tới nguyên nhân
@@ -389,7 +457,14 @@ gốc bằng thí nghiệm đối chứng và **đã khắc phục triệt để
 Mã nguồn đã được đưa vào quản lý phiên bản bằng Git, đẩy lên GitHub ở chế độ riêng
 tư, và mật khẩu CSDL đã được tách khỏi mã nguồn.
 
-Việc duy nhất còn lại là cài MySQL 8 (mục 7.4) — thao tác cài đặt phần mềm cần quyền
-quản trị và có bước cấu hình tương tác, **không liên quan tới mã nguồn**. Sau khi cài
-xong, chỉ cần chạy lại một lần `mvnw spring-boot:run` là Phase 0 đạt đủ toàn bộ tiêu
-chí nghiệm thu.
+Hai lỗi thật đã được phát hiện và khắc phục trong Phase 0, cả hai đều chỉ lộ ra khi
+chạy thử trong điều kiện đầy đủ chứ không thể thấy bằng cách đọc mã:
+
+1. **Đường dẫn có dấu tiếng Việt** làm hỏng classpath khi Maven fork JVM con (mục 6)
+2. **Hai file SQL chỉ chứa chú thích** khiến `ScriptUtils` ném lỗi chuỗi rỗng (mục 5.4)
+
+Lỗi thứ hai đáng chú ý về mặt phương pháp: nó nằm đúng trong phần mà báo cáo đã đánh
+dấu là "chưa kiểm chứng" ở lần nghiệm thu đầu. Nếu khi đó tuyên bố đạt thay vì ghi rõ
+giới hạn, lỗi sẽ trôi sang Phase 1 và khó truy nguyên hơn nhiều.
+
+Phase 0 khép lại, không còn việc tồn đọng. Sẵn sàng bước sang Phase 1.

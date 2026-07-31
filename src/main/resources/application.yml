@@ -23,7 +23,8 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        # Khong khai bao dialect: Hibernate tu nhan dien MySQL qua driver.
+        # Khai bao thua se sinh canh bao HHH90000025 khi khoi dong.
         format_sql: true
 
   # ---------------------------------------------------------------
