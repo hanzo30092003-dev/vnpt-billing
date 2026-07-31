@@ -153,9 +153,9 @@ vnpt-billing/
 
 ---
 
-## 6. Trạng thái hiện tại — Phase 0
+## 6. Trạng thái hiện tại — hết Phase 1
 
-Đã hoàn thành khung dự án:
+**Phase 0 — khung dự án** ✅
 
 - [x] Khung Maven + Spring Boot chạy được
 - [x] Cấu hình kết nối MySQL, JPA (`ddl-auto: none`), script khởi tạo CSDL
@@ -163,25 +163,32 @@ vnpt-billing/
 - [x] Trang chủ, trang lỗi 404 / 500
 - [x] Spring Security **tạm mở toàn bộ** (`permitAll`) để tiện phát triển
 
+**Phase 1 — cơ sở dữ liệu** ✅
+
+- [x] 15 bảng + 2 view trong `schema.sql`
+- [x] 15 entity JPA + 16 enum
+- [x] 15 repository Spring Data JPA
+- [x] Dữ liệu mẫu: 50 khách hàng, 80 thuê bao, 5 gói cước, 9 dòng bảng giá
+
 Chưa làm (thuộc các phase sau):
 
-- [ ] Phase 1 — bảng CSDL, entity, repository, dữ liệu mẫu
-- [ ] Phase 2 — bật đăng nhập và phân quyền theo vai trò
-- [ ] Phase 3 — nghiệp vụ khách hàng / thuê bao / gói cước / bảng giá
-- [ ] Phase 4 — CDR, engine tính cước, hóa đơn, thanh toán
-- [ ] Phase 5 — báo cáo và biểu đồ (Chart.js)
+- [ ] Phase 2 — bật đăng nhập, phân quyền; quản lý khách hàng và thuê bao
+- [ ] Phase 3 — gói cước, bảng giá, CDR (bộ sinh giả lập + import CSV)
+- [ ] Phase 4 — engine tính cước (Rating & Billing)
+- [ ] Phase 5 — hóa đơn, thanh toán, công nợ
+- [ ] Phase 6 — báo cáo, thống kê, dashboard
+- [ ] Phase 7 — hoàn thiện, kiểm thử, tài liệu
 
-Báo cáo chi tiết quá trình và kết quả: [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md)
+Tài liệu:
 
-> **Về hai file `src/main/resources/db/schema.sql` và `data-mau.sql`:** hiện mỗi file
-> chỉ có chú thích kèm một câu lệnh no-op `SELECT 1;`.
->
-> - Hai file **bắt buộc phải tồn tại** vì `application.yml` trỏ tới chúng — nếu xoá,
->   ứng dụng báo `No SQL scripts found at location` khi khởi động.
-> - Câu `SELECT 1;` **không được xoá** khi file chưa có lệnh SQL nào khác. Spring bóc
->   hết chú thích trước khi chạy script, nên file chỉ có chú thích sẽ thành chuỗi rỗng
->   và gây lỗi `'script' must not be null or empty`.
-> - Phase 1 sẽ xoá `SELECT 1;` khi thêm các lệnh `CREATE TABLE` và `INSERT` thật.
+- [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md) — báo cáo quá trình và kết quả Phase 0
+- [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) — mô tả chi tiết 15 bảng và 2 view
+
+> ⚠️ **CSDL bị dựng lại mỗi lần khởi động.** `application.yml` đặt
+> `spring.sql.init.mode: always`, nên `schema.sql` (bắt đầu bằng `DROP TABLE IF EXISTS`)
+> và `data-mau.sql` chạy lại ở mỗi lần chạy app. Mọi dữ liệu nhập tay sẽ mất.
+> Chấp nhận được ở giai đoạn này vì toàn bộ là dữ liệu mẫu, nhưng **trước Phase 2**
+> (khi bắt đầu có chức năng nhập liệu) phải chuyển sang `mode: never` hoặc dùng Flyway.
 
 ---
 
