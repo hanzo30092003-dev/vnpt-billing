@@ -130,6 +130,29 @@
     </div>
 </div>
 
+<!--/*
+    Modal xác nhận dùng chung cho mọi thao tác nguy hiểm (chuyển trạng thái,
+    ngừng giao dịch...). Nút bấm chỉ cần khai data-xac-nhan="câu hỏi" và nằm
+    trong một thẻ form; app.js sẽ chặn submit, hiện modal rồi mới gửi.
+*/-->
+<div class="modal fade" id="modalXacNhan" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận thao tác</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="noi-dung-xac-nhan mb-0"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                <button type="button" class="btn btn-danger nut-dong-y">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <script th:src="@{/js/app.js}"></script>

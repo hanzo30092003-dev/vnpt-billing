@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(${laThemMoi} ? 'Thêm khách hàng' : 'Sửa khách hàng', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">
+            <i class="bi bi-person-plus me-2"></i>
+            <span th:text="${laThemMoi} ? 'Thêm khách hàng mới' : 'Sửa thông tin khách hàng'"></span>
+        </h2>
+        <a class="btn btn-outline-secondary" th:href="@{/khach-hang}">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form th:action="@{/khach-hang/luu}" th:object="${khachHangForm}" method="post" novalidate>
+                <input type="hidden" th:field="*{id}">
+
+                <!--/*
+                    Lỗi nghiệp vụ (ví dụ trùng số giấy tờ) hiển thị ở đầu form.
+                    Khối này BẮT BUỘC nằm trong thẻ <form th:object=...>, vì #fields chỉ
+                    hoạt động trong phạm vi một đối tượng đang bind; đặt bên ngoài sẽ ném
+                    lỗi "Method hasGlobalErrors() cannot be found".
+                */-->
+                <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span th:each="loi : ${#fields.globalErrors()}" th:text="${loi}"></span>
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="loaiKh">Loại khách hàng <span class="text-danger">*</span></label>
+                        <select class="form-select" id="loaiKh" th:field="*{loaiKh}"
+                                th:classappend="${#fields.hasErrors('loaiKh')} ? 'is-invalid'">
+                            <option value="CA_NHAN">Cá nhân</option>
+                            <option value="DOANH_NGHIEP">Doanh nghiệp</option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{loaiKh}"></div>
+                    </div>
+
+                    <div class="col-md-4" th:if="${!laThemMoi}">
+                        <label class="form-label">Mã khách hàng</label>
+                        <input type="text" class="form-control" th:field="*{maKh}" readonly>
+                        <div class="form-text">Mã do hệ thống sinh, không sửa được.</div>
+                    </div>
+
+                    <div class="col-md-4" th:if="${!laThemMoi}">
+                        <label class="form-label" for="trangThai">Trạng thái</label>
+                        <select class="form-select" id="trangThai" th:field="*{trangThai}">
+                            <option value="HOAT_DONG">Hoạt động</option>
+                            <option value="NGUNG_GIAO_DICH">Ngừng giao dịch</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="tenKh">
+                            <span class="nhan-ten-kh">Họ và tên</span> <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="tenKh" th:field="*{tenKh}"
+                               th:classappend="${#fields.hasErrors('tenKh')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{tenKh}"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="soGiayTo">
+                            <span class="nhan-giay-to">Số CCCD</span> <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="soGiayTo" th:field="*{soGiayTo}"
+                               th:classappend="${#fields.hasErrors('soGiayTo')} ? 'is-invalid'">
+                        <div class="form-text goi-y-giay-to">CCCD gồm đúng 12 chữ số.</div>
+                        <div class="invalid-feedback" th:errors="*{soGiayTo}"></div>
+                    </div>
+
+                    <!--/* Hai ô dưới đây loại trừ nhau, JS bên dưới ẩn/hiện theo loại khách hàng */-->
+                    <div class="col-md-6 o-ca-nhan">
+                        <label class="form-label" for="ngaySinh">Ngày sinh</label>
+                        <input type="date" class="form-control" id="ngaySinh" th:field="*{ngaySinh}"
+                               th:classappend="${#fields.hasErrors('ngaySinh')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{ngaySinh}"></div>
+                    </div>
+
+                    <div class="col-md-6 o-doanh-nghiep">
+                        <label class="form-label" for="nguoiDaiDien">Người đại diện</label>
+                        <input type="text" class="form-control" id="nguoiDaiDien" th:field="*{nguoiDaiDien}"
+                               th:classappend="${#fields.hasErrors('nguoiDaiDien')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{nguoiDaiDien}"></div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="diaChi">Địa chỉ <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="diaChi" th:field="*{diaChi}"
+                               th:classappend="${#fields.hasErrors('diaChi')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{diaChi}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="dienThoaiLh">Điện thoại liên hệ</label>
+                        <input type="text" class="form-control" id="dienThoaiLh" th:field="*{dienThoaiLh}"
+                               th:classappend="${#fields.hasErrors('dienThoaiLh')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{dienThoaiLh}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="text" class="form-control" id="email" th:field="*{email}"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{email}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="ngayDangKy">Ngày đăng ký <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="ngayDangKy" th:field="*{ngayDangKy}"
+                               th:classappend="${#fields.hasErrors('ngayDangKy')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{ngayDangKy}"></div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label" for="ghiChu">Ghi chú</label>
+                        <textarea class="form-control" id="ghiChu" rows="2" th:field="*{ghiChu}"></textarea>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Lưu
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/khach-hang}">Huỷ</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        /*
+            Đổi form theo loại khách hàng:
+              CA_NHAN      -> hiện Ngày sinh, ẩn Người đại diện, nhãn "Số CCCD"
+              DOANH_NGHIEP -> ngược lại, nhãn đổi thành "Mã số thuế"
+            Chạy ngay khi tải trang để trạng thái ban đầu khớp với dữ liệu đang có.
+        */
+        (function () {
+            var oLoai = document.getElementById('loaiKh');
+            if (!oLoai) return;
+
+            function capNhatForm() {
+                var laCaNhan = (oLoai.value === 'CA_NHAN');
+
+                document.querySelectorAll('.o-ca-nhan').forEach(function (el) {
+                    el.style.display = laCaNhan ? '' : 'none';
+                });
+                document.querySelectorAll('.o-doanh-nghiep').forEach(function (el) {
+                    el.style.display = laCaNhan ? 'none' : '';
+                });
+
+                document.querySelector('.nhan-giay-to').textContent =
+                    laCaNhan ? 'Số CCCD' : 'Mã số thuế';
+                document.querySelector('.goi-y-giay-to').textContent =
+                    laCaNhan ? 'CCCD gồm đúng 12 chữ số.' : 'Mã số thuế gồm 10 hoặc 13 chữ số.';
+                document.querySelector('.nhan-ten-kh').textContent =
+                    laCaNhan ? 'Họ và tên' : 'Tên doanh nghiệp';
+            }
+
+            oLoai.addEventListener('change', capNhatForm);
+            capNhatForm();
+        })();
+    </script>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Chi tiết khách hàng', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">
+            <i class="bi bi-person-vcard me-2"></i>
+            <span th:text="${khachHang.tenKh}">Tên khách hàng</span>
+            <span class="badge ms-2"
+                  th:classappend="'bg-' + ${khachHang.trangThai.mauBadge}"
+                  th:text="${khachHang.trangThai.nhan}"></span>
+        </h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" th:href="@{/khach-hang}">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách
+            </a>
+            <a class="btn btn-primary" th:href="@{/khach-hang/{id}/sua(id=${khachHang.id})}">
+                <i class="bi bi-pencil me-1"></i> Sửa
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+
+        <!--/* ---------- Thông tin khách hàng ---------- */-->
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">Thông tin khách hàng</div>
+                <div class="card-body">
+                    <dl class="row mb-0 small">
+                        <dt class="col-5 text-secondary">Mã khách hàng</dt>
+                        <dd class="col-7"><code th:text="${khachHang.maKh}"></code></dd>
+
+                        <dt class="col-5 text-secondary">Loại</dt>
+                        <dd class="col-7" th:text="${khachHang.loaiKh.nhan}"></dd>
+
+                        <dt class="col-5 text-secondary"
+                            th:text="${khachHang.loaiKh.name() == 'CA_NHAN'} ? 'Số CCCD' : 'Mã số thuế'"></dt>
+                        <dd class="col-7" th:text="${khachHang.soGiayTo}"></dd>
+
+                        <dt class="col-5 text-secondary" th:if="${khachHang.ngaySinh != null}">Ngày sinh</dt>
+                        <dd class="col-7" th:if="${khachHang.ngaySinh != null}"
+                            th:text="${#temporals.format(khachHang.ngaySinh, 'dd/MM/yyyy')}"></dd>
+
+                        <dt class="col-5 text-secondary" th:if="${khachHang.nguoiDaiDien != null}">Người đại diện</dt>
+                        <dd class="col-7" th:if="${khachHang.nguoiDaiDien != null}"
+                            th:text="${khachHang.nguoiDaiDien}"></dd>
+
+                        <dt class="col-5 text-secondary">Địa chỉ</dt>
+                        <dd class="col-7" th:text="${khachHang.diaChi}"></dd>
+
+                        <dt class="col-5 text-secondary">Điện thoại</dt>
+                        <dd class="col-7" th:text="${khachHang.dienThoaiLh ?: '—'}"></dd>
+
+                        <dt class="col-5 text-secondary">Email</dt>
+                        <dd class="col-7" th:text="${khachHang.email ?: '—'}"></dd>
+
+                        <dt class="col-5 text-secondary">Ngày đăng ký</dt>
+                        <dd class="col-7" th:text="${#temporals.format(khachHang.ngayDangKy, 'dd/MM/yyyy')}"></dd>
+
+                        <dt class="col-5 text-secondary" th:if="${khachHang.ghiChu != null}">Ghi chú</dt>
+                        <dd class="col-7" th:if="${khachHang.ghiChu != null}" th:text="${khachHang.ghiChu}"></dd>
+                    </dl>
+                </div>
+
+                <div class="card-footer bg-white"
+                     th:if="${khachHang.trangThai.name() == 'HOAT_DONG'}">
+                    <!--/*
+                        Ngừng giao dịch là xoá mềm, không xoá bản ghi. Nút bấm đi qua modal
+                        xác nhận dùng chung khai báo trong layout.
+                    */-->
+                    <form th:action="@{/khach-hang/{id}/ngung-giao-dich(id=${khachHang.id})}" method="post">
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                data-xac-nhan-tieu-de="Ngừng giao dịch khách hàng"
+                                th:attr="data-xac-nhan=|Xác nhận chuyển khách hàng ${khachHang.tenKh} sang trạng thái ngừng giao dịch?|">
+                            <i class="bi bi-slash-circle me-1"></i> Ngừng giao dịch
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!--/* ---------- Thuê bao đang sở hữu ---------- */-->
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">
+                        Thuê bao đang sở hữu
+                        <span class="badge text-bg-secondary ms-1" th:text="${#lists.size(danhSachThueBao)}">0</span>
+                    </span>
+                    <!--/* Truyền sẵn khachHangId sang form đăng ký để nhân viên không phải chọn lại */-->
+                    <a class="btn btn-sm btn-success"
+                       th:href="@{/thue-bao/dang-ky(khachHangId=${khachHang.id})}">
+                        <i class="bi bi-plus-lg me-1"></i> Đăng ký thuê bao mới
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover bang-du-lieu mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Số thuê bao</th>
+                                <th>Gói cước</th>
+                                <th>Loại</th>
+                                <th>Ngày kích hoạt</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(danhSachThueBao)}">
+                                <td colspan="5" class="text-center text-secondary py-4">
+                                    Khách hàng chưa có thuê bao nào.
+                                </td>
+                            </tr>
+                            <tr th:each="tb : ${danhSachThueBao}">
+                                <td>
+                                    <a th:href="@{/thue-bao/{id}(id=${tb.id})}"
+                                       th:text="${tb.soThueBao}"></a>
+                                </td>
+                                <td th:text="${tb.goiCuoc.tenGoi}"></td>
+                                <td th:text="${tb.loaiThueBao.nhan}"></td>
+                                <td th:text="${#temporals.format(tb.ngayKichHoat, 'dd/MM/yyyy')}"></td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="'bg-' + ${tb.trangThai.mauBadge}"
+                                          th:text="${tb.trangThai.nhan}"></span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

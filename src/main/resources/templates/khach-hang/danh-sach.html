@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Khách hàng', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-people me-2"></i>Quản lý khách hàng</h2>
+        <a class="btn btn-primary" th:href="@{/khach-hang/them}">
+            <i class="bi bi-plus-lg me-1"></i> Thêm khách hàng
+        </a>
+    </div>
+
+    <!--/* Bộ lọc: gửi bằng GET để giữ được điều kiện trên thanh địa chỉ, tiện chia sẻ và F5 */-->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" th:action="@{/khach-hang}" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small mb-1">Tìm kiếm</label>
+                    <input type="text" class="form-control" name="tuKhoa" th:value="${tuKhoa}"
+                           placeholder="Mã KH, tên, số giấy tờ hoặc điện thoại">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Loại khách hàng</label>
+                    <select class="form-select" name="loaiKh">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="l : ${danhSachLoaiKh}"
+                                th:value="${l}" th:text="${l.nhan}"
+                                th:selected="${loaiKh != null and loaiKh.name() == l.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Trạng thái</label>
+                    <select class="form-select" name="trangThai">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="t : ${danhSachTrangThai}"
+                                th:value="${t}" th:text="${t.nhan}"
+                                th:selected="${trangThai != null and trangThai.name() == t.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-search"></i> Lọc
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/khach-hang}" title="Xoá bộ lọc">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <p class="text-secondary small mb-2">
+                Tìm thấy <strong th:text="${ketQua.totalElements}">0</strong> khách hàng
+                <span th:if="${ketQua.totalPages > 1}">
+                    &mdash; trang <span th:text="${ketQua.number + 1}">1</span>/<span th:text="${ketQua.totalPages}">1</span>
+                </span>
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-hover bang-du-lieu align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Mã KH</th>
+                        <th>Tên khách hàng</th>
+                        <th>Loại</th>
+                        <th>Số giấy tờ</th>
+                        <th>Điện thoại</th>
+                        <th>Ngày đăng ký</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${ketQua.empty}">
+                        <td colspan="8" class="text-center text-secondary py-4">
+                            Không có khách hàng nào khớp điều kiện tìm kiếm.
+                        </td>
+                    </tr>
+                    <tr th:each="kh : ${ketQua.content}">
+                        <td><code th:text="${kh.maKh}"></code></td>
+                        <td>
+                            <a th:href="@{/khach-hang/{id}(id=${kh.id})}" th:text="${kh.tenKh}"></a>
+                        </td>
+                        <td th:text="${kh.loaiKh.nhan}"></td>
+                        <td th:text="${kh.soGiayTo}"></td>
+                        <td th:text="${kh.dienThoaiLh}"></td>
+                        <td th:text="${#temporals.format(kh.ngayDangKy, 'dd/MM/yyyy')}"></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="'bg-' + ${kh.trangThai.mauBadge}"
+                                  th:text="${kh.trangThai.nhan}"></span>
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:href="@{/khach-hang/{id}(id=${kh.id})}" title="Xem chi tiết">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary"
+                               th:href="@{/khach-hang/{id}/sua(id=${kh.id})}" title="Sửa">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!--/* Phân trang: mỗi liên kết mang theo chuoiLoc để không mất bộ lọc khi sang trang */-->
+            <nav th:if="${ketQua.totalPages > 1}">
+                <ul class="pagination pagination-sm mb-0 justify-content-center">
+                    <li class="page-item" th:classappend="${ketQua.first} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{'/khach-hang?trang=' + ${ketQua.number - 1} + ${chuoiLoc}}">Trước</a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, ketQua.totalPages - 1)}"
+                        th:classappend="${i == ketQua.number} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{'/khach-hang?trang=' + ${i} + ${chuoiLoc}}"
+                           th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${ketQua.last} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{'/khach-hang?trang=' + ${ketQua.number + 1} + ${chuoiLoc}}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
