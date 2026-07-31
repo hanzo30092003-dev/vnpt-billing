@@ -74,7 +74,9 @@ Thay vì cài thêm JDK 21, `pom.xml` khai báo:
   javac, phải hỗ trợ nội bộ của JDK đang dùng. Bản 1.18.40 mới thêm hỗ trợ JDK 25,
   1.18.46 hỗ trợ tới JDK 26. Bản Lombok mặc định của Boot 3.5.16 có thể chưa đủ mới.
 
-Cấu hình này chạy được trên **cả JDK 21 lẫn JDK 25**, không cần cài thêm gì.
+Về nguyên tắc tương thích ngược của Java, cấu hình này chạy được trên **JDK 21 trở lên**.
+Tuy nhiên trong khuôn khổ đồ án **mới chỉ kiểm chứng thực tế trên JDK 25**, vì máy phát
+triển không cài JDK 21 nên chưa có điều kiện chạy thử để khẳng định.
 
 ### 3.3. Maven Wrapper thay vì cài Maven
 
@@ -208,7 +210,8 @@ SPRING_SQL_INIT_MODE         = never
 ```
 
 Do đó **việc khởi động đầy đủ với MySQL thật chưa được kiểm chứng**. Đây là hạng mục
-cần xác nhận lại sau khi cài MySQL 8 và thay `CHANGE_ME` trong `application.yml`.
+cần xác nhận lại sau khi cài MySQL 8 và đặt biến môi trường `MYSQL_PASSWORD`
+(xem mục 7.3).
 
 ---
 
@@ -257,10 +260,15 @@ classpath vẫn buộc plugin fork tiến trình.
 
 ### 6.4. Hướng xử lý
 
-Đã thống nhất: **đổi tên `D:\HỌC` thành `D:\KGU`**, dự án sẽ nằm tại
+Phương án đã chọn: **đổi tên `D:\HỌC` thành `D:\KGU`**, đưa dự án về
 `D:\KGU\TTNN\APP\vnpt-billing` — đường dẫn thuần ASCII.
 
-Trong lúc chưa đổi tên, hai cách chạy vẫn hoạt động bình thường (đã kiểm chứng):
+> ✅ **Đã thực hiện xong.** Thư mục đã được đổi tên, dự án hiện nằm tại
+> `D:\KGU\TTNN\APP\vnpt-billing`. Việc chạy lại `spring-boot:run` tại đường dẫn mới
+> để nghiệm thu vẫn đang chờ cài MySQL — xem mục 7.3.
+
+Hai cách chạy dưới đây là phương án dự phòng khi buộc phải giữ đường dẫn có dấu
+(đã kiểm chứng hoạt động bình thường):
 
 ```bash
 mvnw package
@@ -277,13 +285,13 @@ qua argfile của Maven plugin.
 
 ## 7. Việc tồn đọng
 
-### 7.1. Đổi tên thư mục (chưa thực hiện được tự động)
+Trạng thái cập nhật sau phiên làm việc ngày 31/07/2026.
 
-Thao tác đổi tên `D:\HỌC` → `D:\KGU` **không thực hiện được từ trong phiên làm việc**
-vì working directory của công cụ nằm tại `D:\HỌC\TTNN\APP`, mà Windows khoá mọi thư
-mục tổ tiên của working directory.
+### 7.1. Đổi tên thư mục — ✅ ĐÃ XONG
 
-Đã kiểm chứng chính xác quy luật này:
+Ban đầu thao tác này **không thực hiện được từ trong phiên làm việc** vì working
+directory của công cụ nằm tại `D:\HỌC\TTNN\APP`, mà Windows khoá mọi thư mục tổ tiên
+của working directory. Quy luật đã được kiểm chứng chính xác:
 
 | Thư mục | Quan hệ với working directory | Kết quả đổi tên |
 |---|---|---|
@@ -291,33 +299,66 @@ mục tổ tiên của working directory.
 | `D:\HỌC\TTNN` | thư mục **tổ tiên** | ❌ `Access denied` |
 | `D:\HỌC` | thư mục **tổ tiên** | ❌ `Access denied` |
 
-**Cách xử lý:** đóng Claude Code, đổi tên bằng File Explorer; hoặc mở PowerShell ở
-ngoài thư mục đó rồi chạy:
+Đã xử lý bằng cách đổi tên thủ công ở ngoài phiên làm việc. Dự án hiện nằm tại
+`D:\KGU\TTNN\APP\vnpt-billing`, thư mục cũ không còn tồn tại.
 
-```powershell
-Rename-Item -LiteralPath "D:\HỌC" -NewName "KGU"
+### 7.2. Khởi tạo Git — ✅ ĐÃ XONG
+
+- `git init -b main` tại thư mục gốc dự án
+- Rà soát `.gitignore`: kiểm chứng **16 quy tắc** bằng `git check-ignore`, đảm bảo
+  `target/`, `.idea/`, `*.iml`, `.vscode/`, `*.log`, `.env`, `application-local.yml`,
+  `.mvn/wrapper/maven-wrapper.jar` bị loại; đồng thời `mvnw`, `mvnw.cmd`,
+  `maven-wrapper.properties` và `docs/` **không** bị loại
+- Commit đầu tiên `3930963` — 27 file, 1622 dòng, không lọt file nào trong `target/`
+- Kiểm tra ký tự xuống dòng: `core.autocrlf=true` hoạt động đúng — `mvnw` (script
+  bash) lưu LF trong repo nên chạy được trên Linux/macOS, còn `mvnw.cmd` được trả về
+  CRLF khi checkout trên Windows
+
+### 7.3. Bảo mật cấu hình — ✅ ĐÃ XONG
+
+`application.yml` không còn chứa mật khẩu dạng văn bản thuần. Thông tin đăng nhập
+CSDL được đọc từ biến môi trường:
+
+```yaml
+username: "${MYSQL_USER:root}"
+password: "${MYSQL_PASSWORD:}"
 ```
 
-### 7.2. Cài đặt MySQL 8
+Nhờ vậy mã nguồn đẩy lên GitHub không mang theo mật khẩu. `.gitignore` cũng đã chặn
+`.env`, `.env.*`, `application-local.yml` và `application-local.properties`.
+Hướng dẫn đặt biến môi trường bằng `setx` đã được bổ sung vào `README.md` mục 3.2.
 
-Cần cài MySQL 8, đảm bảo chạy tại `localhost:3306`, và thay `CHANGE_ME` trong
-`application.yml` bằng mật khẩu `root` thật. Không cần tạo database thủ công vì chuỗi
-kết nối đã có `createDatabaseIfNotExist=true`.
+### 7.4. Cài đặt MySQL 8 — ⏳ ĐANG CHỜ
 
-Sau khi hoàn tất 7.1 và 7.2, cần chạy lại `mvnw spring-boot:run` để xác nhận tiêu chí
-nghiệm thu số 2 trong điều kiện đầy đủ.
+Máy chưa cài MySQL (không tìm thấy service nào, port 3306 đóng) và cũng chưa có
+Docker. Việc cài đặt cần quyền quản trị và có bước cấu hình tương tác nên không
+tự động hoá được.
+
+Sau khi cài xong cần đặt biến `MYSQL_PASSWORD`, rồi chạy lại `mvnw spring-boot:run`
+tại `D:\KGU\TTNN\APP\vnpt-billing` để xác nhận **tiêu chí nghiệm thu số 2** trong
+điều kiện đầy đủ — đây là hạng mục duy nhất còn chưa đạt của Phase 0.
+
+### 7.5. Đẩy mã nguồn lên GitHub — ⏳ ĐANG CHỜ
+
+GitHub CLI (`gh`) chưa được cài trên máy nên chưa tạo được repository từ xa.
+Cần cài `gh`, đăng nhập, rồi tạo repo **private** tên `vnpt-billing` và push
+nhánh `main`.
 
 ---
 
 ## 8. Kế hoạch các phase tiếp theo
 
+Dự án gồm 8 phase (Phase 0–7). Phase 0 là phần đã trình bày trong báo cáo này.
+
 | Phase | Nội dung |
 |---|---|
-| 1 | Thiết kế CSDL: bảng, entity JPA, repository, sinh dữ liệu mẫu |
-| 2 | Bật Spring Security thật, đăng nhập và phân quyền theo vai trò |
-| 3 | Nghiệp vụ danh mục: khách hàng, thuê bao, gói cước, bảng giá |
-| 4 | Nghiệp vụ lõi: CDR, engine tính cước, hóa đơn, thanh toán |
-| 5 | Báo cáo và biểu đồ doanh thu bằng Chart.js |
+| 1 | Thiết kế CSDL 15 bảng, entity JPA, repository, dữ liệu mẫu |
+| 2 | Bật Spring Security thật; quản lý khách hàng và thuê bao |
+| 3 | Gói cước, bảng giá cước, CDR (bộ sinh giả lập + import CSV) |
+| 4 | Engine tính cước — Rating và Billing (phần lõi) |
+| 5 | Hóa đơn, thanh toán, công nợ |
+| 6 | Báo cáo, thống kê, dashboard |
+| 7 | Hoàn thiện, kiểm thử, tài liệu |
 
 ---
 
@@ -328,6 +369,12 @@ giao diện chạy đúng với đầy đủ sidebar, header, trang chủ và ha
 
 Ba điểm lệch môi trường (thiếu JDK 21, thiếu Maven, thiếu MySQL) đều đã được xử lý
 hoặc ghi nhận rõ ràng. Sự cố đường dẫn tiếng Việt đã được chẩn đoán tới nguyên nhân
-gốc bằng thí nghiệm đối chứng, và có phương án khắc phục triệt để.
+gốc bằng thí nghiệm đối chứng và **đã khắc phục triệt để** bằng việc đổi tên thư mục.
 
-Hai việc tồn đọng ở mục 7 đều là thao tác cấu hình máy, không liên quan tới mã nguồn.
+Mã nguồn đã được đưa vào quản lý phiên bản bằng Git, và mật khẩu CSDL đã được tách
+khỏi mã nguồn.
+
+Hai việc còn lại (mục 7.4 cài MySQL, mục 7.5 đẩy lên GitHub) đều là thao tác cài đặt
+phần mềm trên máy, cần quyền quản trị và thao tác tương tác, **không liên quan tới
+mã nguồn**. Sau khi hoàn tất, chỉ cần chạy lại một lần `mvnw spring-boot:run` là
+Phase 0 đạt đủ toàn bộ tiêu chí nghiệm thu.
