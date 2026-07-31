@@ -26,4 +26,7 @@ public interface KhachHangService {
 
     /** Xoá mềm: chuyển sang NGUNG_GIAO_DICH. */
     void ngungGiaoDich(Long id);
+
+    /** Khách hàng còn giao dịch, dùng đổ vào ô chọn khi đăng ký thuê bao. */
+    List<KhachHang> layKhachHangDangHoatDong();
 }

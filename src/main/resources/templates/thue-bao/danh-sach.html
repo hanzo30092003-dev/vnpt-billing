@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Thuê bao', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-sim me-2"></i>Quản lý thuê bao</h2>
+        <a class="btn btn-primary" th:href="@{/thue-bao/dang-ky}">
+            <i class="bi bi-plus-lg me-1"></i> Đăng ký thuê bao
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" th:action="@{/thue-bao}" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Tìm kiếm</label>
+                    <input type="text" class="form-control" name="tuKhoa" th:value="${tuKhoa}"
+                           placeholder="Số thuê bao hoặc tên khách hàng">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Trạng thái</label>
+                    <select class="form-select" name="trangThai">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="t : ${danhSachTrangThai}" th:value="${t}" th:text="${t.nhan}"
+                                th:selected="${trangThai != null and trangThai.name() == t.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Loại</label>
+                    <select class="form-select" name="loaiThueBao">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="l : ${danhSachLoaiThueBao}" th:value="${l}" th:text="${l.nhan}"
+                                th:selected="${loaiThueBao != null and loaiThueBao.name() == l.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Gói cước</label>
+                    <select class="form-select" name="goiCuocId">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="g : ${danhSachGoiCuoc}" th:value="${g.id}" th:text="${g.tenGoi}"
+                                th:selected="${goiCuocId != null and goiCuocId == g.id}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-search"></i> Lọc
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/thue-bao}" title="Xoá bộ lọc">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="text-secondary small mb-2">
+                Tìm thấy <strong th:text="${ketQua.totalElements}">0</strong> thuê bao
+                <span th:if="${ketQua.totalPages > 1}">
+                    &mdash; trang <span th:text="${ketQua.number + 1}">1</span>/<span th:text="${ketQua.totalPages}">1</span>
+                </span>
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-hover bang-du-lieu align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Số thuê bao</th>
+                        <th>Khách hàng</th>
+                        <th>Gói cước</th>
+                        <th>Loại</th>
+                        <th>Ngày kích hoạt</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${ketQua.empty}">
+                        <td colspan="7" class="text-center text-secondary py-4">
+                            Không có thuê bao nào khớp điều kiện tìm kiếm.
+                        </td>
+                    </tr>
+                    <tr th:each="tb : ${ketQua.content}">
+                        <td>
+                            <a th:href="@{/thue-bao/{id}(id=${tb.id})}" th:text="${tb.soThueBao}"></a>
+                        </td>
+                        <td>
+                            <a class="text-decoration-none"
+                               th:href="@{/khach-hang/{id}(id=${tb.khachHang.id})}"
+                               th:text="${tb.khachHang.tenKh}"></a>
+                        </td>
+                        <td th:text="${tb.goiCuoc.tenGoi}"></td>
+                        <td th:text="${tb.loaiThueBao.nhan}"></td>
+                        <td th:text="${#temporals.format(tb.ngayKichHoat, 'dd/MM/yyyy')}"></td>
+                        <td>
+                            <!--/* Màu badge lấy từ enum: xanh lá / vàng / cam / xám */-->
+                            <span class="badge"
+                                  th:classappend="'bg-' + ${tb.trangThai.mauBadge}"
+                                  th:text="${tb.trangThai.nhan}"></span>
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:href="@{/thue-bao/{id}(id=${tb.id})}" title="Xem chi tiết">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav th:if="${ketQua.totalPages > 1}">
+                <ul class="pagination pagination-sm mb-0 justify-content-center">
+                    <li class="page-item" th:classappend="${ketQua.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/thue-bao?trang=' + ${ketQua.number - 1} + ${chuoiLoc}}">Trước</a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, ketQua.totalPages - 1)}"
+                        th:classappend="${i == ketQua.number} ? 'active'">
+                        <a class="page-link" th:href="@{'/thue-bao?trang=' + ${i} + ${chuoiLoc}}" th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${ketQua.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/thue-bao?trang=' + ${ketQua.number + 1} + ${chuoiLoc}}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

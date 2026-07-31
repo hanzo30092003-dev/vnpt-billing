@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Đăng ký thuê bao', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-sim me-2"></i>Đăng ký thuê bao mới</h2>
+        <a class="btn btn-outline-secondary" th:href="@{/thue-bao}">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form th:action="@{/thue-bao/luu}" th:object="${thueBaoForm}" method="post" novalidate>
+
+                <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span th:each="loi : ${#fields.globalErrors()}" th:text="${loi}"></span>
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-12">
+                        <label class="form-label" for="khachHangId">Khách hàng <span class="text-danger">*</span></label>
+                        <!--/*
+                            Danh sách khách hàng có thể dài, dùng <datalist> để gõ lọc nhanh
+                            mà không cần thư viện ngoài. Giá trị thật gửi lên là id.
+                        */-->
+                        <select class="form-select" id="khachHangId" th:field="*{khachHangId}"
+                                th:classappend="${#fields.hasErrors('khachHangId')} ? 'is-invalid'">
+                            <option value="">-- Chọn khách hàng --</option>
+                            <option th:each="kh : ${danhSachKhachHang}" th:value="${kh.id}"
+                                    th:text="|${kh.maKh} - ${kh.tenKh} (${kh.loaiKh.nhan})|"></option>
+                        </select>
+                        <div class="form-text">Gõ chữ cái đầu để nhảy nhanh tới khách hàng cần tìm.</div>
+                        <div class="invalid-feedback" th:errors="*{khachHangId}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="soThueBao">Số thuê bao <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="soThueBao" th:field="*{soThueBao}"
+                               th:classappend="${#fields.hasErrors('soThueBao')} ? 'is-invalid'"
+                               placeholder="0901234567">
+                        <div class="form-text">10 chữ số, đầu số 03/05/07/08/09.</div>
+                        <div class="invalid-feedback" th:errors="*{soThueBao}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="loaiThueBao">Loại thuê bao <span class="text-danger">*</span></label>
+                        <select class="form-select" id="loaiThueBao" th:field="*{loaiThueBao}"
+                                th:classappend="${#fields.hasErrors('loaiThueBao')} ? 'is-invalid'">
+                            <option th:each="l : ${danhSachLoaiThueBao}" th:value="${l}" th:text="${l.nhan}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{loaiThueBao}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="goiCuocId">Gói cước <span class="text-danger">*</span></label>
+                        <select class="form-select" id="goiCuocId" th:field="*{goiCuocId}"
+                                th:classappend="${#fields.hasErrors('goiCuocId')} ? 'is-invalid'">
+                            <!--/* data-loai để JS lọc gói theo loại thuê bao đang chọn */-->
+                            <option th:each="g : ${danhSachGoiCuoc}" th:value="${g.id}"
+                                    th:attr="data-loai=${g.loaiThueBao.name()}"
+                                    th:text="|${g.maGoi} - ${g.tenGoi}|"></option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{goiCuocId}"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="ngayKichHoat">Ngày kích hoạt <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="ngayKichHoat" th:field="*{ngayKichHoat}"
+                               th:classappend="${#fields.hasErrors('ngayKichHoat')} ? 'is-invalid'">
+                        <div class="form-text">Không được chọn ngày ở tương lai.</div>
+                        <div class="invalid-feedback" th:errors="*{ngayKichHoat}"></div>
+                    </div>
+
+                    <div class="col-md-4 o-tra-sau">
+                        <label class="form-label" for="hanMucTinDung">Hạn mức tín dụng (đồng)</label>
+                        <input type="number" step="1000" min="0" class="form-control"
+                               id="hanMucTinDung" th:field="*{hanMucTinDung}"
+                               th:classappend="${#fields.hasErrors('hanMucTinDung')} ? 'is-invalid'">
+                        <div class="form-text">Chỉ áp dụng cho thuê bao trả sau.</div>
+                        <div class="invalid-feedback" th:errors="*{hanMucTinDung}"></div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Đăng ký
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/thue-bao}">Huỷ</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /*
+            Lọc danh sách gói cước theo loại thuê bao đang chọn.
+            Gói trả trước và trả sau có cách tính cước khác nhau nên không dùng lẫn.
+            Ô hạn mức tín dụng cũng chỉ hiện khi chọn TRA_SAU.
+        */
+        (function () {
+            var oLoai = document.getElementById('loaiThueBao');
+            var oGoi = document.getElementById('goiCuocId');
+            if (!oLoai || !oGoi) return;
+
+            var tatCaGoi = Array.prototype.slice.call(oGoi.querySelectorAll('option'));
+
+            function capNhat() {
+                var loai = oLoai.value;
+                var conLai = null;
+
+                tatCaGoi.forEach(function (opt) {
+                    var hop = (opt.getAttribute('data-loai') === loai);
+                    opt.hidden = !hop;
+                    opt.disabled = !hop;
+                    if (hop && conLai === null) conLai = opt;
+                });
+
+                // Nếu gói đang chọn không còn hợp lệ thì tự chuyển sang gói hợp lệ đầu tiên
+                var dangChon = oGoi.options[oGoi.selectedIndex];
+                if (!dangChon || dangChon.hidden) {
+                    if (conLai) oGoi.value = conLai.value;
+                }
+
+                document.querySelectorAll('.o-tra-sau').forEach(function (el) {
+                    el.style.display = (loai === 'TRA_SAU') ? '' : 'none';
+                });
+            }
+
+            oLoai.addEventListener('change', capNhat);
+            capNhat();
+        })();
+    </script>
+
+</div>
+
+</body>
+</html>

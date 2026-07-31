@@ -131,6 +131,13 @@ public class KhachHangServiceImpl implements KhachHangService {
                 "Ngừng giao dịch khách hàng " + khachHang.getMaKh() + " - " + khachHang.getTenKh());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<KhachHang> layKhachHangDangHoatDong() {
+        return khachHangRepository.timKiem(null, null, TrangThaiKhachHang.HOAT_DONG,
+                org.springframework.data.domain.Pageable.unpaged()).getContent();
+    }
+
     /**
      * Sinh mã khách hàng kế tiếp theo định dạng {@code KH} + 6 chữ số.
      *

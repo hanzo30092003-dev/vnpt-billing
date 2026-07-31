@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Chi tiết thuê bao', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">
+            <i class="bi bi-sim me-2"></i>
+            <span th:text="${thueBao.soThueBao}">Số thuê bao</span>
+            <span class="badge ms-2"
+                  th:classappend="'bg-' + ${thueBao.trangThai.mauBadge}"
+                  th:text="${thueBao.trangThai.nhan}"></span>
+        </h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" th:href="@{/thue-bao}">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách
+            </a>
+
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                    data-bs-target="#modalChuyenTrangThai"
+                    th:disabled="${#lists.isEmpty(trangThaiCoTheChuyen)}">
+                <i class="bi bi-arrow-left-right me-1"></i> Chuyển trạng thái
+            </button>
+
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                    data-bs-target="#modalDoiGoi"
+                    th:disabled="${thueBao.trangThai.name() == 'DA_THANH_LY'}">
+                <i class="bi bi-box-seam me-1"></i> Đổi gói cước
+            </button>
+
+            <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                    data-bs-target="#modalNapTien"
+                    th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}"
+                    th:disabled="${thueBao.trangThai.name() == 'DA_THANH_LY'}">
+                <i class="bi bi-cash-coin me-1"></i> Nạp tiền
+            </button>
+        </div>
+    </div>
+
+    <!--/* Thuê bao đã thanh lý là trạng thái cuối, nhắc rõ để người dùng khỏi thắc mắc vì sao nút bị mờ */-->
+    <div class="alert alert-secondary py-2" th:if="${thueBao.trangThai.name() == 'DA_THANH_LY'}">
+        <i class="bi bi-info-circle me-2"></i>
+        Thuê bao đã thanh lý ngày
+        <strong th:text="${#temporals.format(thueBao.ngayHuy, 'dd/MM/yyyy')}"></strong>.
+        Đây là trạng thái cuối, không thể chuyển sang trạng thái khác hay đổi gói cước.
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white pb-0">
+            <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-chung" type="button">
+                        <i class="bi bi-info-circle me-1"></i> Thông tin chung
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-goi" type="button">
+                        <i class="bi bi-box-seam me-1"></i> Lịch sử gói cước
+                        <span class="badge text-bg-secondary" th:text="${#lists.size(lichSuGoiCuoc)}">0</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-trang-thai" type="button">
+                        <i class="bi bi-clock-history me-1"></i> Lịch sử biến động
+                        <span class="badge text-bg-secondary" th:text="${#lists.size(lichSuTrangThai)}">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-nap-tien" type="button">
+                        <i class="bi bi-wallet2 me-1"></i> Lịch sử nạp tiền
+                        <span class="badge text-bg-secondary" th:text="${#lists.size(lichSuNapTien)}">0</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body tab-content">
+
+            <!--/* ---------- TAB 1: Thông tin chung ---------- */-->
+            <div class="tab-pane fade show active" id="tab-chung">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row small mb-0">
+                            <dt class="col-5 text-secondary">Số thuê bao</dt>
+                            <dd class="col-7"><code th:text="${thueBao.soThueBao}"></code></dd>
+
+                            <dt class="col-5 text-secondary">Khách hàng</dt>
+                            <dd class="col-7">
+                                <a th:href="@{/khach-hang/{id}(id=${thueBao.khachHang.id})}"
+                                   th:text="|${thueBao.khachHang.maKh} - ${thueBao.khachHang.tenKh}|"></a>
+                            </dd>
+
+                            <dt class="col-5 text-secondary">Loại thuê bao</dt>
+                            <dd class="col-7" th:text="${thueBao.loaiThueBao.nhan}"></dd>
+
+                            <dt class="col-5 text-secondary">Gói cước hiện tại</dt>
+                            <dd class="col-7" th:text="|${thueBao.goiCuoc.maGoi} - ${thueBao.goiCuoc.tenGoi}|"></dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="row small mb-0">
+                            <dt class="col-5 text-secondary">Ngày kích hoạt</dt>
+                            <dd class="col-7" th:text="${#temporals.format(thueBao.ngayKichHoat, 'dd/MM/yyyy')}"></dd>
+
+                            <dt class="col-5 text-secondary" th:if="${thueBao.ngayHuy != null}">Ngày thanh lý</dt>
+                            <dd class="col-7" th:if="${thueBao.ngayHuy != null}"
+                                th:text="${#temporals.format(thueBao.ngayHuy, 'dd/MM/yyyy')}"></dd>
+
+                            <dt class="col-5 text-secondary" th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}">
+                                Số dư tài khoản
+                            </dt>
+                            <dd class="col-7" th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}">
+                                <strong th:text="${#numbers.formatDecimal(thueBao.soDu, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong>
+                            </dd>
+
+                            <dt class="col-5 text-secondary" th:if="${thueBao.loaiThueBao.name() == 'TRA_SAU'}">
+                                Hạn mức tín dụng
+                            </dt>
+                            <dd class="col-7" th:if="${thueBao.loaiThueBao.name() == 'TRA_SAU'}"
+                                th:text="${#numbers.formatDecimal(thueBao.hanMucTinDung, 0, 'POINT', 0, 'COMMA')} + ' đ'"></dd>
+
+                            <dt class="col-5 text-secondary">Trạng thái</dt>
+                            <dd class="col-7">
+                                <span class="badge" th:classappend="'bg-' + ${thueBao.trangThai.mauBadge}"
+                                      th:text="${thueBao.trangThai.nhan}"></span>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <!--/* ---------- TAB 2: Lịch sử gói cước ---------- */-->
+            <div class="tab-pane fade" id="tab-goi">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover bang-du-lieu mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Gói cước</th>
+                            <th>Cước thuê bao tháng</th>
+                            <th>Từ ngày</th>
+                            <th>Đến ngày</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(lichSuGoiCuoc)}">
+                            <td colspan="5" class="text-center text-secondary py-4">Chưa có dữ liệu.</td>
+                        </tr>
+                        <tr th:each="dk : ${lichSuGoiCuoc}">
+                            <td th:text="|${dk.goiCuoc.maGoi} - ${dk.goiCuoc.tenGoi}|"></td>
+                            <td th:text="${#numbers.formatDecimal(dk.goiCuoc.cuocThueBaoThang, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                            <td th:text="${#temporals.format(dk.ngayBatDau, 'dd/MM/yyyy')}"></td>
+                            <td th:text="${dk.ngayKetThuc != null} ? ${#temporals.format(dk.ngayKetThuc, 'dd/MM/yyyy')} : '—'"></td>
+                            <td>
+                                <span class="badge" th:classappend="'bg-' + ${dk.trangThai.mauBadge}"
+                                      th:text="${dk.trangThai.nhan}"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!--/* ---------- TAB 3: Lịch sử biến động trạng thái (timeline) ---------- */-->
+            <div class="tab-pane fade" id="tab-trang-thai">
+                <p class="text-secondary text-center py-4 mb-0" th:if="${#lists.isEmpty(lichSuTrangThai)}">
+                    Chưa có biến động trạng thái nào.
+                </p>
+                <ul class="timeline" th:if="${!#lists.isEmpty(lichSuTrangThai)}">
+                    <li class="timeline-item" th:each="ls : ${lichSuTrangThai}">
+                        <div class="timeline-time"
+                             th:text="${#temporals.format(ls.thoiGian, 'dd/MM/yyyy HH:mm')}"></div>
+                        <div class="fw-semibold">
+                            <span th:if="${ls.trangThaiCu != null}" th:text="${ls.trangThaiCu}"></span>
+                            <span th:if="${ls.trangThaiCu != null}" class="mx-1">&rarr;</span>
+                            <span th:text="${ls.trangThaiMoi}"></span>
+                        </div>
+                        <div class="small" th:text="${ls.lyDo}"></div>
+                        <div class="small text-secondary" th:if="${ls.nguoiThucHien != null}">
+                            <i class="bi bi-person me-1"></i>
+                            <span th:text="${ls.nguoiThucHien.hoTen}"></span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!--/* ---------- TAB 4: Lịch sử nạp tiền (chỉ trả trước) ---------- */-->
+            <div class="tab-pane fade" id="tab-nap-tien" th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover bang-du-lieu mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Thời điểm</th>
+                            <th>Số tiền</th>
+                            <th>Số dư trước</th>
+                            <th>Số dư sau</th>
+                            <th>Hình thức</th>
+                            <th>Người thực hiện</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(lichSuNapTien)}">
+                            <td colspan="6" class="text-center text-secondary py-4">Chưa có giao dịch nạp tiền nào.</td>
+                        </tr>
+                        <tr th:each="nt : ${lichSuNapTien}">
+                            <td th:text="${#temporals.format(nt.ngayNap, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td class="fw-semibold text-success"
+                                th:text="'+' + ${#numbers.formatDecimal(nt.soTien, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                            <td th:text="${#numbers.formatDecimal(nt.soDuTruoc, 0, 'POINT', 0, 'COMMA')}"></td>
+                            <td th:text="${#numbers.formatDecimal(nt.soDuSau, 0, 'POINT', 0, 'COMMA')}"></td>
+                            <td th:text="${nt.hinhThuc != null} ? ${nt.hinhThuc.nhan} : '—'"></td>
+                            <td th:text="${nt.nguoiThucHien != null} ? ${nt.nguoiThucHien.hoTen} : '—'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!--/* ============ MODAL: chuyển trạng thái ============ */-->
+    <div class="modal fade" id="modalChuyenTrangThai" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <form th:action="@{/thue-bao/{id}/chuyen-trang-thai(id=${thueBao.id})}" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Chuyển trạng thái thuê bao</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-secondary">
+                            Trạng thái hiện tại:
+                            <span class="badge" th:classappend="'bg-' + ${thueBao.trangThai.mauBadge}"
+                                  th:text="${thueBao.trangThai.nhan}"></span>
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Chuyển sang <span class="text-danger">*</span></label>
+                            <select class="form-select" name="trangThaiMoi" required>
+                                <!--/* Chỉ liệt kê các trạng thái hợp lệ theo ma trận trong ThueBaoService */-->
+                                <option th:each="t : ${trangThaiCoTheChuyen}"
+                                        th:value="${t}" th:text="${t.nhan}"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Lý do <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="lyDo" rows="3" required
+                                      placeholder="Ví dụ: Tạm ngừng theo yêu cầu khách hàng"></textarea>
+                            <div class="form-text">Lý do được lưu vào lịch sử biến động, bắt buộc nhập.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                        <button type="submit" class="btn btn-warning">Xác nhận chuyển</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!--/* ============ MODAL: đổi gói cước ============ */-->
+    <div class="modal fade" id="modalDoiGoi" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <form th:action="@{/thue-bao/{id}/doi-goi-cuoc(id=${thueBao.id})}" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Đổi gói cước</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-secondary mb-3">
+                            Gói hiện tại: <strong th:text="${thueBao.goiCuoc.tenGoi}"></strong>
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Gói cước mới <span class="text-danger">*</span></label>
+                            <select class="form-select" name="goiCuocMoiId" required>
+                                <option th:each="g : ${danhSachGoiCuoc}"
+                                        th:if="${g.loaiThueBao.name() == thueBao.loaiThueBao.name()
+                                                 and g.id != thueBao.goiCuoc.id}"
+                                        th:value="${g.id}"
+                                        th:text="|${g.maGoi} - ${g.tenGoi} (${#numbers.formatDecimal(g.cuocThueBaoThang, 0, 'POINT', 0, 'COMMA')} đ/tháng)|"></option>
+                            </select>
+                            <div class="form-text">Chỉ hiển thị gói cùng loại
+                                <span th:text="${thueBao.loaiThueBao.nhan.toLowerCase()}"></span>.
+                            </div>
+                        </div>
+                        <div class="alert alert-info mb-0 py-2 small">
+                            <i class="bi bi-calendar-event me-1"></i>
+                            Gói mới có hiệu lực từ
+                            <strong th:text="${#temporals.format(ngayHieuLucDoiGoi, 'dd/MM/yyyy')}"></strong>
+                            (ngày đầu tháng kế tiếp). Tháng hiện tại vẫn tính trọn theo gói cũ vì
+                            cước thuê bao tính theo chu kỳ tháng.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                        <button type="submit" class="btn btn-primary">Xác nhận đổi gói</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!--/* ============ MODAL: nạp tiền ============ */-->
+    <div class="modal fade" id="modalNapTien" tabindex="-1"
+         th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}">
+        <div class="modal-dialog modal-dialog-centered">
+            <form th:action="@{/thue-bao/{id}/nap-tien(id=${thueBao.id})}" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Nạp tiền vào tài khoản</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-secondary mb-3">
+                            Số dư hiện tại:
+                            <strong th:text="${#numbers.formatDecimal(thueBao.soDu, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong>
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Số tiền (đồng) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="soTien"
+                                   min="1000" step="1000" value="50000" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Hình thức <span class="text-danger">*</span></label>
+                            <select class="form-select" name="hinhThuc" required>
+                                <option th:each="h : ${danhSachHinhThucNap}"
+                                        th:value="${h}" th:text="${h.nhan}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Huỷ</button>
+                        <button type="submit" class="btn btn-success">Xác nhận nạp tiền</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
