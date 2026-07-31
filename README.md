@@ -178,7 +178,7 @@ vnpt-billing/
 
 ---
 
-## 6. Trạng thái hiện tại — hết Phase 1
+## 6. Trạng thái hiện tại — hết Phase 2
 
 **Phase 0 — khung dự án** ✅
 
@@ -195,9 +195,19 @@ vnpt-billing/
 - [x] 15 repository Spring Data JPA
 - [x] Dữ liệu mẫu: 50 khách hàng, 80 thuê bao, 5 gói cước, 9 dòng bảng giá
 
+**Phase 2 — xác thực và nghiệp vụ đầu tiên** ✅
+
+- [x] Tách profile `reset` để dữ liệu nhập qua giao diện không bị mất khi khởi động lại
+- [x] `SchemaValidationTest` kiểm tra ánh xạ Entity ↔ CSDL tự động ở khâu build
+- [x] Đăng nhập thật, BCrypt, CSRF, phân quyền 3 vai trò, trang 403
+- [x] Quản lý khách hàng: danh sách/tìm kiếm/lọc, form đổi động, validation, xoá mềm
+- [x] Quản lý thuê bao: đăng ký, chi tiết 4 tab, chuyển trạng thái theo ma trận,
+      đổi gói cước, nạp tiền
+
+Tài khoản dùng thử (mật khẩu đều là `123456`): `admin`, `nhanvien01`, `ketoan01`.
+
 Chưa làm (thuộc các phase sau):
 
-- [ ] Phase 2 — bật đăng nhập, phân quyền; quản lý khách hàng và thuê bao
 - [ ] Phase 3 — gói cước, bảng giá, CDR (bộ sinh giả lập + import CSV)
 - [ ] Phase 4 — engine tính cước (Rating & Billing)
 - [ ] Phase 5 — hóa đơn, thanh toán, công nợ
@@ -207,6 +217,7 @@ Chưa làm (thuộc các phase sau):
 Tài liệu:
 
 - [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md) — báo cáo quá trình và kết quả Phase 0
+- [`docs/PHASE-2-REPORT.md`](docs/PHASE-2-REPORT.md) — báo cáo Phase 2, kèm danh sách màn hình cần chụp ảnh
 - [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) — mô tả chi tiết 15 bảng và 2 view
 
 > ⚠️ **CSDL bị dựng lại mỗi lần khởi động.** `application.yml` đặt
