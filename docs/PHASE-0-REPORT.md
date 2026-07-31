@@ -338,11 +338,26 @@ Sau khi cài xong cần đặt biến `MYSQL_PASSWORD`, rồi chạy lại `mvnw
 tại `D:\KGU\TTNN\APP\vnpt-billing` để xác nhận **tiêu chí nghiệm thu số 2** trong
 điều kiện đầy đủ — đây là hạng mục duy nhất còn chưa đạt của Phase 0.
 
-### 7.5. Đẩy mã nguồn lên GitHub — ⏳ ĐANG CHỜ
+### 7.5. Đẩy mã nguồn lên GitHub — ✅ ĐÃ XONG
 
-GitHub CLI (`gh`) chưa được cài trên máy nên chưa tạo được repository từ xa.
-Cần cài `gh`, đăng nhập, rồi tạo repo **private** tên `vnpt-billing` và push
-nhánh `main`.
+Repository riêng tư đã được tạo và đồng bộ:
+
+| Hạng mục | Giá trị |
+|---|---|
+| URL | `https://github.com/hanzo30092003-dev/vnpt-billing` |
+| Chế độ | **Private** |
+| Nhánh mặc định | `main` |
+| Số file trên remote | 27 — khớp với repo cục bộ, 0 file trong `target/` |
+| Số commit | 2 |
+
+Hai điểm vướng gặp phải khi cài đặt, ghi lại để tham khảo:
+
+1. Sau khi cài GitHub CLI, terminal đang mở vẫn báo `gh is not recognized`. Nguyên
+   nhân: tiến trình terminal giữ bản `PATH` chụp lúc khởi động, không tự cập nhật khi
+   có phần mềm mới cài. Phải mở lại cửa sổ terminal, hoặc gọi bằng đường dẫn đầy đủ.
+2. Đã đăng nhập github.com trên trình duyệt nhưng `gh auth status` vẫn báo chưa đăng
+   nhập. Nguyên nhân: CLI lưu token riêng trên máy, độc lập hoàn toàn với phiên đăng
+   nhập của trình duyệt — vẫn phải chạy `gh auth login`.
 
 ---
 
@@ -371,10 +386,10 @@ Ba điểm lệch môi trường (thiếu JDK 21, thiếu Maven, thiếu MySQL) 
 hoặc ghi nhận rõ ràng. Sự cố đường dẫn tiếng Việt đã được chẩn đoán tới nguyên nhân
 gốc bằng thí nghiệm đối chứng và **đã khắc phục triệt để** bằng việc đổi tên thư mục.
 
-Mã nguồn đã được đưa vào quản lý phiên bản bằng Git, và mật khẩu CSDL đã được tách
-khỏi mã nguồn.
+Mã nguồn đã được đưa vào quản lý phiên bản bằng Git, đẩy lên GitHub ở chế độ riêng
+tư, và mật khẩu CSDL đã được tách khỏi mã nguồn.
 
-Hai việc còn lại (mục 7.4 cài MySQL, mục 7.5 đẩy lên GitHub) đều là thao tác cài đặt
-phần mềm trên máy, cần quyền quản trị và thao tác tương tác, **không liên quan tới
-mã nguồn**. Sau khi hoàn tất, chỉ cần chạy lại một lần `mvnw spring-boot:run` là
-Phase 0 đạt đủ toàn bộ tiêu chí nghiệm thu.
+Việc duy nhất còn lại là cài MySQL 8 (mục 7.4) — thao tác cài đặt phần mềm cần quyền
+quản trị và có bước cấu hình tương tác, **không liên quan tới mã nguồn**. Sau khi cài
+xong, chỉ cần chạy lại một lần `mvnw spring-boot:run` là Phase 0 đạt đủ toàn bộ tiêu
+chí nghiệm thu.
