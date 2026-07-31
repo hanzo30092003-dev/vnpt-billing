@@ -1,0 +1,134 @@
+/* Giao dien chung: sidebar trai co dinh + vung noi dung ben phai */
+
+:root {
+    --sidebar-width: 250px;
+    --sidebar-bg: #14304d;
+    --sidebar-fg: #cfd8e3;
+    --sidebar-active: #1e88e5;
+}
+
+body {
+    background-color: #f4f6f9;
+}
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-fg);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
+}
+
+.sidebar-nav {
+    padding: .5rem 0 1.5rem;
+    overflow-y: auto;
+}
+
+.sidebar-nav .nav-group {
+    padding: 1rem 1.25rem .35rem;
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .45);
+}
+
+.sidebar-nav .nav-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .55rem 1.25rem;
+    color: var(--sidebar-fg);
+    text-decoration: none;
+    font-size: .93rem;
+}
+
+.sidebar-nav .nav-item:hover {
+    background-color: rgba(255, 255, 255, .08);
+    color: #fff;
+}
+
+.sidebar-nav .nav-item.active {
+    background-color: var(--sidebar-active);
+    color: #fff;
+}
+
+/* ---------- Vung ben phai ---------- */
+.app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .85rem 1.5rem;
+    background-color: #fff;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.topbar-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    color: #14304d;
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    white-space: nowrap;
+    color: #495057;
+    font-size: .9rem;
+}
+
+.content {
+    flex: 1;
+    padding: 1.5rem;
+}
+
+.app-footer {
+    padding: .75rem 1.5rem;
+    border-top: 1px solid #dee2e6;
+    background-color: #fff;
+    color: #6c757d;
+    font-size: .82rem;
+}
+
+/* ---------- Man hinh nho ---------- */
+@media (max-width: 768px) {
+    .app-shell {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .topbar-title {
+        font-size: .85rem;
+    }
+}

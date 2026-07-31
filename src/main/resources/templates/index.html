@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Trang chủ', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <p class="text-uppercase text-secondary small mb-1">Đồ án Thực tập nghề nghiệp</p>
+            <h2 class="h4 mb-3">Xây dựng phần mềm quản lý thuê bao và tính cước điện thoại</h2>
+            <p class="mb-0 text-secondary">
+                Hệ thống mô phỏng nghiệp vụ viễn thông: quản lý khách hàng, thuê bao,
+                gói cước, bảng giá, thu thập CDR, tính cước, lập hóa đơn và ghi nhận thanh toán.
+            </p>
+        </div>
+    </div>
+
+    <div class="alert alert-warning d-flex align-items-center" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        <span>Dữ liệu trong hệ thống là dữ liệu mẫu phục vụ học tập.</span>
+    </div>
+
+    <div class="alert alert-secondary mb-0" role="alert">
+        <i class="bi bi-hammer me-2"></i>
+        Phase 0 &mdash; bộ khung dự án đã sẵn sàng. Các chức năng nghiệp vụ sẽ được bổ sung ở các phase sau.
+    </div>
+
+</div>
+
+</body>
+</html>

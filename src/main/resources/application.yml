@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: vnpt-billing
+
+  # ---------------------------------------------------------------
+  # Ket noi MySQL 8. Tham so createDatabaseIfNotExist=true giup tu
+  # tao schema vnpt_billing neu chua ton tai.
+  # ---------------------------------------------------------------
+  datasource:
+    url: "jdbc:mysql://localhost:3306/vnpt_billing?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh&createDatabaseIfNotExist=true"
+    # Lay tu bien moi truong - KHONG ghi mat khau truc tiep vao ma nguon
+    username: "${MYSQL_USER:root}"
+    password: "${MYSQL_PASSWORD:}"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # Bang duoc tao bang script SQL thu cong, KHONG de Hibernate tu sinh
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  # ---------------------------------------------------------------
+  # Script khoi tao CSDL: schema.sql tao bang, data-mau.sql chen du
+  # lieu mau. O Phase 0 hai file nay con rong (chi co chu thich).
+  # ---------------------------------------------------------------
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+      data-locations: classpath:db/data-mau.sql
+      encoding: UTF-8
+
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
