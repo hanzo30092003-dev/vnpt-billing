@@ -11,6 +11,7 @@ import com.hanzo.billing.repository.KhachHangRepository;
 import com.hanzo.billing.repository.ThueBaoRepository;
 import com.hanzo.billing.service.KhachHangService;
 import com.hanzo.billing.service.NhatKyService;
+import com.hanzo.billing.service.SinhMaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,11 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class KhachHangServiceImpl implements KhachHangService {
 
-    private static final String TIEN_TO_MA_KH = "KH";
-
     private final KhachHangRepository khachHangRepository;
     private final ThueBaoRepository thueBaoRepository;
     private final NhatKyService nhatKyService;
+    private final SinhMaService sinhMaService;
 
     @Override
     @Transactional(readOnly = true)
@@ -68,7 +68,7 @@ public class KhachHangServiceImpl implements KhachHangService {
         KhachHang khachHang = themMoi ? new KhachHang() : layTheoId(form.getId());
 
         if (themMoi) {
-            khachHang.setMaKh(sinhMaKhachHang());
+            khachHang.setMaKh(sinhMaService.sinhMaKhachHang());
             khachHang.setTrangThai(TrangThaiKhachHang.HOAT_DONG);
         } else if (form.getTrangThai() != null) {
             khachHang.setTrangThai(form.getTrangThai());
@@ -136,17 +136,6 @@ public class KhachHangServiceImpl implements KhachHangService {
     public List<KhachHang> layKhachHangDangHoatDong() {
         return khachHangRepository.timKiem(null, null, TrangThaiKhachHang.HOAT_DONG,
                 org.springframework.data.domain.Pageable.unpaged()).getContent();
-    }
-
-    /**
-     * Sinh mã khách hàng kế tiếp theo định dạng {@code KH} + 6 chữ số.
-     *
-     * <p>Lấy số thứ tự lớn nhất đang có rồi cộng 1, thay vì đếm số bản ghi — vì nếu
-     * đếm thì sau khi có khách hàng bị xoá, mã mới sẽ trùng với mã đã từng cấp.</p>
-     */
-    private String sinhMaKhachHang() {
-        long soTiepTheo = khachHangRepository.timSoThuTuLonNhat() + 1;
-        return TIEN_TO_MA_KH + String.format("%06d", soTiepTheo);
     }
 
     /** Chuỗi rỗng từ form được quy về null để CSDL không lưu chuỗi trống vô nghĩa. */

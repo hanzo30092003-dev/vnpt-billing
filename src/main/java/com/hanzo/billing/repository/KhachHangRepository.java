@@ -56,10 +56,12 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Long> {
                             Pageable pageable);
 
     /**
-     * Số thứ tự lớn nhất đang có trong mã khách hàng, dùng để sinh mã tiếp theo.
-     * Cắt bỏ 2 ký tự tiền tố "KH" rồi ép phần còn lại về số.
+     * Mã khách hàng lớn nhất đang có, hoặc null nếu bảng còn rỗng.
+     *
+     * <p>Việc tách phần số và cộng 1 được làm ở tầng Java trong
+     * {@code SinhMaServiceImpl} để có thể viết unit test, thay vì nhét
+     * {@code CAST(SUBSTRING(...))} vào câu SQL như trước.</p>
      */
-    @Query(value = "SELECT COALESCE(MAX(CAST(SUBSTRING(ma_kh, 3) AS UNSIGNED)), 0) FROM khach_hang",
-            nativeQuery = true)
-    long timSoThuTuLonNhat();
+    @Query("SELECT MAX(kh.maKh) FROM KhachHang kh")
+    String timMaKhachHangLonNhat();
 }
