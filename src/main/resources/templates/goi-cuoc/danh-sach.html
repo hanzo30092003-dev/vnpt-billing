@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Gói cước', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-box-seam me-2"></i>Danh mục gói cước</h2>
+        <a class="btn btn-primary" th:href="@{/goi-cuoc/them}">
+            <i class="bi bi-plus-lg me-1"></i> Thêm gói cước
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover bang-du-lieu align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Mã gói</th>
+                        <th>Tên gói</th>
+                        <th>Loại</th>
+                        <th class="text-end">Cước tháng</th>
+                        <th>Ưu đãi kèm theo</th>
+                        <th class="text-center">Thuê bao dùng</th>
+                        <th>Hiệu lực</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(danhSach)}">
+                        <td colspan="9" class="text-center text-secondary py-4">Chưa có gói cước nào.</td>
+                    </tr>
+                    <tr th:each="d : ${danhSach}">
+                        <td><code th:text="${d.goiCuoc.maGoi}"></code></td>
+                        <td>
+                            <a th:href="@{/goi-cuoc/{id}(id=${d.goiCuoc.id})}" th:text="${d.goiCuoc.tenGoi}"></a>
+                        </td>
+                        <td th:text="${d.goiCuoc.loaiThueBao.nhan}"></td>
+                        <td class="text-end"
+                            th:text="${#numbers.formatDecimal(d.goiCuoc.cuocThueBaoThang, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                        <td class="small" th:text="${d.tomTatUuDai}"></td>
+                        <td class="text-center">
+                            <span class="badge"
+                                  th:classappend="${d.soThueBao > 0} ? 'text-bg-primary' : 'text-bg-light'"
+                                  th:text="${d.soThueBao}">0</span>
+                        </td>
+                        <td class="small">
+                            <span th:text="${#temporals.format(d.goiCuoc.ngayHieuLuc, 'dd/MM/yyyy')}"></span>
+                            <span th:if="${d.goiCuoc.ngayHetHieuLuc != null}"
+                                  th:text="' → ' + ${#temporals.format(d.goiCuoc.ngayHetHieuLuc, 'dd/MM/yyyy')}"></span>
+                        </td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${d.goiCuoc.trangThai} ? 'bg-success' : 'bg-secondary'"
+                                  th:text="${d.goiCuoc.trangThai} ? 'Đang mở bán' : 'Ngừng bán'"></span>
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:href="@{/goi-cuoc/{id}(id=${d.goiCuoc.id})}" title="Chi tiết">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a class="btn btn-sm btn-outline-primary"
+                               th:href="@{/goi-cuoc/{id}/sua(id=${d.goiCuoc.id})}" title="Sửa">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="small text-secondary mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Gói cước đang có thuê bao sử dụng không xoá được. Muốn ngừng bán thì đặt
+                ngày hết hiệu lực hoặc chuyển trạng thái sang "Ngừng bán".
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

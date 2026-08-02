@@ -17,4 +17,9 @@ public interface GoiCuocRepository extends JpaRepository<GoiCuoc, Long> {
 
     /** Các gói đang còn hiệu lực để hiển thị khi đăng ký mới. */
     List<GoiCuoc> findByTrangThaiTrue();
+
+    /** Kiểm tra trùng mã gói, bỏ qua chính bản ghi đang sửa. */
+    boolean existsByMaGoiAndIdNot(String maGoi, Long id);
+
+    List<GoiCuoc> findAllByOrderByMaGoiAsc();
 }

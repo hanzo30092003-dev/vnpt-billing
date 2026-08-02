@@ -56,9 +56,22 @@
             <!--/* Danh mục và tính cước: chỉ quản trị viên. Các mục còn để # vì thuộc Phase 3-4 */-->
             <div sec:authorize="hasRole('ADMIN')">
                 <div class="nav-group">Danh mục &amp; tính cước</div>
-                <a class="nav-item" href="#"><i class="bi bi-box-seam"></i> Gói cước</a>
-                <a class="nav-item" href="#"><i class="bi bi-tags"></i> Bảng giá</a>
-                <a class="nav-item" href="#"><i class="bi bi-file-earmark-text"></i> CDR</a>
+                <a class="nav-item" th:href="@{/goi-cuoc}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/goi-cuoc')} ? 'active'">
+                    <i class="bi bi-box-seam"></i> Gói cước
+                </a>
+                <a class="nav-item" th:href="@{/bang-gia}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/bang-gia')} ? 'active'">
+                    <i class="bi bi-tags"></i> Bảng giá
+                </a>
+                <a class="nav-item" th:href="@{/cdr}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/cdr')} ? 'active'">
+                    <i class="bi bi-file-earmark-text"></i> CDR
+                </a>
+                <a class="nav-item" th:href="@{/ky-cuoc}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/ky-cuoc')} ? 'active'">
+                    <i class="bi bi-calendar3"></i> Kỳ cước
+                </a>
                 <a class="nav-item" href="#"><i class="bi bi-calculator"></i> Tính cước</a>
             </div>
 

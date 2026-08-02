@@ -31,6 +31,29 @@ public interface ThueBaoRepository extends JpaRepository<ThueBao, Long> {
     /** Đếm thuê bao đang hoạt động của một khách hàng — dùng khi chặn ngừng giao dịch. */
     long countByKhachHangIdAndTrangThai(Long khachHangId, TrangThaiThueBao trangThai);
 
+    /** Đếm thuê bao đang dùng một gói cước — dùng khi chặn xoá gói. */
+    long countByGoiCuocId(Long goiCuocId);
+
+    /**
+     * Đếm thuê bao theo từng gói cước trong MỘT truy vấn.
+     *
+     * <p>Dùng cho màn hình danh sách gói cước: nếu gọi {@code countByGoiCuocId} trong
+     * vòng lặp thì mỗi gói là một truy vấn (bài toán N+1).</p>
+     *
+     * @return danh sách cặp {@code [goiCuocId, soLuong]}
+     */
+    @Query("SELECT tb.goiCuoc.id, COUNT(tb) FROM ThueBao tb GROUP BY tb.goiCuoc.id")
+    List<Object[]> demThueBaoTheoGoiCuoc();
+
+    /** Thuê bao của một gói cước, có phân trang, nạp sẵn khách hàng để hiển thị tên. */
+    @Query(value = """
+            SELECT tb FROM ThueBao tb
+            JOIN FETCH tb.khachHang
+            WHERE tb.goiCuoc.id = :goiCuocId
+            """,
+            countQuery = "SELECT COUNT(tb) FROM ThueBao tb WHERE tb.goiCuoc.id = :goiCuocId")
+    Page<ThueBao> timTheoGoiCuoc(@Param("goiCuocId") Long goiCuocId, Pageable pageable);
+
     /**
      * Thuê bao của một khách hàng, nạp sẵn gói cước.
      *

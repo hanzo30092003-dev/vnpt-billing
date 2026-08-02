@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Chi tiết gói cước', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">
+            <i class="bi bi-box-seam me-2"></i>
+            <span th:text="${goiCuoc.tenGoi}">Tên gói</span>
+            <code class="ms-2" th:text="${goiCuoc.maGoi}"></code>
+            <span class="badge ms-2"
+                  th:classappend="${goiCuoc.trangThai} ? 'bg-success' : 'bg-secondary'"
+                  th:text="${goiCuoc.trangThai} ? 'Đang mở bán' : 'Ngừng bán'"></span>
+        </h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" th:href="@{/goi-cuoc}">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách
+            </a>
+            <a class="btn btn-primary" th:href="@{/goi-cuoc/{id}/sua(id=${goiCuoc.id})}">
+                <i class="bi bi-pencil me-1"></i> Sửa
+            </a>
+            <form th:action="@{/goi-cuoc/{id}/xoa(id=${goiCuoc.id})}" method="post" class="d-inline">
+                <button type="button" class="btn btn-outline-danger"
+                        data-xac-nhan-tieu-de="Xoá gói cước"
+                        th:attr="data-xac-nhan=|Xác nhận xoá gói cước ${goiCuoc.maGoi}?|">
+                    <i class="bi bi-trash me-1"></i> Xoá
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">Thông tin gói</div>
+                <div class="card-body">
+                    <dl class="row small mb-0">
+                        <dt class="col-5 text-secondary">Loại thuê bao</dt>
+                        <dd class="col-7" th:text="${goiCuoc.loaiThueBao.nhan}"></dd>
+
+                        <dt class="col-5 text-secondary">Cước thuê bao tháng</dt>
+                        <dd class="col-7">
+                            <strong th:text="${#numbers.formatDecimal(goiCuoc.cuocThueBaoThang, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong>
+                        </dd>
+
+                        <dt class="col-5 text-secondary">Ưu đãi kèm theo</dt>
+                        <dd class="col-7" th:text="${tomTatUuDai}"></dd>
+
+                        <dt class="col-5 text-secondary">Phút nội mạng</dt>
+                        <dd class="col-7" th:text="${goiCuoc.phutNoiMangMienPhi} + ' phút'"></dd>
+
+                        <dt class="col-5 text-secondary">Phút ngoại mạng</dt>
+                        <dd class="col-7" th:text="${goiCuoc.phutNgoaiMangMienPhi} + ' phút'"></dd>
+
+                        <dt class="col-5 text-secondary">SMS miễn phí</dt>
+                        <dd class="col-7" th:text="${goiCuoc.smsMienPhi} + ' tin'"></dd>
+
+                        <dt class="col-5 text-secondary">Data miễn phí</dt>
+                        <dd class="col-7" th:text="${goiCuoc.dataMienPhiMb} + ' MB'"></dd>
+
+                        <dt class="col-5 text-secondary">Ngày hiệu lực</dt>
+                        <dd class="col-7" th:text="${#temporals.format(goiCuoc.ngayHieuLuc, 'dd/MM/yyyy')}"></dd>
+
+                        <dt class="col-5 text-secondary">Ngày hết hiệu lực</dt>
+                        <dd class="col-7"
+                            th:text="${goiCuoc.ngayHetHieuLuc != null} ? ${#temporals.format(goiCuoc.ngayHetHieuLuc, 'dd/MM/yyyy')} : 'Vô thời hạn'"></dd>
+
+                        <dt class="col-5 text-secondary" th:if="${goiCuoc.moTa != null}">Mô tả</dt>
+                        <dd class="col-7" th:if="${goiCuoc.moTa != null}" th:text="${goiCuoc.moTa}"></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <!--/* Bảng giá riêng của gói. Nếu trống nghĩa là gói dùng bảng giá mặc định chung. */-->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-white fw-semibold">
+                    Bảng giá riêng của gói
+                    <span class="badge text-bg-secondary ms-1" th:text="${#lists.size(bangGiaRieng)}">0</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-secondary small mb-0" th:if="${#lists.isEmpty(bangGiaRieng)}">
+                        Gói này chưa có bảng giá riêng, cước phát sinh sẽ tính theo
+                        <a th:href="@{/bang-gia}">bảng giá mặc định chung</a>.
+                    </p>
+                    <div class="table-responsive" th:if="${!#lists.isEmpty(bangGiaRieng)}">
+                        <table class="table table-sm bang-du-lieu mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Dịch vụ</th>
+                                <th>Hướng</th>
+                                <th>Giờ cao điểm</th>
+                                <th class="text-end">Block</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th>Hiệu lực</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="bg : ${bangGiaRieng}">
+                                <td th:text="${bg.loaiDichVu}"></td>
+                                <td th:text="${bg.huong}"></td>
+                                <td th:text="${bg.gioCaoDiem} ? 'Có' : 'Không'"></td>
+                                <td class="text-end" th:text="${bg.blockGiay}"></td>
+                                <td class="text-end"
+                                    th:text="${#numbers.formatDecimal(bg.donGia, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                                <td class="small" th:text="${#temporals.format(bg.ngayHieuLuc, 'dd/MM/yyyy')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    Thuê bao đang dùng gói này
+                    <span class="badge text-bg-primary ms-1" th:text="${soThueBao}">0</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover bang-du-lieu mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Số thuê bao</th>
+                                <th>Khách hàng</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${trangThueBao.empty}">
+                                <td colspan="3" class="text-center text-secondary py-3">
+                                    Chưa có thuê bao nào dùng gói này.
+                                </td>
+                            </tr>
+                            <tr th:each="tb : ${trangThueBao.content}">
+                                <td><a th:href="@{/thue-bao/{id}(id=${tb.id})}" th:text="${tb.soThueBao}"></a></td>
+                                <td th:text="${tb.khachHang.tenKh}"></td>
+                                <td>
+                                    <span class="badge" th:classappend="'bg-' + ${tb.trangThai.mauBadge}"
+                                          th:text="${tb.trangThai.nhan}"></span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <nav th:if="${trangThueBao.totalPages > 1}" class="mt-2">
+                        <ul class="pagination pagination-sm mb-0 justify-content-center">
+                            <li class="page-item" th:classappend="${trangThueBao.first} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{'/goi-cuoc/' + ${goiCuoc.id} + '?trang=' + ${trangThueBao.number - 1}}">Trước</a>
+                            </li>
+                            <li class="page-item"
+                                th:each="i : ${#numbers.sequence(0, trangThueBao.totalPages - 1)}"
+                                th:classappend="${i == trangThueBao.number} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{'/goi-cuoc/' + ${goiCuoc.id} + '?trang=' + ${i}}" th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${trangThueBao.last} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{'/goi-cuoc/' + ${goiCuoc.id} + '?trang=' + ${trangThueBao.number + 1}}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

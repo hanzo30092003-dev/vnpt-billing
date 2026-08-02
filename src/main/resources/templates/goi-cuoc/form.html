@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(${laThemMoi} ? 'Thêm gói cước' : 'Sửa gói cước', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">
+            <i class="bi bi-box-seam me-2"></i>
+            <span th:text="${laThemMoi} ? 'Thêm gói cước mới' : 'Sửa gói cước'"></span>
+        </h2>
+        <a class="btn btn-outline-secondary" th:href="@{/goi-cuoc}">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form th:action="@{/goi-cuoc/luu}" th:object="${goiCuocForm}" method="post" novalidate>
+                <input type="hidden" th:field="*{id}">
+
+                <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span th:each="loi : ${#fields.globalErrors()}" th:text="${loi}"></span>
+                </div>
+
+                <h6 class="text-secondary text-uppercase small">Thông tin chung</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label" for="maGoi">Mã gói <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control text-uppercase" id="maGoi" th:field="*{maGoi}"
+                               th:classappend="${#fields.hasErrors('maGoi')} ? 'is-invalid'" placeholder="MAX150">
+                        <div class="invalid-feedback" th:errors="*{maGoi}"></div>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="tenGoi">Tên gói <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="tenGoi" th:field="*{tenGoi}"
+                               th:classappend="${#fields.hasErrors('tenGoi')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{tenGoi}"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" for="loaiThueBao">Loại thuê bao <span class="text-danger">*</span></label>
+                        <select class="form-select" id="loaiThueBao" th:field="*{loaiThueBao}"
+                                th:classappend="${#fields.hasErrors('loaiThueBao')} ? 'is-invalid'">
+                            <option value="TRA_SAU">Trả sau</option>
+                            <option value="TRA_TRUOC">Trả trước</option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{loaiThueBao}"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" for="cuocThueBaoThang">Cước tháng (đ) <span class="text-danger">*</span></label>
+                        <input type="number" step="1000" min="0" class="form-control"
+                               id="cuocThueBaoThang" th:field="*{cuocThueBaoThang}"
+                               th:classappend="${#fields.hasErrors('cuocThueBaoThang')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{cuocThueBaoThang}"></div>
+                    </div>
+                </div>
+
+                <h6 class="text-secondary text-uppercase small">Ưu đãi kèm theo mỗi tháng</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label" for="phutNoiMangMienPhi">Phút nội mạng</label>
+                        <input type="number" min="0" class="form-control" id="phutNoiMangMienPhi"
+                               th:field="*{phutNoiMangMienPhi}"
+                               th:classappend="${#fields.hasErrors('phutNoiMangMienPhi')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{phutNoiMangMienPhi}"></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="phutNgoaiMangMienPhi">Phút ngoại mạng</label>
+                        <input type="number" min="0" class="form-control" id="phutNgoaiMangMienPhi"
+                               th:field="*{phutNgoaiMangMienPhi}"
+                               th:classappend="${#fields.hasErrors('phutNgoaiMangMienPhi')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{phutNgoaiMangMienPhi}"></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="smsMienPhi">Tin nhắn SMS</label>
+                        <input type="number" min="0" class="form-control" id="smsMienPhi" th:field="*{smsMienPhi}"
+                               th:classappend="${#fields.hasErrors('smsMienPhi')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{smsMienPhi}"></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="dataMienPhiMb">Data (MB)</label>
+                        <input type="number" min="0" step="1024" class="form-control"
+                               id="dataMienPhiMb" th:field="*{dataMienPhiMb}"
+                               th:classappend="${#fields.hasErrors('dataMienPhiMb')} ? 'is-invalid'">
+                        <div class="form-text">1024 MB = 1 GB</div>
+                        <div class="invalid-feedback" th:errors="*{dataMienPhiMb}"></div>
+                    </div>
+                </div>
+
+                <h6 class="text-secondary text-uppercase small">Hiệu lực</h6>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label" for="ngayHieuLuc">Ngày hiệu lực <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="ngayHieuLuc" th:field="*{ngayHieuLuc}"
+                               th:classappend="${#fields.hasErrors('ngayHieuLuc')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{ngayHieuLuc}"></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="ngayHetHieuLuc">Ngày hết hiệu lực</label>
+                        <input type="date" class="form-control" id="ngayHetHieuLuc" th:field="*{ngayHetHieuLuc}"
+                               th:classappend="${#fields.hasErrors('ngayHetHieuLuc')} ? 'is-invalid'">
+                        <div class="form-text">Để trống nghĩa là còn hiệu lực vô thời hạn.</div>
+                        <div class="invalid-feedback" th:errors="*{ngayHetHieuLuc}"></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="trangThai">Trạng thái</label>
+                        <select class="form-select" id="trangThai" th:field="*{trangThai}">
+                            <option value="true">Đang mở bán</option>
+                            <option value="false">Ngừng bán</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="moTa">Mô tả</label>
+                    <textarea class="form-control" id="moTa" rows="2" th:field="*{moTa}"></textarea>
+                </div>
+
+                <hr class="my-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Lưu</button>
+                    <a class="btn btn-outline-secondary" th:href="@{/goi-cuoc}">Huỷ</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

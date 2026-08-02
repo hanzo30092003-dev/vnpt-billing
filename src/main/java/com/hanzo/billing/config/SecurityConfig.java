@@ -50,7 +50,7 @@ public class SecurityConfig {
 
                         // Danh mục và nghiệp vụ tính cước: chỉ quản trị viên
                         .requestMatchers("/quan-tri/**", "/goi-cuoc/**", "/bang-gia/**",
-                                "/tinh-cuoc/**", "/cdr/**")
+                                "/tinh-cuoc/**", "/cdr/**", "/ky-cuoc/**")
                         .hasRole("ADMIN")
 
                         // Báo cáo: mọi vai trò đã đăng nhập đều xem được
