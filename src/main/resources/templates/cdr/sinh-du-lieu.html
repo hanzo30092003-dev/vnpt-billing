@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Sinh dữ liệu CDR', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-magic me-2"></i>Bộ sinh dữ liệu CDR giả lập</h2>
+        <a class="btn btn-outline-secondary" th:href="@{/cdr}">
+            <i class="bi bi-list-ul me-1"></i> Tra cứu CDR
+        </a>
+    </div>
+
+    <div class="alert alert-warning py-2 small">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        <strong>Đây là dữ liệu giả lập phục vụ học tập.</strong>
+        Bản ghi sinh ra có <code>trang_thai_tinh_cuoc = CHUA_TINH</code> và
+        <code>cuoc_phi = NULL</code>; việc tính cước thuộc Phase 4.
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">Tham số sinh dữ liệu</div>
+                <div class="card-body">
+                    <form th:action="@{/cdr/sinh-du-lieu}" th:object="${sinhCdrForm}" method="post"
+                          id="formSinh" novalidate>
+
+                        <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span th:each="loi : ${#fields.globalErrors()}" th:text="${loi}"></span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label" for="tuNgay">Từ ngày</label>
+                                <input type="date" class="form-control" id="tuNgay" th:field="*{tuNgay}"
+                                       th:classappend="${#fields.hasErrors('tuNgay')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{tuNgay}"></div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" for="denNgay">Đến ngày</label>
+                                <input type="date" class="form-control" id="denNgay" th:field="*{denNgay}"
+                                       th:classappend="${#fields.hasErrors('denNgay')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{denNgay}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="soLuong">Số lượng bản ghi</label>
+                                <input type="number" min="1" max="200000" step="500" class="form-control"
+                                       id="soLuong" th:field="*{soLuong}"
+                                       th:classappend="${#fields.hasErrors('soLuong')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{soLuong}"></div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Phạm vi thuê bao</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="pvTatCa"
+                                           th:field="*{phamVi}" value="TAT_CA">
+                                    <label class="form-check-label" for="pvTatCa">
+                                        Tất cả thuê bao đang hoạt động
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="pvChon"
+                                           th:field="*{phamVi}" value="CHON">
+                                    <label class="form-check-label" for="pvChon">
+                                        Chọn thuê bao cụ thể
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 khoi-chon-thue-bao d-none">
+                                <label class="form-label" for="thueBaoIds">Thuê bao</label>
+                                <select class="form-select" id="thueBaoIds" th:field="*{thueBaoIds}"
+                                        multiple size="8">
+                                    <option th:each="tb : ${danhSachThueBao}" th:value="${tb.id}"
+                                            th:text="${tb.soThueBao} + ' - ' + ${tb.khachHang.tenKh}"></option>
+                                </select>
+                                <div class="form-text">Giữ Ctrl để chọn nhiều thuê bao.</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+                        <button type="submit" class="btn btn-primary w-100" id="nutSinh">
+                            <span class="spinner-border spinner-border-sm me-1 d-none" id="quaySinh"></span>
+                            <i class="bi bi-magic me-1" id="bieuTuongSinh"></i>
+                            <span id="chuNutSinh">Sinh dữ liệu</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-white fw-semibold">Quy tắc sinh dữ liệu</div>
+                <div class="card-body small">
+                    <ul class="mb-0 ps-3">
+                        <li>Loại dịch vụ: 70% thoại · 20% SMS · 10% data</li>
+                        <li>Hướng: 55% nội mạng · 40% ngoại mạng · 5% quốc tế</li>
+                        <li>Thời lượng gọi 5–1800 giây, khoảng 80% nằm trong 30–180 giây</li>
+                        <li>Giờ phát sinh tập trung 7h–23h</li>
+                        <li><strong>Giờ cao điểm chỉ gắn cho bản ghi THOẠI</strong> (8h–20h, Thứ Hai đến Thứ Sáu)</li>
+                        <li>Không sinh cho thuê bao tạm ngưng 2 chiều hoặc đã thanh lý</li>
+                        <li>Không sinh trước ngày kích hoạt của thuê bao</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm" th:if="${ketQua != null}">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-check-circle text-success me-1"></i> Kết quả sinh dữ liệu
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="border rounded py-2">
+                                <div class="h4 mb-0 text-primary" th:text="${ketQua.tongBanGhi}">0</div>
+                                <div class="small text-secondary">bản ghi</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded py-2">
+                                <div class="h4 mb-0 text-primary" th:text="${ketQua.soThueBaoCoPhatSinh}">0</div>
+                                <div class="small text-secondary">thuê bao phát sinh</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded py-2">
+                                <div class="h4 mb-0 text-primary" th:text="${ketQua.thoiGianMs} + ' ms'">0</div>
+                                <div class="small text-secondary">thời gian</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="small text-uppercase text-secondary">Phân bố theo loại dịch vụ</h6>
+                    <table class="table table-sm bang-du-lieu">
+                        <tbody>
+                        <tr th:each="e : ${ketQua.theoLoaiDichVu}">
+                            <td th:text="${e.key}"></td>
+                            <td class="text-end" th:text="${e.value}"></td>
+                            <td class="text-end text-secondary"
+                                th:text="${#numbers.formatDecimal(e.value * 100.0 / ketQua.tongBanGhi, 1, 1)} + '%'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <h6 class="small text-uppercase text-secondary">Phân bố theo hướng</h6>
+                    <table class="table table-sm bang-du-lieu mb-0">
+                        <tbody>
+                        <tr th:each="e : ${ketQua.theoHuong}">
+                            <td th:text="${e.key}"></td>
+                            <td class="text-end" th:text="${e.value}"></td>
+                            <td class="text-end text-secondary"
+                                th:text="${#numbers.formatDecimal(e.value * 100.0 / ketQua.tongBanGhi, 1, 1)} + '%'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <a class="btn btn-outline-primary mt-3" th:href="@{/cdr}">
+                        <i class="bi bi-list-ul me-1"></i> Xem dữ liệu vừa sinh
+                    </a>
+                </div>
+            </div>
+
+            <div class="card shadow-sm" th:if="${ketQua == null}">
+                <div class="card-body text-center text-secondary py-5">
+                    <i class="bi bi-bar-chart display-4"></i>
+                    <p class="mt-3 mb-0">Kết quả sinh dữ liệu sẽ hiển thị ở đây.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Hiện/ẩn ô chọn thuê bao theo phạm vi, và báo trạng thái đang xử lý khi bấm sinh */
+        (function () {
+            var pvChon = document.getElementById('pvChon');
+            var pvTatCa = document.getElementById('pvTatCa');
+            var khoi = document.querySelector('.khoi-chon-thue-bao');
+
+            function capNhat() {
+                khoi.classList.toggle('d-none', !pvChon.checked);
+            }
+            pvChon.addEventListener('change', capNhat);
+            pvTatCa.addEventListener('change', capNhat);
+            capNhat();
+
+            document.getElementById('formSinh').addEventListener('submit', function () {
+                document.getElementById('nutSinh').disabled = true;
+                document.getElementById('quaySinh').classList.remove('d-none');
+                document.getElementById('bieuTuongSinh').classList.add('d-none');
+                document.getElementById('chuNutSinh').textContent = 'Đang sinh dữ liệu, vui lòng đợi...';
+            });
+        })();
+    </script>
+
+</div>
+
+</body>
+</html>

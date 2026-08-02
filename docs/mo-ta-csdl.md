@@ -200,7 +200,7 @@ erDiagram
 | `huong` | ENUM | NOT NULL | `NOI_MANG` / `NGOAI_MANG` / `QUOC_TE` |
 | `thoi_gian_bat_dau` | DATETIME | NOT NULL, INDEX | Thời điểm bắt đầu sử dụng |
 | `thoi_luong_giay` | INT | DEFAULT 0 | Thời lượng cuộc gọi (giây), chỉ dùng cho `THOAI` |
-| `so_luong` | INT | DEFAULT 0 | Số tin với `SMS`, số MB với `DATA` |
+| `so_luong` | INT | DEFAULT 0 | Số tin với `SMS`, số **KB** với `DATA` |
 | `gio_cao_diem` | TINYINT | DEFAULT 0 | 1 = phát sinh trong giờ cao điểm |
 | `cuoc_phi` | DECIMAL(15,2) | | Cước tính được, NULL khi chưa tính |
 | `mien_phi` | TINYINT | DEFAULT 0 | 1 = nằm trong ưu đãi của gói nên không thu tiền |
@@ -211,6 +211,18 @@ erDiagram
 > Cột `so_thue_bao` **cố ý trùng lặp** với `thue_bao.so_thue_bao`. CDR là dữ liệu lịch sử:
 > nếu thuê bao bị thanh lý và số được cấp lại cho khách khác, bản ghi cũ vẫn phải giữ
 > đúng số tại thời điểm phát sinh.
+
+> ⚠️ **Đơn vị của `so_luong` với dịch vụ DATA đã đổi ở Phase 3: từ MB sang KB.**
+> Bộ sinh CDR sinh giá trị 1024–512000 KB (tức 1 MB đến 500 MB mỗi phiên), và màn hình
+> tra cứu CDR quy đổi sang MB khi hiển thị.
+>
+> **Việc Phase 4 phải xử lý:** dòng bảng giá `DATA` hiện có `block_giay = 1` và đơn giá
+> 25 đ, vốn được đặt theo giả định "1 block = 1 MB". Khi viết engine tính cước phải
+> chọn một trong hai cách, không được bỏ qua:
+> - Chia `so_luong` cho 1024 để đổi về MB trước khi nhân đơn giá, hoặc
+> - Đổi `block_giay` của dòng DATA thành 1024 để block đúng bằng 1 MB tính theo KB
+>
+> Nếu bỏ qua, cước data sẽ bị tính cao gấp 1024 lần.
 
 ### 2.10. `hoa_don` — Hóa đơn cước tháng
 

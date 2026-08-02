@@ -10,7 +10,11 @@ spring:
   # tao schema vnpt_billing neu chua ton tai.
   # ---------------------------------------------------------------
   datasource:
-    url: "jdbc:mysql://localhost:3306/vnpt_billing?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh&createDatabaseIfNotExist=true"
+    # rewriteBatchedStatements=true: MySQL Connector/J gop nhieu cau INSERT trong
+    # cung mot batch thanh MOT cau lenh nhieu VALUES. Khong co tham so nay thi
+    # batchUpdate van gui tung cau INSERT rieng le, chi tiet kiem duoc mot phan
+    # chi phi. Xem so lieu do duoc trong docs/toi-uu-hieu-nang.md
+    url: "jdbc:mysql://localhost:3306/vnpt_billing?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh&createDatabaseIfNotExist=true&rewriteBatchedStatements=true"
     # Lay tu bien moi truong - KHONG ghi mat khau truc tiep vao ma nguon
     username: "${MYSQL_USER:root}"
     password: "${MYSQL_PASSWORD:}"
