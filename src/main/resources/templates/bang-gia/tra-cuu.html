@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Xem giá đang áp dụng', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-search me-2"></i>Xem giá đang áp dụng</h2>
+        <a class="btn btn-outline-secondary" th:href="@{/bang-gia}">
+            <i class="bi bi-arrow-left me-1"></i> Về bảng giá
+        </a>
+    </div>
+
+    <div class="alert alert-info py-2 small">
+        <i class="bi bi-info-circle me-1"></i>
+        Bảng giá được quản lý <strong>theo thời gian</strong>: mỗi dòng có khoảng hiệu lực riêng.
+        Màn hình này cho biết tại một ngày bất kỳ thì hệ thống đang áp dụng những đơn giá nào —
+        đúng cách engine tính cước sẽ tra giá cho từng bản ghi CDR ở Phase 4.
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" th:action="@{/bang-gia/tra-cuu}" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small mb-1" for="ngay">Xem giá tại ngày</label>
+                    <input type="date" class="form-control" id="ngay" name="ngay"
+                           th:value="${#temporals.format(ngay, 'yyyy-MM-dd')}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i> Tra cứu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="mb-3">
+                Tại ngày <strong th:text="${#temporals.format(ngay, 'dd/MM/yyyy')}"></strong>
+                có <strong th:text="${#lists.size(danhSach)}">0</strong> đơn giá đang được áp dụng.
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-hover bang-du-lieu align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Áp dụng cho</th>
+                        <th>Dịch vụ</th>
+                        <th>Hướng</th>
+                        <th>Khung giờ</th>
+                        <th class="text-end">Block</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th>Có hiệu lực từ</th>
+                        <th>Đến</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(danhSach)}">
+                        <td colspan="8" class="text-center text-secondary py-4">
+                            Không có đơn giá nào có hiệu lực tại ngày này.
+                        </td>
+                    </tr>
+                    <tr th:each="bg : ${danhSach}">
+                        <td>
+                            <span th:if="${bg.goiCuoc == null}" class="badge text-bg-info">Giá mặc định chung</span>
+                            <span th:if="${bg.goiCuoc != null}" th:text="${bg.goiCuoc.maGoi}"></span>
+                        </td>
+                        <td th:text="${bg.loaiDichVu}"></td>
+                        <td th:text="${bg.huong}"></td>
+                        <td>
+                            <span class="badge" th:classappend="${bg.gioCaoDiem} ? 'text-bg-warning' : 'text-bg-light'"
+                                  th:text="${bg.gioCaoDiem} ? 'Cao điểm' : 'Thường'"></span>
+                        </td>
+                        <td class="text-end" th:text="${bg.blockGiay}"></td>
+                        <td class="text-end fw-semibold"
+                            th:text="${#numbers.formatDecimal(bg.donGia, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                        <td th:text="${#temporals.format(bg.ngayHieuLuc, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${bg.ngayHetHieuLuc != null}
+                            ? ${#temporals.format(bg.ngayHetHieuLuc, 'dd/MM/yyyy')} : 'Vô thời hạn'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

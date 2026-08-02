@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(${laThemMoi} ? 'Thêm dòng giá' : 'Sửa dòng giá', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">
+            <i class="bi bi-tags me-2"></i>
+            <span th:text="${laThemMoi} ? 'Thêm dòng bảng giá' : 'Sửa dòng bảng giá'"></span>
+        </h2>
+        <a class="btn btn-outline-secondary" th:href="@{/bang-gia}">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form th:action="@{/bang-gia/luu}" th:object="${bangGiaForm}" method="post" novalidate>
+                <input type="hidden" th:field="*{id}">
+
+                <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span th:each="loi : ${#fields.globalErrors()}" th:text="${loi}"></span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label" for="goiCuocId">Áp dụng cho</label>
+                        <select class="form-select" id="goiCuocId" th:field="*{goiCuocId}">
+                            <option value="">Giá mặc định chung (mọi gói)</option>
+                            <option th:each="g : ${danhSachGoiCuoc}" th:value="${g.goiCuoc.id}"
+                                    th:text="${g.goiCuoc.maGoi} + ' - ' + ${g.goiCuoc.tenGoi}"></option>
+                        </select>
+                        <div class="form-text">
+                            Để "Giá mặc định chung" nếu đơn giá này áp dụng cho mọi gói cước.
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="loaiDichVu">Loại dịch vụ <span class="text-danger">*</span></label>
+                        <select class="form-select" id="loaiDichVu" th:field="*{loaiDichVu}"
+                                th:classappend="${#fields.hasErrors('loaiDichVu')} ? 'is-invalid'">
+                            <option th:each="l : ${danhSachLoaiDichVu}" th:value="${l}" th:text="${l}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{loaiDichVu}"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="huong">Hướng <span class="text-danger">*</span></label>
+                        <select class="form-select" id="huong" th:field="*{huong}"
+                                th:classappend="${#fields.hasErrors('huong')} ? 'is-invalid'">
+                            <option th:each="h : ${danhSachHuong}" th:value="${h}" th:text="${h}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{huong}"></div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label" for="gioCaoDiem">Khung giờ <span class="text-danger">*</span></label>
+                        <select class="form-select" id="gioCaoDiem" th:field="*{gioCaoDiem}">
+                            <option value="false">Giờ thường</option>
+                            <option value="true">Giờ cao điểm</option>
+                        </select>
+                        <div class="form-text canh-bao-cao-diem text-warning d-none">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Hiện chỉ dịch vụ THOẠI mới có bản ghi CDR mang cờ giờ cao điểm.
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="blockGiay">Block tính cước <span class="text-danger">*</span></label>
+                        <input type="number" min="1" class="form-control" id="blockGiay" th:field="*{blockGiay}"
+                               th:classappend="${#fields.hasErrors('blockGiay')} ? 'is-invalid'">
+                        <div class="form-text">Giây với thoại, 1 tin với SMS, 1 MB với data.</div>
+                        <div class="invalid-feedback" th:errors="*{blockGiay}"></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="donGia">Đơn giá mỗi block (đ) <span class="text-danger">*</span></label>
+                        <input type="number" min="0" step="1" class="form-control" id="donGia" th:field="*{donGia}"
+                               th:classappend="${#fields.hasErrors('donGia')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{donGia}"></div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label" for="ngayHieuLuc">Ngày hiệu lực <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="ngayHieuLuc" th:field="*{ngayHieuLuc}"
+                               th:classappend="${#fields.hasErrors('ngayHieuLuc')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{ngayHieuLuc}"></div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" for="ngayHetHieuLuc">Ngày hết hiệu lực</label>
+                        <input type="date" class="form-control" id="ngayHetHieuLuc" th:field="*{ngayHetHieuLuc}"
+                               th:classappend="${#fields.hasErrors('ngayHetHieuLuc')} ? 'is-invalid'">
+                        <div class="form-text">Để trống nghĩa là vô thời hạn.</div>
+                        <div class="invalid-feedback" th:errors="*{ngayHetHieuLuc}"></div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4 py-2 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Không được tồn tại hai dòng cùng <strong>gói cước · loại dịch vụ · hướng · khung giờ</strong>
+                    mà khoảng hiệu lực đè lên nhau. Nếu muốn đổi giá từ một mốc thời gian, hãy đặt
+                    ngày hết hiệu lực cho dòng cũ trước, rồi mới thêm dòng mới bắt đầu từ hôm sau.
+                </div>
+
+                <hr class="my-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Lưu</button>
+                    <a class="btn btn-outline-secondary" th:href="@{/bang-gia}">Huỷ</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /* Nhắc người dùng khi chọn giờ cao điểm cho dịch vụ không phải THOAI:
+           bộ sinh CDR chỉ gắn cờ giờ cao điểm cho bản ghi THOAI, nên dòng giá
+           cao điểm của SMS/DATA sẽ không bao giờ được dùng tới. */
+        (function () {
+            var oDichVu = document.getElementById('loaiDichVu');
+            var oGio = document.getElementById('gioCaoDiem');
+            var canhBao = document.querySelector('.canh-bao-cao-diem');
+            if (!oDichVu || !oGio || !canhBao) return;
+
+            function capNhat() {
+                var caoDiem = (oGio.value === 'true');
+                var khongPhaiThoai = (oDichVu.value !== 'THOAI');
+                canhBao.classList.toggle('d-none', !(caoDiem && khongPhaiThoai));
+            }
+            oDichVu.addEventListener('change', capNhat);
+            oGio.addEventListener('change', capNhat);
+            capNhat();
+        })();
+    </script>
+
+</div>
+
+</body>
+</html>

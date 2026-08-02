@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Bảng giá cước', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-tags me-2"></i>Bảng giá cước</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/bang-gia/tra-cuu}">
+                <i class="bi bi-search me-1"></i> Xem giá đang áp dụng
+            </a>
+            <a class="btn btn-primary" th:href="@{/bang-gia/them}">
+                <i class="bi bi-plus-lg me-1"></i> Thêm dòng giá
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" th:action="@{/bang-gia}" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Gói cước</label>
+                    <select class="form-select" name="goiCuoc">
+                        <option value="">-- Tất cả --</option>
+                        <option th:value="${maGiaMacDinh}" th:selected="${goiCuoc == maGiaMacDinh}">
+                            Giá mặc định chung
+                        </option>
+                        <option th:each="g : ${danhSachGoiCuoc}"
+                                th:value="${g.goiCuoc.id}"
+                                th:text="${g.goiCuoc.maGoi} + ' - ' + ${g.goiCuoc.tenGoi}"
+                                th:selected="${goiCuoc == #strings.toString(g.goiCuoc.id)}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Loại dịch vụ</label>
+                    <select class="form-select" name="loaiDichVu">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="l : ${danhSachLoaiDichVu}" th:value="${l}" th:text="${l}"
+                                th:selected="${loaiDichVu != null and loaiDichVu.name() == l.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Hướng</label>
+                    <select class="form-select" name="huong">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="h : ${danhSachHuong}" th:value="${h}" th:text="${h}"
+                                th:selected="${huong != null and huong.name() == h.name()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" id="chiConHieuLuc"
+                               name="chiConHieuLuc" value="true" th:checked="${chiConHieuLuc}">
+                        <label class="form-check-label" for="chiConHieuLuc">
+                            Chỉ hiện dòng còn hiệu lực hôm nay
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-search"></i> Lọc
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/bang-gia}" title="Xoá bộ lọc">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="text-secondary small mb-2">
+                Tìm thấy <strong th:text="${#lists.size(danhSach)}">0</strong> dòng bảng giá.
+            </p>
+            <div class="table-responsive">
+                <table class="table table-hover bang-du-lieu align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Áp dụng cho</th>
+                        <th>Dịch vụ</th>
+                        <th>Hướng</th>
+                        <th>Khung giờ</th>
+                        <th class="text-end">Block</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th>Hiệu lực</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(danhSach)}">
+                        <td colspan="8" class="text-center text-secondary py-4">
+                            Không có dòng bảng giá nào khớp điều kiện lọc.
+                        </td>
+                    </tr>
+                    <tr th:each="bg : ${danhSach}">
+                        <td>
+                            <span th:if="${bg.goiCuoc == null}" class="badge text-bg-info">Giá mặc định chung</span>
+                            <a th:if="${bg.goiCuoc != null}"
+                               th:href="@{/goi-cuoc/{id}(id=${bg.goiCuoc.id})}"
+                               th:text="${bg.goiCuoc.maGoi}"></a>
+                        </td>
+                        <td th:text="${bg.loaiDichVu}"></td>
+                        <td th:text="${bg.huong}"></td>
+                        <td>
+                            <span class="badge" th:classappend="${bg.gioCaoDiem} ? 'text-bg-warning' : 'text-bg-light'"
+                                  th:text="${bg.gioCaoDiem} ? 'Cao điểm' : 'Thường'"></span>
+                        </td>
+                        <td class="text-end" th:text="${bg.blockGiay}"></td>
+                        <td class="text-end fw-semibold"
+                            th:text="${#numbers.formatDecimal(bg.donGia, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                        <td class="small">
+                            <span th:text="${#temporals.format(bg.ngayHieuLuc, 'dd/MM/yyyy')}"></span>
+                            <span th:text="${bg.ngayHetHieuLuc != null}
+                                  ? ' → ' + ${#temporals.format(bg.ngayHetHieuLuc, 'dd/MM/yyyy')}
+                                  : ' → vô thời hạn'"></span>
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary"
+                               th:href="@{/bang-gia/{id}/sua(id=${bg.id})}" title="Sửa">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form th:action="@{/bang-gia/{id}/xoa(id=${bg.id})}" method="post" class="d-inline">
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        data-xac-nhan-tieu-de="Xoá dòng bảng giá"
+                                        th:attr="data-xac-nhan=|Xác nhận xoá dòng giá ${bg.loaiDichVu}/${bg.huong}?|">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="small text-secondary mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Hai dòng cùng gói cước, loại dịch vụ, hướng và khung giờ không được có khoảng
+                hiệu lực đè lên nhau — hệ thống sẽ chặn khi lưu.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
