@@ -15,3 +15,18 @@ spring:
   sql:
     init:
       mode: always
+
+  # ---------------------------------------------------------------
+  # TAT DEVTOOLS TRONG PROFILE NAY - day la mot cai bay that su.
+  #
+  # DevTools tu khoi dong lai ung dung moi khi thay file trong target/
+  # doi. Chay ".\mvnw test" trong luc app dang chay se bien dich lai va
+  # kich hoat dung dieu do. Ma o profile reset thi moi lan khoi dong lai
+  # la schema.sql chay lai, tuc DROP TABLE - XOA SACH du lieu vua sinh.
+  #
+  # Phat hien o muc 4A va da phai dung app thu cong truoc khi chay test.
+  # Tat han o day thay vi de nguoi dung phai NHO lam dieu do moi lan.
+  # ---------------------------------------------------------------
+  devtools:
+    restart:
+      enabled: false

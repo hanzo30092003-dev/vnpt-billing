@@ -18,6 +18,16 @@ public interface DangKyGoiCuocRepository extends JpaRepository<DangKyGoiCuoc, Lo
 
     long countByTrangThai(TrangThaiDangKyGoi trangThai);
 
+    /**
+     * Toàn bộ lịch sử đăng ký gói, nạp một lần cho engine tính cước.
+     *
+     * <p>Engine phải biết thuê bao dùng gói nào <b>tại thời điểm phát sinh CDR</b>, không
+     * phải gói hiện hành. Bảng chỉ có chục dòng mỗi thuê bao nên nạp hết rồi gom nhóm
+     * trong bộ nhớ, thay vì truy vấn cho từng bản ghi trong số hàng nghìn CDR.</p>
+     */
+    @Query("SELECT dk FROM DangKyGoiCuoc dk JOIN FETCH dk.goiCuoc JOIN FETCH dk.thueBao")
+    List<DangKyGoiCuoc> timTatCaKemGoiVaThueBao();
+
     /** Lịch sử gói cước, mới nhất trước, nạp sẵn gói để hiển thị tên gói. */
     @Query("""
             SELECT dk FROM DangKyGoiCuoc dk

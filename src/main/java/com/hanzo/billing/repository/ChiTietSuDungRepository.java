@@ -82,6 +82,42 @@ public interface ChiTietSuDungRepository extends JpaRepository<ChiTietSuDung, Lo
                       @Param("trangThaiTinhCuoc") TrangThaiTinhCuoc trangThaiTinhCuoc,
                       @Param("nguon") NguonCdr nguon);
 
+    long countByKyCuocIdAndTrangThaiTinhCuoc(Long kyCuocId, TrangThaiTinhCuoc trangThaiTinhCuoc);
+
+    /**
+     * CDR cần tính cước trong một kỳ.
+     *
+     * <p><b>Khoảng thời gian là NỬA MỞ</b> {@code [tuLuc, denLuc)} với
+     * {@code denLuc = ngày cuối kỳ + 1 ngày, lúc 00:00}. Cách viết quen thuộc hơn là
+     * {@code BETWEEN tuLuc AND ngayKetThuc.atTime(23,59,59)} — nhưng cách đó bỏ sót mọi
+     * bản ghi rơi vào khoảng {@code 23:59:59,000001} đến hết ngày. Hiện cột
+     * {@code thoi_gian_bat_dau} khai là {@code DATETIME} không có phần lẻ giây nên chưa
+     * mất bản ghi nào, song bản ghi muộn nhất đang là {@code 30/06/2026 23:59:03} — chỉ
+     * cách ranh giới 56 giây. Đổi cột sang {@code DATETIME(3)} là mất dữ liệu ngay, và
+     * mất im lặng.</p>
+     *
+     * <p>Lấy cả {@code LOI} bên cạnh {@code CHUA_TINH} để chạy lại được các bản ghi hỏng
+     * sau khi đã sửa nguyên nhân; bản ghi {@code DA_TINH} bị loại nên chạy lại engine
+     * không làm đổi cước đã tính.</p>
+     *
+     * <p>{@code JOIN FETCH} thuê bao và gói cước để tránh N+1: không có nó, mỗi bản ghi
+     * chạm vào gói cước hiện hành sẽ sinh thêm truy vấn.</p>
+     *
+     * <p>Sắp xếp cố định theo {@code (thoiGianBatDau, id)} để hai lần chạy trên cùng dữ
+     * liệu cho ra cùng kết quả — điều kiện bắt buộc khi mục 4D trừ dần quỹ ưu đãi.</p>
+     */
+    @Query("""
+            SELECT c FROM ChiTietSuDung c
+            JOIN FETCH c.thueBao tb
+            JOIN FETCH tb.goiCuoc
+            WHERE c.thoiGianBatDau >= :tuLuc
+              AND c.thoiGianBatDau < :denLuc
+              AND c.trangThaiTinhCuoc <> com.hanzo.billing.enums.TrangThaiTinhCuoc.DA_TINH
+            ORDER BY c.thoiGianBatDau, c.id
+            """)
+    List<ChiTietSuDung> timCanTinhCuoc(@Param("tuLuc") LocalDateTime tuLuc,
+                                       @Param("denLuc") LocalDateTime denLuc);
+
     /**
      * Các tổ hợp tra giá <b>thực sự</b> có trong dữ liệu CDR.
      *

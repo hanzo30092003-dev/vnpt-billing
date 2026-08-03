@@ -2,7 +2,7 @@
 
 **Đề tài:** Xây dựng phần mềm quản lý thuê bao và tính cước điện thoại
 **Môn học:** Thực tập nghề nghiệp
-**Trạng thái:** 🚧 Đang thực hiện — **mục 4A đã xong**, 4B–4G chưa bắt đầu
+**Trạng thái:** 🚧 Đang thực hiện — **mục 4A và 4B đã xong**, 4C–4G chưa bắt đầu
 
 > Toàn bộ dữ liệu trong hệ thống là dữ liệu mẫu tự sinh phục vụ học tập.
 > Hệ thống không sử dụng dữ liệu thật của bất kỳ nhà mạng nào.
@@ -388,15 +388,320 @@ Còn tồn, gộp vào mục 4G:
 
 ---
 
-## 9. Việc tiếp theo — mục 4B
+---
 
-Dựng `RatingService` trên nền `BangGiaLookup` và `DonViCuoc`: tính `cuoc_phi` cho từng CDR,
-gán `ky_cuoc_id`, chuyển trạng thái sang `DA_TINH` hoặc `LOI`.
+# PHẦN II — MỤC 4B: ĐỊNH GIÁ TỪNG BẢN GHI CDR
 
-Ba điều 4B phải giữ:
+## 9. Phạm vi mục 4B
 
-1. Tra giá theo **ngày phát sinh của CDR**, không phải ngày chạy engine
-2. Ranh giới kỳ dùng **nửa mở** `[đầu kỳ 00:00, đầu kỳ sau 00:00)` — viết
-   `ngayKetThuc.atTime(23,59,59)` sẽ bỏ sót bản ghi có phần lẻ giây, và hiện có 10 CDR phát
-   sinh lúc 23 giờ ngày 30/06, sát ngay ranh giới đó
-3. Làm tròn tiền ở **đúng một tầng**: từng CDR. Các mức trên chỉ cộng dồn
+4B chỉ làm **rating** — tính `cuoc_phi` cho từng bản ghi CDR, gán `ky_cuoc_id`, chuyển
+trạng thái sang `DA_TINH` hoặc `LOI`. **Chưa lập hóa đơn** (4C) và **chưa áp ưu đãi gói
+cước** (4D).
+
+⚠️ Hệ quả phải nhớ khi đọc số: mọi bản ghi ở 4B đều bị tính tiền **đầy đủ**, cờ `mien_phi`
+giữ nguyên 0. Tổng cước 9.686.210 đ dưới đây là **cước gộp**, không phải doanh thu. Con số
+này sẽ giảm ở 4D khi quỹ ưu đãi được trừ.
+
+Rating chạy cho **tất cả** thuê bao kể cả trả trước, đúng quyết định 5.4: định giá và lập
+hóa đơn là hai việc khác nhau. Lớp `RatingService` không hề chạm tới `thue_bao.so_du`.
+
+---
+
+## 10. ⚠️ Một điểm sai lệch đặc tả đã điều chỉnh
+
+**Đặc tả 4B mục B.3 yêu cầu lấy CDR trong khoảng `[ngayBatDau 00:00:00, ngayKetThuc
+23:59:59]`.** Cài đặt dùng khoảng **nửa mở** `[ngayBatDau 00:00, ngayKetThuc + 1 ngày 00:00)`.
+
+Lý do: đây chính là điều mục 6.3 của `PHASE-4-PLAN.md` và mục 9 của phần 4A đã dặn. Cận
+trên `23:59:59` bỏ sót mọi bản ghi rơi vào khoảng `23:59:59,000001` đến hết ngày.
+
+Đo trên dữ liệu thật để biết mức độ rủi ro thực tế:
+
+| Kiểm tra | Kết quả |
+|---|---|
+| Kiểu cột `thoi_gian_bat_dau` | `datetime` — **không có phần lẻ giây** |
+| Bản ghi muộn nhất trong kỳ | `2026-06-30 23:59:03` |
+| Số bản ghi bị mất nếu dùng cận `23:59:59` | **0** — hôm nay |
+
+Nên hai cách viết **cho kết quả giống hệt nhau ở thời điểm này**. Điều chỉnh không phải để
+sửa một lỗi đang xảy ra, mà vì khoảng cách tới ranh giới chỉ còn **56 giây**: đổi cột sang
+`DATETIME(3)` — một việc hoàn toàn bình thường khi hệ thống cần độ chính xác cao hơn — là
+mất bản ghi ngay, và mất **im lặng**. Không có cảnh báo nào, chỉ là hóa đơn thiếu vài dòng.
+
+Chi phí của cách viết đúng bằng 0, nên không có lý do giữ cách viết có bẫy.
+
+Ngoài ra, ba nhánh tính block được viết chung một dạng `soBlock(sảnLượng, gia.blockGiay)`
+thay vì gán cứng `block = 1` cho SMS và DATA như đặc tả gợi ý. Với dữ liệu hiện tại
+(`block_giay = 1` cho cả hai) kết quả **hoàn toàn giống nhau**; khác biệt chỉ là nếu sau
+này có dòng giá "gói 10 MB" thì engine tự xử lý đúng thay vì âm thầm tính sai.
+
+---
+
+## 11. Thuật toán định giá
+
+### 11.1. Mã giả cho một bản ghi
+
+```
+HÀM tinhCuoc(cdr, nguonTraCuu):
+
+    ngayPhatSinh ← ngày của cdr.thoiGianBatDau
+
+    # 1. Gói cước TẠI THỜI ĐIỂM PHÁT SINH, không phải gói hiện hành
+    goiCuocId ← null
+    VỚI MỖI đăngKý TRONG nguonTraCuu.lichSuĐăngKý[cdr.thueBaoId]:   # sắp xếp ngày bắt đầu GIẢM DẦN
+        NẾU đăngKý.ngayBatDau ≤ ngayPhatSinh
+           VÀ (đăngKý.ngayKetThuc = null HOẶC đăngKý.ngayKetThuc ≥ ngayPhatSinh):
+            goiCuocId ← đăngKý.goiCuocId
+            THOÁT VÒNG LẶP
+    NẾU goiCuocId = null:
+        GHI LOG WARN "lùi về gói hiện hành"          # dữ liệu thiếu, không được im lặng
+        goiCuocId ← cdr.thueBao.goiCuocId
+
+    # 2. Đơn giá theo NGÀY PHÁT SINH — chuỗi dự phòng bốn bước của 4A
+    gia ← bangGia.traGia(goiCuocId, cdr.loaiDichVu, cdr.huong,
+                         cdr.gioCaoDiem, ngayPhatSinh)
+    NẾU không tìm được: NÉM NghiepVuException      # KHÔNG lùi về đơn giá bất kỳ
+
+    # 3. Sản lượng thô → số block, làm tròn LÊN
+    sảnLượng ← THEO cdr.loaiDichVu:
+        THOAI → cdr.thoiLuongGiay
+        SMS   → cdr.soLuong
+        DATA  → kbSangMb(cdr.soLuong)              # CHIA 1024 TRƯỚC, nếu quên là sai 1024 lần
+    soBlock ← ceil(sảnLượng / gia.blockGiay)
+
+    # 4. Thành tiền — TẦNG LÀM TRÒN DUY NHẤT
+    TRẢ VỀ lamTronTien(soBlock × gia.donGia)
+```
+
+### 11.2. Mã giả cho cả một kỳ
+
+```
+HÀM ratingKy(ky):
+    NẾU ky.trangThai = DA_CHOT:    NÉM "đã chốt, không thể tính lại"
+    NẾU ky.trangThai = DANG_TINH:  NÉM "đang kẹt — dùng chức năng Gỡ kỳ bị kẹt"
+
+    ky.trangThai ← DANG_TINH  và  LƯU NGAY
+
+    nguon ← nạp bảng giá (10 dòng) + lịch sử đăng ký gói (80 dòng)   # MỘT LẦN cho cả kỳ
+    danhSách ← CDR có thoiGianBatDau ∈ [đầu kỳ, đầu kỳ sau)
+                 VÀ trangThaiTinhCuoc ≠ DA_TINH
+                 SẮP XẾP THEO (thoiGianBatDau, id)                   # thứ tự CỐ ĐỊNH
+
+    VỚI MỖI cdr, chỉ số i:
+        THỬ:
+            cuoc ← tinhCuoc(cdr, nguon)
+            thêm vào lô thành công;  cộng dồn tổng cước
+        BẮT LỖI:
+            thêm vào lô lỗi;  GHI LOG kèm id và lý do;  ĐI TIẾP    # không dừng cả kỳ
+        NẾU lô đầy 500: ghi xuống CSDL bằng batchUpdate
+        NẾU (i+1) chia hết 1000: ghi log tiến trình
+
+    ghi nốt hai lô còn dư
+    ky.soCdrXuLy ← ĐẾM LẠI TỪ CSDL số bản ghi DA_TINH của kỳ        # không lấy biến đếm
+    ky.trangThai ← MO                                               # chạy xong ≠ chốt kỳ
+    ghi nhật ký hệ thống
+```
+
+### 11.3. Ba quyết định cài đặt đáng ghi lại
+
+**Bản ghi lỗi vẫn được gán `ky_cuoc_id`.** Nếu để null, chức năng hủy kết quả tính cước
+(lọc theo `ky_cuoc_id`) sẽ không dọn được chúng, và chúng nằm lại ở trạng thái `LOI` vĩnh
+viễn — không có đường nào đưa về `CHUA_TINH` ngoài sửa tay bằng SQL.
+
+**`soCdrXuLy` đếm lại từ CSDL, không lấy biến đếm của lần chạy.** Engine bỏ qua bản ghi đã
+`DA_TINH`, nên lần chạy thứ hai chỉ xử lý phần còn sót. Ghi thẳng biến đếm thì cột này sẽ
+tụt từ 5017 xuống con số của riêng lần chạy đó — báo cáo doanh thu sau này đọc phải là sai.
+Có hẳn một test cho điểm này (số 14).
+
+**Truy vấn lọc `trangThaiTinhCuoc <> DA_TINH` thay vì `IN (CHUA_TINH, LOI)`.** Hai cách hiện
+tương đương vì enum chỉ có ba giá trị, nhưng cách viết phủ định phát biểu đúng bất biến cần
+giữ — *không bao giờ tính lại thứ đã tính* — nên nếu sau này thêm trạng thái mới thì nó tự
+động được xử lý thay vì bị bỏ quên.
+
+---
+
+## 12. Kết quả chạy thật trên kỳ 6/2026
+
+Chạy bằng bộ chạy thủ công `ChayTinhCuocKyThuCong` (nút bấm thuộc mục 4E):
+
+```
+>>> KY CUOC: 6/2026 (id=1), trang thai MO
+>>> LAN 1 - tinh cuoc: thanh cong=5017  loi=0  tong cuoc=9686210.00  thoi gian=1413 ms
+>>>   trang thai CDR: DA_TINH=5017  LOI=0  gan ky=5017
+>>> LAN 2 - chay lai, phai khong co gi de lam: thanh cong=0  loi=0  tong cuoc=0  thoi gian=25 ms
+>>> HUY KET QUA: 5017 ban ghi ve CHUA_TINH
+>>> LAN 3 - tinh lai sau khi huy: thanh cong=5017  loi=0  tong cuoc=9686210.00  thoi gian=1408 ms
+>>>   trang thai CDR: DA_TINH=5017  LOI=0  gan ky=5017
+>>> TINH XAC DINH: Tong cuoc lan 1 = 9686210.00 | lan 3 = 9686210.00 | GIONG NHAU
+```
+
+### 12.1. Bằng chứng engine tính xác định
+
+Ba lần chạy trên chứng minh hai tính chất khác nhau, và cần cả hai:
+
+| Lần | Việc | Kết quả | Chứng minh điều gì |
+|---|---|---|---|
+| 1 | Tính cước lần đầu | 5017 bản ghi, 9.686.210 đ, 1413 ms | Engine chạy được |
+| 2 | Chạy lại ngay, **không** hủy | 0 bản ghi, 25 ms | **Không tính trùng** — bản ghi `DA_TINH` bị loại khỏi truy vấn, cước đã tính không đổi |
+| 3 | Hủy sạch rồi tính lại từ đầu | 5017 bản ghi, **9.686.210 đ** | **Tính xác định** — cùng đầu vào cho cùng kết quả, không phụ thuộc thứ tự trả về của CSDL |
+
+Lần 2 và lần 3 kiểm hai chuyện dễ nhầm là một. Lần 2 có thể "đúng" chỉ vì engine không làm
+gì cả. Lần 3 mới thực sự chạy lại toàn bộ phép tính và ra đúng con số cũ tới từng đồng.
+
+Tính xác định là điều kiện **bắt buộc** cho mục 4D: khi trừ dần quỹ ưu đãi theo thứ tự thời
+gian, thứ tự duyệt phải cố định, nếu không mỗi lần chạy sẽ cho hóa đơn khác nhau.
+
+### 12.2. Cước gộp theo loại dịch vụ
+
+| Loại dịch vụ | Số CDR | Tổng cước gộp | Tỷ trọng |
+|---|---|---|---|
+| THOAI | 3499 | 6.199.739 đ | 64,0% |
+| SMS | 1008 | 271.846 đ | 2,8% |
+| DATA | 510 | 3.214.625 đ | 33,2% |
+| **Tổng** | **5017** | **9.686.210 đ** | 100% |
+
+Điểm đáng chú ý: **DATA chiếm 33,2% cước gộp nhưng chỉ 10,2% số bản ghi.** Vì mỗi phiên data
+sinh 1–500 MB với đơn giá 25 đ/MB, trong khi một cuộc gọi trung bình chỉ vài trăm đồng.
+
+Đây cũng là chỗ mục 4D sẽ thay đổi mạnh nhất: bốn gói trong hệ thống cho 2.048–20.480 MB
+miễn phí mỗi tháng, nên phần lớn 3,2 triệu đồng cước data này sẽ biến mất khi ưu đãi được
+áp. Nếu sau khi làm 4D mà cước data **không** giảm đáng kể thì gần như chắc chắn engine đã
+mắc đúng cái bẫy KB/MB mô tả ở `mo-ta-csdl.md` mục 6.
+
+Cước thấp nhất 15 đ (một cuộc nội mạng dưới 6 giây), cao nhất 129.600 đ (cuộc quốc tế giờ
+cao điểm 1798 giây = 30 block × 4.320 đ).
+
+---
+
+## 13. Kết quả nghiệm thu mục 4B
+
+| # | Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `mvnw test` PASS, tối thiểu 72 test | ✅ | **84 test**, 0 lỗi (62 + **22 mới**) |
+| 2 | Rating 5017 CDR dưới 10 giây | ✅ | **1413 ms** |
+| 3 | Bảy kiểm chứng SQL mục F | ✅ | Bảng 13.1 |
+| 4 | Bảng `hoa_don` vẫn rỗng | ✅ | `hoa_don = 0`, `chi_tiet_hoa_don = 0` |
+| 5 | Đối chiếu tính tay khớp hệ thống | ✅ | Bảng 13.2 — đối chiếu **toàn bộ 5017 bản ghi**, 0 lệch |
+
+### 13.1. Bảy kiểm chứng SQL
+
+| # | Kiểm chứng | Kỳ vọng | Thực tế |
+|---|---|---|---|
+| 1 | CDR ở trạng thái `LOI` | 0 | ✅ **0** |
+| 2 | `DA_TINH` mà `cuoc_phi IS NULL` | 0 | ✅ **0** |
+| 3 | `DA_TINH` mà `ky_cuoc_id IS NULL` | 0 | ✅ **0** |
+| 4 | Số bản ghi và tổng cước của kỳ | 5017 | ✅ **5017**, tổng **9.686.210 đ** |
+| 5 | Chạy lần hai → tổng cước không đổi | không đổi | ✅ 0 bản ghi xử lý, `DA_TINH` vẫn 5017 |
+| 6 | Hủy rồi tính lại → tổng cước giống hệt | giống | ✅ **9.686.210 đ** cả hai lần |
+| 7 | Đối chiếu công thức tính tay | 0 lệch | ✅ **0/5017 lệch** |
+
+Kiểm chứng số 7 làm trên **toàn bộ** 5017 bản ghi chứ không chỉ 3 mẫu như đặc tả yêu cầu —
+câu SQL tự dựng lại công thức `CEIL(sản lượng / block) × đơn giá` rồi so với `cuoc_phi` đã
+lưu. Ba mẫu chứng minh được ít hơn nhiều so với việc kiểm hết, mà chi phí gần như bằng nhau.
+
+### 13.2. Đối chiếu tính tay — ba bản ghi mỗi loại dịch vụ
+
+| id | Dịch vụ | Hướng | Cao điểm | Sản lượng | Block | Đơn giá | Số block (tay) | Cước tay | Cước hệ thống |
+|---|---|---|---|---|---|---|---|---|---|
+| 2 | THOAI | QUOC_TE | 0 | 133 giây | 60 | 3.600 | ⌈133/60⌉ = **3** | 10.800 | ✅ 10.800 |
+| 4 | THOAI | NOI_MANG | 0 | 49 giây | 6 | 15 | ⌈49/6⌉ = **9** | 135 | ✅ 135 |
+| 5 | THOAI | NOI_MANG | **1** | 40 giây | 6 | 18 | ⌈40/6⌉ = **7** | 126 | ✅ 126 |
+| 1 | SMS | NOI_MANG | 0 | 1 tin | 1 | 99 | **1** | 99 | ✅ 99 |
+| 3 | SMS | NGOAI_MANG | 0 | 1 tin | 1 | 250 | **1** | 250 | ✅ 250 |
+| 7 | SMS | NGOAI_MANG | 0 | 1 tin | 1 | 250 | **1** | 250 | ✅ 250 |
+| 20 | DATA | NOI_MANG | 0 | 261.730 KB | 1 | 25 | ⌈261730/1024⌉ = **256** | 6.400 | ✅ 6.400 |
+| 24 | DATA | NOI_MANG | 0 | 269.476 KB | 1 | 25 | ⌈269476/1024⌉ = **264** | 6.600 | ✅ 6.600 |
+| 30 | DATA | NOI_MANG | 0 | 27.072 KB | 1 | 25 | ⌈27072/1024⌉ = **27** | 675 | ✅ 675 |
+
+Ba dòng đáng soi kỹ:
+
+- **id 4**: 49 giây không chia hết cho block 6 giây → 8,17 làm tròn **lên** 9 block. Nếu cắt
+  phần thập phân thì ra 120 đ thay vì 135 đ.
+- **id 5**: cùng hướng nội mạng với id 4 nhưng đơn giá 18 đ chứ không phải 15 đ — engine đã
+  lấy đúng dòng giờ cao điểm.
+- **id 20**: 261.730 KB = 255,6 MB → làm tròn lên **256 MB**. Nếu quên chia 1024 thì cước
+  bản ghi này là 6.543.250 đ thay vì 6.400 đ — một mình nó lớn hơn tổng cước cả kỳ.
+
+### 13.3. Số test theo lớp
+
+| Lớp test | Số test | Ghi chú |
+|---|---|---|
+| `SchemaValidationTest` | 1 | |
+| `ThueBaoServiceTest` | 17 | |
+| `BangGiaCuocServiceTest` | 9 | |
+| `SinhMaServiceTest` | 3 | |
+| `DonViCuocTest` | 13 | 4A |
+| `BangGiaLookupTest` | 9 | 4A |
+| `QuyTacToHopDichVuTest` | 8 | 4A |
+| `KiemTraDoPhuBangGiaTest` | 2 | 4A |
+| **`RatingServiceTest`** | **22** | **4B** |
+| | **84** | |
+
+22 test mới chia bốn nhóm: quy sản lượng về block (7), chọn gói cước tại thời điểm phát
+sinh (4), chạy cả kỳ (5), hủy kết quả và gỡ kỳ bị kẹt (6).
+
+Test số 10 kiểm cả **log WARN** của đường lùi gói cước, không chỉ kiểm giá trị trả về. Lý do:
+đường lùi đó vẫn cho ra một con số hợp lệ, nên nếu không có cảnh báo thì dữ liệu thiếu bản
+ghi `dang_ky_goi_cuoc` sẽ không bao giờ lộ ra.
+
+---
+
+## 14. Đường gỡ khi kỳ kẹt ở trạng thái Đang tính
+
+`ratingKy` đặt kỳ sang `DANG_TINH` trước khi chạy và chỉ trả về `MO` khi xong. Nếu tiến
+trình bị giết giữa chừng — mất điện, kill process, hết bộ nhớ — kỳ nằm lại `DANG_TINH` vĩnh
+viễn, và chính bước kiểm tra đầu `ratingKy` sẽ từ chối mọi lần chạy sau. Không có đường gỡ
+thì cách duy nhất là sửa tay bằng lệnh UPDATE trong CSDL.
+
+`RatingService.goKyBiKet(kyId)` chỉ đổi trạng thái kỳ, **không đụng tới CDR**: bản ghi đã
+kịp tính giữ nguyên `DA_TINH`, chạy lại sẽ xử lý nốt phần còn sót. Muốn làm sạch hẳn thì gọi
+tiếp `huyRatingKy`. Mọi lần gỡ đều ghi `nhat_ky_he_thong` với hành động `GO_KY_BI_KET`.
+
+Chức năng này **có 3 test** (số 20, 21, 22) dù nó chỉ chạy khi có sự cố — đúng vì đó là loại
+mã mà nếu không kiểm thử thì lúc cần đến mới phát hiện nó hỏng, và lúc đó hệ thống đang
+trong tình trạng tệ sẵn rồi.
+
+---
+
+## 15. Cái bẫy DevTools đã được chặn hẳn
+
+Mục 4A phát hiện: chạy `mvnw test` trong lúc ứng dụng đang bật profile `reset` sẽ biên dịch
+lại `target/`, DevTools thấy file đổi nên tự khởi động lại, và `schema.sql` chạy lại —
+`DROP TABLE`, xóa sạch dữ liệu vừa sinh. Ở 4A phải nhớ dừng ứng dụng thủ công trước.
+
+4B chặn hẳn bằng cách thêm vào `application-reset.yml`:
+
+```yaml
+spring:
+  devtools:
+    restart:
+      enabled: false
+```
+
+Chỉ tắt trong profile `reset` — profile này vốn chỉ dùng để nạp lại dữ liệu mẫu, không phải
+để ngồi sửa code. Chạy thường vẫn có DevTools như cũ.
+
+Đây là ví dụ nhỏ của cùng một bài học ở mục 3: biến một việc **phải nhớ** thành một việc
+**không thể quên**.
+
+---
+
+## 16. Việc tiếp theo — mục 4C
+
+Dựng `BillingService`: gom CDR đã `DA_TINH` thành `hoa_don` + `chi_tiet_hoa_don` cho thuê
+bao **trả sau**, prorate cước thuê bao, tính VAT.
+
+Bốn điều 4C phải giữ:
+
+1. **Chỉ lập hóa đơn cho `TRA_SAU`** (quyết định 5.4). Thuê bao trả trước đã có `cuoc_phi`
+   trên từng CDR nhưng không có hóa đơn tháng
+2. **Làm tròn tiền không được lặp lại.** 4B đã làm tròn ở tầng CDR; 4C chỉ cộng dồn. Bất
+   biến kiểm được bằng SQL: `SUM(cuoc_phi)` theo dịch vụ phải khớp **tuyệt đối** với các cột
+   `cuoc_thoai` / `cuoc_sms` / `cuoc_data` trên `hoa_don`
+3. **Chặn chạy trùng ở tầng nghiệp vụ** trước khi để ràng buộc
+   `UNIQUE(thue_bao_id, ky_cuoc_id)` của CSDL bắt
+4. Prorate theo bảng giá trị kỳ vọng đã tính sẵn ở `PHASE-4-PLAN.md` mục 5.6
+
+> ⚠️ Lưu ý cho 4D (sau 4C): tổng cước gộp 9.686.210 đ hiện chưa trừ ưu đãi. Sau khi áp ưu
+> đãi, **cước data phải giảm mạnh** — 46 thuê bao còn nằm trong ưu đãi data phải có
+> `cuoc_data = 0`. Nếu không giảm thì engine đã mắc bẫy KB/MB.
