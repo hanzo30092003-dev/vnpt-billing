@@ -24,6 +24,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Nang Lombok len ban ho tro JDK moi (may dev dang chay JDK 25) -->
         <lombok.version>1.18.46</lombok.version>
+        <poi.version>5.4.1</poi.version>
     </properties>
 
     <dependencies>
@@ -61,6 +62,14 @@
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
+        <!-- Apache POI: xuat ket qua tra cuu CDR ra file Excel (.xlsx).
+             Spring Boot BOM khong quan ly POI nen phai ghi ro phien ban. -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
         </dependency>
 
         <!-- Driver MySQL 8 -->

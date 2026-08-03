@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{fragments/layout :: layout('Chi tiết thuê bao', ~{::noiDungTrang})}">
 <body>
 
@@ -16,6 +17,16 @@
         <div class="d-flex gap-2">
             <a class="btn btn-outline-secondary" th:href="@{/thue-bao}">
                 <i class="bi bi-arrow-left me-1"></i> Danh sách
+            </a>
+
+            <!--/*
+                Sang màn hình tra cứu CDR với bộ lọc đặt sẵn theo số thuê bao này.
+                Chỉ hiện với quản trị viên vì /cdr thuộc nhóm đường dẫn chỉ ADMIN
+                được vào; hiện nút cho vai trò khác sẽ dẫn thẳng tới trang 403.
+            */-->
+            <a class="btn btn-outline-info" sec:authorize="hasRole('ADMIN')"
+               th:href="@{/cdr(soThueBao=${thueBao.soThueBao})}">
+                <i class="bi bi-file-earmark-text me-1"></i> Xem chi tiết sử dụng
             </a>
 
             <button type="button" class="btn btn-warning" data-bs-toggle="modal"

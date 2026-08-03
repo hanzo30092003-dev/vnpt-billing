@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Tra cứu CDR', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-file-earmark-text me-2"></i>Tra cứu chi tiết sử dụng (CDR)</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-success" th:href="@{'/cdr/xuat-excel?' + ${chuoiLoc}}">
+                <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+            </a>
+            <a class="btn btn-outline-primary" th:href="@{/cdr/import}">
+                <i class="bi bi-upload me-1"></i> Nhập CSV
+            </a>
+            <a class="btn btn-primary" th:href="@{/cdr/sinh-du-lieu}">
+                <i class="bi bi-magic me-1"></i> Sinh dữ liệu
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" th:action="@{/cdr}" th:object="${boLoc}" class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Số thuê bao</label>
+                    <input type="text" class="form-control" th:field="*{soThueBao}" placeholder="09xxxxxxxx">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Từ ngày</label>
+                    <input type="date" class="form-control" th:field="*{tuNgay}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Đến ngày</label>
+                    <input type="date" class="form-control" th:field="*{denNgay}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Dịch vụ</label>
+                    <select class="form-select" th:field="*{loaiDichVu}">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="l : ${danhSachLoaiDichVu}" th:value="${l}" th:text="${l}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Hướng</label>
+                    <select class="form-select" th:field="*{huong}">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="h : ${danhSachHuong}" th:value="${h}" th:text="${h}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Trạng thái tính cước</label>
+                    <select class="form-select" th:field="*{trangThaiTinhCuoc}">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="t : ${danhSachTrangThaiTinhCuoc}" th:value="${t}" th:text="${t}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Nguồn</label>
+                    <select class="form-select" th:field="*{nguon}">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="n : ${danhSachNguon}" th:value="${n}" th:text="${n}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-search"></i> Lọc
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/cdr}">
+                        <i class="bi bi-x-lg"></i> Xoá lọc
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="text-secondary small mb-2">
+                Tìm thấy <strong th:text="${tongHop.soBanGhi}">0</strong> bản ghi
+                <span th:if="${ketQua.totalPages > 1}">
+                    &mdash; trang <span th:text="${ketQua.number + 1}">1</span>/<span th:text="${ketQua.totalPages}">1</span>
+                </span>
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-sm bang-du-lieu align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Số thuê bao</th>
+                        <th>Số bị gọi</th>
+                        <th>Dịch vụ</th>
+                        <th>Hướng</th>
+                        <th>Thời gian bắt đầu</th>
+                        <th class="text-end">Thời lượng</th>
+                        <th class="text-end">Số lượng</th>
+                        <th class="text-center">Cao điểm</th>
+                        <th class="text-end">Cước phí</th>
+                        <th>Trạng thái</th>
+                        <th>Nguồn</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${ketQua.empty}">
+                        <td colspan="11" class="text-center text-secondary py-4">
+                            Không có bản ghi nào khớp điều kiện lọc.
+                        </td>
+                    </tr>
+                    <tr th:each="c : ${ketQua.content}">
+                        <td><code th:text="${c.soThueBao}"></code></td>
+                        <td th:text="${c.soBiGoi} ?: '—'"></td>
+                        <td>
+                            <span class="badge text-bg-light" th:text="${c.loaiDichVu}"></span>
+                        </td>
+                        <td class="small" th:text="${c.huong}"></td>
+                        <td class="small" th:text="${#temporals.format(c.thoiGianBatDau, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                        <!--/* Thời lượng dạng mm:ss, chỉ có nghĩa với THOẠI */-->
+                        <td class="text-end" th:text="${@dinhDang.thoiLuong(c)}"></td>
+                        <!--/* DATA quy đổi KB sang MB, SMS hiện số tin */-->
+                        <td class="text-end" th:text="${@dinhDang.soLuong(c)}"></td>
+                        <td class="text-center">
+                            <i class="bi bi-check-lg text-warning" th:if="${c.gioCaoDiem}"></i>
+                            <span class="text-secondary" th:unless="${c.gioCaoDiem}">—</span>
+                        </td>
+                        <!--/* Phase 3 chưa tính cước nên cột này để trống */-->
+                        <td class="text-end" th:text="${c.cuocPhi != null}
+                            ? ${#numbers.formatDecimal(c.cuocPhi, 0, 'POINT', 0, 'COMMA')} : ''"></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${c.trangThaiTinhCuoc.name() == 'DA_TINH'} ? 'text-bg-success'
+                                                : (${c.trangThaiTinhCuoc.name() == 'LOI'} ? 'text-bg-danger' : 'text-bg-secondary')"
+                                  th:text="${c.trangThaiTinhCuoc}"></span>
+                        </td>
+                        <td class="small text-secondary" th:text="${c.nguon}"></td>
+                    </tr>
+                    </tbody>
+                    <!--/* Dòng tổng tính trên TOÀN BỘ kết quả lọc, không chỉ trang đang xem */-->
+                    <tfoot class="table-light border-top border-2">
+                    <tr class="fw-semibold">
+                        <td colspan="5" class="text-end">TỔNG THEO BỘ LỌC HIỆN TẠI</td>
+                        <td class="text-end" th:text="${tongHop.tongThoiLuongDangChu()}">00:00:00</td>
+                        <td class="text-end" th:text="${tongHop.tongDungLuongMb()} + ' MB'">0 MB</td>
+                        <td colspan="4" class="small text-secondary"
+                            th:text="${tongHop.soBanGhi} + ' bản ghi'"></td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <nav th:if="${ketQua.totalPages > 1}">
+                <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
+                    <li class="page-item" th:classappend="${ketQua.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/cdr?trang=' + ${ketQua.number - 1} + ${chuoiLoc}}">Trước</a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(
+                            ketQua.number - 3 < 0 ? 0 : ketQua.number - 3,
+                            ketQua.number + 3 >= ketQua.totalPages ? ketQua.totalPages - 1 : ketQua.number + 3)}"
+                        th:classappend="${i == ketQua.number} ? 'active'">
+                        <a class="page-link" th:href="@{'/cdr?trang=' + ${i} + ${chuoiLoc}}" th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${ketQua.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/cdr?trang=' + ${ketQua.number + 1} + ${chuoiLoc}}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <p class="small text-secondary mt-2 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Cột <strong>Cước phí</strong> để trống vì Phase 3 chưa tính cước — mọi bản ghi
+                đang ở trạng thái <code>CHUA_TINH</code>. Engine tính cước thuộc Phase 4.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

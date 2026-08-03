@@ -1,9 +1,15 @@
 package com.hanzo.billing.controller;
 
+import com.hanzo.billing.dto.BoLocCdr;
 import com.hanzo.billing.dto.KetQuaSinhCdr;
 import com.hanzo.billing.dto.SinhCdrForm;
+import com.hanzo.billing.enums.HuongCuocGoi;
+import com.hanzo.billing.enums.LoaiDichVu;
+import com.hanzo.billing.enums.NguonCdr;
 import com.hanzo.billing.enums.TrangThaiThueBao;
+import com.hanzo.billing.enums.TrangThaiTinhCuoc;
 import com.hanzo.billing.exception.NghiepVuException;
+import com.hanzo.billing.service.ChiTietSuDungService;
 import com.hanzo.billing.service.ThueBaoService;
 import com.hanzo.billing.service.rating.CdrGeneratorService;
 import com.hanzo.billing.service.rating.CdrImportService;
@@ -12,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +28,61 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Controller
 @RequestMapping("/cdr")
 @RequiredArgsConstructor
 public class CdrController {
 
+    private static final int SO_DONG_MOI_TRANG = 25;
+
     private final CdrGeneratorService cdrGeneratorService;
     private final CdrImportService cdrImportService;
+    private final ChiTietSuDungService chiTietSuDungService;
     private final ThueBaoService thueBaoService;
+
+    // =================================================================
+    // TRA CỨU CDR
+    // =================================================================
+
+    @GetMapping
+    public String danhSach(@ModelAttribute("boLoc") BoLocCdr boLoc,
+                           @RequestParam(defaultValue = "0") int trang,
+                           Model model) {
+
+        Pageable phanTrang = PageRequest.of(Math.max(trang, 0), SO_DONG_MOI_TRANG);
+        model.addAttribute("ketQua", chiTietSuDungService.timCoLoc(boLoc, phanTrang));
+        model.addAttribute("tongHop", chiTietSuDungService.tinhTong(boLoc));
+        model.addAttribute("chuoiLoc", boLoc.chuoiQuery());
+        napDuLieuChonLua(model);
+        return "cdr/danh-sach";
+    }
+
+    /** Xuất toàn bộ kết quả lọc hiện tại ra file Excel. */
+    @GetMapping("/xuat-excel")
+    public ResponseEntity<byte[]> xuatExcel(@ModelAttribute("boLoc") BoLocCdr boLoc) {
+        byte[] noiDung = chiTietSuDungService.xuatExcel(boLoc);
+        String tenFile = "chi-tiet-su-dung-"
+                + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + tenFile + "\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(noiDung);
+    }
+
+    private void napDuLieuChonLua(Model model) {
+        model.addAttribute("danhSachLoaiDichVu", LoaiDichVu.values());
+        model.addAttribute("danhSachHuong", HuongCuocGoi.values());
+        model.addAttribute("danhSachTrangThaiTinhCuoc", TrangThaiTinhCuoc.values());
+        model.addAttribute("danhSachNguon", NguonCdr.values());
+    }
+
+    // =================================================================
+    // SINH DỮ LIỆU GIẢ LẬP
+    // =================================================================
 
     @GetMapping("/sinh-du-lieu")
     public String moFormSinh(Model model) {
