@@ -9,4 +9,15 @@ public interface SinhMaService {
      * @return ví dụ {@code KH000051}
      */
     String sinhMaKhachHang();
+
+    /**
+     * Sinh mã hóa đơn kế tiếp của một kỳ, định dạng {@code HD} + {@code yyyyMM} + {@code -}
+     * + 6 chữ số.
+     *
+     * <p>Số thứ tự đếm riêng theo từng kỳ, nên mỗi tháng luôn bắt đầu lại từ
+     * {@code 000001}. Nhờ vậy nhìn mã là biết ngay hóa đơn thuộc kỳ nào.</p>
+     *
+     * @return ví dụ {@code HD202606-000001}
+     */
+    String sinhMaHoaDon(int thang, int nam);
 }

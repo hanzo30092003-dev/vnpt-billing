@@ -193,6 +193,9 @@ thuê bao phải có cước tương ứng **bằng 0** sau khi chạy engine:
 | Phút ngoại mạng | **40** |
 | SMS | **47** |
 
+> Bốn con số này đo trên dữ liệu CDR **trước** mục 4A. Mục 4A sinh lại toàn bộ CDR nên chúng
+> đã thay đổi — số liệu dùng cho 4D nằm ở `PHASE-4-REPORT.md` mục 20.2.
+
 Nếu sau khi chạy engine mà bất kỳ nhóm nào trong bốn nhóm này có cước khác 0 →
 engine đang quên đúng chỗ quy đổi tương ứng. Câu SQL ở mục 9.2.
 
@@ -437,8 +440,8 @@ khi viết nghiệp vụ mới, và cách làm đó đã tỏ ra có giá trị 
 | 1 | `mvnw test` PASS, tối thiểu **55 test** (30 cũ + ≥25 mới) | Dòng `Results: Tests run:` |
 | 2 | **0 CDR ở trạng thái `LOI`** sau khi chạy kỳ 6/2026 | SQL 9.1 |
 | 3 | Mọi tổ hợp `(dịch vụ, hướng, cao điểm)` trong CDR đều tra được đơn giá | SQL 9.1 |
-| 4 | 46 thuê bao còn trong ưu đãi data có `cuoc_data = 0` | SQL 9.2 |
-| 5 | 45 / 40 / 47 thuê bao còn trong ưu đãi phút NM / phút NgM / SMS có cước tương ứng = 0 | SQL 9.2 |
+| 4 | Thuê bao còn trong ưu đãi data có `cuoc_data = 0` | SQL 9.2 |
+| 5 | Thuê bao còn trong ưu đãi phút NM / phút NgM / SMS có cước tương ứng = 0 | SQL 9.2 |
 | 6 | `SUM(cuoc_phi)` theo dịch vụ **khớp tuyệt đối** với các cột trên `hoa_don` | SQL 9.3 |
 | 7 | `tong_truoc_thue`, `thue_vat`, `tong_thanh_toan`, `con_no` khớp công thức mục 5.8 | SQL 9.3 |
 | 8 | 5 thuê bao prorate ra **đúng** giá trị kỳ vọng ở bảng mục 5.6 | SQL 9.4 |

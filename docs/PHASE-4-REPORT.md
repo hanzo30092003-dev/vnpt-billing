@@ -2,7 +2,7 @@
 
 **Đề tài:** Xây dựng phần mềm quản lý thuê bao và tính cước điện thoại
 **Môn học:** Thực tập nghề nghiệp
-**Trạng thái:** 🚧 Đang thực hiện — **mục 4A và 4B đã xong**, 4C–4G chưa bắt đầu
+**Trạng thái:** 🚧 Đang thực hiện — **mục 4A, 4B, 4C đã xong**, 4D–4G chưa bắt đầu
 
 > Toàn bộ dữ liệu trong hệ thống là dữ liệu mẫu tự sinh phục vụ học tập.
 > Hệ thống không sử dụng dữ liệu thật của bất kỳ nhà mạng nào.
@@ -687,22 +687,339 @@ Chỉ tắt trong profile `reset` — profile này vốn chỉ dùng để nạp
 
 ---
 
-## 16. Việc tiếp theo — mục 4C
+---
 
-Dựng `BillingService`: gom CDR đã `DA_TINH` thành `hoa_don` + `chi_tiet_hoa_don` cho thuê
-bao **trả sau**, prorate cước thuê bao, tính VAT.
+# PHẦN III — MỤC 4C: GOM CDR THÀNH HÓA ĐƠN
 
-Bốn điều 4C phải giữ:
+## 16. Phạm vi mục 4C
 
-1. **Chỉ lập hóa đơn cho `TRA_SAU`** (quyết định 5.4). Thuê bao trả trước đã có `cuoc_phi`
-   trên từng CDR nhưng không có hóa đơn tháng
-2. **Làm tròn tiền không được lặp lại.** 4B đã làm tròn ở tầng CDR; 4C chỉ cộng dồn. Bất
-   biến kiểm được bằng SQL: `SUM(cuoc_phi)` theo dịch vụ phải khớp **tuyệt đối** với các cột
-   `cuoc_thoai` / `cuoc_sms` / `cuoc_data` trên `hoa_don`
-3. **Chặn chạy trùng ở tầng nghiệp vụ** trước khi để ràng buộc
-   `UNIQUE(thue_bao_id, ky_cuoc_id)` của CSDL bắt
-4. Prorate theo bảng giá trị kỳ vọng đã tính sẵn ở `PHASE-4-PLAN.md` mục 5.6
+4C dựng bộ khung hóa đơn và chứng minh **bất biến cộng dồn**, để 4D chỉ còn việc trừ ưu đãi
+trên một nền đã đúng. **Chưa áp ưu đãi gói cước.**
 
-> ⚠️ Lưu ý cho 4D (sau 4C): tổng cước gộp 9.686.210 đ hiện chưa trừ ưu đãi. Sau khi áp ưu
-> đãi, **cước data phải giảm mạnh** — 46 thuê bao còn nằm trong ưu đãi data phải có
-> `cuoc_data = 0`. Nếu không giảm thì engine đã mắc bẫy KB/MB.
+Chỉ lập hóa đơn cho thuê bao **trả sau** (quyết định 5.4). Thuê bao trả trước đã có
+`cuoc_phi` trên từng CDR nhưng không có hóa đơn tháng — cước của họ trừ thẳng vào số dư,
+thuộc Phase 5.
+
+---
+
+## 17. Ba điểm điều chỉnh so với đặc tả
+
+### 17.1. Một công thức prorate thay cho phân nhánh theo trạng thái
+
+Đặc tả liệt kê quy tắc theo từng trạng thái thuê bao. Cài đặt dùng **một công thức khoảng
+ngày** phủ hết mọi trường hợp, cho kết quả giống hệt:
+
+```
+tuNgay  = max(ngayKichHoat, đầu kỳ)
+denNgay = min(ngayHuy nếu có, cuối kỳ)
+nếu tuNgay > denNgay  →  không lập hóa đơn
+soNgaySuDung = denNgay − tuNgay + 1        # tính CẢ hai đầu
+```
+
+| Trường hợp | Công thức cho ra |
+|---|---|
+| Kích hoạt trước kỳ, chưa hủy | Trọn kỳ, thu đủ cước tháng |
+| Kích hoạt giữa kỳ | Từ ngày kích hoạt tới cuối kỳ |
+| Hủy giữa kỳ | Từ đầu kỳ tới ngày hủy |
+| Hủy **trước** kỳ | Khoảng rỗng → không lập hóa đơn |
+| Kích hoạt **sau** kỳ | Khoảng rỗng → không lập hóa đơn |
+
+Hai dòng cuối là trường hợp đặc tả không nhắc tới. Phân nhánh theo trạng thái thì phải nhớ
+viết thêm hai nhánh; công thức khoảng ngày xử lý sẵn mà không cần nghĩ tới.
+
+Thêm một ca đặc tả không nêu: thuê bao **`DA_THANH_LY` nhưng `ngay_huy` để trống**. Đây là
+dữ liệu hỏng. Cài đặt **không đoán mò** — bỏ qua và ghi log WARN. Nếu đoán "chưa hủy" thì
+sẽ thu đủ cước tháng của một thuê bao đã thanh lý, sai tiền mà không có dấu hiệu gì. Có test
+riêng (số 11).
+
+### 17.2. Hạn thanh toán: hai cách phát biểu trùng nhau
+
+Đặc tả ghi *"hanThanhToan = ngày 15 tháng kế tiếp"*, còn hằng số từ 4A ghi *"số ngày từ
+ngày lập tới hạn thanh toán = 15"*. Hai cách này **cho kết quả giống hệt nhau** vì ngày lập
+luôn là ngày cuối tháng:
+
+| Ngày lập | + 15 ngày | Ngày 15 tháng sau |
+|---|---|---|
+| 30/06 | 15/07 | 15/07 |
+| 31/07 | 15/08 | 15/08 |
+| 28/02 | 15/03 | 15/03 |
+| 29/02 | 15/03 | 15/03 |
+
+Đã đổi tên hằng số thành `NGAY_HAN_THANH_TOAN_THANG_SAU` theo cách phát biểu của đặc tả, vì
+nó không phụ thuộc giả định "ngày lập luôn cuối tháng".
+
+### 17.3. ⚠️ Dòng cước sử dụng KHÔNG có đơn giá — và vì sao không nên có
+
+Đặc tả yêu cầu *"chi_tiet_hoa_don cho mọi khoản mục > 0, SNAPSHOT đơn giá tại thời điểm
+lập"*. Cài đặt tạo 4 loại dòng, nhưng **chỉ dòng cước thuê bao có đơn giá**; ba dòng cước sử
+dụng để trống cột `don_gia`.
+
+Lý do không phải là lười:
+
+- Mỗi dòng cước sử dụng là **tổng của nhiều bản ghi áp đơn giá khác nhau** — nội mạng 15 đ,
+  ngoại mạng 25 đ, quốc tế 3.600 đ, cộng thêm bậc giờ cao điểm. Không tồn tại một đơn giá
+  duy nhất để ghi.
+- Điền đơn giá bình quân suy ngược từ thành tiền sẽ là **con số không có trên bảng giá nào**.
+- Tách chi tiết tới từng bậc giá thì phải **suy ngược lại bảng giá ở khâu lập hóa đơn** —
+  và đó là sai nguyên tắc: bảng giá có thể đã đổi giữa lúc định giá và lúc lập hóa đơn, khi
+  đó đơn giá in ra không phải đơn giá đã thu. Đúng loại sai lệch âm thầm mà cả Phase 4 đang
+  phòng.
+
+**Muốn có snapshot thật tới từng bậc giá thì phải lưu `bang_gia_cuoc_id` trên từng bản ghi
+CDR ngay lúc định giá.** Hiện chưa có cột đó. Đã ghi vào phần hạn chế (mục 21.2) như một đề
+xuất thay đổi schema, không tự ý thêm ở 4C.
+
+Một điểm nữa về đặc tả B.1 (*"kỳ chưa rating xong → cảnh báo rõ"*): cài đặt hiểu theo hai
+mức khác nhau — bản ghi `CHUA_TINH` thì **chặn cứng** (hóa đơn sẽ thiếu tiền), bản ghi `LOI`
+thì **chỉ ghi log WARN**. Chặn cứng cả `LOI` sẽ khiến một bản ghi hỏng không sửa được làm cả
+kỳ không bao giờ lập được hóa đơn.
+
+---
+
+## 18. Thuật toán lập hóa đơn
+
+```
+HÀM tinhCuocThueBao(thueBao, ky, nguon):
+
+    # BƯỚC 0 — chặn trùng ở tầng nghiệp vụ, TRƯỚC khi để UNIQUE của CSDL bắt
+    NẾU đã có hóa đơn (thueBao, ky):  TRẢ VỀ null
+
+    # BƯỚC 1 — cước thuê bao tháng, prorate theo số ngày thực dùng
+    khoang ← tinhKhoangSuDung(thueBao, ky)        # công thức ở mục 17.1
+    NẾU khoang = null:  TRẢ VỀ null
+    goi ← gói hiệu lực tại NGÀY CUỐI KỲ qua dang_ky_goi_cuoc
+          (lùi về thue_bao.goi_cuoc_id kèm log WARN nếu thiếu)
+    cuocThueBao ← NẾU trọn kỳ THÌ goi.cuocThueBaoThang
+                  NGƯỢC LẠI lamTronTien(goi.cuocThueBaoThang × soNgày / soNgàyTrongKỳ)
+
+    # BƯỚC 2 — gom cước từ CDR đã DA_TINH. CHỈ CỘNG DỒN, KHÔNG LÀM TRÒN LẠI.
+    cuocThoai, cuocSms, cuocData ← tra từ ảnh chụp tổng hợp theo (thuê bao, dịch vụ)
+
+    # BƯỚC 3 — giảm trừ (bảng còn rỗng, đường xử lý viết sẵn)
+    truocGiamTru ← cuocThueBao + cuocThoai + cuocSms + cuocData + cuocKhac
+    giamTru ← Σ (số tiền tuyệt đối, hoặc tỷ lệ % nếu không khai số tiền)
+
+    # BƯỚC 4 — tổng hợp
+    tongTruocThue ← max(0, truocGiamTru − giamTru)
+    thueVat       ← lamTronTien(tongTruocThue × 10%)
+    tongThanhToan ← tongTruocThue + thueVat
+
+    # BƯỚC 5 — sinh hóa đơn
+    maHoaDon      ← "HD" + yyyyMM + "-" + số thứ tự 6 chữ số, đếm riêng theo kỳ
+    ngayLap       ← ngày cuối kỳ
+    hanThanhToan  ← ngày 15 tháng kế tiếp
+    trangThai ← CHUA_TT, daThanhToan ← 0, conNo ← tongThanhToan
+    thêm dòng chi tiết cho mọi khoản mục khác 0
+```
+
+Ba quyết định cài đặt đáng ghi lại:
+
+**Ảnh chụp tra cứu nạp một lần cho cả kỳ.** Lịch sử đăng ký gói, tổng cước gom theo
+(thuê bao, dịch vụ) và danh sách giảm trừ đều nạp một lần. Riêng phần tổng cước là **một
+truy vấn `GROUP BY` duy nhất** thay vì ba truy vấn cho mỗi thuê bao — với 58 thuê bao đó là
+174 truy vấn tiết kiệm được.
+
+**`soHoaDonTao` và `tongDoanhThu` đếm lại từ CSDL**, không lấy biến đếm của lần chạy — cùng
+lý do như `soCdrXuLy` ở 4B.
+
+**Giảm trừ: khai cả số tiền lẫn tỷ lệ thì số tiền tuyệt đối thắng.** Cộng cả hai lại sẽ giảm
+trừ gấp đôi ý định người nhập. Bảng `giam_tru` hiện rỗng nên quy tắc này chưa phát huy, nhưng
+phải chốt trước khi có dữ liệu.
+
+---
+
+## 19. Kết quả chạy thật trên kỳ 6/2026
+
+```
+>>> KY CUOC: 6/2026 (id=1), trang thai MO
+>>> LAN 1 - lap hoa don: tao moi=58  bo qua da co=0  bo qua khong du dieu kien=2
+                         doanh thu ky=28692784.00  thoi gian=722 ms
+>>> LAN 2 - chay lai:    tao moi=0   bo qua da co=58 bo qua khong du dieu kien=2
+                         doanh thu ky=28692784.00  thoi gian=148 ms
+>>> HUY LAP HOA DON: 58 hoa don da xoa, con lai 0
+>>> LAN 3 - lap lai sau khi huy: tao moi=58  doanh thu ky=28692784.00  thoi gian=354 ms
+>>> TINH XAC DINH: Doanh thu lan 1 = 28692784.00 | lan 3 = 28692784.00 | GIONG NHAU
+```
+
+**58 hóa đơn, 2 thuê bao bị bỏ qua** — đúng hai thuê bao trả sau đã thanh lý với ngày hủy
+20/05/2026 và 30/04/2026, tức trước kỳ 6/2026.
+
+Ba lần chạy chứng minh cùng bộ tính chất như ở 4B: chạy được, không tạo trùng, và lập lại
+sau khi hủy ra đúng con số cũ tới từng đồng.
+
+### 19.1. Đối chiếu prorate — tính tay so với hệ thống
+
+| Số thuê bao | Gói | Cước tháng | Kích hoạt | Số ngày | Tính tay | Hệ thống |
+|---|---|---|---|---|---|---|
+| 0967901278 | DN500 | 500.000 | 05/06 | 26 | 500000 × 26/30 = **433.333** | ✅ 433.333 |
+| 0834567834 | MAX70 | 70.000 | 11/06 | 20 | 70000 × 20/30 = **46.667** | ✅ 46.667 |
+| 0978012379 | MAX150 | 150.000 | 15/06 | 16 | 150000 × 16/30 = **80.000** | ✅ 80.000 |
+| 0845678935 | MAX150 | 150.000 | 17/06 | 14 | 150000 × 14/30 = **70.000** | ✅ 70.000 |
+| 0819123480 | MAX150 | 150.000 | 23/06 | 8 | 150000 × 8/30 = **40.000** | ✅ 40.000 |
+
+Khớp đúng bảng giá trị kỳ vọng đã tính sẵn ở `PHASE-4-PLAN.md` mục 5.6, không sửa lại con số
+nào. Số ngày tính **bao gồm cả ngày kích hoạt**: thuê bao vào mạng ngày 23 dùng 8 ngày
+(23→30), không phải 7.
+
+### 19.2. Ba hóa đơn mẫu
+
+| Mã hóa đơn | Thuê bao | Thuê bao tháng | Thoại | SMS | Data | Trước thuế | VAT | Thanh toán |
+|---|---|---|---|---|---|---|---|---|
+| HD202606-000001 | 0821234521 | 50.000 | 29.180 | 2.886 | 143.750 | 225.816 | 22.582 | 248.398 |
+| HD202606-000002 | 0832345622 | 70.000 | 43.446 | 1.146 | 36.150 | 150.742 | 15.074 | 165.816 |
+| HD202606-000003 | 0843456723 | 150.000 | 58.549 | 7.844 | 44.525 | 260.918 | 26.092 | 287.010 |
+
+Ngày lập 30/06/2026, hạn thanh toán 15/07/2026, trạng thái `CHUA_TT`, còn nợ bằng tổng thanh
+toán.
+
+---
+
+## 20. Kết quả nghiệm thu mục 4C
+
+| # | Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `mvnw test` PASS, tối thiểu 96 test | ✅ | **110 test**, 0 lỗi (84 + **26 mới**) |
+| 2 | Billing kỳ 6/2026 dưới 10 giây | ✅ | **722 ms** |
+| 3 | Chín kiểm chứng SQL mục E | ✅ | Bảng 20.1 |
+| 4 | 5 thuê bao prorate khớp bảng kỳ vọng | ✅ | Bảng 19.1 — khớp cả 5 |
+| 5 | Ghi đủ bảng số liệu mốc | ✅ | Mục 20.2 |
+
+### 20.1. Chín kiểm chứng SQL
+
+| # | Kiểm chứng | Kỳ vọng | Thực tế |
+|---|---|---|---|
+| 1 | ⭐ `SUM(cuoc_phi)` theo dịch vụ vs cột trên hóa đơn | lệch 0 đ | ✅ **0,00 đ** cả ba dịch vụ |
+| 1b | CDR của thuê bao trả sau không có hóa đơn | 0 | ✅ **0** |
+| 1c | Đối chiếu **từng hóa đơn một** | 0 dòng lệch | ✅ **0/58** |
+| 2 | `tong_truoc_thue` = tổng các khoản − giảm trừ | 0 dòng lệch | ✅ **0** |
+| 3 | `thue_vat = ROUND(tong_truoc_thue × 0,10)` | 0 dòng lệch | ✅ **0** |
+| 4 | `tong_thanh_toan`, `con_no` | 0 dòng lệch | ✅ **0** |
+| 5 | `SUM(chi_tiet.thanh_tien)` = `tong_truoc_thue` | 0 dòng lệch | ✅ **0** |
+| 5b | Từng khoản mục chi tiết khớp cột tương ứng | 0 dòng lệch | ✅ **0** |
+| 6 | Số hóa đơn theo loại thuê bao | 58 trả sau, **0 trả trước** | ✅ đúng |
+| 6b | Thuê bao đủ điều kiện vs số hóa đơn | bằng nhau | ✅ **58 = 58** |
+| 7 | `SUM(tong_thanh_toan)` = `ky_cuoc.tong_doanh_thu` | bằng nhau | ✅ 28.692.784 |
+| 8 | Chạy lần hai → số hóa đơn không đổi | không đổi | ✅ 0 tạo mới, 58 bỏ qua |
+| 9 | Hủy → lập lại → doanh thu giống hệt | giống | ✅ 28.692.784 cả hai lần |
+
+Kiểm chứng số 1b tuy nhỏ nhưng **không thể thiếu**: nếu có thuê bao trả sau phát sinh CDR mà
+không được lập hóa đơn thì tổng ở kiểm chứng 1 vẫn có thể tình cờ khớp trong khi hóa đơn
+đang thiếu. Và kiểm chứng 1c đối chiếu **từng hóa đơn một** chứ không chỉ tổng — hai sai lệch
+ngược dấu ở hai hóa đơn khác nhau sẽ triệt tiêu nhau ở mức tổng.
+
+> **Một chi tiết về VAT đáng ghi lại.** Tổng VAT của 58 hóa đơn là 2.608.437 đ, còn
+> `ROUND(tổng trước thuế × 10%)` là 2.608.435 đ — **lệch 2 đồng**. Đây **không phải lỗi**:
+> VAT tính trên từng hóa đơn rồi mới cộng, đúng như hóa đơn thật phải làm. Nó cho thấy tại
+> sao bất biến phải kiểm **trên từng dòng**, không kiểm trên số tổng — kiểm ở mức tổng thì
+> câu SQL này sẽ báo lệch và người đọc tưởng engine sai.
+
+### 20.2. 📌 Số liệu mốc TRƯỚC KHI áp ưu đãi — để 4D đối chiếu
+
+| Chỉ tiêu | Giá trị |
+|---|---|
+| **Tổng doanh thu kỳ 6/2026** | **28.692.784 đ** |
+| Tổng trước thuế | 26.084.347 đ |
+| — Cước thuê bao | 18.400.000 đ |
+| — Cước thoại | 4.863.778 đ |
+| — Cước SMS | 214.169 đ |
+| — **Cước data** | **2.606.400 đ** |
+| **Số hóa đơn có `cuoc_data > 0`** | **50 / 58** |
+| Số hóa đơn | 58 |
+| Số dòng chi tiết hóa đơn | 208 |
+
+**Dự đoán cho 4D**, đo trên đúng 58 thuê bao đang có hóa đơn (không phải con số 46 của
+`PHASE-4-PLAN.md` mục 4.2 — con số đó đo trước khi mục 4A sinh lại dữ liệu):
+
+| Loại ưu đãi | Số thuê bao **còn trong** ưu đãi | Sau 4D phải có cước tương ứng = 0 |
+|---|---|---|
+| Data | **45** / 50 thuê bao có phát sinh data | ✅ |
+| Phút nội mạng | **45** | ✅ |
+| Phút ngoại mạng | **39** | ✅ |
+| SMS | **47** | ✅ |
+
+Suy ra **số hóa đơn có `cuoc_data > 0` phải tụt từ 50 xuống đúng 5**, gồm 3 thuê bao gói
+CB01 (ưu đãi 0 MB) và 2 thuê bao gói MAX70 đã dùng quá 2.048 MB. Chi tiết theo gói:
+
+| Gói | Ưu đãi | Số thuê bao có data | Còn trong ưu đãi | Vẫn phải trả |
+|---|---|---|---|---|
+| CB01 | 0 MB | 3 | 0 | **3** |
+| MAX70 | 2.048 MB | 4 | 2 | **2** |
+| MAX150 | 5.120 MB | 14 | 14 | 0 |
+| DN500 | 20.480 MB | 29 | 29 | 0 |
+
+Con số 5 này là dự đoán **chính xác chứ không phải ước lượng**, vì quyết định 5.3 không cắt
+đôi bản ghi: thuê bao có tổng sản lượng nằm trong ưu đãi thì **mọi** bản ghi của họ đều miễn
+phí. Nếu cước data **không** giảm thì engine đã mắc bẫy KB/MB mô tả ở `mo-ta-csdl.md` mục 6.
+
+Cước thuê bao 18.400.000 đ thì **không được đổi** ở 4D: ưu đãi không prorate và cũng không
+tác động tới cước cố định hàng tháng.
+
+### 20.3. Số test theo lớp
+
+| Lớp test | Số test | Ghi chú |
+|---|---|---|
+| `SchemaValidationTest` · `ThueBaoServiceTest` · `BangGiaCuocServiceTest` · `SinhMaServiceTest` | 30 | Phase 2–3 |
+| `DonViCuocTest` · `BangGiaLookupTest` · `QuyTacToHopDichVuTest` · `KiemTraDoPhuBangGiaTest` | 32 | 4A |
+| `RatingServiceTest` | 22 | 4B |
+| **`BillingServiceTest`** | **26** | **4C** |
+| | **110** | |
+
+26 test mới chia bốn nhóm: prorate (7), quy tắc thuê bao được lập hóa đơn (7), tổng hợp tiền
+và bất biến cộng dồn (5), chạy cả kỳ và hủy (7).
+
+Test số 17 là test đáng chú ý nhất: nó nạp vào các con số **lẻ tới hàng xu** (1000,49 đ /
+250,51 đ / 99,99 đ) rồi khẳng định hóa đơn giữ nguyên từng xu. Mục 4B luôn sinh số nguyên
+đồng nên trên dữ liệu thật sẽ không bao giờ thấy khác biệt — nhưng nếu tầng này lỡ thêm một
+lần làm tròn thì test đỏ ngay, trong khi kiểm chứng SQL trên dữ liệu thật vẫn xanh.
+
+---
+
+## 21. Hạn chế bổ sung sau 4C
+
+### 21.1. Đổi gói giữa kỳ: cước thuê bao tính theo gói cuối kỳ
+
+Cước thuê bao tháng lấy theo gói có hiệu lực tại **ngày cuối kỳ**, không chia đôi kỳ theo
+từng gói (quyết định 5.10). Cước **sử dụng** thì không bị xấp xỉ này — mục 4B đã tra giá theo
+đúng gói tại thời điểm từng bản ghi CDR.
+
+Hiện chưa lộ ra vì dữ liệu mẫu không có thuê bao nào đổi gói giữa kỳ.
+
+### 21.2. Đề xuất thay đổi schema: lưu `bang_gia_cuoc_id` trên CDR
+
+Như phân tích ở mục 17.3, hóa đơn không thể in đơn giá cho các dòng cước sử dụng vì bảng giá
+đã áp không được lưu lại. Thêm cột `bang_gia_cuoc_id` vào `chi_tiet_su_dung` khi định giá sẽ
+mở ra:
+
+- Chi tiết hóa đơn tách theo từng bậc giá, có đơn giá snapshot thật
+- Truy nguyên được vì sao một bản ghi ra đúng số tiền đó
+- Kiểm chứng lại cước cũ ngay cả sau khi bảng giá đã đổi
+
+Không tự ý thêm ở 4C vì đây là thay đổi schema, cần cân nhắc cùng lúc với 4D.
+
+### 21.3. Hai đường hủy tách bạch
+
+`RatingService.huyRatingKy` xóa `cuoc_phi` của CDR; `BillingService.huyBillingKy` xóa hóa
+đơn. Tách bạch để lập lại hóa đơn không bắt buộc phải định giá lại từ đầu. Hệ quả cần nhớ:
+**hủy rating trong khi kỳ còn hóa đơn sẽ bị từ chối**, phải hủy hóa đơn trước.
+
+---
+
+## 22. Việc tiếp theo — mục 4D
+
+Áp ưu đãi gói cước: trừ dần quỹ ưu đãi theo thứ tự thời gian, đánh cờ `mien_phi` trên các
+bản ghi nằm trong ưu đãi, rồi lập lại hóa đơn.
+
+Bốn điều 4D phải giữ:
+
+1. **Ba chỗ quy đổi đơn vị** — dùng `DonViCuoc`, tuyệt đối không viết lại phép chia 1024
+   hay 60 ở chỗ khác
+2. **Không cắt đôi bản ghi CDR** (quyết định 5.3): mỗi bản ghi hoặc hoàn toàn trong ưu đãi
+   (`mien_phi = 1`, `cuoc_phi = 0`) hoặc hoàn toàn tính tiền. Duyệt theo thứ tự thời gian cố
+   định — tính xác định đã được chứng minh ở 4B chính là điều kiện cho việc này
+3. **Ưu đãi không prorate** theo ngày kích hoạt (quyết định 5.6)
+4. Sau khi áp ưu đãi phải **hủy và lập lại hóa đơn**, rồi đối chiếu với bảng số liệu mốc ở
+   mục 20.2
+
+> ⚠️ Phép thử quyết định của 4D: **45 thuê bao còn trong ưu đãi data phải có `cuoc_data = 0`**,
+> và số hóa đơn có `cuoc_data > 0` phải tụt từ 50 xuống **đúng 5** (bảng ở mục 20.2). Câu SQL
+> kiểm chứng có sẵn ở `PHASE-4-PLAN.md` mục 9.2.

@@ -119,6 +119,48 @@ public interface ChiTietSuDungRepository extends JpaRepository<ChiTietSuDung, Lo
                                        @Param("denLuc") LocalDateTime denLuc);
 
     /**
+     * Tổng cước và sản lượng của một kỳ, gom theo (thuê bao, loại dịch vụ).
+     *
+     * <p>Một truy vấn duy nhất cho cả kỳ thay vì ba truy vấn cho mỗi thuê bao — với 58
+     * thuê bao trả sau đó là 174 truy vấn tiết kiệm được.</p>
+     *
+     * <p>Chỉ lấy bản ghi {@code DA_TINH}: bản ghi {@code LOI} chưa có cước, gộp vào sẽ
+     * cho ra hóa đơn thiếu tiền mà không có dấu hiệu gì.</p>
+     *
+     * @return mỗi phần tử là mảng
+     *         {@code [thueBaoId, loaiDichVu, tongCuoc, tongThoiLuongGiay, tongSoLuong, soBanGhi]}
+     */
+    @Query("""
+            SELECT c.thueBao.id, c.loaiDichVu,
+                   COALESCE(SUM(c.cuocPhi), 0),
+                   COALESCE(SUM(c.thoiLuongGiay), 0),
+                   COALESCE(SUM(c.soLuong), 0),
+                   COUNT(c)
+            FROM ChiTietSuDung c
+            WHERE c.kyCuoc.id = :kyCuocId
+              AND c.trangThaiTinhCuoc = com.hanzo.billing.enums.TrangThaiTinhCuoc.DA_TINH
+            GROUP BY c.thueBao.id, c.loaiDichVu
+            """)
+    List<Object[]> tongHopCuocTheoThueBao(@Param("kyCuocId") Long kyCuocId);
+
+    /**
+     * Số CDR trong khoảng thời gian của kỳ còn ở trạng thái cho trước.
+     *
+     * <p>Dùng để chặn lập hóa đơn khi kỳ chưa tính cước xong. Lọc theo thời gian chứ không
+     * theo {@code ky_cuoc_id}, vì bản ghi {@code CHUA_TINH} chính là bản ghi <b>chưa</b>
+     * được gán kỳ.</p>
+     */
+    @Query("""
+            SELECT COUNT(c) FROM ChiTietSuDung c
+            WHERE c.thoiGianBatDau >= :tuLuc
+              AND c.thoiGianBatDau < :denLuc
+              AND c.trangThaiTinhCuoc = :trangThai
+            """)
+    long demTheoKhoangVaTrangThai(@Param("tuLuc") LocalDateTime tuLuc,
+                                  @Param("denLuc") LocalDateTime denLuc,
+                                  @Param("trangThai") TrangThaiTinhCuoc trangThai);
+
+    /**
      * Các tổ hợp tra giá <b>thực sự</b> có trong dữ liệu CDR.
      *
      * <p>Phục vụ bất biến "mọi tổ hợp có trong CDR đều phải tra được đơn giá" —

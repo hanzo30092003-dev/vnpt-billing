@@ -24,6 +24,21 @@ public interface ThueBaoRepository extends JpaRepository<ThueBao, Long> {
 
     List<ThueBao> findByLoaiThueBao(LoaiThueBao loaiThueBao);
 
+    /**
+     * Thuê bao theo loại, nạp sẵn khách hàng và gói cước, sắp xếp theo id.
+     *
+     * <p>Dùng khi lập hóa đơn cả kỳ. Thứ tự {@code ORDER BY id} là cố định nên hai lần
+     * chạy sinh mã hóa đơn theo cùng một trình tự.</p>
+     */
+    @Query("""
+            SELECT tb FROM ThueBao tb
+            JOIN FETCH tb.khachHang
+            JOIN FETCH tb.goiCuoc
+            WHERE tb.loaiThueBao = :loaiThueBao
+            ORDER BY tb.id
+            """)
+    List<ThueBao> timTheoLoaiKemQuanHe(@Param("loaiThueBao") LoaiThueBao loaiThueBao);
+
     long countByTrangThai(TrangThaiThueBao trangThai);
 
     long countByLoaiThueBao(LoaiThueBao loaiThueBao);

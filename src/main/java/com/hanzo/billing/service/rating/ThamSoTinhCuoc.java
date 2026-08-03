@@ -15,8 +15,17 @@ public final class ThamSoTinhCuoc {
     /** Thuế suất giá trị gia tăng, 10%. */
     public static final BigDecimal THUE_SUAT_VAT = new BigDecimal("0.10");
 
-    /** Số ngày từ ngày lập hóa đơn tới hạn thanh toán. */
-    public static final int SO_NGAY_HAN_THANH_TOAN = 15;
+    /**
+     * Ngày trong tháng kế tiếp là hạn thanh toán hóa đơn.
+     *
+     * <p>Hóa đơn lập vào ngày cuối kỳ, hạn thanh toán là ngày 15 của tháng sau.</p>
+     *
+     * <p>Cách phát biểu tương đương: <i>ngày lập + 15 ngày</i>. Hai cách cho kết quả
+     * <b>giống hệt nhau</b> vì ngày lập luôn là ngày cuối tháng — 30/06 + 15 = 15/07,
+     * 31/07 + 15 = 15/08, 28/02 + 15 = 15/03, 29/02 + 15 = 15/03. Chọn cách phát biểu
+     * theo ngày cố định vì nó không phụ thuộc vào giả định "ngày lập luôn cuối tháng".</p>
+     */
+    public static final int NGAY_HAN_THANH_TOAN_THANG_SAU = 15;
 
     /** Chế độ làm tròn tiền. */
     public static final RoundingMode LAM_TRON = RoundingMode.HALF_UP;
