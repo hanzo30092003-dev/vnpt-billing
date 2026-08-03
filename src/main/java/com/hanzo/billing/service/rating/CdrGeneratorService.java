@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -49,10 +48,6 @@ public class CdrGeneratorService {
     // ---------- Khung giờ phát sinh: tập trung 7h–23h ----------
     private static final int GIO_SOM_NHAT = 7;
     private static final int GIO_MUON_NHAT = 23;
-
-    // ---------- Khung giờ cao điểm: 8h–20h các ngày Thứ Hai đến Thứ Sáu ----------
-    private static final int GIO_CAO_DIEM_TU = 8;
-    private static final int GIO_CAO_DIEM_DEN = 20;
 
     /** Kích thước lô ghi CSDL. */
     private static final int KICH_THUOC_LO = 500;
@@ -120,7 +115,8 @@ public class CdrGeneratorService {
                     thoiDiem,
                     dichVu == LoaiDichVu.THOAI ? sinhThoiLuongGoi() : 0,
                     sinhSoLuong(dichVu),
-                    laGioCaoDiem(dichVu, thoiDiem));
+                    // Quy tắc giờ cao điểm nằm ở QuyTacGioCaoDiem, dùng chung với bộ nhập CSV
+                    QuyTacGioCaoDiem.apDung(dichVu, thoiDiem));
 
             lo.add(banGhi);
             thueBaoCoPhatSinh[viTri] = true;
@@ -300,29 +296,6 @@ public class CdrGeneratorService {
             return 1024 + ngauNhien.nextInt(512000 - 1024 + 1);
         }
         return 0;
-    }
-
-    /**
-     * ⚠️ QUY TẮC GIỜ CAO ĐIỂM — điểm dễ sai nhất của bộ sinh.
-     *
-     * <p>Bảng giá hiện CHỈ có dòng giờ cao điểm cho dịch vụ <b>THOAI</b>, không có cho
-     * SMS và DATA. Vì vậy chỉ bản ghi THOAI mới được phép mang cờ giờ cao điểm; SMS và
-     * DATA luôn để 0.</p>
-     *
-     * <p>Nếu vi phạm, engine tính cước ở Phase 4 sẽ đi tìm dòng giá
-     * {@code SMS + gio_cao_diem = 1}, không thấy, và toàn bộ CDR loại đó rơi vào trạng
-     * thái LOI.</p>
-     *
-     * <p>Khung cao điểm: 8h–20h các ngày Thứ Hai đến Thứ Sáu.</p>
-     */
-    private boolean laGioCaoDiem(LoaiDichVu dichVu, LocalDateTime thoiDiem) {
-        if (dichVu != LoaiDichVu.THOAI) {
-            return false;
-        }
-        DayOfWeek thu = thoiDiem.getDayOfWeek();
-        boolean ngayLamViec = (thu != DayOfWeek.SATURDAY && thu != DayOfWeek.SUNDAY);
-        int gio = thoiDiem.getHour();
-        return ngayLamViec && gio >= GIO_CAO_DIEM_TU && gio < GIO_CAO_DIEM_DEN;
     }
 
     /**

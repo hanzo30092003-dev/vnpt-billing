@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Nhập CDR từ CSV', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-upload me-2"></i>Nhập CDR từ file CSV</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" th:href="@{/cdr/sinh-du-lieu}">
+                <i class="bi bi-magic me-1"></i> Bộ sinh CDR
+            </a>
+            <a class="btn btn-outline-secondary" th:href="@{/cdr}">
+                <i class="bi bi-list-ul me-1"></i> Tra cứu CDR
+            </a>
+        </div>
+    </div>
+
+    <div class="alert alert-danger" th:if="${thongBaoLoi}">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${thongBaoLoi}"></span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">Chọn file</div>
+                <div class="card-body">
+                    <form th:action="@{/cdr/import}" method="post" enctype="multipart/form-data" id="formImport">
+                        <div class="mb-3">
+                            <label class="form-label" for="file">File CSV</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="nutNhap">
+                            <span class="spinner-border spinner-border-sm me-1 d-none" id="quayNhap"></span>
+                            <i class="bi bi-upload me-1" id="bieuTuongNhap"></i>
+                            <span id="chuNutNhap">Nhập dữ liệu</span>
+                        </button>
+                    </form>
+
+                    <hr>
+                    <a class="btn btn-outline-success w-100" th:href="@{/cdr/tai-file-mau}">
+                        <i class="bi bi-download me-1"></i> Tải file mẫu
+                    </a>
+                    <div class="form-text mt-2">
+                        File mẫu gồm 20 dòng, trong đó có <strong>3 dòng cố ý sai</strong>
+                        để minh hoạ cơ chế báo lỗi từng dòng.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">Định dạng file</div>
+                <div class="card-body small">
+                    <p>File CSV mã hoá UTF-8, dòng đầu là tiêu đề, gồm 7 cột theo đúng thứ tự:</p>
+                    <pre class="bg-light p-2 rounded mb-3"><code>so_thue_bao,so_bi_goi,loai_dich_vu,huong,thoi_gian_bat_dau,thoi_luong_giay,so_luong</code></pre>
+
+                    <table class="table table-sm bang-du-lieu">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Cột</th>
+                            <th>Quy tắc</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>so_thue_bao</code></td>
+                            <td>Phải tồn tại trong hệ thống, không ở trạng thái tạm ngưng 2 chiều hoặc đã thanh lý</td>
+                        </tr>
+                        <tr>
+                            <td><code>so_bi_goi</code></td>
+                            <td>Có thể để trống (ví dụ với bản ghi DATA)</td>
+                        </tr>
+                        <tr>
+                            <td><code>loai_dich_vu</code></td>
+                            <td><code>THOAI</code> · <code>SMS</code> · <code>DATA</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>huong</code></td>
+                            <td><code>NOI_MANG</code> · <code>NGOAI_MANG</code> · <code>QUOC_TE</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>thoi_gian_bat_dau</code></td>
+                            <td>Đúng định dạng <code>yyyy-MM-dd HH:mm:ss</code>, không sớm hơn ngày kích hoạt thuê bao</td>
+                        </tr>
+                        <tr>
+                            <td><code>thoi_luong_giay</code></td>
+                            <td>Số giây. Bản ghi <code>THOAI</code> bắt buộc lớn hơn 0; SMS và DATA để 0</td>
+                        </tr>
+                        <tr>
+                            <td><code>so_luong</code></td>
+                            <td>
+                                SMS ghi <code>1</code>.
+                                <strong>DATA ghi theo đơn vị KB</strong> (ví dụ 153600 = 150 MB).
+                                THOAI để 0.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-info py-2 mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Cờ <strong>giờ cao điểm</strong> do hệ thống tự tính, không có trong file.
+                        Chỉ bản ghi <code>THOAI</code> phát sinh trong 8h–20h các ngày Thứ Hai đến
+                        Thứ Sáu mới được đánh dấu cao điểm — dùng chung đúng quy tắc với bộ sinh CDR.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--/* ============ KẾT QUẢ NHẬP ============ */-->
+    <div class="card shadow-sm mt-3" th:if="${ketQua != null}">
+        <div class="card-header bg-white fw-semibold">
+            Kết quả nhập file <code th:text="${ketQua.tenFile}"></code>
+        </div>
+        <div class="card-body">
+            <div class="row text-center mb-3">
+                <div class="col-4">
+                    <div class="border rounded py-2">
+                        <div class="h4 mb-0" th:text="${ketQua.tongDong}">0</div>
+                        <div class="small text-secondary">dòng dữ liệu</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="border rounded py-2 border-success">
+                        <div class="h4 mb-0 text-success" th:text="${ketQua.soThanhCong}">0</div>
+                        <div class="small text-secondary">dòng thành công</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="border rounded py-2"
+                         th:classappend="${ketQua.soLoi > 0} ? 'border-danger' : ''">
+                        <div class="h4 mb-0" th:classappend="${ketQua.soLoi > 0} ? 'text-danger' : 'text-secondary'"
+                             th:text="${ketQua.soLoi}">0</div>
+                        <div class="small text-secondary">dòng lỗi</div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="small text-secondary">
+                Thời gian xử lý: <strong th:text="${ketQua.thoiGianMs} + ' ms'"></strong>.
+                Các dòng lỗi bị bỏ qua, những dòng hợp lệ vẫn được ghi nhận bình thường.
+            </p>
+
+            <div th:if="${ketQua.soLoi > 0}">
+                <h6 class="text-danger"><i class="bi bi-x-circle me-1"></i>Chi tiết các dòng bị loại</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm bang-du-lieu">
+                        <thead class="table-light">
+                        <tr>
+                            <th style="width: 6rem">Dòng số</th>
+                            <th>Lý do</th>
+                            <th>Nội dung dòng</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="loi : ${ketQua.danhSachLoi}">
+                            <td><span class="badge text-bg-danger" th:text="${loi.soDong}"></span></td>
+                            <td th:text="${loi.lyDo}"></td>
+                            <td><code class="small" th:text="${loi.noiDung}"></code></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-secondary mb-0">
+                    Số dòng tính từ 1 và đã bao gồm dòng tiêu đề, mở file ra là thấy đúng dòng cần sửa.
+                </p>
+            </div>
+
+            <a class="btn btn-outline-primary mt-2" th:href="@{/cdr(nguon='IMPORT_CSV')}">
+                <i class="bi bi-list-ul me-1"></i> Xem dữ liệu vừa nhập
+            </a>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var form = document.getElementById('formImport');
+            if (!form) return;
+            form.addEventListener('submit', function () {
+                document.getElementById('nutNhap').disabled = true;
+                document.getElementById('quayNhap').classList.remove('d-none');
+                document.getElementById('bieuTuongNhap').classList.add('d-none');
+                document.getElementById('chuNutNhap').textContent = 'Đang xử lý file...';
+            });
+        })();
+    </script>
+
+</div>
+
+</body>
+</html>

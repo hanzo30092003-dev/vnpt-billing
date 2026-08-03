@@ -406,3 +406,67 @@ theo thứ tự ngược phụ thuộc khóa ngoại.
 Riêng dòng `TINYINT` là điểm dễ sai: nếu chỉ khai `Boolean` không kèm `@JdbcTypeCode`,
 Hibernate mặc định mong đợi cột kiểu `BIT` và sẽ báo lỗi khi chạy với
 `spring.jpa.hibernate.ddl-auto=validate`.
+
+---
+
+## 6. ⚠️ CẢNH BÁO CHO PHASE 4 — HAI CHỖ QUY ĐỔI ĐƠN VỊ DATA
+
+Dữ liệu data trong hệ thống được lưu ở **hai đơn vị khác nhau**. Engine tính cước ở
+Phase 4 phải quy đổi ở **cả hai chỗ**, quên bất kỳ chỗ nào cũng cho ra hóa đơn sai.
+
+| # | Cột | Đơn vị lưu | Phải làm gì khi tính cước |
+|---|---|---|---|
+| 1 | `chi_tiet_su_dung.so_luong` | **KB** | Chia cho 1024 để ra MB **trước khi** nhân đơn giá |
+| 2 | `goi_cuoc.data_mien_phi_mb` | **MB** | So sánh với sản lượng **đã quy đổi sang MB**, tuyệt đối không so trực tiếp với tổng KB |
+
+### 6.1. Vì sao chỗ thứ hai nguy hiểm hơn
+
+Chỗ thứ nhất (`so_luong`) nếu quên sẽ cho ra con số tiền lớn bất thường, nhìn hóa đơn
+là thấy ngay.
+
+Chỗ thứ hai âm thầm hơn nhiều. Giả sử thuê bao dùng gói MAX70 (ưu đãi 2048 MB) và
+phát sinh tổng 1.500.000 KB trong tháng — tức khoảng 1465 MB, **vẫn nằm trong ưu đãi,
+đáng lẽ không mất tiền data**.
+
+Nếu engine so thẳng `1500000 > 2048` thì kết luận thuê bao đã vượt ưu đãi và tính cước
+cho phần "vượt" khổng lồ. Hậu quả:
+
+- Hóa đơn **vẫn phát hành bình thường**, không lỗi, không cảnh báo
+- Mọi thuê bao đều bị coi là vượt ưu đãi data, sai lệch khoảng **1024 lần**
+- Chỉ phát hiện được khi có người ngồi đối chiếu tay một hóa đơn cụ thể
+
+### 6.2. Cách kiểm chứng nhanh ở Phase 4
+
+Sau khi chạy tính cước, đối chiếu một thuê bao dùng ít data:
+
+```sql
+SELECT t.so_thue_bao,
+       g.ma_goi,
+       g.data_mien_phi_mb                              AS uu_dai_mb,
+       ROUND(SUM(c.so_luong) / 1024, 2)                AS da_dung_mb,
+       SUM(c.so_luong)                                 AS da_dung_kb
+FROM chi_tiet_su_dung c
+JOIN thue_bao t ON t.id = c.thue_bao_id
+JOIN goi_cuoc g ON g.id = t.goi_cuoc_id
+WHERE c.loai_dich_vu = 'DATA'
+GROUP BY t.id
+HAVING da_dung_mb < uu_dai_mb
+LIMIT 5;
+```
+
+Những thuê bao lọt vào kết quả này **phải có cước data bằng 0**. Nếu khác 0 thì engine
+đang mắc đúng lỗi mô tả ở trên.
+
+### 6.3. Khuyến nghị
+
+Nên viết một hằng số và một hàm quy đổi dùng chung ngay khi bắt đầu Phase 4, thay vì
+rải phép chia 1024 ở nhiều chỗ:
+
+```java
+public static final int KB_MOI_MB = 1024;
+
+public static BigDecimal kbSangMb(long soKb) {
+    return BigDecimal.valueOf(soKb)
+            .divide(BigDecimal.valueOf(KB_MOI_MB), 2, RoundingMode.HALF_UP);
+}
+```
