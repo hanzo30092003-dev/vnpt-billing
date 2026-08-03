@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Kỳ cước', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <h2 class="h4 mb-3"><i class="bi bi-calendar3 me-2"></i>Quản lý kỳ cước</h2>
+
+    <div class="alert alert-info py-2 small">
+        <i class="bi bi-info-circle me-1"></i>
+        Kỳ cước là đơn vị gom bản ghi CDR để tính cước và phát hành hóa đơn theo tháng.
+        Phase 3 mới chỉ tạo và theo dõi kỳ — <strong>chức năng chạy tính cước thuộc Phase 4</strong>.
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">Tạo kỳ cước mới</div>
+                <div class="card-body">
+                    <form th:action="@{/ky-cuoc/tao-moi}" th:object="${kyCuocForm}" method="post" novalidate>
+
+                        <div class="alert alert-danger py-2" th:if="${#fields.hasGlobalErrors()}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span th:each="loi : ${#fields.globalErrors()}" th:text="${loi}"></span>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label" for="thang">Tháng <span class="text-danger">*</span></label>
+                                <select class="form-select" id="thang" th:field="*{thang}"
+                                        th:classappend="${#fields.hasErrors('thang')} ? 'is-invalid'">
+                                    <option th:each="t : ${#numbers.sequence(1, 12)}"
+                                            th:value="${t}" th:text="'Tháng ' + ${t}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{thang}"></div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" for="nam">Năm <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="nam" th:field="*{nam}"
+                                       min="2020" max="2100"
+                                       th:classappend="${#fields.hasErrors('nam')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{nam}"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-text mt-2 mb-3">
+                            Ngày đầu và ngày cuối kỳ được hệ thống tự tính theo tháng đã chọn.
+                            Kỳ mới luôn ở trạng thái <span class="badge text-bg-success">Mở</span>.
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-lg me-1"></i> Tạo kỳ cước
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    Danh sách kỳ cước
+                    <span class="badge text-bg-secondary ms-1" th:text="${#lists.size(danhSach)}">0</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover bang-du-lieu align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Kỳ</th>
+                                <th>Khoảng ngày</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">CDR đã xử lý</th>
+                                <th class="text-end">Hóa đơn</th>
+                                <th class="text-end">Tổng doanh thu</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(danhSach)}">
+                                <td colspan="6" class="text-center text-secondary py-4">Chưa có kỳ cước nào.</td>
+                            </tr>
+                            <tr th:each="k : ${danhSach}">
+                                <td class="fw-semibold" th:text="'Tháng ' + ${k.thang} + '/' + ${k.nam}"></td>
+                                <td class="small"
+                                    th:text="${#temporals.format(k.ngayBatDau, 'dd/MM/yyyy')} + ' → '
+                                             + ${#temporals.format(k.ngayKetThuc, 'dd/MM/yyyy')}"></td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${k.trangThai.name() == 'MO'} ? 'text-bg-success'
+                                                        : (${k.trangThai.name() == 'DANG_TINH'} ? 'text-bg-warning' : 'text-bg-secondary')"
+                                          th:text="${k.trangThai.name() == 'MO'} ? 'Mở'
+                                                 : (${k.trangThai.name() == 'DANG_TINH'} ? 'Đang tính' : 'Đã chốt')"></span>
+                                </td>
+                                <td class="text-end" th:text="${k.soCdrXuLy}">0</td>
+                                <td class="text-end" th:text="${k.soHoaDonTao}">0</td>
+                                <td class="text-end"
+                                    th:text="${#numbers.formatDecimal(k.tongDoanhThu, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="small text-secondary mt-3 mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Ba cột cuối đang bằng 0 vì chưa chạy tính cước. CSDL đã có ràng buộc
+                        <code>UNIQUE(thang, nam)</code>, nhưng hệ thống vẫn chặn trùng ở tầng nghiệp vụ
+                        trước để báo lỗi bằng tiếng Việt thay vì lỗi kỹ thuật của CSDL.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -228,9 +228,13 @@ SELECT id, goi_cuoc_id, ngay_kich_hoat, NULL, 'DANG_AP_DUNG' FROM thue_bao;
 -- ---------------------------------------------------------------------
 -- 7. ky_cuoc - ky thang 6/2026, dang mo
 -- ---------------------------------------------------------------------
+-- Ba ky lien tiep de thu nghiem chuyen ky o Phase 4. Ca ba deu de trang thai MO;
+-- viec chot ky thuoc pham vi Phase 4.
 INSERT INTO ky_cuoc (id, thang, nam, ngay_bat_dau, ngay_ket_thuc, trang_thai,
                      ngay_chot, so_cdr_xu_ly, so_hoa_don_tao, tong_doanh_thu) VALUES
-(1, 6, 2026, '2026-06-01', '2026-06-30', 'MO', NULL, 0, 0, 0);
+(1, 6, 2026, '2026-06-01', '2026-06-30', 'MO', NULL, 0, 0, 0),
+(2, 5, 2026, '2026-05-01', '2026-05-31', 'MO', NULL, 0, 0, 0),
+(3, 7, 2026, '2026-07-01', '2026-07-31', 'MO', NULL, 0, 0, 0);
 
 -- ---------------------------------------------------------------------
 -- 8. lich_su_thue_bao - lich su bien dong trang thai
