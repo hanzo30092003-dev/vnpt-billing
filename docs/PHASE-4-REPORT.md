@@ -620,7 +620,8 @@ Ba dòng đáng soi kỹ:
 - **id 5**: cùng hướng nội mạng với id 4 nhưng đơn giá 18 đ chứ không phải 15 đ — engine đã
   lấy đúng dòng giờ cao điểm.
 - **id 20**: 261.730 KB = 255,6 MB → làm tròn lên **256 MB**. Nếu quên chia 1024 thì cước
-  bản ghi này là 6.543.250 đ thay vì 6.400 đ — một mình nó lớn hơn tổng cước cả kỳ.
+  bản ghi này là 6.543.250 đ thay vì 6.400 đ — gấp hơn **1000 lần**, và một mình nó chiếm
+  hai phần ba tổng cước của cả 5017 bản ghi.
 
 ### 13.3. Số test theo lớp
 
