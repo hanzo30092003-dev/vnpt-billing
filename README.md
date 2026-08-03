@@ -178,7 +178,7 @@ vnpt-billing/
 
 ---
 
-## 6. Trạng thái hiện tại — hết Phase 2
+## 6. Trạng thái hiện tại — hết Phase 3
 
 **Phase 0 — khung dự án** ✅
 
@@ -206,9 +206,20 @@ vnpt-billing/
 
 Tài khoản dùng thử (mật khẩu đều là `123456`): `admin`, `nhanvien01`, `ketoan01`.
 
+**Phase 3 — gói cước, bảng giá, CDR** ✅
+
+- [x] Chuẩn hoá mã khách hàng 6 chữ số, tách `SinhMaService` có unit test
+- [x] 16 unit test phủ kín ma trận chuyển trạng thái thuê bao
+- [x] Script kiểm thử chuyển vào `scripts/`, xét mã trạng thái HTTP trước
+- [x] Quản lý gói cước, chặn xoá gói đang có thuê bao dùng
+- [x] Bảng giá theo thời gian, chặn chồng khoảng hiệu lực (9 unit test)
+- [x] Bộ sinh CDR giả lập, 5000 bản ghi trong ~257 ms
+- [x] Nhập CDR từ CSV, báo lỗi từng dòng
+- [x] Tra cứu CDR, lọc, phân trang, xuất Excel
+- [x] Quản lý kỳ cước
+
 Chưa làm (thuộc các phase sau):
 
-- [ ] Phase 3 — gói cước, bảng giá, CDR (bộ sinh giả lập + import CSV)
 - [ ] Phase 4 — engine tính cước (Rating & Billing)
 - [ ] Phase 5 — hóa đơn, thanh toán, công nợ
 - [ ] Phase 6 — báo cáo, thống kê, dashboard
@@ -218,7 +229,11 @@ Tài liệu:
 
 - [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md) — báo cáo quá trình và kết quả Phase 0
 - [`docs/PHASE-2-REPORT.md`](docs/PHASE-2-REPORT.md) — báo cáo Phase 2, kèm danh sách màn hình cần chụp ảnh
-- [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) — mô tả chi tiết 15 bảng và 2 view
+- [`docs/PHASE-3-REPORT.md`](docs/PHASE-3-REPORT.md) — báo cáo Phase 3, kèm 2 điểm sai lệch đặc tả và danh sách màn hình
+- [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) — mô tả chi tiết 15 bảng và 2 view (**mục 6: cảnh báo quy đổi đơn vị DATA cho Phase 4**)
+- [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) — số đo tối ưu ghi hàng loạt CDR
+- [`docs/mau-cdr.csv`](docs/mau-cdr.csv) — file CSV mẫu để thử chức năng nhập CDR
+- [`scripts/README.md`](scripts/README.md) — script kiểm thử giao diện qua HTTP
 
 > ⚠️ **CSDL bị dựng lại mỗi lần khởi động.** `application.yml` đặt
 > `spring.sql.init.mode: always`, nên `schema.sql` (bắt đầu bằng `DROP TABLE IF EXISTS`)
