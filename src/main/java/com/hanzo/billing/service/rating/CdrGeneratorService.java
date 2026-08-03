@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Bộ sinh CDR giả lập.
@@ -42,6 +43,8 @@ public class CdrGeneratorService {
     private static final int NGUONG_SMS = 90;   // 70..89 là SMS, 90..99 là DATA
 
     // ---------- Phân bố hướng: 55% nội mạng, 40% ngoại mạng, 5% quốc tế ----------
+    // Chỉ áp dụng cho dịch vụ có nhiều hướng (THOAI và SMS). DATA luôn NOI_MANG —
+    // xem QuyTacToHopDichVu.
     private static final int NGUONG_NOI_MANG = 55;
     private static final int NGUONG_NGOAI_MANG = 95;
 
@@ -104,7 +107,7 @@ public class CdrGeneratorService {
             }
 
             LoaiDichVu dichVu = chonLoaiDichVu();
-            HuongCuocGoi huong = chonHuong();
+            HuongCuocGoi huong = chonHuong(dichVu);
 
             BanGhiCdr banGhi = new BanGhiCdr(
                     thueBao.getId(),
@@ -251,8 +254,23 @@ public class CdrGeneratorService {
         return r < NGUONG_SMS ? LoaiDichVu.SMS : LoaiDichVu.DATA;
     }
 
-    /** 55% nội mạng, 40% ngoại mạng, 5% quốc tế. */
-    private HuongCuocGoi chonHuong() {
+    /**
+     * Hướng của bản ghi — <b>phụ thuộc loại dịch vụ</b>.
+     *
+     * <p>Dịch vụ có nhiều hướng (THOAI, SMS) giữ nguyên phân bố 55% nội mạng /
+     * 40% ngoại mạng / 5% quốc tế. Dịch vụ chỉ có một hướng hợp lệ (DATA) thì không
+     * bốc ngẫu nhiên, trả thẳng hướng đó.</p>
+     *
+     * <p><b>Trước Phase 4A hàm này không nhận tham số</b> — hướng được bốc độc lập với
+     * loại dịch vụ, nên sinh ra {@code DATA + NGOAI_MANG} và {@code DATA + QUOC_TE},
+     * hai tổ hợp không tồn tại về mặt nghiệp vụ và không có dòng bảng giá nào khớp.
+     * Danh sách hướng hợp lệ nằm ở {@link QuyTacToHopDichVu}, dùng chung với bộ nhập CSV.</p>
+     */
+    private HuongCuocGoi chonHuong(LoaiDichVu dichVu) {
+        Set<HuongCuocGoi> hopLe = QuyTacToHopDichVu.huongHopLe(dichVu);
+        if (hopLe.size() == 1) {
+            return hopLe.iterator().next();
+        }
         int r = ngauNhien.nextInt(100);
         if (r < NGUONG_NOI_MANG) {
             return HuongCuocGoi.NOI_MANG;

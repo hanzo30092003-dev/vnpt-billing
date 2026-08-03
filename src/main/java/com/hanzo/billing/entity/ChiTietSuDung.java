@@ -58,7 +58,14 @@ public class ChiTietSuDung {
     @Column(name = "thoi_luong_giay")
     private Integer thoiLuongGiay;
 
-    /** Số tin nhắn với SMS, số MB với DATA. */
+    /**
+     * Số tin nhắn với SMS, số <b>KB</b> với DATA.
+     *
+     * <p>⚠️ Đơn vị của DATA là KB, <b>không phải MB</b>. Ưu đãi của gói lại khai bằng MB
+     * ({@code goi_cuoc.data_mien_phi_mb}), nên mọi phép so sánh và nhân đơn giá đều phải
+     * đi qua {@code DonViCuoc.kbSangMb()}. Quên chỗ nào cũng cho ra hóa đơn sai 1024 lần
+     * mà không có cảnh báo nào — xem {@code docs/mo-ta-csdl.md} mục 6.</p>
+     */
     @Column(name = "so_luong")
     private Integer soLuong;
 

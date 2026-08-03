@@ -43,6 +43,11 @@ INSERT INTO goi_cuoc (id, ma_goi, ten_goi, loai_thue_bao, cuoc_thue_bao_thang,
 -- goi_cuoc_id NULL nghia la don gia ap dung chung cho moi goi cuoc.
 -- block_giay: don vi tinh block - giay voi THOAI, 1 tin voi SMS, 1 MB voi DATA.
 -- Ban ghi gio_cao_diem = 1 chi ap dung cho dich vu THOAI, don gia cao hon 20%.
+--
+-- DO PHU: bang nay phai co du dong cho MOI to hop (dich_vu, huong) ma
+-- QuyTacToHopDichVu cho phep sinh ra - THOAI va SMS ca 3 huong, DATA chi
+-- NOI_MANG. Thieu mot to hop thi toan bo CDR loai do roi vao trang thai LOI
+-- khi chay engine tinh cuoc. KiemTraDoPhuBangGiaTest kiem dieu nay o khau build.
 -- ---------------------------------------------------------------------
 INSERT INTO bang_gia_cuoc (goi_cuoc_id, loai_dich_vu, huong, gio_cao_diem, block_giay, don_gia, ngay_hieu_luc, ngay_het_hieu_luc) VALUES
 (NULL, 'THOAI', 'NOI_MANG',   0,  6,   15, '2025-01-01', NULL),
@@ -50,6 +55,7 @@ INSERT INTO bang_gia_cuoc (goi_cuoc_id, loai_dich_vu, huong, gio_cao_diem, block
 (NULL, 'THOAI', 'QUOC_TE',    0, 60, 3600, '2025-01-01', NULL),
 (NULL, 'SMS',   'NOI_MANG',   0,  1,   99, '2025-01-01', NULL),
 (NULL, 'SMS',   'NGOAI_MANG', 0,  1,  250, '2025-01-01', NULL),
+(NULL, 'SMS',   'QUOC_TE',    0,  1, 2500, '2025-01-01', NULL),
 (NULL, 'DATA',  'NOI_MANG',   0,  1,   25, '2025-01-01', NULL),
 -- Gio cao diem: +20% so voi gia thuong
 (NULL, 'THOAI', 'NOI_MANG',   1,  6,   18, '2025-01-01', NULL),

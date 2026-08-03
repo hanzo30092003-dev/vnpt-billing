@@ -201,7 +201,13 @@ public class CdrImportService {
                     + "' không hợp lệ, chỉ chấp nhận NOI_MANG, NGOAI_MANG hoặc QUOC_TE");
         }
 
-        // 5. Thời gian đúng định dạng
+        // 5. Tổ hợp (dịch vụ, hướng) phải hợp lệ.
+        //    Dùng CHUNG quy tắc với bộ sinh CDR, không viết lại logic ở đây.
+        if (!QuyTacToHopDichVu.hopLe(loaiDichVu, huong)) {
+            throw new NghiepVuException(QuyTacToHopDichVu.thongBaoKhongHopLe(loaiDichVu, huong));
+        }
+
+        // 6. Thời gian đúng định dạng
         LocalDateTime thoiGian;
         try {
             thoiGian = LocalDateTime.parse(chuoiThoiGian, DINH_DANG_THOI_GIAN);
@@ -210,20 +216,20 @@ public class CdrImportService {
                     + "' sai định dạng, phải là yyyy-MM-dd HH:mm:ss");
         }
 
-        // 6. Không nhận bản ghi phát sinh trước ngày kích hoạt thuê bao
+        // 7. Không nhận bản ghi phát sinh trước ngày kích hoạt thuê bao
         if (thoiGian.toLocalDate().isBefore(thueBao.getNgayKichHoat())) {
             throw new NghiepVuException("Thời gian phát sinh sớm hơn ngày kích hoạt thuê bao ("
                     + thueBao.getNgayKichHoat() + ")");
         }
 
-        // 7. Các trường số
+        // 8. Các trường số
         int thoiLuong = docSoNguyen(chuoiThoiLuong, "thoi_luong_giay");
         int soLuong = docSoNguyen(chuoiSoLuong, "so_luong");
         if (thoiLuong < 0 || soLuong < 0) {
             throw new NghiepVuException("thoi_luong_giay và so_luong không được âm");
         }
 
-        // 8. Cuộc gọi bắt buộc phải có thời lượng
+        // 9. Cuộc gọi bắt buộc phải có thời lượng
         if (loaiDichVu == LoaiDichVu.THOAI && thoiLuong <= 0) {
             throw new NghiepVuException("Bản ghi THOAI phải có thoi_luong_giay lớn hơn 0");
         }

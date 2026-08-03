@@ -1,0 +1,50 @@
+package com.hanzo.billing.service.rating;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+/**
+ * Tham số nghiệp vụ của engine tính cước — gom về một nơi để đối chiếu với báo cáo.
+ *
+ * <p>Các giá trị này không nằm trong CSDL vì chúng là hằng số nghiệp vụ, không phải dữ
+ * liệu người dùng nhập. Thêm hẳn một bảng cấu hình cho ba hằng số là thừa; nhưng rải
+ * chúng rải rác trong code thì không ai đối chiếu được với con số ghi trong báo cáo.</p>
+ */
+public final class ThamSoTinhCuoc {
+
+    /** Thuế suất giá trị gia tăng, 10%. */
+    public static final BigDecimal THUE_SUAT_VAT = new BigDecimal("0.10");
+
+    /** Số ngày từ ngày lập hóa đơn tới hạn thanh toán. */
+    public static final int SO_NGAY_HAN_THANH_TOAN = 15;
+
+    /** Chế độ làm tròn tiền. */
+    public static final RoundingMode LAM_TRON = RoundingMode.HALF_UP;
+
+    /**
+     * Số chữ số thập phân khi làm tròn tiền: 0, vì VND không có đơn vị nhỏ hơn đồng.
+     *
+     * <p>Cột trong CSDL vẫn là {@code DECIMAL(15,2)} nên giá trị lưu xuống có dạng
+     * {@code x.00} — làm tròn về đồng rồi mới đưa về scale 2, không phải ngược lại.</p>
+     */
+    public static final int SO_LE_TIEN = 0;
+
+    /** Scale của các cột tiền trong CSDL. */
+    private static final int SCALE_CSDL = 2;
+
+    private ThamSoTinhCuoc() {
+    }
+
+    /**
+     * Làm tròn một khoản tiền về đồng.
+     *
+     * <p><b>Bất biến quan trọng:</b> chỉ được làm tròn ở <b>đúng một tầng</b> — tầng từng
+     * bản ghi CDR. Các mức trên (cước theo dịch vụ, tổng trước thuế, tổng thanh toán)
+     * chỉ cộng dồn, không làm tròn lại. Làm tròn ở nhiều tầng sẽ khiến
+     * {@code SUM(cuoc_phi)} không khớp với cột tương ứng trên {@code hoa_don}, và loại
+     * lệch một đồng đó gần như không thể truy nguyên.</p>
+     */
+    public static BigDecimal lamTronTien(BigDecimal soTien) {
+        return soTien.setScale(SO_LE_TIEN, LAM_TRON).setScale(SCALE_CSDL);
+    }
+}

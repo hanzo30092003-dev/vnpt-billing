@@ -82,6 +82,29 @@ public interface ChiTietSuDungRepository extends JpaRepository<ChiTietSuDung, Lo
                       @Param("trangThaiTinhCuoc") TrangThaiTinhCuoc trangThaiTinhCuoc,
                       @Param("nguon") NguonCdr nguon);
 
+    /**
+     * Các tổ hợp tra giá <b>thực sự</b> có trong dữ liệu CDR.
+     *
+     * <p>Phục vụ bất biến "mọi tổ hợp có trong CDR đều phải tra được đơn giá" —
+     * xem {@code KiemTraDoPhuBangGiaTest}. Gộp cả gói cước của thuê bao vào nhóm vì
+     * engine tra giá ưu tiên dòng gắn gói trước dòng mặc định chung, nên phải kiểm
+     * đúng cặp (gói, tổ hợp) mà engine sẽ gặp.</p>
+     *
+     * <p>Trả về ngày sớm nhất và muộn nhất của mỗi nhóm để kiểm được cả hai đầu khoảng
+     * hiệu lực: bảng giá có thể còn hiệu lực đầu tháng nhưng đã hết hiệu lực cuối tháng.</p>
+     *
+     * @return mỗi phần tử là mảng
+     *         {@code [goiCuocId, loaiDichVu, huong, gioCaoDiem, soBanGhi, somNhat, muonNhat]}
+     */
+    @Query("""
+            SELECT tb.goiCuoc.id, c.loaiDichVu, c.huong, c.gioCaoDiem,
+                   COUNT(c), MIN(c.thoiGianBatDau), MAX(c.thoiGianBatDau)
+            FROM ChiTietSuDung c
+            JOIN c.thueBao tb
+            GROUP BY tb.goiCuoc.id, c.loaiDichVu, c.huong, c.gioCaoDiem
+            """)
+    List<Object[]> thongKeToHopTraGia();
+
     /** Toàn bộ bản ghi khớp bộ lọc, dùng khi xuất Excel. */
     @Query("SELECT c FROM ChiTietSuDung c " + DIEU_KIEN_LOC + " ORDER BY c.thoiGianBatDau DESC, c.id DESC")
     List<ChiTietSuDung> timTatCaCoLoc(@Param("soThueBao") String soThueBao,

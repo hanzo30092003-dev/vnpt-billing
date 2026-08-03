@@ -62,6 +62,21 @@ public interface BangGiaCuocRepository extends JpaRepository<BangGiaCuoc, Long> 
             """)
     List<BangGiaCuoc> timCoHieuLucTaiNgay(@Param("ngay") LocalDate ngay);
 
+    /**
+     * Toàn bộ bảng giá kèm gói cước, nạp một lần duy nhất cho engine tính cước.
+     *
+     * <p>Cố ý <b>không</b> lọc theo ngày: CDR của một kỳ rải suốt cả tháng và bảng giá
+     * có khoảng hiệu lực, nên phải tra theo ngày phát sinh của từng bản ghi chứ không
+     * theo một ngày cố định. Bảng chỉ có chục dòng nên nạp hết rồi giải quyết khoảng
+     * hiệu lực trong bộ nhớ là rẻ nhất — xem {@code BangGiaLookup}.</p>
+     *
+     * <p>{@code LEFT JOIN FETCH} là bắt buộc: cấu hình đặt {@code open-in-view: false},
+     * nếu để {@code goiCuoc} ở dạng lazy thì việc đọc nó ngoài giao dịch sẽ ném
+     * {@code LazyInitializationException}.</p>
+     */
+    @Query("SELECT bg FROM BangGiaCuoc bg LEFT JOIN FETCH bg.goiCuoc")
+    List<BangGiaCuoc> timTatCaKemGoi();
+
     /** Danh sách có lọc; mọi tham số null nghĩa là bỏ qua điều kiện đó. */
     @Query("""
             SELECT bg FROM BangGiaCuoc bg

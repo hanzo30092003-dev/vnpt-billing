@@ -193,7 +193,7 @@ vnpt-billing/
 - [x] 15 bảng + 2 view trong `schema.sql`
 - [x] 15 entity JPA + 16 enum
 - [x] 15 repository Spring Data JPA
-- [x] Dữ liệu mẫu: 50 khách hàng, 80 thuê bao, 5 gói cước, 9 dòng bảng giá
+- [x] Dữ liệu mẫu: 50 khách hàng, 80 thuê bao, 5 gói cước, 10 dòng bảng giá
 
 **Phase 2 — xác thực và nghiệp vụ đầu tiên** ✅
 
@@ -220,7 +220,7 @@ Tài khoản dùng thử (mật khẩu đều là `123456`): `admin`, `nhanvien0
 
 Chưa làm (thuộc các phase sau):
 
-- [ ] Phase 4 — engine tính cước (Rating & Billing)
+- [ ] Phase 4 — engine tính cước (Rating & Billing) — **mục 4A xong**, còn 4B–4G
 - [ ] Phase 5 — hóa đơn, thanh toán, công nợ
 - [ ] Phase 6 — báo cáo, thống kê, dashboard
 - [ ] Phase 7 — hoàn thiện, kiểm thử, tài liệu
@@ -230,6 +230,8 @@ Tài liệu:
 - [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md) — báo cáo quá trình và kết quả Phase 0
 - [`docs/PHASE-2-REPORT.md`](docs/PHASE-2-REPORT.md) — báo cáo Phase 2, kèm danh sách màn hình cần chụp ảnh
 - [`docs/PHASE-3-REPORT.md`](docs/PHASE-3-REPORT.md) — báo cáo Phase 3, kèm 2 điểm sai lệch đặc tả và danh sách màn hình
+- [`docs/PHASE-4-PLAN.md`](docs/PHASE-4-PLAN.md) — rà soát đầu vào Phase 4, 10 quyết định nghiệp vụ và tiêu chí nghiệm thu
+- [`docs/PHASE-4-REPORT.md`](docs/PHASE-4-REPORT.md) — báo cáo Phase 4 (**mục 3: bài học phương pháp kiểm thử — kiểm bất biến thay vì kiểm luật**)
 - [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) — mô tả chi tiết 15 bảng và 2 view (**mục 6: cảnh báo quy đổi đơn vị DATA cho Phase 4**)
 - [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) — số đo tối ưu ghi hàng loạt CDR
 - [`docs/mau-cdr.csv`](docs/mau-cdr.csv) — file CSV mẫu để thử chức năng nhập CDR

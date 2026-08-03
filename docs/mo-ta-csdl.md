@@ -358,7 +358,7 @@ chưa có hóa đơn nào vẫn xuất hiện với giá trị 0.
 | `nguoi_dung` | 3 | `admin`, `nhanvien01`, `ketoan01` — mật khẩu đều là `123456` (băm BCrypt) |
 | `khach_hang` | 50 | 35 cá nhân + 15 doanh nghiệp, địa chỉ các tỉnh ĐBSCL |
 | `goi_cuoc` | 5 | CB01, MAX70, MAX150, DN500, TT01 |
-| `bang_gia_cuoc` | 9 | 6 dòng giá thường + 3 dòng giờ cao điểm (thoại, +20%) |
+| `bang_gia_cuoc` | 10 | 7 dòng giá thường + 3 dòng giờ cao điểm (thoại, +20%) |
 | `thue_bao` | 80 | 60 trả sau + 20 trả trước |
 | `dang_ky_goi_cuoc` | 80 | Mỗi thuê bao một bản ghi `DANG_AP_DUNG` |
 | `ky_cuoc` | 1 | Tháng 6/2026, trạng thái `MO` |
