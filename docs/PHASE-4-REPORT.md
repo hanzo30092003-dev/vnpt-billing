@@ -2,7 +2,7 @@
 
 **Đề tài:** Xây dựng phần mềm quản lý thuê bao và tính cước điện thoại
 **Môn học:** Thực tập nghề nghiệp
-**Trạng thái:** 🚧 Đang thực hiện — **mục 4A, 4B, 4C đã xong**, 4D–4G chưa bắt đầu
+**Trạng thái:** 🚧 Đang thực hiện — **mục 4A, 4B, 4C, 4D đã xong**, 4E–4G chưa bắt đầu
 
 > Toàn bộ dữ liệu trong hệ thống là dữ liệu mẫu tự sinh phục vụ học tập.
 > Hệ thống không sử dụng dữ liệu thật của bất kỳ nhà mạng nào.
@@ -1004,7 +1004,7 @@ Không tự ý thêm ở 4C vì đây là thay đổi schema, cần cân nhắc 
 
 ---
 
-## 22. Việc tiếp theo — mục 4D
+## 22. Kế hoạch mục 4D (viết trước khi làm)
 
 Áp ưu đãi gói cước: trừ dần quỹ ưu đãi theo thứ tự thời gian, đánh cờ `mien_phi` trên các
 bản ghi nằm trong ưu đãi, rồi lập lại hóa đơn.
@@ -1023,3 +1023,351 @@ Bốn điều 4D phải giữ:
 > ⚠️ Phép thử quyết định của 4D: **45 thuê bao còn trong ưu đãi data phải có `cuoc_data = 0`**,
 > và số hóa đơn có `cuoc_data > 0` phải tụt từ 50 xuống **đúng 5** (bảng ở mục 20.2). Câu SQL
 > kiểm chứng có sẵn ở `PHASE-4-PLAN.md` mục 9.2.
+
+---
+
+# PHẦN IV — MỤC 4D: ÁP ƯU ĐÃI GÓI CƯỚC
+
+## 23. ⚠️ Mâu thuẫn đặc tả về quy đổi đơn vị — điểm quan trọng nhất của 4D
+
+Đặc tả 4D mục B đưa ra **hai chỉ dẫn không tương thích** trong cùng một khối:
+
+> *"CDR THOAI: `thoi_luong_giay` (GIÂY) → `DonViCuoc.giaySangPhut()`"*
+>
+> *"⚠️ Ưu đãi trừ theo SẢN LƯỢNG THÔ (quyết định 5.2), không theo block đã làm tròn."*
+
+`giaySangPhut()` làm tròn **lên**. Áp nó cho từng bản ghi rồi cộng dồn chính là một dạng làm
+tròn — mâu thuẫn với dòng ngay bên dưới.
+
+### 23.1. Đo trước, quyết sau
+
+Trước khi viết dòng code nào, đã đo cả hai cách trên dữ liệu thật:
+
+| Loại ưu đãi | Cách A — quy từng CDR lên đơn vị quỹ | Cách B — so ở đơn vị nhỏ nhất | Chênh |
+|---|---|---|---|
+| Data | 45 thuê bao còn trong ưu đãi | 45 | — |
+| **Phút nội mạng** | **43** | **45** | **2 thuê bao** |
+| **Phút ngoại mạng** | **37** | **39** | **2 thuê bao** |
+| SMS | 47 | 47 | — |
+
+Mức "lạm phát" của cách A: **+0,18%** với data, nhưng **+10,97%** với thoại. Chênh lệch lớn
+vì cuộc gọi trung bình chỉ khoảng 3 phút — làm tròn lên nửa phút mỗi cuộc, cộng qua vài chục
+cuộc là mất cả chục phút quỹ.
+
+Trường hợp cụ thể nhất:
+
+| Thuê bao | Gói | Quỹ | Đã dùng thật | Cách A quy ra | Kết luận của cách A |
+|---|---|---|---|---|---|
+| 0832345622 | MAX70 | 100 phút | 5.351 giây = **89,2 phút** | **105 phút** | ❌ Vượt quỹ |
+| 0834567834 | MAX70 | 100 phút | 5.978 giây = **99,6 phút** | **109 phút** | ❌ Vượt quỹ |
+
+Cả hai thuê bao này **chưa hề vượt quỹ**, nhưng cách A vẫn thu tiền của họ. Đây đúng loại
+hỏng mà cả Phase 4 đang phòng: hóa đơn vẫn phát hành bình thường, không lỗi, không cảnh báo,
+chỉ sai tiền — và sai theo hướng bất lợi cho khách hàng.
+
+### 23.2. Cách đã chọn: so ở đơn vị nhỏ nhất
+
+Cài đặt **quy quỹ xuống** đơn vị của bản ghi thay vì quy bản ghi lên đơn vị của quỹ:
+
+```
+quyNoiMang   = goi.phutNoiMangMienPhi × 60      → GIÂY
+quyNgoaiMang = goi.phutNgoaiMangMienPhi × 60    → GIÂY
+quySms       = goi.smsMienPhi                   → TIN (không quy đổi)
+quyData      = goi.dataMienPhiMb × 1024         → KB
+```
+
+Ba lý do:
+
+1. **Không có phép làm tròn nào** trong toàn bộ phép so, nên không có gì để tranh cãi.
+2. Đúng nguyên văn dòng thứ hai của đặc tả và đúng lý do đã ghi ở quyết định 5.2:
+   *"ưu đãi là ưu đãi của khách, không nên bị hao thêm vì quy tắc làm tròn của nhà mạng"*.
+3. Ý đồ của dòng thứ nhất — nhìn ghi chú `[sai → lệch 60 lần]` — là **đừng quên quy đổi**,
+   chứ không phải *phải làm tròn lên*. So ở đơn vị nhỏ nhất đạt đúng ý đồ đó, và đạt tốt hơn.
+
+Đã bổ sung `DonViCuoc.phutSangGiay()` và `DonViCuoc.mbSangKb()` — hai phép **nhân đúng tuyệt
+đối**, để chiều quy đổi này cũng nằm trong cùng một lớp chứ không rải ra ngoài.
+
+> Nếu muốn đổi sang cách A thì chỉ cần sửa bốn dòng khởi tạo quỹ trong `UuDaiGoiCuoc`. Toàn
+> bộ phần còn lại không phụ thuộc lựa chọn này.
+
+### 23.3. Đặc tả còn một chỗ nữa cần đính chính
+
+Đặc tả D.8 yêu cầu test *"đảo thứ tự đầu vào → kết quả không đổi"*. **Điều đó không đúng với
+thuật toán đã chốt**, và không thể đúng: quy tắc không cắt đôi bản ghi (quyết định 5.3) làm
+kết quả **phụ thuộc thứ tự** một cách cố hữu.
+
+Ví dụ, quỹ 60 giây với ba cuộc 30 / 40 / 20 giây:
+
+| Thứ tự | Diễn biến | Kết quả |
+|---|---|---|
+| 30 → 40 → 20 | 30 lọt (còn 30) · 40 vượt, quỹ đóng · 20 bị thu | miễn phí 1 cuộc |
+| 20 → 40 → 30 | 20 lọt (còn 40) · 40 lọt (còn 0) · 30 vượt | miễn phí 2 cuộc |
+
+Vì vậy test được viết lại thành **hai** test khác nhau, và cả hai đều có giá trị hơn:
+
+- *Tính xác định*: cùng danh sách chạy hai lần cho kết quả giống hệt
+- *Phụ thuộc thứ tự*: hai thứ tự khác nhau cho hai kết quả khác nhau — chính là lý do truy
+  vấn lấy CDR **bắt buộc** phải có `ORDER BY` cố định. Nếu để CSDL tự chọn thứ tự thì cùng
+  một dữ liệu có thể cho ra hai hóa đơn khác nhau ở hai lần chạy.
+
+---
+
+## 24. Bước A — lưu `bang_gia_cuoc_id` lên CDR
+
+Chấp thuận đề xuất mục 21.2. Thêm cột `bang_gia_cuoc_id BIGINT NULL`, FK →
+`bang_gia_cuoc(id)`. `RatingService` gán cột này cùng lúc gán `cuoc_phi`.
+
+Áp lên CSDL bằng `ALTER TABLE` chứ **không** dùng profile `reset`: reset sẽ sinh lại CDR
+ngẫu nhiên và làm mất khả năng đối chiếu. Sau đó chạy lại trọn vòng — hủy hóa đơn → hủy định
+giá → định giá → lập hóa đơn:
+
+| Chỉ tiêu | Trước bước A | Sau bước A | |
+|---|---|---|---|
+| Tổng cước gộp | 9.686.210 đ | **9.686.210 đ** | ✅ không đổi |
+| Doanh thu | 28.692.784 đ | **28.692.784 đ** | ✅ không đổi |
+| Số hóa đơn | 58 | 58 | ✅ |
+| CDR `DA_TINH` thiếu snapshot | — | **0** | ✅ |
+
+Hai con số đầu là phép thử quan trọng nhất của bước này: nếu lệch thì thay đổi đã vô tình
+động vào logic tính cước chứ không chỉ thêm một cột.
+
+### 24.1. Cột này trả giá ngay ở bước B
+
+Bước áp ưu đãi phải quyết định mỗi bản ghi được miễn phí hay bị thu tiền, và nếu bị thu thì
+thu bao nhiêu. Nếu chỉ **giữ nguyên** `cuoc_phi` cũ thì bước này **không chạy lại được**:
+lần chạy trước đã đặt `cuoc_phi = 0` cho các bản ghi miễn phí, nên lần sau chúng mang giá 0
+vĩnh viễn dù quỹ đã đổi.
+
+Nhờ có snapshot, bước áp ưu đãi **tính lại cước đầy đủ** từ đúng dòng bảng giá đã áp dụng, và
+trở thành **bất biến theo số lần chạy**. Công thức dùng chung với engine định giá qua
+`RatingService.tinhTienTheoBangGia()` — không viết lại ở hai nơi.
+
+---
+
+## 25. Thuật toán quỹ ưu đãi
+
+```
+KHỞI TẠO UuDaiGoiCuoc(goi):
+    quyNoiMang   ← Quy(goi.phutNoiMangMienPhi   × 60)     # GIÂY
+    quyNgoaiMang ← Quy(goi.phutNgoaiMangMienPhi × 60)     # GIÂY
+    quySms       ← Quy(goi.smsMienPhi)                    # TIN
+    quyData      ← Quy(goi.dataMienPhiMb × 1024)          # KB
+    # Quỹ bằng 0 thì ĐÓNG ngay từ đầu (gói CB01)
+
+HÀM namTrongUuDai(cdr):
+    NẾU cdr.huong = QUOC_TE:  TRẢ VỀ false        # quốc tế không có ưu đãi, không đụng quỹ
+    quy, luong ← THEO cdr.loaiDichVu:
+        THOAI → (quy theo hướng,  cdr.thoiLuongGiay)      # GIÂY, sản lượng THÔ
+        SMS   → (quySms,          cdr.soLuong)            # TIN
+        DATA  → (quyData,         cdr.soLuong)            # KB, sản lượng THÔ
+    TRẢ VỀ quy.thu(luong)
+
+HÀM Quy.thu(luong):
+    NẾU daDong HOẶC luong > conLai:
+        daDong ← true            # quỹ ĐÓNG: mọi bản ghi sau đều thu tiền
+        TRẢ VỀ false
+    conLai ← conLai − luong
+    TRẢ VỀ true
+
+ÁP CHO CẢ KỲ:
+    danhSách ← CDR đã DA_TINH của kỳ, ORDER BY (thuê bao, thời gian, id)
+    VỚI MỖI thuê bao (danh sách đã gom sẵn theo thuê bao):
+        quy ← UuDaiGoiCuoc(gói hiệu lực tại NGÀY CUỐI KỲ)
+        VỚI MỖI cdr:
+            cuocDayDu ← tinhTienTheoBangGia(cdr, bảng giá đã lưu ở bang_gia_cuoc_id)
+            NẾU quy.namTrongUuDai(cdr):  ghi mien_phi=1, cuoc_phi=0
+            NGƯỢC LẠI:                   ghi mien_phi=0, cuoc_phi=cuocDayDu
+```
+
+### 25.1. Vì sao quỹ phải "đóng" chứ không chỉ "không trừ"
+
+Nếu quỹ chỉ đơn giản không bị trừ khi bản ghi quá lớn, thì một bản ghi **ngắn** phát sinh sau
+đó vẫn lọt vào phần dư. Khách hàng sẽ thấy cuộc gọi dài mất tiền, còn cuộc ngắn ngay sau đó
+lại miễn phí — không giải thích nổi, và kết quả phụ thuộc vào việc bản ghi nào tình cờ nhỏ
+hơn phần dư. Cờ `daDong` biến quy tắc thành: *ưu đãi dùng hết là hết*.
+
+### 25.2. Bốn quỹ độc lập
+
+Cạn quỹ data không ảnh hưởng quỹ SMS hay thoại; quỹ nội mạng và ngoại mạng cũng tách riêng.
+Có test cho từng cặp.
+
+---
+
+## 26. ⭐ Kiểm chứng dự đoán đã công bố ở 4C
+
+Báo cáo 4C công bố dự đoán **trước khi viết dòng code 4D nào**. Kết quả:
+
+| # | Dự đoán (viết ở 4C) | Kỳ vọng | Thực tế | |
+|---|---|---|---|---|
+| 1 | Số hóa đơn có `cuoc_data > 0` | tụt 50 → **đúng 5** | **5** | ✅ |
+| 2 | 5 hóa đơn đó gồm những ai | 3 gói CB01 + 2 gói MAX70 | **đúng 3 CB01 + 2 MAX70** | ✅ |
+| 3 | 45 thuê bao còn trong ưu đãi data có `cuoc_data = 0` | 0 vi phạm | **0** | ✅ |
+| 4 | 45 thuê bao còn ưu đãi phút nội mạng, cước = 0 | 0 vi phạm | **0** | ✅ |
+| 5 | 39 ngoại mạng, 47 SMS | 0 vi phạm | **0** | ✅ |
+| 6 | Tổng `cuoc_data` giảm mạnh | — | **−87,4%** | ✅ |
+
+Năm hóa đơn còn phải trả cước data, đúng như dự đoán:
+
+| Mã hóa đơn | Thuê bao | Gói | Ưu đãi | Đã dùng | Cước data |
+|---|---|---|---|---|---|
+| HD202606-000001 | 0821234521 | CB01 | 0 MB | 5.740 MB | 143.750 đ |
+| HD202606-000007 | 0917890127 | CB01 | 0 MB | 2.516 MB | 62.975 đ |
+| HD202606-000010 | 0960123430 | CB01 | 0 MB | 3.009 MB | 75.400 đ |
+| HD202606-000005 | 0885678925 | MAX70 | 2.048 MB | 2.628 MB | 18.500 đ |
+| HD202606-000011 | 0971234531 | MAX70 | 2.048 MB | 3.038 MB | 27.725 đ |
+
+### 26.1. Một sự cố: câu SQL kiểm chứng sai, không phải engine sai
+
+Lần chạy kiểm chứng đầu tiên báo **25 thuê bao vi phạm** ở phép kiểm ưu đãi SMS. Theo đúng
+quy tắc "nếu số không khớp thì dừng lại phân tích trước khi sửa", đã truy nguyên trước khi
+động vào code.
+
+Nguyên nhân nằm ở **câu SQL kiểm chứng**, không nằm ở engine: nó cộng cả **SMS quốc tế** vào
+phép so với quỹ. Mà tin nhắn quốc tế **không có ưu đãi** — đó là quy tắc đã chốt và engine
+làm đúng. Một thuê bao nhắn 20 tin trong nước (nằm gọn trong quỹ 30 tin) cộng 2 tin quốc tế
+sẽ có `SUM(cuoc_phi) ≠ 0` một cách hoàn toàn hợp lệ.
+
+Loại `QUOC_TE` ra khỏi phép kiểm thì kết quả là **0 vi phạm** cho cả bốn loại ưu đãi.
+
+Ghi lại vì đây là một biến thể đáng nhớ của bài học mục 3: **một phép kiểm sai cũng nguy hiểm
+như thiếu phép kiểm** — nó tạo ra báo động giả, và nếu tin nó thì sẽ đi "sửa" một engine đang
+chạy đúng.
+
+---
+
+## 27. Bảng so sánh trước / sau khi áp ưu đãi
+
+| Chỉ tiêu | Trước ưu đãi (4C) | Sau ưu đãi (4D) | Chênh lệch |
+|---|---|---|---|
+| **Doanh thu** | 28.692.784 đ | **23.940.596 đ** | **−4.752.188 đ (−16,6%)** |
+| Cước thuê bao | 18.400.000 đ | 18.400.000 đ | **0 đ** ✅ không đổi |
+| Cước thoại | 4.863.778 đ | 2.939.561 đ | −1.924.217 đ (−39,6%) |
+| Cước SMS | 214.169 đ | 96.267 đ | −117.902 đ (−55,0%) |
+| **Cước data** | 2.606.400 đ | **328.350 đ** | **−2.278.050 đ (−87,4%)** |
+| Hóa đơn có cước data | 50 | **5** | −45 |
+
+Cước thuê bao **không đổi một đồng** — đúng như phải thế: ưu đãi không tác động tới cước cố
+định hàng tháng.
+
+Tỷ lệ bản ghi được miễn phí:
+
+| Dịch vụ | Tổng bản ghi | Miễn phí | Tỷ lệ |
+|---|---|---|---|
+| THOAI | 3.499 | 2.292 | 65,5% |
+| SMS | 1.008 | 712 | 70,6% |
+| DATA | 510 | 353 | 69,2% |
+| **Tổng** | **5.017** | **3.357** | **66,9%** |
+
+### 27.1. Cước còn lại đến từ đâu
+
+| Dịch vụ | Hướng | Bản ghi | Miễn phí | Cước còn lại |
+|---|---|---|---|---|
+| THOAI | NOI_MANG | 1.937 | 1.390 | 363.867 đ |
+| THOAI | NGOAI_MANG | 1.391 | 902 | 485.895 đ |
+| **THOAI** | **QUOC_TE** | 171 | **0** | **3.425.760 đ** |
+| SMS | NOI_MANG | 554 | 398 | 15.444 đ |
+| SMS | NGOAI_MANG | 408 | 314 | 23.500 đ |
+| **SMS** | **QUOC_TE** | 46 | **0** | **115.000 đ** |
+| DATA | NOI_MANG | 510 | 353 | 936.575 đ |
+
+Điểm đáng chú ý: **171 cuộc gọi quốc tế — chỉ 3,4% số bản ghi — sinh ra 3,4 triệu đồng**, gần
+bằng toàn bộ cước còn lại của mọi dịch vụ khác cộng lại. Vì quốc tế không có ưu đãi và đơn
+giá cao gấp 144 lần nội mạng (3.600 đ/phút so với 15 đ/6 giây). Con số này khiến bảng cước
+sau ưu đãi trông rất khác bảng trước ưu đãi, và giải thích vì sao cước thoại chỉ giảm 39,6%
+trong khi 65,5% số cuộc gọi được miễn phí.
+
+*(Bảng này tính trên toàn bộ thuê bao; các cột trên hóa đơn chỉ gồm thuê bao trả sau.)*
+
+---
+
+## 28. Kết quả nghiệm thu mục 4D
+
+| # | Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `mvnw test` PASS, tối thiểu 125 test | ✅ | **130 test**, 0 lỗi (111 + **19 mới**) |
+| 2 | Bước A: mọi CDR `DA_TINH` có snapshot, cước gộp vẫn 9.686.210 đ | ✅ | Bảng mục 24 |
+| 3 | Dự đoán số 1 ra **đúng 5** | ✅ | Bảng mục 26 |
+| 4 | Mười kiểm chứng SQL | ✅ | Bảng 28.1 |
+| 5 | Bất biến cộng dồn vẫn lệch 0,00 đ | ✅ | Kiểm chứng 9 |
+| 6 | Bảng so sánh trước/sau | ✅ | Mục 27 |
+
+### 28.1. Mười kiểm chứng SQL
+
+| # | Kiểm chứng | Kỳ vọng | Thực tế |
+|---|---|---|---|
+| 1 | Hóa đơn có `cuoc_data > 0` | 5 | ✅ **5** |
+| 2 | Thành phần 5 hóa đơn đó | 3 CB01 + 2 MAX70 | ✅ đúng |
+| 3 | Thuê bao còn ưu đãi data mà vẫn bị thu | 0 | ✅ **0** |
+| 4 | Thuê bao còn ưu đãi phút NM / NgM mà vẫn bị thu | 0 | ✅ **0 / 0** |
+| 5 | Thuê bao còn ưu đãi SMS trong nước mà vẫn bị thu | 0 | ✅ **0** |
+| 6 | Tổng cước data | giảm mạnh | ✅ **−87,4%** |
+| 7 | `mien_phi = 1` mà `cuoc_phi ≠ 0` | 0 | ✅ **0** |
+| 8 | Tổng sản lượng miễn phí vượt quỹ (cả 3 loại) | 0 | ✅ **0 / 0 / 0** |
+| 8b | Bản ghi quốc tế được miễn phí | 0 | ✅ **0** |
+| 9 | Bất biến cộng dồn cả 3 dịch vụ | lệch 0 đ | ✅ **0,00 đ**; từng hóa đơn: **0/58 lệch** |
+| 9c | Các bất biến tiền tệ khác của 4C | 0 dòng lệch | ✅ **0** |
+| 10 | Hủy → chạy lại → doanh thu giống hệt | giống | ✅ 23.940.596 đ |
+
+### 28.2. Số test theo lớp
+
+| Lớp test | Số test | Ghi chú |
+|---|---|---|
+| Phase 2–3 | 30 | |
+| 4A (`DonViCuoc`, `BangGiaLookup`, `QuyTacToHopDichVu`, `KiemTraDoPhuBangGia`) | 33 | +1 test snapshot bảng giá |
+| `RatingServiceTest` | 22 | 4B |
+| `BillingServiceTest` | 29 | 4C + **3 test áp ưu đãi** |
+| **`UuDaiGoiCuocTest`** | **16** | **4D** |
+| | **130** | |
+
+16 test của `UuDaiGoiCuoc` chia ba nhóm: bẫy quy đổi đơn vị (7), quy tắc trừ quỹ (7), tính
+xác định và phụ thuộc thứ tự (2). Hai test đầu nhóm 1 chính là hai cái bẫy 1024 lần và 60 lần
+mà `mo-ta-csdl.md` mục 6 cảnh báo.
+
+---
+
+## 29. Hạn chế bổ sung sau 4D
+
+### 29.1. Quỹ ưu đãi lấy theo gói cuối kỳ
+
+Giống cước thuê bao (mục 21.1): nếu khách đổi gói giữa kỳ thì quỹ ưu đãi lấy theo gói có hiệu
+lực tại **ngày cuối kỳ**, không chia quỹ theo tỷ lệ giữa hai gói. Cước **sử dụng** thì vẫn tra
+giá theo đúng gói tại thời điểm từng bản ghi (mục 4B) — hai chỗ này dùng hai mốc khác nhau
+một cách có chủ đích, nhưng cần nêu rõ trong báo cáo cuối kỳ.
+
+### 29.2. Bản ghi làm vượt ngưỡng bị thu tiền toàn bộ
+
+Quyết định 5.3 không cắt đôi bản ghi. Hệ quả có thể thấy trên hóa đơn: một phiên data 500 MB
+phát sinh khi quỹ chỉ còn 400 MB sẽ bị thu tiền cho **cả** 500 MB, và 400 MB còn lại của quỹ
+coi như mất. Đây là xấp xỉ có chủ đích, bắt nguồn từ việc `chi_tiet_su_dung` chỉ có một cột
+`cuoc_phi` và một cờ `mien_phi`.
+
+Muốn chính xác tuyệt đối thì phải tách bản ghi thành hai dòng, hoặc thêm cột "sản lượng trong
+ưu đãi" — cả hai đều là thay đổi schema, nên để lại làm hướng phát triển.
+
+### 29.3. Bước áp ưu đãi nằm trong `BillingService`
+
+Về mặt khái niệm, quỹ ưu đãi là chuyện của **kỳ cước** chứ không của từng bản ghi, nên đặt ở
+tầng lập hóa đơn là hợp lý. Nhưng nó **ghi vào `chi_tiet_su_dung`** — tức tầng lập hóa đơn
+đang sửa dữ liệu của tầng định giá. Hiện chấp nhận được vì hai tầng luôn chạy nối tiếp nhau và
+bước này bất biến theo số lần chạy. Nếu về sau tách thành hai tiến trình chạy độc lập thì nên
+tách `UuDaiService` riêng.
+
+---
+
+## 30. Việc tiếp theo — mục 4E
+
+Dựng giao diện: màn hình chạy tính cước theo kỳ, lập hóa đơn, chốt kỳ, và các đường hủy/gỡ đã
+có sẵn ở tầng nghiệp vụ.
+
+Bốn việc 4E phải làm:
+
+1. Nút **Tính cước kỳ** và **Lập hóa đơn kỳ**, có xác nhận trước khi chạy và hiển thị kết quả
+   (số bản ghi, số hóa đơn, thời gian, tổng cước)
+2. Nút **Hủy kết quả tính cước** / **Hủy lập hóa đơn** / **Gỡ kỳ bị kẹt**, mỗi nút một modal
+   cảnh báo riêng — đặc biệt nút gỡ kỳ kẹt phải nói rõ nó chỉ dùng khi có sự cố
+3. **Chốt kỳ** (`MO` → `DA_CHOT`), thao tác một chiều, phải cảnh báo rõ
+4. Xóa ba lớp bộ chạy thủ công `ChayTinhCuocKyThuCong`, `ChayLapHoaDonKyThuCong`,
+   `ChayLaiToanBoKyThuCong` khi giao diện đã thay được chúng
+
+> Cũng nên chốt kỳ 5/2026 ở 4E — nợ này ghi từ `PHASE-3-REPORT.md` mục 8.2, đến giờ mới có
+> chức năng chốt kỳ để xử lý.

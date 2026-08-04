@@ -126,6 +126,23 @@ public interface ChiTietSuDungRepository extends JpaRepository<ChiTietSuDung, Lo
                                        @Param("denLuc") LocalDateTime denLuc);
 
     /**
+     * CDR đã định giá của một kỳ, sắp xếp để duyệt quỹ ưu đãi theo từng thuê bao.
+     *
+     * <p>Thứ tự {@code (thuê bao, thời gian, id)} là <b>bắt buộc</b>: quỹ ưu đãi trừ dần
+     * theo thứ tự thời gian, nên thứ tự duyệt quyết định bản ghi nào được miễn phí. Thứ tự
+     * cố định là điều kiện để chạy hai lần ra cùng kết quả.</p>
+     */
+    @Query("""
+            SELECT c FROM ChiTietSuDung c
+            JOIN FETCH c.thueBao tb
+            JOIN FETCH tb.goiCuoc
+            WHERE c.kyCuoc.id = :kyCuocId
+              AND c.trangThaiTinhCuoc = com.hanzo.billing.enums.TrangThaiTinhCuoc.DA_TINH
+            ORDER BY tb.id, c.thoiGianBatDau, c.id
+            """)
+    List<ChiTietSuDung> timDaTinhTheoKyDeApUuDai(@Param("kyCuocId") Long kyCuocId);
+
+    /**
      * Tổng cước và sản lượng của một kỳ, gom theo (thuê bao, loại dịch vụ).
      *
      * <p>Một truy vấn duy nhất cho cả kỳ thay vì ba truy vấn cho mỗi thuê bao — với 58

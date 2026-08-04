@@ -47,6 +47,21 @@ public class BangGiaLookup {
     }
 
     /**
+     * Bảng giá tra theo mã số dòng.
+     *
+     * <p>Dùng khi cần tính lại tiền của một bản ghi CDR từ chính dòng bảng giá đã áp dụng
+     * lúc định giá ({@code chi_tiet_su_dung.bang_gia_cuoc_id}), thay vì tra lại từ đầu.</p>
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, BangGiaCuoc> napTheoId() {
+        Map<Long, BangGiaCuoc> theoId = new HashMap<>();
+        for (BangGiaCuoc bg : bangGiaCuocRepository.timTatCaKemGoi()) {
+            theoId.put(bg.getId(), bg);
+        }
+        return theoId;
+    }
+
+    /**
      * Khoá tra cứu. {@code goiCuocId} null nghĩa là dòng giá mặc định chung.
      *
      * <p>{@code gioCaoDiem} khai là {@code boolean} nguyên thuỷ chứ không phải

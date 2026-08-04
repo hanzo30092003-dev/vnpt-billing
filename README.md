@@ -220,7 +220,7 @@ Tài khoản dùng thử (mật khẩu đều là `123456`): `admin`, `nhanvien0
 
 Chưa làm (thuộc các phase sau):
 
-- [ ] Phase 4 — engine tính cước (Rating & Billing) — **mục 4A, 4B, 4C xong**, còn 4D–4G
+- [ ] Phase 4 — engine tính cước (Rating & Billing) — **mục 4A–4D xong**, còn 4E–4G
 - [ ] Phase 5 — hóa đơn, thanh toán, công nợ
 - [ ] Phase 6 — báo cáo, thống kê, dashboard
 - [ ] Phase 7 — hoàn thiện, kiểm thử, tài liệu

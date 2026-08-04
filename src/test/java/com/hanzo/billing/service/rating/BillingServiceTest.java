@@ -1,13 +1,16 @@
 package com.hanzo.billing.service.rating;
 
 import com.hanzo.billing.dto.KetQuaBilling;
+import com.hanzo.billing.entity.BangGiaCuoc;
 import com.hanzo.billing.entity.ChiTietHoaDon;
+import com.hanzo.billing.entity.ChiTietSuDung;
 import com.hanzo.billing.entity.DangKyGoiCuoc;
 import com.hanzo.billing.entity.GoiCuoc;
 import com.hanzo.billing.entity.HoaDon;
 import com.hanzo.billing.entity.KhachHang;
 import com.hanzo.billing.entity.KyCuoc;
 import com.hanzo.billing.entity.ThueBao;
+import com.hanzo.billing.enums.HuongCuocGoi;
 import com.hanzo.billing.enums.LoaiDichVu;
 import com.hanzo.billing.enums.LoaiThueBao;
 import com.hanzo.billing.enums.TrangThaiDangKyGoi;
@@ -34,11 +37,17 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,6 +56,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,6 +80,8 @@ class BillingServiceTest {
 
     private static final Long KY_ID = 1L;
 
+    @Mock private JdbcTemplate jdbcTemplate;
+    @Mock private BangGiaLookup bangGiaLookup;
     @Mock private HoaDonRepository hoaDonRepository;
     @Mock private ChiTietSuDungRepository chiTietSuDungRepository;
     @Mock private DangKyGoiCuocRepository dangKyGoiCuocRepository;
@@ -494,6 +506,116 @@ class BillingServiceTest {
     }
 
     // =================================================================
+    // NHÓM 5 — ÁP ƯU ĐÃI GÓI CƯỚC
+    // =================================================================
+
+    @Nested
+    @DisplayName("Áp ưu đãi gói cước lên bản ghi CDR")
+    class ApUuDai {
+
+        private final BangGiaCuoc giaData = bangGia(6L, LoaiDichVu.DATA, 1, 25);
+
+        @Test
+        @DisplayName("27. Ưu đãi KHÔNG prorate: thuê bao hòa mạng 23/06 vẫn được trọn quỹ tháng")
+        void uuDaiKhongProrate() throws SQLException {
+            // Gói MAX70 cho 2048 MB = 2.097.152 KB. Thuê bao chỉ hòa mạng ngày 23/06 nhưng
+            // quỹ vẫn nguyên tháng: hai phiên tổng 2.000.000 KB đều phải miễn phí.
+            KyCuoc ky = ky(TrangThaiKyCuoc.MO);
+            ThueBao tb = thueBao(TrangThaiThueBao.HOAT_DONG, "2026-06-23", null);
+            chuanBiToiBuocUuDai(tb, List.of(
+                    cdrData(tb, 1L, 1_000_000, giaData),
+                    cdrData(tb, 2L, 1_000_000, giaData)));
+            chuanBiPhanLapHoaDon(tb);
+
+            service.billingKy(ky);
+
+            List<Object[]> daGhi = docLoGhi(batLoGhi());
+            assertThat(daGhi).hasSize(2);
+            assertThat(daGhi).allSatisfy(dong -> {
+                assertThat((Integer) dong[0]).as("mien_phi").isEqualTo(1);
+                assertThat((BigDecimal) dong[1]).as("cuoc_phi").isEqualByComparingTo("0");
+            });
+        }
+
+        @Test
+        @DisplayName("28. Bản ghi làm vượt quỹ: mien_phi = 0 và cước TÍNH LẠI đầy đủ từ bảng giá")
+        void banGhiVuotQuy_tinhLaiCuocDayDu() {
+            // Quỹ 2048 MB. Phiên 1 dùng 2.000.000 KB (lọt). Phiên 2 dùng 500.000 KB —
+            // vượt phần dư nên phải thu tiền ĐẦY ĐỦ: ceil(500000/1024) = 489 MB × 25 = 12.225 đ.
+            // Cước này được TÍNH LẠI từ dòng bảng giá đã lưu, không lấy từ cuoc_phi cũ —
+            // đó là thứ làm cho bước áp ưu đãi chạy lại được nhiều lần.
+            KyCuoc ky = ky(TrangThaiKyCuoc.MO);
+            ThueBao tb = thueBao(TrangThaiThueBao.HOAT_DONG, "2025-01-01", null);
+            chuanBiToiBuocUuDai(tb, List.of(
+                    cdrData(tb, 1L, 2_000_000, giaData),
+                    cdrData(tb, 2L, 500_000, giaData)));
+            chuanBiPhanLapHoaDon(tb);
+
+            service.billingKy(ky);
+
+            List<Object[]> daGhi = docLoGhiKhongNemLoi();
+            assertThat((Integer) daGhi.get(0)[0]).as("phiên 1 miễn phí").isEqualTo(1);
+            assertThat((BigDecimal) daGhi.get(0)[1]).isEqualByComparingTo("0");
+            assertThat((Integer) daGhi.get(1)[0]).as("phiên 2 thu tiền").isZero();
+            assertThat((BigDecimal) daGhi.get(1)[1]).isEqualByComparingTo("12225");
+        }
+
+        @Test
+        @DisplayName("29. Bản ghi đã tính cước mà thiếu tham chiếu bảng giá: dừng lại, không đoán")
+        void thieuThamChieuBangGia_thiNemLoi() {
+            KyCuoc ky = ky(TrangThaiKyCuoc.MO);
+            ThueBao tb = thueBao(TrangThaiThueBao.HOAT_DONG, "2025-01-01", null);
+            ChiTietSuDung khongCoGia = cdrData(tb, 1L, 1000, giaData);
+            khongCoGia.setBangGiaCuoc(null);
+            chuanBiToiBuocUuDai(tb, List.of(khongCoGia));
+
+            assertThatThrownBy(() -> service.billingKy(ky))
+                    .isInstanceOf(NghiepVuException.class)
+                    .hasMessageContaining("không lưu dòng bảng giá");
+        }
+
+        /** Stub tối thiểu để chạy tới đúng bước áp ưu đãi, không xa hơn. */
+        private void chuanBiToiBuocUuDai(ThueBao tb, List<ChiTietSuDung> danhSachCdr) {
+            when(chiTietSuDungRepository.demTheoKhoangVaTrangThai(
+                    any(LocalDateTime.class), any(LocalDateTime.class), any())).thenReturn(0L);
+            when(dangKyGoiCuocRepository.timTatCaKemGoiVaThueBao())
+                    .thenReturn(List.of(dangKyVoiGoi(tb, goiMax70())));
+            when(chiTietSuDungRepository.tongHopCuocTheoThueBao(KY_ID)).thenReturn(List.of());
+            when(giamTruRepository.timApDungChoKy(KY_ID)).thenReturn(List.of());
+            when(chiTietSuDungRepository.timDaTinhTheoKyDeApUuDai(KY_ID)).thenReturn(danhSachCdr);
+            when(bangGiaLookup.napTheoId()).thenReturn(Map.of(giaData.getId(), giaData));
+        }
+
+        /** Phần còn lại của {@code billingKy} sau bước áp ưu đãi. */
+        private void chuanBiPhanLapHoaDon(ThueBao tb) {
+            when(thueBaoRepository.timTheoLoaiKemQuanHe(LoaiThueBao.TRA_SAU))
+                    .thenReturn(List.of(tb));
+            when(hoaDonRepository.existsByThueBaoIdAndKyCuocId(anyLong(), eq(KY_ID)))
+                    .thenReturn(false);
+            when(sinhMaService.sinhMaHoaDon(6, 2026)).thenReturn("HD202606-000001");
+            when(hoaDonRepository.save(any(HoaDon.class))).thenAnswer(loi -> loi.getArgument(0));
+            when(hoaDonRepository.countByKyCuocId(KY_ID)).thenReturn(1L);
+            when(hoaDonRepository.tinhTongDoanhThuTheoKy(KY_ID))
+                    .thenReturn(new BigDecimal("165000"));
+        }
+
+        private BatchPreparedStatementSetter batLoGhi() {
+            ArgumentCaptor<BatchPreparedStatementSetter> bat =
+                    ArgumentCaptor.forClass(BatchPreparedStatementSetter.class);
+            verify(jdbcTemplate).batchUpdate(anyString(), bat.capture());
+            return bat.getValue();
+        }
+
+        private List<Object[]> docLoGhiKhongNemLoi() {
+            try {
+                return docLoGhi(batLoGhi());
+            } catch (SQLException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+
+    // =================================================================
     // TIỆN ÍCH DỰNG DỮ LIỆU
     // =================================================================
 
@@ -528,6 +650,75 @@ class BillingServiceTest {
         when(hoaDonRepository.countByKyCuocId(KY_ID)).thenReturn(58L);
         when(hoaDonRepository.tinhTongDoanhThuTheoKy(KY_ID))
                 .thenReturn(new BigDecimal("123456789"));
+        // Bước áp ưu đãi chạy trước khi gom cước; mặc định không có bản ghi nào để áp
+        when(bangGiaLookup.napTheoId()).thenReturn(Map.of());
+        when(chiTietSuDungRepository.timDaTinhTheoKyDeApUuDai(KY_ID)).thenReturn(List.of());
+    }
+
+    /** Một dòng bảng giá THOẠI nội mạng / DATA nội mạng để tính lại cước đầy đủ. */
+    private static BangGiaCuoc bangGia(Long id, LoaiDichVu dichVu, int blockGiay, int donGia) {
+        BangGiaCuoc bg = new BangGiaCuoc();
+        bg.setId(id);
+        bg.setLoaiDichVu(dichVu);
+        bg.setHuong(HuongCuocGoi.NOI_MANG);
+        bg.setGioCaoDiem(false);
+        bg.setBlockGiay(blockGiay);
+        bg.setDonGia(BigDecimal.valueOf(donGia));
+        bg.setNgayHieuLuc(LocalDate.of(2025, 1, 1));
+        return bg;
+    }
+
+    private static ChiTietSuDung cdrData(ThueBao thueBao, long id, int soKb, BangGiaCuoc gia) {
+        ChiTietSuDung cdr = new ChiTietSuDung();
+        cdr.setId(id);
+        cdr.setThueBao(thueBao);
+        cdr.setLoaiDichVu(LoaiDichVu.DATA);
+        cdr.setHuong(HuongCuocGoi.NOI_MANG);
+        cdr.setGioCaoDiem(false);
+        cdr.setThoiLuongGiay(0);
+        cdr.setSoLuong(soKb);
+        cdr.setThoiGianBatDau(LocalDateTime.of(2026, 6, 25, 9, 0));
+        cdr.setTrangThaiTinhCuoc(TrangThaiTinhCuoc.DA_TINH);
+        cdr.setBangGiaCuoc(gia);
+        return cdr;
+    }
+
+    /** Bản ghi đăng ký gói phủ trọn kỳ, với gói cước dựng sẵn. */
+    private static DangKyGoiCuoc dangKyVoiGoi(ThueBao thueBao, GoiCuoc goiCuoc) {
+        DangKyGoiCuoc dk = new DangKyGoiCuoc();
+        dk.setThueBao(thueBao);
+        dk.setGoiCuoc(goiCuoc);
+        dk.setNgayBatDau(LocalDate.of(2020, 1, 1));
+        dk.setNgayKetThuc(null);
+        dk.setTrangThai(TrangThaiDangKyGoi.DANG_AP_DUNG);
+        return dk;
+    }
+
+    /** Gói MAX70: cước 70.000 đ, ưu đãi 2048 MB data. */
+    private static GoiCuoc goiMax70() {
+        GoiCuoc g = goi(70_000);
+        g.setMaGoi("MAX70");
+        g.setPhutNoiMangMienPhi(100);
+        g.setPhutNgoaiMangMienPhi(0);
+        g.setSmsMienPhi(30);
+        g.setDataMienPhiMb(2048);
+        return g;
+    }
+
+    /** Chạy lại bộ ghi lô để đọc các giá trị đã đưa vào câu UPDATE. */
+    private static List<Object[]> docLoGhi(BatchPreparedStatementSetter setter)
+            throws SQLException {
+        List<Object[]> dong = new ArrayList<>();
+        for (int i = 0; i < setter.getBatchSize(); i++) {
+            PreparedStatement ps = mock(PreparedStatement.class);
+            setter.setValues(ps, i);
+            ArgumentCaptor<Integer> mienPhi = ArgumentCaptor.forClass(Integer.class);
+            ArgumentCaptor<BigDecimal> cuoc = ArgumentCaptor.forClass(BigDecimal.class);
+            verify(ps).setInt(eq(1), mienPhi.capture());
+            verify(ps).setBigDecimal(eq(2), cuoc.capture());
+            dong.add(new Object[]{mienPhi.getValue(), cuoc.getValue()});
+        }
+        return dong;
     }
 
     private static KyCuoc ky(TrangThaiKyCuoc trangThai) {

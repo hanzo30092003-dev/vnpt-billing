@@ -86,4 +86,22 @@ public final class DonViCuoc {
     public static long giaySangPhut(long soGiay) {
         return soBlock(soGiay, GIAY_MOI_PHUT);
     }
+
+    /**
+     * Phút sang giây — phép nhân <b>đúng tuyệt đối</b>, không làm tròn.
+     *
+     * <p><b>Vì sao cần chiều ngược lại:</b> khi so sản lượng với quỹ ưu đãi, phải so ở
+     * đơn vị <b>nhỏ nhất</b> chứ không quy sản lượng lên đơn vị của quỹ. Quy từng bản ghi
+     * lên phút rồi cộng sẽ làm tròn lên nhiều lần và <b>ăn mòn quỹ của khách</b>: 37 cuộc
+     * gọi tổng 5351 giây (89,2 phút) bị cộng thành 105 phút, vượt quỹ 100 phút mà thực tế
+     * chưa hề vượt. Xem {@code docs/PHASE-4-REPORT.md} mục 23.</p>
+     */
+    public static long phutSangGiay(long soPhut) {
+        return soPhut * GIAY_MOI_PHUT;
+    }
+
+    /** MB sang KB — phép nhân đúng tuyệt đối, không làm tròn. Cùng lý do như {@link #phutSangGiay}. */
+    public static long mbSangKb(long soMb) {
+        return soMb * KB_MOI_MB;
+    }
 }

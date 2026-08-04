@@ -1,7 +1,9 @@
 package com.hanzo.billing.service.rating;
 
 import com.hanzo.billing.dto.KetQuaBilling;
+import com.hanzo.billing.entity.BangGiaCuoc;
 import com.hanzo.billing.entity.ChiTietHoaDon;
+import com.hanzo.billing.entity.ChiTietSuDung;
 import com.hanzo.billing.entity.DangKyGoiCuoc;
 import com.hanzo.billing.entity.GiamTru;
 import com.hanzo.billing.entity.GoiCuoc;
@@ -27,11 +29,15 @@ import com.hanzo.billing.service.NhatKyService;
 import com.hanzo.billing.service.SinhMaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -65,6 +71,15 @@ import java.util.Map;
 @Slf4j
 public class BillingService {
 
+    /** Kích thước lô ghi CSDL khi áp ưu đãi, cùng cỡ với các bộ ghi hàng loạt khác. */
+    private static final int KICH_THUOC_LO = 500;
+
+    private static final String SQL_AP_UU_DAI = """
+            UPDATE chi_tiet_su_dung SET mien_phi = ?, cuoc_phi = ? WHERE id = ?
+            """;
+
+    private final JdbcTemplate jdbcTemplate;
+    private final BangGiaLookup bangGiaLookup;
     private final HoaDonRepository hoaDonRepository;
     private final ChiTietSuDungRepository chiTietSuDungRepository;
     private final DangKyGoiCuocRepository dangKyGoiCuocRepository;
@@ -384,6 +399,12 @@ public class BillingService {
         long batDau = System.currentTimeMillis();
         kiemTraTruocKhiChay(ky);
 
+        // Áp ưu đãi TRƯỚC khi gom cước: bước này ghi lại cuoc_phi và mien_phi của từng
+        // bản ghi, nên ảnh chụp tổng hợp phải nạp SAU đó mới đúng.
+        int soMienPhi = apDungUuDai(ky, napNguonBilling(ky));
+        log.info("Đã áp ưu đãi gói cước kỳ {}/{}: {} bản ghi được miễn phí",
+                ky.getThang(), ky.getNam(), soMienPhi);
+
         NguonBilling nguon = napNguonBilling(ky);
         List<ThueBao> danhSach =
                 thueBaoRepository.timTheoLoaiKemQuanHe(LoaiThueBao.TRA_SAU);
@@ -471,6 +492,102 @@ public class BillingService {
                             + "KHÔNG bao gồm cước của các bản ghi này.",
                     ky.getThang(), ky.getNam(), loi);
         }
+    }
+
+    // =================================================================
+    // B'. ÁP ƯU ĐÃI GÓI CƯỚC LÊN TỪNG BẢN GHI CDR
+    // =================================================================
+
+    /**
+     * Trừ quỹ ưu đãi của từng thuê bao lên các bản ghi CDR đã định giá của kỳ.
+     *
+     * <p>Bản ghi nằm trong ưu đãi được đặt {@code mien_phi = 1, cuoc_phi = 0}; bản ghi phải
+     * thu tiền được đặt {@code mien_phi = 0} và <b>tính lại cước đầy đủ</b> từ dòng bảng giá
+     * đã lưu ở {@code bang_gia_cuoc_id}.</p>
+     *
+     * <p><b>Vì sao phải tính lại thay vì giữ nguyên {@code cuoc_phi}:</b> nếu chỉ giữ
+     * nguyên thì hàm này <b>không chạy lại được</b> — lần chạy trước đã đặt {@code cuoc_phi = 0}
+     * cho các bản ghi miễn phí, nên lần sau chúng có giá 0 vĩnh viễn dù quỹ đã đổi. Tính
+     * lại từ ảnh chụp bảng giá làm hàm này <b>bất biến theo số lần chạy</b>. Đây chính là
+     * chỗ cột {@code bang_gia_cuoc_id} thêm ở bước A phát huy tác dụng.</p>
+     *
+     * @return số bản ghi được miễn phí
+     */
+    private int apDungUuDai(KyCuoc ky, NguonBilling nguon) {
+        Map<Long, BangGiaCuoc> bangGiaTheoId = bangGiaLookup.napTheoId();
+        List<ChiTietSuDung> danhSach =
+                chiTietSuDungRepository.timDaTinhTheoKyDeApUuDai(ky.getId());
+
+        List<Object[]> lo = new ArrayList<>(KICH_THUOC_LO);
+        int soMienPhi = 0;
+        Long thueBaoDangXet = null;
+        UuDaiGoiCuoc quy = null;
+
+        for (ChiTietSuDung cdr : danhSach) {
+            Long thueBaoId = cdr.getThueBao().getId();
+            // Danh sách đã sắp xếp theo thuê bao nên chỉ cần mở quỹ mới khi đổi thuê bao
+            if (!thueBaoId.equals(thueBaoDangXet)) {
+                thueBaoDangXet = thueBaoId;
+                quy = new UuDaiGoiCuoc(timGoiCuocCuoiKy(cdr.getThueBao(), ky, nguon));
+            }
+
+            BigDecimal cuocDayDu = tinhLaiCuocDayDu(cdr, bangGiaTheoId);
+            boolean mienPhi = quy.namTrongUuDai(cdr);
+            if (mienPhi) {
+                soMienPhi++;
+            }
+            lo.add(new Object[]{mienPhi ? 1 : 0,
+                    mienPhi ? BigDecimal.ZERO : cuocDayDu, cdr.getId()});
+
+            if (lo.size() >= KICH_THUOC_LO) {
+                ghiLoUuDai(lo);
+            }
+        }
+        ghiLoUuDai(lo);
+        return soMienPhi;
+    }
+
+    /** Cước đầy đủ của một bản ghi, tính lại từ đúng dòng bảng giá đã áp dụng lúc định giá. */
+    private BigDecimal tinhLaiCuocDayDu(ChiTietSuDung cdr, Map<Long, BangGiaCuoc> bangGiaTheoId) {
+        if (cdr.getBangGiaCuoc() == null) {
+            throw new NghiepVuException("Bản ghi chi tiết sử dụng mã số " + cdr.getId()
+                    + " đã tính cước nhưng không lưu dòng bảng giá đã áp dụng. "
+                    + "Chạy lại tính cước cho kỳ này trước khi lập hóa đơn.");
+        }
+        BangGiaCuoc gia = bangGiaTheoId.get(cdr.getBangGiaCuoc().getId());
+        if (gia == null) {
+            throw new NghiepVuException("Không tìm thấy dòng bảng giá mã số "
+                    + cdr.getBangGiaCuoc().getId() + " mà bản ghi chi tiết sử dụng mã số "
+                    + cdr.getId() + " đang tham chiếu. Dòng bảng giá này có thể đã bị xóa.");
+        }
+        // Dùng CHUNG công thức với engine định giá, không viết lại
+        return RatingService.tinhTienTheoBangGia(cdr, gia);
+    }
+
+    private void ghiLoUuDai(List<Object[]> lo) {
+        if (lo.isEmpty()) {
+            return;
+        }
+        // Chụp một bản sao rồi mới xoá lô gốc: bộ đặt tham số giữ tham chiếu tới danh sách,
+        // nếu đóng gói thẳng danh sách đang được dùng lại cho lô sau thì nó trở thành cái
+        // bẫy - danh sách bị xoá ngay sau khi ghi, và mọi thứ đọc lại nó về sau đều thấy rỗng.
+        List<Object[]> banSao = List.copyOf(lo);
+        lo.clear();
+
+        jdbcTemplate.batchUpdate(SQL_AP_UU_DAI, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Object[] dong = banSao.get(i);
+                ps.setInt(1, (Integer) dong[0]);
+                ps.setBigDecimal(2, (BigDecimal) dong[1]);
+                ps.setLong(3, (Long) dong[2]);
+            }
+
+            @Override
+            public int getBatchSize() {
+                return banSao.size();
+            }
+        });
     }
 
     /** Chụp lịch sử đăng ký gói, tổng cước theo thuê bao và giảm trừ cho một lần chạy. */

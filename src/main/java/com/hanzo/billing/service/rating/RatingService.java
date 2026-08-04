@@ -153,20 +153,35 @@ public class RatingService {
                 Boolean.TRUE.equals(cdr.getGioCaoDiem()),
                 ngayPhatSinh);
 
-        long soBlock = DonViCuoc.soBlock(sanLuongTho(cdr), gia.getBlockGiay());
-        BigDecimal cuocPhi = ThamSoTinhCuoc.lamTronTien(
-                BigDecimal.valueOf(soBlock).multiply(gia.getDonGia()));
-        return new KetQuaDinhGia(cuocPhi, gia.getId());
+        return new KetQuaDinhGia(tinhTienTheoBangGia(cdr, gia), gia.getId());
     }
 
     /**
-     * Sản lượng thô đưa vào chia block, theo từng loại dịch vụ.
+     * Tiền của một bản ghi theo một dòng bảng giá cho trước — <b>nơi duy nhất</b> đặt công
+     * thức này.
+     *
+     * <p>Khai {@code public static} vì mục 4D cần tính lại tiền đầy đủ của một bản ghi từ
+     * chính dòng bảng giá đã lưu ở {@code bang_gia_cuoc_id}, khi quyết định bản ghi đó nằm
+     * trong ưu đãi hay phải thu tiền. Viết lại công thức ở đó là con đường chắc chắn dẫn
+     * tới sửa một chỗ mà quên chỗ kia.</p>
+     */
+    public static BigDecimal tinhTienTheoBangGia(ChiTietSuDung cdr, BangGiaCuoc gia) {
+        long soBlock = DonViCuoc.soBlock(sanLuongTinhCuoc(cdr), gia.getBlockGiay());
+        return ThamSoTinhCuoc.lamTronTien(
+                BigDecimal.valueOf(soBlock).multiply(gia.getDonGia()));
+    }
+
+    /**
+     * Sản lượng đưa vào chia block, theo từng loại dịch vụ.
      *
      * <p>DATA phải quy KB sang MB <b>trước</b> khi chia block, vì đơn giá 25 đ đặt theo MB
      * còn cột {@code so_luong} lưu theo KB. Quên bước này là sai 1024 lần — xem
      * {@link DonViCuoc}.</p>
+     *
+     * <p>Đây là sản lượng dùng để <b>tính tiền</b>. Việc trừ quỹ ưu đãi dùng sản lượng
+     * <b>thô</b> ở đơn vị nhỏ nhất (giây, KB) — xem {@link UuDaiGoiCuoc}.</p>
      */
-    private static long sanLuongTho(ChiTietSuDung cdr) {
+    private static long sanLuongTinhCuoc(ChiTietSuDung cdr) {
         return switch (cdr.getLoaiDichVu()) {
             case THOAI -> khongNull(cdr.getThoiLuongGiay());
             case SMS -> khongNull(cdr.getSoLuong());
