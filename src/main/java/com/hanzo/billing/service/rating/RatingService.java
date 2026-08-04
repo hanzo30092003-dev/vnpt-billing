@@ -67,7 +67,8 @@ public class RatingService {
 
     private static final String SQL_DA_TINH = """
             UPDATE chi_tiet_su_dung
-               SET cuoc_phi = ?, trang_thai_tinh_cuoc = 'DA_TINH', ky_cuoc_id = ?
+               SET cuoc_phi = ?, trang_thai_tinh_cuoc = 'DA_TINH', ky_cuoc_id = ?,
+                   bang_gia_cuoc_id = ?
              WHERE id = ?
             """;
 
@@ -78,14 +79,15 @@ public class RatingService {
      */
     private static final String SQL_LOI = """
             UPDATE chi_tiet_su_dung
-               SET cuoc_phi = NULL, trang_thai_tinh_cuoc = 'LOI', ky_cuoc_id = ?
+               SET cuoc_phi = NULL, trang_thai_tinh_cuoc = 'LOI', ky_cuoc_id = ?,
+                   bang_gia_cuoc_id = NULL
              WHERE id = ?
             """;
 
     private static final String SQL_HUY = """
             UPDATE chi_tiet_su_dung
                SET trang_thai_tinh_cuoc = 'CHUA_TINH', cuoc_phi = NULL,
-                   mien_phi = 0, ky_cuoc_id = NULL
+                   mien_phi = 0, ky_cuoc_id = NULL, bang_gia_cuoc_id = NULL
              WHERE ky_cuoc_id = ?
             """;
 
@@ -128,10 +130,19 @@ public class RatingService {
      */
     @Transactional(readOnly = true)
     public BigDecimal ratingCdr(ChiTietSuDung cdr) {
-        return tinhCuoc(cdr, napNguonTraCuu());
+        return tinhCuoc(cdr, napNguonTraCuu()).cuocPhi();
     }
 
-    private BigDecimal tinhCuoc(ChiTietSuDung cdr, NguonTraCuu nguon) {
+    /**
+     * Kết quả định giá một bản ghi: số tiền và <b>dòng bảng giá đã áp dụng</b>.
+     *
+     * <p>Trả về cả mã dòng bảng giá để ghi xuống {@code chi_tiet_su_dung.bang_gia_cuoc_id}
+     * — ảnh chụp thật tại thời điểm định giá, không phải thứ suy ngược lại về sau.</p>
+     */
+    public record KetQuaDinhGia(BigDecimal cuocPhi, Long bangGiaCuocId) {
+    }
+
+    private KetQuaDinhGia tinhCuoc(ChiTietSuDung cdr, NguonTraCuu nguon) {
         LocalDate ngayPhatSinh = cdr.getThoiGianBatDau().toLocalDate();
         Long goiCuocId = timGoiCuocTaiThoiDiem(cdr, ngayPhatSinh, nguon);
 
@@ -143,7 +154,9 @@ public class RatingService {
                 ngayPhatSinh);
 
         long soBlock = DonViCuoc.soBlock(sanLuongTho(cdr), gia.getBlockGiay());
-        return ThamSoTinhCuoc.lamTronTien(BigDecimal.valueOf(soBlock).multiply(gia.getDonGia()));
+        BigDecimal cuocPhi = ThamSoTinhCuoc.lamTronTien(
+                BigDecimal.valueOf(soBlock).multiply(gia.getDonGia()));
+        return new KetQuaDinhGia(cuocPhi, gia.getId());
     }
 
     /**
@@ -243,9 +256,10 @@ public class RatingService {
         for (int i = 0; i < danhSach.size(); i++) {
             ChiTietSuDung cdr = danhSach.get(i);
             try {
-                BigDecimal cuoc = tinhCuoc(cdr, nguon);
-                loThanhCong.add(new Object[]{cuoc, ky.getId(), cdr.getId()});
-                ketQua.setTongCuoc(ketQua.getTongCuoc().add(cuoc));
+                KetQuaDinhGia dinhGia = tinhCuoc(cdr, nguon);
+                loThanhCong.add(new Object[]{dinhGia.cuocPhi(), ky.getId(),
+                        dinhGia.bangGiaCuocId(), cdr.getId()});
+                ketQua.setTongCuoc(ketQua.getTongCuoc().add(dinhGia.cuocPhi()));
                 ketQua.setSoThanhCong(ketQua.getSoThanhCong() + 1);
             } catch (RuntimeException ex) {
                 loLoi.add(cdr.getId());
@@ -329,6 +343,7 @@ public class RatingService {
                 ps.setBigDecimal(1, (BigDecimal) dong[0]);
                 ps.setLong(2, (Long) dong[1]);
                 ps.setLong(3, (Long) dong[2]);
+                ps.setLong(4, (Long) dong[3]);
             }
 
             @Override

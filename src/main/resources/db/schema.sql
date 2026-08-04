@@ -204,12 +204,17 @@ CREATE TABLE chi_tiet_su_dung (
     mien_phi              TINYINT       DEFAULT 0,
     trang_thai_tinh_cuoc  ENUM('CHUA_TINH','DA_TINH','LOI') NOT NULL DEFAULT 'CHUA_TINH',
     ky_cuoc_id            BIGINT,
+    -- Dong bang gia DA AP DUNG khi dinh gia ban ghi nay. Snapshot that: bang gia
+    -- co the doi ve sau, nhung hoa don cu van truy nguyen duoc don gia da thu.
+    -- Suy nguoc lai o khau lap hoa don la sai nguyen tac - xem PHASE-4-REPORT muc 17.3.
+    bang_gia_cuoc_id      BIGINT,
     nguon                 ENUM('GENERATOR','IMPORT_CSV','NHAP_TAY'),
     PRIMARY KEY (id),
     KEY idx_cdr_thue_bao_thoi_gian (thue_bao_id, thoi_gian_bat_dau),
     KEY idx_cdr_trang_thai_tinh_cuoc (trang_thai_tinh_cuoc),
     CONSTRAINT fk_cdr_thue_bao FOREIGN KEY (thue_bao_id) REFERENCES thue_bao (id),
-    CONSTRAINT fk_cdr_ky_cuoc  FOREIGN KEY (ky_cuoc_id)  REFERENCES ky_cuoc (id)
+    CONSTRAINT fk_cdr_ky_cuoc  FOREIGN KEY (ky_cuoc_id)  REFERENCES ky_cuoc (id),
+    CONSTRAINT fk_cdr_bang_gia FOREIGN KEY (bang_gia_cuoc_id) REFERENCES bang_gia_cuoc (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------

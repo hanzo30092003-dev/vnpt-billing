@@ -90,6 +90,18 @@ public class ChiTietSuDung {
     @JoinColumn(name = "ky_cuoc_id")
     private KyCuoc kyCuoc;
 
+    /**
+     * Dòng bảng giá <b>đã áp dụng</b> khi định giá bản ghi này.
+     *
+     * <p>Đây là ảnh chụp thật: bảng giá có thể đổi về sau, nhưng hóa đơn cũ vẫn truy
+     * nguyên được đúng đơn giá đã thu. Không có cột này thì khâu lập hóa đơn buộc phải
+     * suy ngược lại bảng giá — mà bảng giá lúc đó có thể đã khác, nên đơn giá in ra
+     * không phải đơn giá đã thu.</p>
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bang_gia_cuoc_id")
+    private BangGiaCuoc bangGiaCuoc;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "nguon")
     private NguonCdr nguon;

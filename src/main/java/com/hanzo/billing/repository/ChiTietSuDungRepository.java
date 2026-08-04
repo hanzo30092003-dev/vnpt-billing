@@ -85,6 +85,13 @@ public interface ChiTietSuDungRepository extends JpaRepository<ChiTietSuDung, Lo
     long countByKyCuocIdAndTrangThaiTinhCuoc(Long kyCuocId, TrangThaiTinhCuoc trangThaiTinhCuoc);
 
     /**
+     * Bản ghi đã tính cước nhưng không lưu lại dòng bảng giá đã áp dụng.
+     *
+     * <p>Phải luôn bằng 0: mọi bản ghi {@code DA_TINH} đều phải truy nguyên được đơn giá.</p>
+     */
+    long countByTrangThaiTinhCuocAndBangGiaCuocIsNull(TrangThaiTinhCuoc trangThaiTinhCuoc);
+
+    /**
      * CDR cần tính cước trong một kỳ.
      *
      * <p><b>Khoảng thời gian là NỬA MỞ</b> {@code [tuLuc, denLuc)} với

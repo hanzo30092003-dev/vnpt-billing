@@ -206,7 +206,13 @@ erDiagram
 | `mien_phi` | TINYINT | DEFAULT 0 | 1 = nằm trong ưu đãi của gói nên không thu tiền |
 | `trang_thai_tinh_cuoc` | ENUM | NOT NULL, DEFAULT `CHUA_TINH`, INDEX | `CHUA_TINH` / `DA_TINH` / `LOI` |
 | `ky_cuoc_id` | BIGINT | FK → `ky_cuoc(id)` | Kỳ cước mà bản ghi được gom vào |
+| `bang_gia_cuoc_id` | BIGINT | FK → `bang_gia_cuoc(id)` | **Dòng bảng giá đã áp dụng khi định giá bản ghi này** |
 | `nguon` | ENUM | | `GENERATOR` / `IMPORT_CSV` / `NHAP_TAY` |
+
+> Cột `bang_gia_cuoc_id` **thêm ở Phase 4D**. Đây là ảnh chụp thật: bảng giá có thể đổi về
+> sau, nhưng hóa đơn cũ vẫn truy nguyên được đúng đơn giá đã thu. Không có cột này thì khâu
+> lập hóa đơn buộc phải suy ngược lại bảng giá — mà bảng giá lúc đó có thể đã khác, nên đơn
+> giá in ra không phải đơn giá đã thu. Cột để `NULL` khi bản ghi chưa tính cước hoặc lỗi.
 
 > Cột `so_thue_bao` **cố ý trùng lặp** với `thue_bao.so_thue_bao`. CDR là dữ liệu lịch sử:
 > nếu thuê bao bị thanh lý và số được cấp lại cho khách khác, bản ghi cũ vẫn phải giữ

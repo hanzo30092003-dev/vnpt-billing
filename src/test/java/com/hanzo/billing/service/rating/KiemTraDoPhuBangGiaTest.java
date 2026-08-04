@@ -2,6 +2,7 @@ package com.hanzo.billing.service.rating;
 
 import com.hanzo.billing.enums.HuongCuocGoi;
 import com.hanzo.billing.enums.LoaiDichVu;
+import com.hanzo.billing.enums.TrangThaiTinhCuoc;
 import com.hanzo.billing.repository.ChiTietSuDungRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -136,6 +137,23 @@ class KiemTraDoPhuBangGiaTest {
                         + "rơi vào trạng thái LOI:%n  %s",
                         toHop.size(), String.join("\n  ", thieu))
                 .isEmpty();
+    }
+
+    /**
+     * Mọi bản ghi đã tính cước phải lưu lại dòng bảng giá đã áp dụng.
+     *
+     * <p>Không có ảnh chụp này thì khâu lập hóa đơn buộc phải <i>suy ngược</i> lại bảng giá,
+     * mà bảng giá lúc đó có thể đã đổi — đơn giá in trên hóa đơn sẽ không phải đơn giá đã
+     * thu. Xem {@code docs/PHASE-4-REPORT.md} mục 17.3.</p>
+     */
+    @Test
+    @DisplayName("3. Mọi CDR đã tính cước đều lưu lại dòng bảng giá đã áp dụng")
+    void moiCdrDaTinh_deuLuuBangGiaDaApDung() {
+        assertThat(chiTietSuDungRepository.countByTrangThaiTinhCuocAndBangGiaCuocIsNull(
+                TrangThaiTinhCuoc.DA_TINH))
+                .as("Bản ghi DA_TINH mà bang_gia_cuoc_id để trống thì không truy nguyên được "
+                        + "đơn giá đã thu")
+                .isZero();
     }
 
     /**
