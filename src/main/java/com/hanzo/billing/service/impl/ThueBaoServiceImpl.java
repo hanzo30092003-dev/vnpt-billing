@@ -61,7 +61,7 @@ public class ThueBaoServiceImpl implements ThueBaoService {
     private final GoiCuocRepository goiCuocRepository;
     private final DangKyGoiCuocRepository dangKyGoiCuocRepository;
     private final LichSuThueBaoRepository lichSuThueBaoRepository;
-    private final NapTienRepository napTienRepository;
+    private final BienDongSoDuRepository bienDongSoDuRepository;
     private final NguoiDungRepository nguoiDungRepository;
     private final NhatKyService nhatKyService;
 
@@ -265,17 +265,18 @@ public class ThueBaoServiceImpl implements ThueBaoService {
         BigDecimal soDuTruoc = thueBao.getSoDu() == null ? BigDecimal.ZERO : thueBao.getSoDu();
         BigDecimal soDuSau = soDuTruoc.add(soTien);
 
-        NapTien napTien = new NapTien();
-        napTien.setThueBao(thueBao);
-        napTien.setSoTien(soTien);
+        BienDongSoDu bienDong = new BienDongSoDu();
+        bienDong.setThueBao(thueBao);
+        bienDong.setLoaiBienDong(LoaiBienDongSoDu.NAP_TIEN);
+        bienDong.setSoTien(soTien);
         // Lưu ảnh chụp số dư hai đầu để về sau đối soát được, không phải suy ngược
-        napTien.setSoDuTruoc(soDuTruoc);
-        napTien.setSoDuSau(soDuSau);
-        napTien.setHinhThuc(hinhThuc);
-        napTien.setNgayNap(LocalDateTime.now());
+        bienDong.setSoDuTruoc(soDuTruoc);
+        bienDong.setSoDuSau(soDuSau);
+        bienDong.setHinhThuc(hinhThuc);
+        bienDong.setNgayGhiNhan(LocalDateTime.now());
         SecurityUtils.layNguoiDungHienTai().ifPresent(p ->
-                napTien.setNguoiThucHien(nguoiDungRepository.getReferenceById(p.getId())));
-        napTienRepository.save(napTien);
+                bienDong.setNguoiThucHien(nguoiDungRepository.getReferenceById(p.getId())));
+        bienDongSoDuRepository.save(bienDong);
 
         thueBao.setSoDu(soDuSau);
         thueBaoRepository.save(thueBao);
@@ -302,8 +303,8 @@ public class ThueBaoServiceImpl implements ThueBaoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<NapTien> layLichSuNapTien(Long thueBaoId) {
-        return napTienRepository.timLichSuTheoThueBao(thueBaoId);
+    public List<BienDongSoDu> layLichSuBienDongSoDu(Long thueBaoId) {
+        return bienDongSoDuRepository.timLichSuTheoThueBao(thueBaoId);
     }
 
     @Override

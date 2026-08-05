@@ -103,7 +103,7 @@ public class ThueBaoController {
         model.addAttribute("thueBao", thueBao);
         model.addAttribute("lichSuGoiCuoc", thueBaoService.layLichSuGoiCuoc(id));
         model.addAttribute("lichSuTrangThai", thueBaoService.layLichSuTrangThai(id));
-        model.addAttribute("lichSuNapTien", thueBaoService.layLichSuNapTien(id));
+        model.addAttribute("soCaiSoDu", thueBaoService.layLichSuBienDongSoDu(id));
         model.addAttribute("trangThaiCoTheChuyen",
                 thueBaoService.cacTrangThaiCoTheChuyen(thueBao.getTrangThai()));
         model.addAttribute("danhSachGoiCuoc", thueBaoService.layGoiCuocConHieuLuc());

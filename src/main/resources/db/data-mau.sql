@@ -297,8 +297,45 @@ INSERT INTO lich_su_thue_bao (id, thue_bao_id, trang_thai_cu, trang_thai_moi, ly
 (21, 45, 'TAM_NGUNG_1C', 'HOAT_DONG',    'Khách hàng đã thanh toán, khôi phục dịch vụ', 2, '2026-06-05 14:45:00');
 
 -- ---------------------------------------------------------------------
--- 9. CHUA tao du lieu cho cac bang sau - thuoc pham vi cac phase ke tiep:
+-- 9. bien_dong_so_du - DONG MO SO cho thue bao tra truoc
+--
+-- So du mau o bang thue_bao ben tren duoc nap thang vao cot so_du, khong
+-- co dong so cai nao chong lung. Bat bien cua muc G1
+--     so_du = SUM(nap + dieu chinh) - SUM(tru)
+-- vi the se SAI NGAY TU DAU tren ca 18 thue bao neu khong co cac dong nay
+-- (285.000 <> 0 - 0). Moi dong duoi day la mot but toan MO SO: dua so du
+-- tu 0 len dung gia tri mau, ngay_ghi_nhan lay theo ngay_kich_hoat cua
+-- chinh thue bao do.
+--
+-- Thue bao 8 va 15 co so du = 0 (tam ngung hai chieu / da thanh ly) nen
+-- KHONG can dong mo so: bat bien tu dung voi 0 = 0 - 0.
+--
+-- ID co dinh 1-18 de doi chieu duoc giua cac lan chay profile reset.
+-- ---------------------------------------------------------------------
+INSERT INTO bien_dong_so_du
+    (id, thue_bao_id, loai_bien_dong, so_tien, so_du_truoc, so_du_sau, hinh_thuc, ky_cuoc_id, ngay_ghi_nhan, nguoi_thuc_hien_id) VALUES
+( 1,  1, 'DIEU_CHINH', 285000, 0, 285000, NULL, NULL, '2024-01-15 00:00:00', NULL),
+( 2,  2, 'DIEU_CHINH', 340000, 0, 340000, NULL, NULL, '2024-02-20 00:00:00', NULL),
+( 3,  3, 'DIEU_CHINH', 215000, 0, 215000, NULL, NULL, '2024-03-05 00:00:00', NULL),
+( 4,  4, 'DIEU_CHINH', 205000, 0, 205000, NULL, NULL, '2024-03-28 00:00:00', NULL),
+( 5,  5, 'DIEU_CHINH',  18000, 0,  18000, NULL, NULL, '2024-04-12 00:00:00', NULL),
+( 6,  6, 'DIEU_CHINH', 260000, 0, 260000, NULL, NULL, '2024-05-08 00:00:00', NULL),
+( 7,  7, 'DIEU_CHINH', 415000, 0, 415000, NULL, NULL, '2024-06-17 00:00:00', NULL),
+( 8,  9, 'DIEU_CHINH', 230000, 0, 230000, NULL, NULL, '2024-07-25 00:00:00', NULL),
+( 9, 10, 'DIEU_CHINH', 310000, 0, 310000, NULL, NULL, '2024-08-14 00:00:00', NULL),
+(10, 11, 'DIEU_CHINH', 250000, 0, 250000, NULL, NULL, '2024-09-03 00:00:00', NULL),
+(11, 12, 'DIEU_CHINH',  22000, 0,  22000, NULL, NULL, '2024-09-22 00:00:00', NULL),
+(12, 13, 'DIEU_CHINH', 380000, 0, 380000, NULL, NULL, '2024-10-10 00:00:00', NULL),
+(13, 14, 'DIEU_CHINH', 295000, 0, 295000, NULL, NULL, '2024-11-05 00:00:00', NULL),
+(14, 16, 'DIEU_CHINH', 465000, 0, 465000, NULL, NULL, '2024-12-16 00:00:00', NULL),
+(15, 17, 'DIEU_CHINH', 225000, 0, 225000, NULL, NULL, '2025-01-09 00:00:00', NULL),
+(16, 18, 'DIEU_CHINH', 355000, 0, 355000, NULL, NULL, '2025-01-30 00:00:00', NULL),
+(17, 19, 'DIEU_CHINH', 234000, 0, 234000, NULL, NULL, '2025-02-18 00:00:00', NULL),
+(18, 20, 'DIEU_CHINH',  20000, 0,  20000, NULL, NULL, '2025-03-07 00:00:00', NULL);
+
+-- ---------------------------------------------------------------------
+-- 10. CHUA tao du lieu cho cac bang sau - thuoc pham vi cac phase ke tiep:
 --    chi_tiet_su_dung (CDR)  -> Phase 3
 --    hoa_don, chi_tiet_hoa_don, thanh_toan -> Phase 4, 5
---    nap_tien, giam_tru, nhat_ky_he_thong -> phat sinh trong van hanh
+--    giam_tru, nhat_ky_he_thong -> phat sinh trong van hanh
 -- ---------------------------------------------------------------------

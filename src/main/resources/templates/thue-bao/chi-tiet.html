@@ -99,9 +99,9 @@
                     </button>
                 </li>
                 <li class="nav-item" th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-nap-tien" type="button">
-                        <i class="bi bi-wallet2 me-1"></i> Lịch sử nạp tiền
-                        <span class="badge text-bg-secondary" th:text="${#lists.size(lichSuNapTien)}">0</span>
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-so-du" type="button">
+                        <i class="bi bi-wallet2 me-1"></i> Biến động số dư
+                        <span class="badge text-bg-secondary" th:text="${#lists.size(soCaiSoDu)}">0</span>
                     </button>
                 </li>
             </ul>
@@ -217,32 +217,44 @@
                 </ul>
             </div>
 
-            <!--/* ---------- TAB 4: Lịch sử nạp tiền (chỉ trả trước) ---------- */-->
-            <div class="tab-pane fade" id="tab-nap-tien" th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}">
+            <!--/* ---------- TAB 4: Sổ cái biến động số dư (chỉ trả trước) ---------- */-->
+            <div class="tab-pane fade" id="tab-so-du" th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover bang-du-lieu mb-0">
                         <thead class="table-light">
                         <tr>
                             <th>Thời điểm</th>
+                            <th>Loại</th>
                             <th>Số tiền</th>
                             <th>Số dư trước</th>
                             <th>Số dư sau</th>
+                            <th>Kỳ cước</th>
                             <th>Hình thức</th>
                             <th>Người thực hiện</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:if="${#lists.isEmpty(lichSuNapTien)}">
-                            <td colspan="6" class="text-center text-secondary py-4">Chưa có giao dịch nạp tiền nào.</td>
+                        <tr th:if="${#lists.isEmpty(soCaiSoDu)}">
+                            <td colspan="8" class="text-center text-secondary py-4">Chưa có biến động số dư nào.</td>
                         </tr>
-                        <tr th:each="nt : ${lichSuNapTien}">
-                            <td th:text="${#temporals.format(nt.ngayNap, 'dd/MM/yyyy HH:mm')}"></td>
-                            <td class="fw-semibold text-success"
-                                th:text="'+' + ${#numbers.formatDecimal(nt.soTien, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
-                            <td th:text="${#numbers.formatDecimal(nt.soDuTruoc, 0, 'POINT', 0, 'COMMA')}"></td>
-                            <td th:text="${#numbers.formatDecimal(nt.soDuSau, 0, 'POINT', 0, 'COMMA')}"></td>
-                            <td th:text="${nt.hinhThuc != null} ? ${nt.hinhThuc.nhan} : '—'"></td>
-                            <td th:text="${nt.nguoiThucHien != null} ? ${nt.nguoiThucHien.hoTen} : '—'"></td>
+                        <tr th:each="bd : ${soCaiSoDu}">
+                            <td th:text="${#temporals.format(bd.ngayGhiNhan, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${bd.loaiBienDong.name() == 'TRU_CUOC'} ? 'text-bg-danger'
+                                                    : (${bd.loaiBienDong.name() == 'NAP_TIEN'} ? 'text-bg-success' : 'text-bg-secondary')"
+                                      th:text="${bd.loaiBienDong.nhan}"></span>
+                            </td>
+                            <!--/* Dau +/- lay tu loai bien dong, khong doc mau sac - ban in den trang van doc duoc */-->
+                            <td class="fw-semibold"
+                                th:classappend="${bd.loaiBienDong.congVaoSoDu} ? 'text-success' : 'text-danger'"
+                                th:text="(${bd.loaiBienDong.congVaoSoDu} ? '+' : '−')
+                                         + ${#numbers.formatDecimal(bd.soTien, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                            <td th:text="${#numbers.formatDecimal(bd.soDuTruoc, 0, 'POINT', 0, 'COMMA')}"></td>
+                            <td th:text="${#numbers.formatDecimal(bd.soDuSau, 0, 'POINT', 0, 'COMMA')}"></td>
+                            <td th:text="${bd.kyCuoc != null} ? (${bd.kyCuoc.thang} + '/' + ${bd.kyCuoc.nam}) : '—'"></td>
+                            <td th:text="${bd.hinhThuc != null} ? ${bd.hinhThuc.nhan} : '—'"></td>
+                            <td th:text="${bd.nguoiThucHien != null} ? ${bd.nguoiThucHien.hoTen} : '—'"></td>
                         </tr>
                         </tbody>
                     </table>

@@ -18,7 +18,7 @@ CSDL gồm **15 bảng** và **2 view**, chia thành 4 nhóm chức năng:
 | Quản trị & danh mục | `nguoi_dung`, `khach_hang`, `goi_cuoc`, `bang_gia_cuoc` |
 | Thuê bao | `thue_bao`, `lich_su_thue_bao`, `dang_ky_goi_cuoc` |
 | Tính cước | `ky_cuoc`, `chi_tiet_su_dung`, `giam_tru` |
-| Hóa đơn & thu tiền | `hoa_don`, `chi_tiet_hoa_don`, `thanh_toan`, `nap_tien` |
+| Hóa đơn & thu tiền | `hoa_don`, `chi_tiet_hoa_don`, `thanh_toan`, `bien_dong_so_du` |
 | Hệ thống | `nhat_ky_he_thong` |
 
 ### Sơ đồ quan hệ
@@ -38,11 +38,12 @@ erDiagram
     ky_cuoc          ||--o{ hoa_don          : "thuộc kỳ"
     hoa_don          ||--o{ chi_tiet_hoa_don : "gồm khoản mục"
     hoa_don          ||--o{ thanh_toan       : "được thanh toán"
-    thue_bao         ||--o{ nap_tien         : "nạp tiền"
+    thue_bao         ||--o{ bien_dong_so_du  : "biến động số dư"
+    ky_cuoc          ||--o{ bien_dong_so_du  : "trừ cước theo kỳ"
     thue_bao         ||--o{ giam_tru         : "được giảm trừ"
     ky_cuoc          ||--o{ giam_tru         : "trong kỳ"
     nguoi_dung       ||--o{ thanh_toan       : "người thu"
-    nguoi_dung       ||--o{ nap_tien         : "người thực hiện"
+    nguoi_dung       ||--o{ bien_dong_so_du  : "người thực hiện"
     nguoi_dung       ||--o{ lich_su_thue_bao : "người thao tác"
     nguoi_dung       ||--o{ nhat_ky_he_thong : "ghi vết"
 ```
@@ -285,21 +286,43 @@ erDiagram
 
 > Một hóa đơn có thể có **nhiều** bản ghi thanh toán (thanh toán từng phần).
 
-### 2.13. `nap_tien` — Nạp tiền cho thuê bao trả trước
+### 2.13. `bien_dong_so_du` — Sổ cái biến động số dư thuê bao trả trước
+
+> **Đổi ở Phase 5 mục G1.** Bảng này trước tên là `nap_tien` và chỉ ghi chiều **nạp**.
+> Trừ cước khi đó không để lại vết nào — trừ xong chỉ còn `thue_bao.so_du` đã đổi, nhìn vào
+> không biết con số đó đến từ đâu. Cách xử lý là **tổng quát hoá chính bảng cũ**, cố ý
+> **không** thêm bảng thứ hai cho phần trừ: hai bảng cùng ghi số dư là hai nguồn sự thật.
 
 | Tên trường | Kiểu dữ liệu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
 | `id` | BIGINT | PK, AUTO_INCREMENT | Khóa chính |
-| `thue_bao_id` | BIGINT | NOT NULL, FK → `thue_bao(id)`, INDEX | Thuê bao được nạp |
-| `so_tien` | DECIMAL(15,2) | NOT NULL | Số tiền nạp |
+| `thue_bao_id` | BIGINT | NOT NULL, FK → `thue_bao(id)`, INDEX | Thuê bao |
+| `loai_bien_dong` | ENUM | NOT NULL | `NAP_TIEN` / `TRU_CUOC` / `DIEU_CHINH` |
+| `so_tien` | DECIMAL(15,2) | NOT NULL | **Luôn dương**; chiều cộng/trừ do `loai_bien_dong` quyết định |
 | `so_du_truoc` | DECIMAL(15,2) | | Số dư trước giao dịch |
 | `so_du_sau` | DECIMAL(15,2) | | Số dư sau giao dịch |
-| `hinh_thuc` | ENUM | | `THE_CAO` / `CHUYEN_KHOAN` / `TAI_QUAY` |
-| `ngay_nap` | DATETIME | NOT NULL | Thời điểm nạp |
-| `nguoi_thuc_hien_id` | BIGINT | FK → `nguoi_dung(id)` | Người thực hiện |
+| `hinh_thuc` | ENUM | | `THE_CAO` / `CHUYEN_KHOAN` / `TAI_QUAY` — chỉ có nghĩa với `NAP_TIEN` |
+| `ky_cuoc_id` | BIGINT | FK → `ky_cuoc(id)`, INDEX | Chỉ có giá trị với `TRU_CUOC` |
+| `ngay_ghi_nhan` | DATETIME | NOT NULL | Thời điểm ghi sổ |
+| `nguoi_thuc_hien_id` | BIGINT | FK → `nguoi_dung(id)` | Người thực hiện (null nếu do hệ thống) |
 
 > Hai cột `so_du_truoc` / `so_du_sau` lưu ảnh chụp số dư để **đối soát** về sau,
-> không phải dữ liệu suy ra được sau khi số dư đã thay đổi nhiều lần.
+> không phải dữ liệu suy ra được sau khi số dư đã thay đổi nhiều lần. Chính hai cột này
+> làm bảng thành **sổ cái** chứ không phải một danh sách giao dịch.
+
+**Quy tắc dấu** gom trong enum `LoaiBienDongSoDu`, không rải ra chỗ khác: `NAP_TIEN` và
+`DIEU_CHINH` cộng vào số dư, `TRU_CUOC` trừ đi. Nếu về sau cần điều chỉnh *giảm* thì phải
+thêm giá trị enum riêng — đổi dấu `DIEU_CHINH` sẽ làm một loại mang hai ý nghĩa.
+
+**Bất biến kiểm ở khâu build** (`KiemTraSoCaiSoDuTest`, 2 test):
+
+```
+so_du = SUM(nạp + điều chỉnh) − SUM(trừ)      -- đúng với MỌI thuê bao
+so_du_sau − so_du_truoc = số tiền đã áp dấu   -- đúng với TỪNG dòng
+```
+
+Test thứ hai kiểm **từng dòng** vì test thứ nhất kiểm ở mức tổng, mà hai dòng sai ngược dấu
+sẽ triệt tiêu nhau ở mức tổng (bài học 43.3).
 
 ### 2.14. `giam_tru` — Khoản giảm trừ trên hóa đơn
 
@@ -368,7 +391,14 @@ chưa có hóa đơn nào vẫn xuất hiện với giá trị 0.
 | `thue_bao` | 80 | 60 trả sau + 20 trả trước |
 | `dang_ky_goi_cuoc` | 80 | Mỗi thuê bao một bản ghi `DANG_AP_DUNG` |
 | `ky_cuoc` | 3 | Tháng 5, 6, 7/2026 — đều khởi tạo ở trạng thái `MO` |
+| `bien_dong_so_du` | 18 | Dòng **mở sổ** cho 18 thuê bao trả trước có số dư > 0 — xem ghi chú dưới |
 | Các bảng còn lại | 0 | Phát sinh ở các phase sau |
+
+> **Vì sao có 18 dòng mở sổ.** Số dư mẫu được nạp thẳng vào `thue_bao.so_du`, không có dòng
+> sổ cái nào chống lưng, nên bất biến `so_du = SUM(nạp) − SUM(trừ)` sẽ **sai ngay từ đầu**
+> trên cả 18 thuê bao (285.000 ≠ 0 − 0). Mỗi dòng là một bút toán `DIEU_CHINH` đưa số dư từ
+> 0 lên đúng giá trị mẫu, `ngay_ghi_nhan` lấy theo `ngay_kich_hoat` của chính thuê bao đó.
+> Hai thuê bao còn lại (id 8, 15) có số dư 0 nên không cần dòng mở sổ: `0 = 0 − 0`.
 
 > Bảng trên là nội dung **của script `data-mau.sql`**, tức trạng thái ngay sau khi chạy
 > profile `reset`. Dữ liệu CDR, hóa đơn và chi tiết hóa đơn **không** nằm trong script — chúng

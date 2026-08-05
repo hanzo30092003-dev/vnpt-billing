@@ -20,7 +20,7 @@ DROP VIEW IF EXISTS v_thong_ke_thue_bao;
 
 DROP TABLE IF EXISTS nhat_ky_he_thong;
 DROP TABLE IF EXISTS giam_tru;
-DROP TABLE IF EXISTS nap_tien;
+DROP TABLE IF EXISTS bien_dong_so_du;
 DROP TABLE IF EXISTS thanh_toan;
 DROP TABLE IF EXISTS chi_tiet_hoa_don;
 DROP TABLE IF EXISTS hoa_don;
@@ -286,21 +286,38 @@ CREATE TABLE thanh_toan (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
--- 13. nap_tien - Nap tien cho thue bao tra truoc
+-- 13. bien_dong_so_du - So cai bien dong so du thue bao tra truoc
+--
+-- Phase 5 muc G1 tong quat hoa bang nap_tien cu thanh so cai. Ly do: nap
+-- tien co so_du_truoc/so_du_sau nen truy nguyen duoc, nhung TRU CUOC lai
+-- khong de lai vet nao - tru xong chi con thue_bao.so_du da doi.
+--
+-- CO Y KHONG them bang thu hai cho phan tru: hai bang cung ghi so du la
+-- hai nguon su that, dung thu rang buoc so 2 cua Phase 5 cam.
+--
+-- so_tien luon DUONG; chieu cong/tru do loai_bien_dong quyet dinh.
+-- so_du_truoc/so_du_sau la thu lam bang nay thanh SO CAI chu khong phai
+-- mot danh sach giao dich - nho no moi doi soat nguoc duoc tung buoc.
 -- ---------------------------------------------------------------------
-CREATE TABLE nap_tien (
+CREATE TABLE bien_dong_so_du (
     id                   BIGINT        NOT NULL AUTO_INCREMENT,
     thue_bao_id          BIGINT        NOT NULL,
+    -- KHONG dat DEFAULT: moi cho ghi so cai phai noi ro day la bien dong gi
+    loai_bien_dong       ENUM('NAP_TIEN','TRU_CUOC','DIEU_CHINH') NOT NULL,
     so_tien              DECIMAL(15,2) NOT NULL,
     so_du_truoc          DECIMAL(15,2),
     so_du_sau            DECIMAL(15,2),
     hinh_thuc            ENUM('THE_CAO','CHUYEN_KHOAN','TAI_QUAY'),
-    ngay_nap             DATETIME      NOT NULL,
+    -- Chi co gia tri voi dong TRU_CUOC: tru cuoc luon gan voi mot ky
+    ky_cuoc_id           BIGINT,
+    ngay_ghi_nhan        DATETIME      NOT NULL,
     nguoi_thuc_hien_id   BIGINT,
     PRIMARY KEY (id),
-    KEY idx_nap_tien_thue_bao (thue_bao_id),
-    CONSTRAINT fk_nap_tien_thue_bao      FOREIGN KEY (thue_bao_id)        REFERENCES thue_bao (id),
-    CONSTRAINT fk_nap_tien_nguoi_thuc_hien FOREIGN KEY (nguoi_thuc_hien_id) REFERENCES nguoi_dung (id)
+    KEY idx_bien_dong_thue_bao (thue_bao_id),
+    KEY idx_bien_dong_ky_cuoc (ky_cuoc_id),
+    CONSTRAINT fk_bien_dong_thue_bao        FOREIGN KEY (thue_bao_id)        REFERENCES thue_bao (id),
+    CONSTRAINT fk_bien_dong_nguoi_thuc_hien FOREIGN KEY (nguoi_thuc_hien_id) REFERENCES nguoi_dung (id),
+    CONSTRAINT fk_bien_dong_ky_cuoc         FOREIGN KEY (ky_cuoc_id)         REFERENCES ky_cuoc (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------

@@ -132,9 +132,9 @@ mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 mvnw test
 ```
 
-Hiện có **148 test**. Hai lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
-với schema thật, `KiemTraDoPhuBangGiaTest` kiểm bất biến trên dữ liệu thật); các lớp còn lại
-chạy độc lập không cần CSDL.
+Hiện có **150 test**. Ba lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
+với schema thật, `KiemTraDoPhuBangGiaTest` và `KiemTraSoCaiSoDuTest` kiểm bất biến trên dữ
+liệu thật); các lớp còn lại chạy độc lập không cần CSDL.
 
 > ⚠️ Dòng phân rã theo lớp có thể in ra `Tests run: 0 ... in Ma trận chuyển trạng thái thuê bao`.
 > Đó là cách Surefire đếm lớp `@Nested`, **không phải lỗi** — con số đúng nằm ở dòng tổng

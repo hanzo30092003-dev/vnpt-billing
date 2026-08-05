@@ -39,7 +39,8 @@ public interface ThueBaoService {
 
     List<LichSuThueBao> layLichSuTrangThai(Long thueBaoId);
 
-    List<NapTien> layLichSuNapTien(Long thueBaoId);
+    /** Sổ cái biến động số dư: cả nạp tiền, trừ cước lẫn bút toán điều chỉnh. */
+    List<BienDongSoDu> layLichSuBienDongSoDu(Long thueBaoId);
 
     /** Ngày gói cước mới bắt đầu có hiệu lực nếu đổi gói ngay bây giờ. */
     LocalDate ngayHieuLucDoiGoi();

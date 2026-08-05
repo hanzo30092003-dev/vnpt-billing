@@ -55,7 +55,7 @@ class ThueBaoServiceTest {
     @Mock private GoiCuocRepository goiCuocRepository;
     @Mock private DangKyGoiCuocRepository dangKyGoiCuocRepository;
     @Mock private LichSuThueBaoRepository lichSuThueBaoRepository;
-    @Mock private NapTienRepository napTienRepository;
+    @Mock private BienDongSoDuRepository bienDongSoDuRepository;
     @Mock private NguoiDungRepository nguoiDungRepository;
     @Mock private NhatKyService nhatKyService;
 
