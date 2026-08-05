@@ -216,7 +216,8 @@ vnpt-billing/
 - [x] 15 bảng + 2 view trong `schema.sql`
 - [x] 15 entity JPA + 16 enum
 - [x] 15 repository Spring Data JPA
-- [x] Dữ liệu mẫu: 50 khách hàng, 80 thuê bao, 5 gói cước, 10 dòng bảng giá
+- [x] Dữ liệu mẫu: 50 khách hàng, 80 thuê bao, 5 gói cước, 9 dòng bảng giá
+      (nay là 10 — dòng `SMS/QUOC_TE` bổ sung ở Phase 4A)
 
 **Phase 2 — xác thực và nghiệp vụ đầu tiên** ✅
 
@@ -267,6 +268,7 @@ Tài liệu:
 - [`docs/PHASE-3-REPORT.md`](docs/PHASE-3-REPORT.md) — báo cáo Phase 3, kèm 2 điểm sai lệch đặc tả và danh sách màn hình
 - [`docs/PHASE-4-PLAN.md`](docs/PHASE-4-PLAN.md) — rà soát đầu vào Phase 4, 10 quyết định nghiệp vụ và tiêu chí nghiệm thu
 - [`docs/PHASE-4-REPORT.md`](docs/PHASE-4-REPORT.md) — báo cáo Phase 4 (**mục 3: bài học phương pháp kiểm thử — kiểm bất biến thay vì kiểm luật**)
+- [`docs/PHASE-5-PLAN.md`](docs/PHASE-5-PLAN.md) — kế hoạch Phase 5: ba ràng buộc bắt buộc và mục G (sổ cái biến động số dư)
 - [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) — mô tả chi tiết 15 bảng và 2 view (**mục 6: cảnh báo quy đổi đơn vị DATA cho Phase 4**)
 - [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) — số đo tối ưu ghi hàng loạt CDR
 - [`docs/mau-cdr.csv`](docs/mau-cdr.csv) — file CSV mẫu để thử chức năng nhập CDR

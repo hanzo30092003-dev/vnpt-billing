@@ -1761,7 +1761,7 @@ sửa một chỗ mà quên chỗ kia. Sẽ nêu lý do này trong báo cáo cu�
 **Không cài chức năng chuyển hóa đơn sang `QUA_HAN` ở Phase 4.** Kiểm chứng: 54 hóa đơn kỳ
 5/2026 có hạn thanh toán 15/06/2026 — đã quá hạn — nhưng vẫn ở `CHUA_TT`. Đây **đúng như dự
 kiến**: theo dõi công nợ thuộc Phase 5, và cột `trang_thai` của hóa đơn còn phụ thuộc dữ liệu
-thanh toán mà Phase 4 cố ý chưa tạo. Ghi vào bàn giao (mục 44) để Phase 5 nhận.
+thanh toán mà Phase 4 cố ý chưa tạo. Ghi vào bàn giao (mục 45.2) để Phase 5 nhận.
 
 ---
 
@@ -2022,8 +2022,13 @@ Thuê bao trả trước: 15 có số dư 205.000–465.000 đ, **3 cố ý đ�
    15/06/2026 đã quá hạn nhưng vẫn `CHUA_TT` — Phase 4 cố ý không cài vì trạng thái hóa đơn
    phụ thuộc dữ liệu thanh toán.
 2. **Trừ cước vào số dư thuê bao trả trước.** Engine tính `cuoc_phi` cho cả thuê bao trả
-   trước nhưng **không** động vào `so_du` (quyết định 5.4). 1.148 bản ghi CDR của 16 thuê bao
-   trả trước ở kỳ 6 đã có cước, chờ Phase 5 xử lý.
+   trước nhưng **không** động vào `so_du` (quyết định 5.4). Toàn bộ 20 thuê bao trả trước đã
+   có cước trên CDR, chờ Phase 5 xử lý:
+
+   | Kỳ | Thuê bao trả trước có phát sinh | Số CDR | Tổng cước đã tính |
+   |---|---|---|---|
+   | 5/2026 | 15 | **921** | 1.643.768 đ |
+   | 6/2026 | 16 | **1.126** | 2.001.863 đ |
 3. **Ràng buộc đã có sẵn cần tôn trọng.** `BillingService.huyBillingKy` từ chối xoá hóa đơn
    khi kỳ đã ghi nhận thanh toán. Sau khi Phase 5 tạo dữ liệu thanh toán, **kỳ đó không huỷ
    hóa đơn được nữa** — nên tạo thanh toán ở kỳ 5 (đã chốt) trước, giữ kỳ 6 linh hoạt để demo.

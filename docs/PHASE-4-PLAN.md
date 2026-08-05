@@ -270,6 +270,10 @@ kết quả.
 
 ### 5.4. Thuê bao trả trước — 16 thuê bao, 1148 CDR
 
+> Con số **1148** đo trên dữ liệu CDR **trước** mục 4A. Mục 4A sinh lại toàn bộ CDR nên nó đã
+> thay đổi — số liệu bàn giao cho Phase 5 nằm ở `PHASE-4-REPORT.md` mục 45.2 (kỳ 6: **1.126**
+> bản ghi / 16 thuê bao; kỳ 5: 921 bản ghi / 15 thuê bao).
+
 Gói TT01 có cước thuê bao tháng = 0 và không ưu đãi gì. Nghiệp vụ trả trước là trừ
 thẳng số dư, **không lập hóa đơn tháng**.
 

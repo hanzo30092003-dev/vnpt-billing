@@ -373,7 +373,7 @@ chưa có hóa đơn nào vẫn xuất hiện với giá trị 0.
 > Bảng trên là nội dung **của script `data-mau.sql`**, tức trạng thái ngay sau khi chạy
 > profile `reset`. Dữ liệu CDR, hóa đơn và chi tiết hóa đơn **không** nằm trong script — chúng
 > được sinh ra lúc chạy, qua màn hình *Sinh dữ liệu CDR* và *Tính cước*. Trạng thái dữ liệu
-> đang có sau Phase 4 xem `PHASE-4-REPORT.md` mục 42.
+> đang có sau Phase 4 xem `PHASE-4-REPORT.md` mục 45.1.
 
 **Số dư thuê bao trả trước** (điều chỉnh ở Phase 4F): 15 thuê bao có 200.000–500.000 đ,
 3 thuê bao cố ý để thấp khoảng 20.000 đ để Phase 5 có trường hợp *"số dư không đủ"*, và
