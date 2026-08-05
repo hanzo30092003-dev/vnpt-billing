@@ -132,30 +132,42 @@ INSERT INTO khach_hang (id, ma_kh, loai_kh, ten_kh, so_giay_to, ngay_sinh, nguoi
 --   Ngay kich hoat trai deu tu 2024-01 den 2026-06. Cac thue bao 34, 35,
 --   78, 79, 80 kich hoat GIUA THANG 6/2026 de thu nghiem tinh cuoc prorate.
 --   so_du chi co y nghia voi TRA_TRUOC; han_muc_tin_dung chi voi TRA_SAU.
+--
+--   SO DU TRA TRUOC - dieu chinh o Phase 4F.
+--   Muc cu (3.000-61.000 d) qua thap so voi cuoc thuc te phat sinh trong mot
+--   thang (~85.000-110.000 d), nen khi Phase 5 tru cuoc vao so du thi gan nhu
+--   ca 20 thue bao deu am tien - man hinh trong nhu he thong bi loi.
+--   Nay nang len 200.000-500.000 d cho phan lon.
+--
+--   CO Y giu lai BA thue bao so du thap (id 5, 12, 20: 18.000 / 22.000 / 20.000)
+--   de Phase 5 co truong hop that de minh hoa canh bao "so du khong du".
+--   Hai thue bao id 8 va 15 giu so du 0 vi da tam ngung hai chieu / thanh ly.
+--
+--   Day la dieu chinh DU LIEU MAU cho hop ly ve nghiep vu, KHONG phai sua logic.
 -- ---------------------------------------------------------------------
 INSERT INTO thue_bao (id, so_thue_bao, khach_hang_id, goi_cuoc_id, loai_thue_bao,
                       ngay_kich_hoat, ngay_huy, trang_thai, so_du, han_muc_tin_dung) VALUES
 -- Ca nhan tra truoc (goi TT01)
-(1,  '0901234501',  1, 5, 'TRA_TRUOC', '2024-01-15', NULL,         'HOAT_DONG',     52000, 0),
-(2,  '0912345602',  2, 5, 'TRA_TRUOC', '2024-02-20', NULL,         'HOAT_DONG',    118000, 0),
-(3,  '0933456703',  3, 5, 'TRA_TRUOC', '2024-03-05', NULL,         'HOAT_DONG',     27500, 0),
+(1,  '0901234501',  1, 5, 'TRA_TRUOC', '2024-01-15', NULL,         'HOAT_DONG',    285000, 0),
+(2,  '0912345602',  2, 5, 'TRA_TRUOC', '2024-02-20', NULL,         'HOAT_DONG',    340000, 0),
+(3,  '0933456703',  3, 5, 'TRA_TRUOC', '2024-03-05', NULL,         'HOAT_DONG',    215000, 0),
 (4,  '0944567804',  4, 5, 'TRA_TRUOC', '2024-03-28', NULL,         'HOAT_DONG',    205000, 0),
-(5,  '0965678905',  5, 5, 'TRA_TRUOC', '2024-04-12', NULL,         'TAM_NGUNG_1C',   3000, 0),
-(6,  '0976789006',  6, 5, 'TRA_TRUOC', '2024-05-08', NULL,         'HOAT_DONG',     89000, 0),
-(7,  '0987890107',  7, 5, 'TRA_TRUOC', '2024-06-17', NULL,         'HOAT_DONG',    143000, 0),
+(5,  '0965678905',  5, 5, 'TRA_TRUOC', '2024-04-12', NULL,         'TAM_NGUNG_1C',  18000, 0),
+(6,  '0976789006',  6, 5, 'TRA_TRUOC', '2024-05-08', NULL,         'HOAT_DONG',    260000, 0),
+(7,  '0987890107',  7, 5, 'TRA_TRUOC', '2024-06-17', NULL,         'HOAT_DONG',    415000, 0),
 (8,  '0818901208',  8, 5, 'TRA_TRUOC', '2024-07-01', NULL,         'TAM_NGUNG_2C',      0, 0),
-(9,  '0829012309',  9, 5, 'TRA_TRUOC', '2024-07-25', NULL,         'HOAT_DONG',     66000, 0),
+(9,  '0829012309',  9, 5, 'TRA_TRUOC', '2024-07-25', NULL,         'HOAT_DONG',    230000, 0),
 (10, '0830123410', 10, 5, 'TRA_TRUOC', '2024-08-14', NULL,         'HOAT_DONG',    310000, 0),
-(11, '0841234511', 11, 5, 'TRA_TRUOC', '2024-09-03', NULL,         'HOAT_DONG',     15000, 0),
-(12, '0852345612', 12, 5, 'TRA_TRUOC', '2024-09-22', NULL,         'TAM_NGUNG_1C',   8500, 0),
-(13, '0883456713', 13, 5, 'TRA_TRUOC', '2024-10-10', NULL,         'HOAT_DONG',    175000, 0),
-(14, '0904567814', 14, 5, 'TRA_TRUOC', '2024-11-05', NULL,         'HOAT_DONG',     43000, 0),
+(11, '0841234511', 11, 5, 'TRA_TRUOC', '2024-09-03', NULL,         'HOAT_DONG',    250000, 0),
+(12, '0852345612', 12, 5, 'TRA_TRUOC', '2024-09-22', NULL,         'TAM_NGUNG_1C',  22000, 0),
+(13, '0883456713', 13, 5, 'TRA_TRUOC', '2024-10-10', NULL,         'HOAT_DONG',    380000, 0),
+(14, '0904567814', 14, 5, 'TRA_TRUOC', '2024-11-05', NULL,         'HOAT_DONG',    295000, 0),
 (15, '0915678915', 15, 5, 'TRA_TRUOC', '2024-11-28', '2026-03-15', 'DA_THANH_LY',       0, 0),
-(16, '0936789016', 16, 5, 'TRA_TRUOC', '2024-12-16', NULL,         'HOAT_DONG',     97000, 0),
-(17, '0947890117', 17, 5, 'TRA_TRUOC', '2025-01-09', NULL,         'HOAT_DONG',    128000, 0),
-(18, '0968901218', 18, 5, 'TRA_TRUOC', '2025-01-30', NULL,         'HOAT_DONG',     61000, 0),
+(16, '0936789016', 16, 5, 'TRA_TRUOC', '2024-12-16', NULL,         'HOAT_DONG',    465000, 0),
+(17, '0947890117', 17, 5, 'TRA_TRUOC', '2025-01-09', NULL,         'HOAT_DONG',    225000, 0),
+(18, '0968901218', 18, 5, 'TRA_TRUOC', '2025-01-30', NULL,         'HOAT_DONG',    355000, 0),
 (19, '0979012319', 19, 5, 'TRA_TRUOC', '2025-02-18', NULL,         'HOAT_DONG',    234000, 0),
-(20, '0810123420', 20, 5, 'TRA_TRUOC', '2025-03-07', NULL,         'TAM_NGUNG_1C',   1200, 0),
+(20, '0810123420', 20, 5, 'TRA_TRUOC', '2025-03-07', NULL,         'TAM_NGUNG_1C',  20000, 0),
 -- Ca nhan tra sau (goi CB01 / MAX70 / MAX150)
 (21, '0821234521', 21, 1, 'TRA_SAU',   '2025-03-25', NULL,         'HOAT_DONG',    0,  500000),
 (22, '0832345622', 22, 2, 'TRA_SAU',   '2025-04-11', NULL,         'HOAT_DONG',    0,  500000),

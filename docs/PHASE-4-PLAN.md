@@ -203,6 +203,33 @@ engine đang quên đúng chỗ quy đổi tương ứng. Câu SQL ở mục 9.2
 
 ## 5. Mười quyết định nghiệp vụ phải chốt trước khi viết code
 
+> ### ✅ Đối chiếu sau khi Phase 4 hoàn tất
+>
+> Cả 10 quyết định đều đã được thực hiện. Một quyết định phải **làm rõ thêm** trong quá
+> trình làm, không phải đổi ý:
+>
+> | # | Nội dung | Trạng thái | Cài đặt ở |
+> |---|---|---|---|
+> | 5.1 | Làm tròn block lên (CEILING) | ✅ đúng như chốt | `DonViCuoc.soBlock` — 4A |
+> | 5.2 | Ưu đãi trừ theo **sản lượng thô** | ✅ đúng như chốt, **đã làm rõ** ⬇ | `UuDaiGoiCuoc` — 4D |
+> | 5.3 | Không cắt đôi bản ghi làm vượt quota | ✅ đúng như chốt | `UuDaiGoiCuoc.Quy` — 4D |
+> | 5.4 | Rating cho mọi thuê bao, billing chỉ trả sau | ✅ đúng như chốt | `BillingService` — 4C |
+> | 5.5 | Tạm ngưng vẫn thu cước thuê bao | ✅ đúng như chốt | `QuyTacKyCuoc` — 4C |
+> | 5.6 | Prorate cước thuê bao, ưu đãi trọn tháng | ✅ đúng như chốt | `QuyTacKyCuoc` — 4C |
+> | 5.7 | VAT 10% là hằng số | ✅ đúng như chốt | `ThamSoTinhCuoc` — 4A |
+> | 5.8 | Làm tròn ở đúng một tầng — tầng CDR | ✅ đúng như chốt | `ThamSoTinhCuoc.lamTronTien` — 4A |
+> | 5.9 | Chỉ xử lý `CHUA_TINH`/`LOI`; có đường hủy và gỡ kỳ kẹt | ✅ đúng như chốt | `RatingService` — 4B |
+> | 5.10 | Gói lấy theo `dang_ky_goi_cuoc` | ✅ đúng như chốt | `QuyTacKyCuoc` — 4C |
+>
+> **Chỗ phải làm rõ ở 5.2.** Quyết định gốc chỉ nói *"trừ theo sản lượng thô, không theo
+> block đã làm tròn"* — tức phân biệt với **block tính cước**. Nhưng vẫn còn một câu chưa
+> trả lời: khi so sản lượng (giây, KB) với quota (phút, MB) thì quy đổi theo chiều nào?
+> Mục 4D đo cả hai chiều và chọn **so ở đơn vị nhỏ nhất** (quy quota xuống giây và KB), vì
+> chiều ngược lại làm tròn lên từng bản ghi rồi cộng dồn nên ăn mòn quỹ của khách — đo được
+> **+10,97%** với thoại, làm 4 thuê bao bị coi là vượt quota trong khi chưa hề vượt. Đây là
+> cách đọc trung thành nhất với chính lý do đã ghi ở 5.2. Chi tiết:
+> [`PHASE-4-REPORT.md`](PHASE-4-REPORT.md) mục 23.
+
 Đây là các chỗ mà **mọi lựa chọn đều "chạy được"**, nên nếu không chốt trước thì sẽ
 chốt ngầm bằng dòng code đầu tiên viết ra, và không ai rà lại được nữa.
 

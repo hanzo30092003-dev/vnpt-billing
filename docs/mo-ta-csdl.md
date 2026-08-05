@@ -78,7 +78,7 @@ erDiagram
 | Tên trường | Kiểu dữ liệu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
 | `id` | BIGINT | PK, AUTO_INCREMENT | Khóa chính |
-| `ma_kh` | VARCHAR(20) | NOT NULL, UNIQUE | Mã khách hàng, dạng `KH0001` |
+| `ma_kh` | VARCHAR(20) | NOT NULL, UNIQUE | Mã khách hàng, dạng `KH000001` — **6 chữ số**, chuẩn hoá ở Phase 3A |
 | `loai_kh` | ENUM | NOT NULL | `CA_NHAN` / `DOANH_NGHIEP` |
 | `ten_kh` | VARCHAR(200) | NOT NULL, INDEX | Họ tên cá nhân hoặc tên doanh nghiệp |
 | `so_giay_to` | VARCHAR(30) | NOT NULL, INDEX | CCCD (12 số) với cá nhân, MST (10 số) với doanh nghiệp |
@@ -367,8 +367,17 @@ chưa có hóa đơn nào vẫn xuất hiện với giá trị 0.
 | `bang_gia_cuoc` | 10 | 7 dòng giá thường + 3 dòng giờ cao điểm (thoại, +20%) |
 | `thue_bao` | 80 | 60 trả sau + 20 trả trước |
 | `dang_ky_goi_cuoc` | 80 | Mỗi thuê bao một bản ghi `DANG_AP_DUNG` |
-| `ky_cuoc` | 1 | Tháng 6/2026, trạng thái `MO` |
+| `ky_cuoc` | 3 | Tháng 5, 6, 7/2026 — đều khởi tạo ở trạng thái `MO` |
 | Các bảng còn lại | 0 | Phát sinh ở các phase sau |
+
+> Bảng trên là nội dung **của script `data-mau.sql`**, tức trạng thái ngay sau khi chạy
+> profile `reset`. Dữ liệu CDR, hóa đơn và chi tiết hóa đơn **không** nằm trong script — chúng
+> được sinh ra lúc chạy, qua màn hình *Sinh dữ liệu CDR* và *Tính cước*. Trạng thái dữ liệu
+> đang có sau Phase 4 xem `PHASE-4-REPORT.md` mục 42.
+
+**Số dư thuê bao trả trước** (điều chỉnh ở Phase 4F): 15 thuê bao có 200.000–500.000 đ,
+3 thuê bao cố ý để thấp khoảng 20.000 đ để Phase 5 có trường hợp *"số dư không đủ"*, và
+2 thuê bao để 0 đ vì đã tạm ngưng hai chiều hoặc đã thanh lý.
 
 **Phân bố thuê bao:**
 
@@ -387,16 +396,25 @@ thử nghiệm tính cước theo tỷ lệ ngày (prorate) ở Phase 4.
 
 ## 5. Lưu ý vận hành
 
-### 5.1. Script chạy lại mỗi lần khởi động
+### 5.1. Script khởi tạo chỉ chạy khi được yêu cầu
 
-`application.yml` đặt `spring.sql.init.mode: always`, nên `schema.sql` và `data-mau.sql`
-chạy lại **mỗi lần khởi động ứng dụng**. Do đó `schema.sql` bắt đầu bằng `DROP TABLE IF EXISTS`
-theo thứ tự ngược phụ thuộc khóa ngoại.
+`application.yml` đặt `spring.sql.init.mode: never` **từ Phase 2**, nên `schema.sql` và
+`data-mau.sql` **không** chạy lại ở mỗi lần khởi động và dữ liệu nhập qua giao diện được giữ
+nguyên.
 
-> ⚠️ **Hệ quả: mọi dữ liệu nhập qua giao diện sẽ mất khi khởi động lại.**
-> Chấp nhận được ở Phase 1 vì toàn bộ là dữ liệu mẫu. Trước khi bước vào Phase 3
-> (có chức năng nhập liệu) **bắt buộc** phải chuyển sang `spring.sql.init.mode: never`
-> hoặc thay bằng công cụ quản lý phiên bản CSDL như Flyway / Liquibase.
+Muốn nạp lại bộ dữ liệu mẫu từ đầu thì chạy với profile `reset`:
+
+```bash
+mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
+```
+
+> ⚠️ Profile `reset` bật `mode: always`, mà `schema.sql` mở đầu bằng `DROP TABLE IF EXISTS`
+> theo thứ tự ngược phụ thuộc khóa ngoại — **toàn bộ dữ liệu đang có sẽ mất**. Chỉ dùng khi
+> chủ đích làm mới CSDL.
+>
+> Profile này cũng tắt DevTools (`spring.devtools.restart.enabled: false`). Lý do ghi ở
+> `PHASE-4-REPORT.md` mục 15: DevTools thấy `target/` đổi sẽ tự khởi động lại, và ở profile
+> `reset` thì mỗi lần khởi động lại là một lần `DROP TABLE`.
 
 ### 5.2. Ánh xạ kiểu dữ liệu cần lưu ý
 
@@ -415,15 +433,34 @@ Hibernate mặc định mong đợi cột kiểu `BIT` và sẽ báo lỗi khi c
 
 ---
 
-## 6. ⚠️ CẢNH BÁO CHO PHASE 4 — HAI CHỖ QUY ĐỔI ĐƠN VỊ DATA
+## 6. ⚠️ BA CHỖ QUY ĐỔI ĐƠN VỊ
 
-Dữ liệu data trong hệ thống được lưu ở **hai đơn vị khác nhau**. Engine tính cước ở
-Phase 4 phải quy đổi ở **cả hai chỗ**, quên bất kỳ chỗ nào cũng cho ra hóa đơn sai.
+> **Cập nhật sau Phase 4.** Mục này ban đầu chỉ ghi **hai** chỗ quy đổi KB/MB. Rà soát đầu
+> Phase 4 phát hiện **chỗ thứ ba** cùng loại và cùng mức nguy hiểm: quỹ ưu đãi thoại khai
+> bằng **phút** còn CDR lưu bằng **giây**. Cả ba nay đã được cài đặt và gom vào một lớp
+> duy nhất — `service/rating/DonViCuoc.java`.
 
-| # | Cột | Đơn vị lưu | Phải làm gì khi tính cước |
-|---|---|---|---|
-| 1 | `chi_tiet_su_dung.so_luong` | **KB** | Chia cho 1024 để ra MB **trước khi** nhân đơn giá |
-| 2 | `goi_cuoc.data_mien_phi_mb` | **MB** | So sánh với sản lượng **đã quy đổi sang MB**, tuyệt đối không so trực tiếp với tổng KB |
+Sản lượng trong hệ thống lưu ở **đơn vị nhỏ** (giây, KB), còn ưu đãi của gói khai ở **đơn vị
+lớn** (phút, MB). Quên quy đổi ở bất kỳ chỗ nào cũng cho ra hóa đơn sai mà không có cảnh báo.
+
+| # | Cột | Đơn vị lưu | Đối chiếu với | Sai số nếu quên |
+|---|---|---|---|---|
+| 1 | `chi_tiet_su_dung.so_luong` (DATA) | **KB** | đơn giá đặt theo MB | **×1024** |
+| 2 | `goi_cuoc.data_mien_phi_mb` | **MB** | sản lượng lưu bằng KB | **×1024** |
+| 3 | `goi_cuoc.phut_*_mien_phi` | **PHÚT** | `thoi_luong_giay` lưu bằng GIÂY | **×60** |
+
+### 6.0. Cách đã cài đặt: so ở đơn vị NHỎ NHẤT
+
+Có hai cách khớp hai đơn vị, và chúng **không** cho cùng kết quả:
+
+| Cách | Làm gì | Hệ quả |
+|---|---|---|
+| A | Quy từng bản ghi **lên** đơn vị của quỹ, làm tròn lên | Thổi phồng sản lượng — đo trên dữ liệu mẫu: **+10,97%** với thoại |
+| B ✅ | Quy quỹ **xuống** đơn vị của bản ghi, phép nhân đúng | Không có phép làm tròn nào |
+
+Hệ thống dùng **cách B**: `quota_phút × 60` và `quota_MB × 1024`, rồi so với tổng giây và
+tổng KB thô. Cách A làm 4 thuê bao trong dữ liệu mẫu bị coi là vượt quỹ trong khi chưa hề
+vượt — chi tiết ở `PHASE-4-REPORT.md` mục 23.
 
 ### 6.1. Vì sao chỗ thứ hai nguy hiểm hơn
 
@@ -463,16 +500,38 @@ LIMIT 5;
 Những thuê bao lọt vào kết quả này **phải có cước data bằng 0**. Nếu khác 0 thì engine
 đang mắc đúng lỗi mô tả ở trên.
 
-### 6.3. Khuyến nghị
+### 6.3. Đã cài đặt — lớp `DonViCuoc`
 
-Nên viết một hằng số và một hàm quy đổi dùng chung ngay khi bắt đầu Phase 4, thay vì
-rải phép chia 1024 ở nhiều chỗ:
+Khuyến nghị ban đầu là gom phép quy đổi vào một chỗ. Phase 4A đã làm, và mở rộng cho cả ba
+chỗ cùng hai chiều quy đổi:
 
 ```java
-public static final int KB_MOI_MB = 1024;
+public final class DonViCuoc {
+    public static final int KB_MOI_MB    = 1024;
+    public static final int GIAY_MOI_PHUT = 60;
 
-public static BigDecimal kbSangMb(long soKb) {
-    return BigDecimal.valueOf(soKb)
-            .divide(BigDecimal.valueOf(KB_MOI_MB), 2, RoundingMode.HALF_UP);
+    // Chiều LÊN - lam tròn LÊN, dùng khi tính tiền
+    public static long soBlock(long soLuong, int kichThuocBlock)  // ceil
+    public static long kbSangMb(long soKb)        // = soBlock(soKb, 1024)
+    public static long giaySangPhut(long soGiay)  // = soBlock(soGiay, 60)
+
+    // Chiều XUỐNG - phép nhân đúng, dùng khi so với quỹ ưu đãi
+    public static long phutSangGiay(long soPhut)  // × 60
+    public static long mbSangKb(long soMb)        // × 1024
 }
 ```
+
+Chia nguyên `(a + b - 1) / b` thay vì `Math.ceil` trên số thực: số nguyên không có sai số
+dấu phẩy động, nên không bao giờ gặp chuyện `3000/60` ra `49,999…` rồi làm tròn thành 50.
+
+Lớp này có **13 unit test** riêng (`DonViCuocTest`), trong đó hai test dựng đúng hai ví dụ
+cảnh báo ở mục 6.1 và 6.2 trên: 1.500.000 KB phải ra 1465 MB, và 5.400 giây phải ra 90 phút.
+
+### 6.4. Truy nguyên đơn giá — cột `bang_gia_cuoc_id`
+
+Phase 4D bổ sung cột `chi_tiet_su_dung.bang_gia_cuoc_id` để lưu **dòng bảng giá đã áp dụng**
+tại thời điểm định giá. Nhờ nó, hóa đơn cũ truy nguyên được đúng đơn giá đã thu ngay cả sau
+khi bảng giá thay đổi, và bước áp ưu đãi chạy lại được nhiều lần mà không sai số.
+
+Bất biến kiểm ở khâu build (`KiemTraDoPhuBangGiaTest`): mọi bản ghi `DA_TINH` đều phải có
+`bang_gia_cuoc_id` khác NULL.

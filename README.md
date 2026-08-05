@@ -132,6 +132,29 @@ mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 mvnw test
 ```
 
+Hiện có **148 test**. Hai lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
+với schema thật, `KiemTraDoPhuBangGiaTest` kiểm bất biến trên dữ liệu thật); các lớp còn lại
+chạy độc lập không cần CSDL.
+
+> ⚠️ Dòng phân rã theo lớp có thể in ra `Tests run: 0 ... in Ma trận chuyển trạng thái thuê bao`.
+> Đó là cách Surefire đếm lớp `@Nested`, **không phải lỗi** — con số đúng nằm ở dòng tổng
+> `Results: Tests run: 148`.
+
+### 4.4. Chạy engine tính cước
+
+Toàn bộ engine điều khiển qua giao diện tại **`/tinh-cuoc`** (cần vai trò `ADMIN`):
+
+1. **Sinh dữ liệu CDR** — `/cdr/sinh-du-lieu`, chọn khoảng ngày và số bản ghi
+2. **Chạy tính cước** — định giá từng bản ghi CDR của kỳ
+3. **Lập hóa đơn** — áp ưu đãi gói cước rồi gom thành hóa đơn cho thuê bao trả sau
+4. **Chốt kỳ** — thao tác **một chiều**, sau đó kỳ không sửa được nữa
+
+Mỗi bước đều có đường lùi (*Huỷ hóa đơn*, *Huỷ kết quả tính cước*) trừ bước chốt kỳ.
+
+**Bảng đối soát cước** tại `/tinh-cuoc/doi-soat/{thueBaoId}/{kyId}` bày ra toàn bộ đường đi
+của con số — từ sản lượng thô trên từng CDR, qua quy đổi đơn vị và quỹ ưu đãi, tới từng cột
+trên hóa đơn — và đối chiếu hai cột "tính từ CDR" với "trên hóa đơn". In ra giấy A4 được.
+
 ### 4.4. Đóng gói và chạy độc lập
 
 ```bash
@@ -178,7 +201,7 @@ vnpt-billing/
 
 ---
 
-## 6. Trạng thái hiện tại — hết Phase 3
+## 6. Trạng thái hiện tại — hết Phase 4
 
 **Phase 0 — khung dự án** ✅
 
@@ -218,9 +241,21 @@ Tài khoản dùng thử (mật khẩu đều là `123456`): `admin`, `nhanvien0
 - [x] Tra cứu CDR, lọc, phân trang, xuất Excel
 - [x] Quản lý kỳ cước
 
+**Phase 4 — engine tính cước (Rating & Billing)** ✅
+
+- [x] **4A** — `QuyTacToHopDichVu`, `DonViCuoc`, `ThamSoTinhCuoc`, `BangGiaLookup`;
+      phát hiện và sửa 251 CDR không tra được đơn giá
+- [x] **4B** — `RatingService`: định giá từng CDR, làm tròn block, gán kỳ, đường gỡ kỳ kẹt
+- [x] **4C** — `BillingService`: gom CDR thành hóa đơn, prorate cước thuê bao, VAT
+- [x] **4D** — `UuDaiGoiCuoc`: quỹ ưu đãi bốn loại; thêm cột `bang_gia_cuoc_id` lưu ảnh chụp đơn giá
+- [x] **4E** — giao diện `/tinh-cuoc` và **bảng đối soát cước**
+- [x] **4F** — chạy kỳ 5/2026, dọn nợ tài liệu, chuẩn bị dữ liệu cho Phase 5–6
+
+Dữ liệu hiện có: **kỳ 5/2026** đã chốt (3697 CDR · 54 hóa đơn · 21.289.162 đ) và
+**kỳ 6/2026** đang mở (5017 CDR · 58 hóa đơn · 23.940.596 đ).
+
 Chưa làm (thuộc các phase sau):
 
-- [ ] Phase 4 — engine tính cước (Rating & Billing) — **mục 4A–4E xong**, còn 4F–4G
 - [ ] Phase 5 — hóa đơn, thanh toán, công nợ
 - [ ] Phase 6 — báo cáo, thống kê, dashboard
 - [ ] Phase 7 — hoàn thiện, kiểm thử, tài liệu
@@ -237,11 +272,9 @@ Tài liệu:
 - [`docs/mau-cdr.csv`](docs/mau-cdr.csv) — file CSV mẫu để thử chức năng nhập CDR
 - [`scripts/README.md`](scripts/README.md) — script kiểm thử giao diện qua HTTP
 
-> ⚠️ **CSDL bị dựng lại mỗi lần khởi động.** `application.yml` đặt
-> `spring.sql.init.mode: always`, nên `schema.sql` (bắt đầu bằng `DROP TABLE IF EXISTS`)
-> và `data-mau.sql` chạy lại ở mỗi lần chạy app. Mọi dữ liệu nhập tay sẽ mất.
-> Chấp nhận được ở giai đoạn này vì toàn bộ là dữ liệu mẫu, nhưng **trước Phase 2**
-> (khi bắt đầu có chức năng nhập liệu) phải chuyển sang `mode: never` hoặc dùng Flyway.
+> ℹ️ **Dữ liệu được giữ nguyên qua các lần khởi động.** `application.yml` đặt
+> `spring.sql.init.mode: never` từ Phase 2, nên `schema.sql` và `data-mau.sql` **không**
+> chạy lại. Muốn nạp lại bộ dữ liệu mẫu từ đầu thì chạy profile `reset` — xem mục 4.2.
 
 ---
 
