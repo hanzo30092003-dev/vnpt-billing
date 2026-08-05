@@ -18,4 +18,11 @@ public interface KyCuocService {
      * trạng thái khởi tạo là {@code MO}.
      */
     KyCuoc taoMoi(KyCuocForm form);
+
+    /**
+     * Chốt kỳ cước — thao tác một chiều, sau đó kỳ không thể tính lại hay sửa đổi.
+     *
+     * <p>Yêu cầu kỳ đang ở {@code MO} và đã có ít nhất một hóa đơn.</p>
+     */
+    KyCuoc chotKy(Long id);
 }

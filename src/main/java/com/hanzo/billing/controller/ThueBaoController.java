@@ -7,6 +7,7 @@ import com.hanzo.billing.enums.LoaiThueBao;
 import com.hanzo.billing.enums.TrangThaiThueBao;
 import com.hanzo.billing.exception.NghiepVuException;
 import com.hanzo.billing.service.KhachHangService;
+import com.hanzo.billing.service.KyCuocService;
 import com.hanzo.billing.service.ThueBaoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class ThueBaoController {
 
     private final ThueBaoService thueBaoService;
     private final KhachHangService khachHangService;
+    private final KyCuocService kyCuocService;
 
     @GetMapping
     public String danhSach(@RequestParam(required = false) String tuKhoa,
@@ -107,6 +109,8 @@ public class ThueBaoController {
         model.addAttribute("danhSachGoiCuoc", thueBaoService.layGoiCuocConHieuLuc());
         model.addAttribute("danhSachHinhThucNap", HinhThucNapTien.values());
         model.addAttribute("ngayHieuLucDoiGoi", thueBaoService.ngayHieuLucDoiGoi());
+        // Danh sách kỳ để mở bảng đối soát cước; đối soát luôn phải gắn với một kỳ cụ thể
+        model.addAttribute("danhSachKy", kyCuocService.layTatCa());
         return "thue-bao/chi-tiet";
     }
 

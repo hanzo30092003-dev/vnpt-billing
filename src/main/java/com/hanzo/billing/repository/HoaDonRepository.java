@@ -36,6 +36,16 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Long> {
     @Query("SELECT MAX(h.maHoaDon) FROM HoaDon h WHERE h.maHoaDon LIKE CONCAT(:tienTo, '%')")
     String timMaHoaDonLonNhatTheoTienTo(@Param("tienTo") String tienTo);
 
+    /** Hóa đơn của một kỳ kèm thuê bao và khách hàng, để hiển thị danh sách. */
+    @Query("""
+            SELECT h FROM HoaDon h
+            JOIN FETCH h.thueBao
+            JOIN FETCH h.khachHang
+            WHERE h.kyCuoc.id = :kyCuocId
+            ORDER BY h.maHoaDon
+            """)
+    List<HoaDon> timTheoKyKemQuanHe(@Param("kyCuocId") Long kyCuocId);
+
     /** Tổng doanh thu của kỳ, tính lại từ hóa đơn thực tế thay vì cộng dồn khi chạy. */
     @Query("SELECT COALESCE(SUM(h.tongThanhToan), 0) FROM HoaDon h WHERE h.kyCuoc.id = :kyCuocId")
     BigDecimal tinhTongDoanhThuTheoKy(@Param("kyCuocId") Long kyCuocId);

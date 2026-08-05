@@ -2,7 +2,7 @@
 
 **Đề tài:** Xây dựng phần mềm quản lý thuê bao và tính cước điện thoại
 **Môn học:** Thực tập nghề nghiệp
-**Trạng thái:** 🚧 Đang thực hiện — **mục 4A, 4B, 4C, 4D đã xong**, 4E–4G chưa bắt đầu
+**Trạng thái:** 🚧 Đang thực hiện — **mục 4A–4E đã xong**, 4F–4G chưa bắt đầu
 
 > Toàn bộ dữ liệu trong hệ thống là dữ liệu mẫu tự sinh phục vụ học tập.
 > Hệ thống không sử dụng dữ liệu thật của bất kỳ nhà mạng nào.
@@ -1354,7 +1354,7 @@ tách `UuDaiService` riêng.
 
 ---
 
-## 30. Việc tiếp theo — mục 4E
+## 30. Kế hoạch mục 4E (viết trước khi làm)
 
 Dựng giao diện: màn hình chạy tính cước theo kỳ, lập hóa đơn, chốt kỳ, và các đường hủy/gỡ đã
 có sẵn ở tầng nghiệp vụ.
@@ -1371,3 +1371,267 @@ Bốn việc 4E phải làm:
 
 > Cũng nên chốt kỳ 5/2026 ở 4E — nợ này ghi từ `PHASE-3-REPORT.md` mục 8.2, đến giờ mới có
 > chức năng chốt kỳ để xử lý.
+
+---
+
+# PHẦN V — MỤC 4E: GIAO DIỆN ĐIỀU KHIỂN VÀ BẢNG ĐỐI SOÁT
+
+## 31. Phạm vi mục 4E
+
+Đưa engine ra giao diện. Trước 4E, engine chỉ chạy được qua ba lớp bộ chạy thủ công gọi từ
+dòng lệnh; sau 4E, cả ba lớp đó **đã bị xoá** và mọi thao tác đều qua nút bấm.
+
+Hai màn hình mới:
+
+| Đường dẫn | Vai trò |
+|---|---|
+| `/tinh-cuoc` | Điều khiển: chạy tính cước, lập hóa đơn, hủy, gỡ kỳ kẹt, chốt kỳ |
+| `/tinh-cuoc/doi-soat/{thueBaoId}/{kyId}` | **Bảng đối soát cước** — màn hình chứng minh engine đúng |
+| `/tinh-cuoc/ky/{id}` | Danh sách hóa đơn của một kỳ, cửa vào bảng đối soát |
+
+---
+
+## 32. Một điểm đặc tả phải bổ sung: trạng thái nút
+
+Đặc tả A.2 mô tả nút theo trạng thái kỳ, nhưng cột `ky_cuoc.trang_thai` chỉ có **ba giá
+trị** (`MO` / `DANG_TINH` / `DA_CHOT`) — không đủ để phân biệt "kỳ mở chưa tính cước" với
+"kỳ mở đã tính xong chờ lập hóa đơn" với "kỳ mở đã có hóa đơn". Cả ba đều là `MO`.
+
+Phải đếm thêm mới suy ra được, nên bổ sung DTO `TinhTrangKy` gom năm con số: bản ghi chưa
+tính, bản ghi lỗi, bản ghi đã tính, số hóa đơn, số giao dịch thanh toán. Từ đó dẫn xuất ra
+sáu điều kiện bật nút:
+
+| Nút | Điều kiện |
+|---|---|
+| Chạy tính cước | kỳ `MO` và còn bản ghi `CHUA_TINH` hoặc `LOI` |
+| Lập hóa đơn | kỳ `MO`, **không còn** bản ghi `CHUA_TINH`, đã có bản ghi `DA_TINH`, chưa có hóa đơn |
+| Huỷ hóa đơn | kỳ `MO`, có hóa đơn, **chưa** có giao dịch thanh toán nào |
+| Huỷ tính cước | kỳ `MO`, **không** còn hóa đơn, có bản ghi `DA_TINH` |
+| Chốt kỳ | kỳ `MO`, đã có hóa đơn |
+| Gỡ kỳ kẹt | kỳ đang `DANG_TINH` |
+
+Kỳ `DA_CHOT` không hiện nút nào, chỉ còn dòng chữ *"Chỉ xem"*.
+
+> ⚠️ Giao diện chỉ **ẩn bớt nút cho gọn mắt**. Chốt chặn thật vẫn nằm nguyên ở tầng nghiệp
+> vụ — gõ thẳng đường dẫn vào một thao tác bị cấm vẫn bị từ chối với đúng thông báo tiếng
+> Việt. Có test riêng cho điều này (mục 34).
+
+Mục 4E cũng bổ sung `KyCuocService.chotKy()` — chức năng chưa tồn tại. Nó yêu cầu kỳ **đã có
+hóa đơn**: chốt một kỳ trống sẽ khóa vĩnh viễn một kỳ rỗng, và **cố ý không có chức năng
+mở lại** vì chốt kỳ là thao tác một chiều theo thiết kế.
+
+---
+
+## 33. Bảng đối soát cước — màn hình quan trọng nhất
+
+### 33.1. Nguyên tắc: chỉ đọc lại, không tính lại
+
+`DoiSoatCuocService` **không tính lại bất cứ con số tiền nào**. Mọi giá trị lấy thẳng từ dữ
+liệu đã ghi: `cuoc_phi` và `mien_phi` do engine đặt, đơn giá lấy từ dòng bảng giá đã chụp ở
+`bang_gia_cuoc_id`.
+
+Đây là điều kiện để bảng đối soát có giá trị chứng minh. Nếu nó tự tính lại theo cách riêng
+thì nó không chứng minh được hóa đơn đúng — nó chỉ chứng minh chính nó.
+
+Riêng khoảng ngày sử dụng và gói cước hiệu lực thì **dùng chung** `QuyTacKyCuoc` với engine
+lập hóa đơn, đúng vì lý do trên: nếu đối soát tự tính khác đi thì nó sẽ có lúc mâu thuẫn với
+chính hóa đơn mà nó đang đối soát.
+
+### 33.2. Bốn khối
+
+**Khối 1** — thuê bao, khách hàng, gói cước và bốn mức ưu đãi. Nếu cước thuê bao bị prorate
+thì ghi thẳng phép tính ra màn hình, ví dụ `150.000 × 8 ÷ 30 = 40.000 đ`, kèm câu nhắc ưu
+đãi **không** bị chia theo ngày.
+
+**Khối 2** — bảng sản lượng và ưu đãi, năm dòng: thoại nội mạng, thoại ngoại mạng, tin nhắn
+trong nước, dữ liệu, và một dòng riêng cho quốc tế ghi rõ *"không áp dụng ưu đãi"*.
+
+Cột "Đã dùng" hiện **hai con số**: đơn vị người đọc hiểu và giá trị gốc trong ngoặc. Cột
+quota cũng vậy. Ví dụ thật lấy từ màn hình:
+
+| Loại | Đã dùng | Quota của gói | Được miễn phí | Vượt ưu đãi | Thành tiền |
+|---|---|---|---|---|---|
+| Thoại nội mạng<br>*Quota 6.000 giây* | **89,2 phút**<br>*(5.351 giây)* | 100 phút | 89,2 phút | 0 phút | **0 đ** |
+| Dữ liệu<br>*Quota 2.097.152 KB* | **1.441,9 MB**<br>*(1.476.505 KB)* | 2.048 MB | 1.441,9 MB | 0 MB | **0 đ** |
+
+Cặp số trong ngoặc là **bằng chứng trực quan** rằng hệ thống không nhầm giây với phút hay KB
+với MB. Người chấm nhìn `5.351 giây` cạnh `Quota 6.000 giây` là tự kiểm được ngay.
+
+Dòng đầu bảng trên còn là ví dụ đắt nhất của cả Phase 4: đây đúng thuê bao `0832345622` đã
+phân tích ở mục 23. Cách quy đổi bị loại bỏ sẽ cộng dồn làm tròn từng cuộc thành **105 phút**
+và kết luận vượt quota 100 phút; cách đã chọn so `5.351 ≤ 6.000` giây và cho **0 đ**. Chênh
+lệch đó hiện ra ngay trên màn hình, không cần đọc code.
+
+**Khối 3** — chi tiết từng bản ghi: thời gian, số bị gọi, dịch vụ, hướng, cờ cao điểm, sản
+lượng, số block, **đơn giá**, cước, và badge *Miễn phí*. Dòng DATA hiện cả hai đơn vị ngay
+trong ô sản lượng, ví dụ `435.754 KB = 425,5 MB`.
+
+Bản ghi **làm vượt ưu đãi** — bản ghi đầu tiên bị tính tiền của mỗi loại — được tô nền **và**
+thêm vạch màu ở mép trái, kèm chú thích giải thích quy tắc không cắt đôi bản ghi. Dùng cả
+nền lẫn vạch chứ không chỉ màu, để bảng in đen trắng vẫn phân biệt được.
+
+Mặc định hiện 50 dòng, có nút **Xem tất cả** để chụp ảnh; khi in ra giấy thì CSS tự bỏ giới
+hạn này.
+
+**Khối 4** — đối chiếu với hóa đơn. Ví dụ thật:
+
+| Khoản mục | Tính từ chi tiết sử dụng | Trên hóa đơn | Chênh lệch |
+|---|---|---|---|
+| Cước thuê bao tháng | 70.000 đ | 70.000 đ | **0 đ** |
+| Cước thoại | 27.930 đ | 27.930 đ | **0 đ** |
+| Cước tin nhắn | 0 đ | 0 đ | **0 đ** |
+| Cước dữ liệu | 0 đ | 0 đ | **0 đ** |
+| Tổng trước thuế | 97.930 đ | 97.930 đ | **0 đ** |
+| Thuế VAT 10% | 9.793 đ | 9.793 đ | **0 đ** |
+| Tổng thanh toán | 107.723 đ | 107.723 đ | **0 đ** |
+
+Đây là **bất biến cộng dồn hiển thị ngay trên giao diện** — thứ mà từ 4C tới giờ chỉ chứng
+minh được bằng câu SQL.
+
+### 33.3. In ra giấy A4
+
+Khối `@media print` (15 quy tắc) bỏ sidebar, thanh trên, chân trang và mọi nút; hiện tiêu đề
+riêng cho bản in; **bỏ giới hạn 50 dòng**; lặp lại dòng tiêu đề bảng ở mỗi trang
+(`thead { display: table-header-group }`); và đổi badge sang dạng viền đen thay vì nền màu để
+bản in đen trắng vẫn đọc được.
+
+---
+
+## 34. Kết quả nghiệm thu mục 4E
+
+| # | Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `mvnw test` PASS, tối thiểu 136 test | ✅ | **148 test**, 0 lỗi (130 + **18 mới**) |
+| 2 | Chạy trọn vòng qua giao diện, doanh thu ra đúng | ✅ | **23.940.596 đ** — mục 34.1 |
+| 3 | Bảng đối soát, chênh lệch khối 4 toàn 0 | ✅ | **58/58 hóa đơn** — mục 34.2 |
+| 4 | Ba lớp bộ chạy thủ công đã xoá | ✅ | Engine chỉ chạy qua nút bấm |
+| 5 | In ra A4 đọc được | ✅ | 15 quy tắc `@media print` nạp đúng |
+
+### 34.1. Chạy trọn một vòng qua giao diện
+
+Không dùng SQL, chỉ bấm nút:
+
+| Bước | Thao tác | Kết quả |
+|---|---|---|
+| 1 | Huỷ hóa đơn | 58 hóa đơn bị xoá |
+| 2 | Huỷ kết quả tính cước | 5017 bản ghi về `CHUA_TINH` |
+| 3 | Chạy tính cước | 5017 bản ghi định giá lại |
+| 4 | Lập hóa đơn | 58 hóa đơn, **doanh thu 23.940.596 đ** |
+
+Doanh thu ra **đúng con số của 4D tới từng đồng** sau khi xoá sạch và làm lại toàn bộ bằng
+giao diện. Đây là lần thứ ba tính xác định được chứng minh, và là lần đầu qua đúng con đường
+người dùng thật sẽ đi.
+
+Sau đó **chốt kỳ**: mọi nút thao tác biến mất, chỉ còn dòng *"Chỉ xem"*; gọi lại thao tác
+tính cước trên kỳ đã chốt bị từ chối với thông báo tiếng Việt.
+
+### 34.2. Bảng đối soát — quét toàn bộ, không lấy mẫu
+
+Đặc tả yêu cầu kiểm 3 thuê bao đại diện. Giữ chuẩn "kiểm hết thay vì lấy mẫu" đã lập từ 4B,
+đã mở **cả 58 bảng đối soát**:
+
+| Kết quả khối 4 | Số hóa đơn |
+|---|---|
+| **Khớp tuyệt đối** (chênh lệch toàn 0) | **58** |
+| Có chênh lệch | **0** |
+
+Ba thuê bao đại diện theo đúng đặc tả:
+
+| Vai trò | Thuê bao | Số liệu đáng chú ý | Khối 4 |
+|---|---|---|---|
+| **Trọn trong ưu đãi** | 0827890157 (DN500) | **70/70 bản ghi miễn phí**; 100,3 phút nội mạng / quota 2.000 phút | ✅ Khớp |
+| **Vượt ưu đãi data** | 0821234521 (CB01) | **5.739,7 MB (5.877.492 KB)** → cước data **143.750 đ**; 0/74 miễn phí | ✅ Khớp |
+| **Prorate** | 0834567834 (MAX70) | **20/30 ngày**; 99,6 phút (5.978 giây) / quota 100 phút → **0 đ** | ✅ Khớp |
+
+Thuê bao trả trước (ví dụ 0901234501) mở bảng đối soát vẫn ra trang bình thường với khung
+thông báo giải thích vì sao không có hóa đơn tháng — không phải lỗi 500.
+
+Hai dòng đáng soi kỹ nhất cho báo cáo:
+
+- **0821234521**: `5.739,7 MB (5.877.492 KB)` — quy đổi KB→MB hiện ngay trên màn hình, và
+  gói CB01 có quota 0 MB nên toàn bộ bị thu tiền.
+- **0834567834**: `99,6 phút (5.978 giây)` với `Quota 100 phút / Quota 6.000 giây` → **0 đ**.
+  Đây là thuê bao sát ranh giới nhất; cách quy đổi bị loại bỏ ở mục 23 sẽ tính ra 109 phút và
+  thu tiền oan.
+
+### 34.3. Số test theo lớp
+
+| Lớp test | Số test | Ghi chú |
+|---|---|---|
+| Phase 2–3 | 30 | |
+| 4A · 4B · 4C · 4D | 100 | |
+| **`TinhCuocControllerTest`** | **9** | **4E** — phân quyền và xử lý lỗi ở tầng HTTP |
+| **`DoiSoatCuocServiceTest`** | **9** | **4E** — nội dung bảng đối soát |
+| | **148** | |
+
+Test đáng chú ý nhất là `DoiSoatCuocServiceTest` số 1: nó dựng **hai bản ghi cùng dịch vụ,
+cùng hướng, cùng khung giờ nhưng mang hai dòng bảng giá khác nhau** — đúng tình huống bảng
+giá đổi giữa kỳ — rồi khẳng định mỗi bản ghi hiện đơn giá của chính nó. Nếu bảng đối soát tra
+lại bảng giá hiện hành thì cả hai sẽ hiện cùng một giá và test đỏ. Đây là test chứng minh
+snapshot của mục 4D thật sự hoạt động.
+
+### 34.4. Hai sự cố nhỏ khi làm
+
+**Test dùng `@WithMockUser` không vẽ được trang.** Layout đọc
+`#authentication.principal.hoTen` và `.vaiTro.nhan`, mà người dùng giả mặc định của Spring
+Security không có hai thuộc tính đó. Đã đổi sang dựng `NguoiDungPrincipal` thật — vừa sửa
+được lỗi, vừa đúng với cách hệ thống chạy thật hơn.
+
+**Test đầu tiên cho trang "chưa có hóa đơn" dựng thuê bao thiếu khách hàng và gói cước.**
+Trang đổ vì `tenKh` null. Nhưng dữ liệu đó **không giống thật** — engine luôn nạp thuê bao
+đầy đủ quan hệ. Đã sửa dữ liệu test cho đúng tình huống thật (thuê bao đầy đủ, chỉ thiếu hóa
+đơn) thay vì thêm kiểm tra null vào template cho một trạng thái không bao giờ xảy ra.
+
+---
+
+## 35. Trạng thái dữ liệu hiện tại và lưu ý khi chụp ảnh
+
+Kỳ 6/2026 hiện: **5017 CDR đã tính, 58 hóa đơn, doanh thu 23.940.596 đ, trạng thái `MO`**.
+
+> ⚠️ **Kỳ đã được chốt trong lúc kiểm chứng rồi trả lại `MO` bằng lệnh SQL.** Chức năng chốt
+> kỳ là **một chiều theo thiết kế** và cố ý không có nút mở lại, nên nếu để nguyên trạng thái
+> `DA_CHOT` thì sẽ không chụp được ảnh các nút thao tác. Việc chốt kỳ đã được kiểm chứng đầy
+> đủ (mục 34.1); sau khi chụp xong ảnh, chỉ cần bấm **Chốt kỳ** một lần là về lại trạng thái
+> cuối cùng.
+
+### 35.1. Màn hình nên chụp cho báo cáo
+
+Đăng nhập bằng `admin`. Thứ tự ưu tiên từ trên xuống.
+
+| # | Màn hình | Cách lấy | Điểm cần thấy rõ |
+|---|---|---|---|
+| 1 | ⭐ **Đối soát — thuê bao vượt ưu đãi data** | `/tinh-cuoc/doi-soat/21/1` | **Ảnh quan trọng nhất.** Khối 2 hiện `5.739,7 MB (5.877.492 KB)`; khối 3 có dòng DATA `435.754 KB = 425,5 MB` và badge Miễn phí; khối 4 chênh lệch toàn 0 |
+| 2 | ⭐ **Đối soát — thuê bao sát ranh giới quota phút** | `/tinh-cuoc/doi-soat/34/1` | `99,6 phút (5.978 giây)` cạnh `Quota 100 phút / 6.000 giây` → **0 đ**. Phóng to đúng dòng này |
+| 3 | ⭐ **Khối 4 — đối chiếu hóa đơn** | Cuộn xuống cuối ảnh 1 hoặc 2 | Cột chênh lệch **toàn 0 đ** và khung xanh "Khớp tuyệt đối" |
+| 4 | Đối soát — thuê bao trọn trong ưu đãi | `/tinh-cuoc/doi-soat/57/1` | 70/70 bản ghi Miễn phí, mọi dòng khối 2 đều 0 đ |
+| 5 | Đối soát — dòng làm vượt ưu đãi | Ảnh 1, phần khối 3 | Dòng tô nền kèm vạch mép trái và chú thích quy tắc không cắt đôi bản ghi |
+| 6 | Đối soát — prorate | Ảnh 2, khối 1 | Khung ghi `20/30 ngày` và phép tính cước thuê bao |
+| 7 | **Bản in A4** | Mở ảnh 1 rồi bấm **In** → xem trước | Không còn sidebar và nút; hiện đủ mọi dòng; tiêu đề riêng cho bản in |
+| 8 | Màn hình điều khiển | `/tinh-cuoc` | Ba kỳ, cột "Bước tiếp theo", các nút bật theo trạng thái |
+| 9 | Modal cảnh báo chốt kỳ | Bấm **Chốt kỳ**, không xác nhận | Câu cảnh báo "MỘT CHIỀU, không có đường quay lại" |
+| 10 | Modal cảnh báo gỡ kỳ kẹt | Cần kỳ đang `DANG_TINH` | Câu "CHỈ dùng khi lần chạy trước bị dừng đột ngột" |
+| 11 | Hộp kết quả sau khi chạy | Bấm **Huỷ hóa đơn** rồi **Lập hóa đơn** | Khung xanh "Hoàn thành" kèm số hóa đơn, doanh thu, thời gian |
+| 12 | Kỳ đã chốt | Bấm **Chốt kỳ** và xác nhận | Badge "Đã chốt", ngày chốt, dòng "Chỉ xem", không còn nút nào |
+| 13 | Danh sách hóa đơn của kỳ | `/tinh-cuoc/ky/1` | 58 hóa đơn; đúng **5 dòng** có cột Dữ liệu tô đỏ đậm |
+| 14 | Trang đối soát của thuê bao trả trước | `/tinh-cuoc/doi-soat/1/1` | Khung vàng giải thích vì sao không có hóa đơn tháng |
+| 15 | Chặn phân quyền | Đăng nhập `ketoan01`, gõ `/tinh-cuoc` | Trang 403 |
+| 16 | Đường vào từ chi tiết thuê bao | `/thue-bao/22` | Nút "Xem đối soát cước" đổ ra danh sách kỳ |
+| 17 | Kết quả 148 test | Console `mvnw test` | Dòng `Results: Tests run: 148, Failures: 0` |
+
+> Ảnh 1 và 2 là hai ảnh nên đưa vào phần trình bày chính. Chúng cho thấy cùng lúc: quy đổi
+> đơn vị đúng, quỹ ưu đãi trừ đúng, đơn giá lấy từ ảnh chụp bảng giá, và hóa đơn khớp tuyệt
+> đối với chi tiết sử dụng — tức toàn bộ những gì Phase 4 phải chứng minh, trên một màn hình.
+
+---
+
+## 36. Việc tiếp theo — mục 4F
+
+Còn hai việc để khép Phase 4:
+
+1. **Chốt kỳ 5/2026** — nợ ghi từ `PHASE-3-REPORT.md` mục 8.2, nay đã có chức năng để xử lý.
+   Kỳ 5/2026 không có CDR nên sẽ không lập được hóa đơn; cần quyết định xử lý kỳ trống thế
+   nào (chốt kỳ hiện yêu cầu phải có hóa đơn)
+2. **Nợ tài liệu còn tồn** ở mục 8 — cảnh báo `spring.sql.init.mode` đã lỗi thời trong
+   `README.md` và `mo-ta-csdl.md`, `ma_kh` ghi 4 chữ số, số kỳ cước mẫu, và mục 6 của
+   `mo-ta-csdl.md` cần ghi **ba** chỗ quy đổi thay vì hai
+3. Nâng số dư mẫu của 16 thuê bao trả trước (mục 7.2) trước khi Phase 5 trừ số dư

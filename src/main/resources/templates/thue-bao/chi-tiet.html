@@ -29,6 +29,26 @@
                 <i class="bi bi-file-earmark-text me-1"></i> Xem chi tiết sử dụng
             </a>
 
+            <!--/*
+                Đối soát cước phải chọn kỳ, nên đổ ra danh sách kỳ thay vì một liên kết đơn.
+                Cũng chỉ hiện với quản trị viên vì /tinh-cuoc thuộc nhóm chỉ ADMIN.
+            */-->
+            <div class="btn-group" sec:authorize="hasRole('ADMIN')"
+                 th:if="${!#lists.isEmpty(danhSachKy)}">
+                <button type="button" class="btn btn-outline-primary dropdown-toggle"
+                        data-bs-toggle="dropdown">
+                    <i class="bi bi-clipboard-check me-1"></i> Xem đối soát cước
+                </button>
+                <ul class="dropdown-menu">
+                    <li><h6 class="dropdown-header">Chọn kỳ cước</h6></li>
+                    <li th:each="k : ${danhSachKy}">
+                        <a class="dropdown-item"
+                           th:href="@{/tinh-cuoc/doi-soat/{tb}/{ky}(tb=${thueBao.id},ky=${k.id})}"
+                           th:text="'Tháng ' + ${k.thang} + '/' + ${k.nam}"></a>
+                    </li>
+                </ul>
+            </div>
+
             <button type="button" class="btn btn-warning" data-bs-toggle="modal"
                     data-bs-target="#modalChuyenTrangThai"
                     th:disabled="${#lists.isEmpty(trangThaiCoTheChuyen)}">

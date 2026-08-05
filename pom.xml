@@ -99,6 +99,15 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Kiem thu phan quyen: @WithMockUser va cac request post-processor cua Spring
+             Security. Khong nam trong spring-boot-starter-test nen phai khai rieng;
+             phien ban do BOM cua Spring Boot quan ly. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

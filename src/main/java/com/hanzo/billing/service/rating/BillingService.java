@@ -27,6 +27,7 @@ import com.hanzo.billing.repository.ThanhToanRepository;
 import com.hanzo.billing.repository.ThueBaoRepository;
 import com.hanzo.billing.service.NhatKyService;
 import com.hanzo.billing.service.SinhMaService;
+import com.hanzo.billing.service.rating.QuyTacKyCuoc.KhoangSuDung;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -40,13 +41,13 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Engine lập hóa đơn — gom CDR đã định giá thành hóa đơn tháng.
@@ -195,53 +196,21 @@ public class BillingService {
     // Cước thuê bao tháng và prorate
     // -----------------------------------------------------------------
 
-    /** Khoảng ngày thuê bao thực sự sử dụng dịch vụ trong kỳ. */
-    private record KhoangSuDung(LocalDate tuNgay, LocalDate denNgay,
-                                long soNgaySuDung, long soNgayTrongKy) {
-
-        boolean troVenTronKy() {
-            return soNgaySuDung == soNgayTrongKy;
-        }
-    }
-
     /**
-     * Số ngày thuê bao thực dùng trong kỳ.
-     *
-     * <p>Một công thức xử lý được mọi trường hợp thay vì phân nhánh theo trạng thái:</p>
-     * <ul>
-     *   <li>Kích hoạt trước kỳ, chưa hủy → trọn kỳ</li>
-     *   <li>Kích hoạt giữa kỳ → từ ngày kích hoạt tới cuối kỳ, <b>tính cả ngày kích hoạt</b></li>
-     *   <li>Hủy giữa kỳ → từ đầu kỳ tới ngày hủy</li>
-     *   <li>Hủy trước kỳ, hoặc kích hoạt sau kỳ → khoảng rỗng, không lập hóa đơn</li>
-     * </ul>
+     * Số ngày thuê bao thực dùng trong kỳ — quy tắc dùng chung với bảng đối soát, xem
+     * {@link QuyTacKyCuoc#khoangSuDung}.
      *
      * @return null nếu thuê bao không dùng ngày nào trong kỳ
      */
     private KhoangSuDung tinhKhoangSuDung(ThueBao thueBao, KyCuoc ky) {
-        long soNgayTrongKy =
-                ChronoUnit.DAYS.between(ky.getNgayBatDau(), ky.getNgayKetThuc()) + 1;
-
-        // Thuê bao đã thanh lý mà không ghi ngày hủy là dữ liệu hỏng. Không đoán mò:
-        // coi như đã hủy từ trước và không lập hóa đơn, nhưng phải để lại cảnh báo.
-        if (thueBao.getTrangThai() == TrangThaiThueBao.DA_THANH_LY
+        Optional<KhoangSuDung> khoang = QuyTacKyCuoc.khoangSuDung(thueBao, ky);
+        if (khoang.isEmpty() && thueBao.getTrangThai() == TrangThaiThueBao.DA_THANH_LY
                 && thueBao.getNgayHuy() == null) {
             log.warn("Thuê bao {} ở trạng thái Đã thanh lý nhưng không có ngày hủy — "
                             + "bỏ qua khi lập hóa đơn kỳ {}/{}. Kiểm tra lại dữ liệu.",
                     thueBao.getSoThueBao(), ky.getThang(), ky.getNam());
-            return null;
         }
-
-        LocalDate tuNgay = thueBao.getNgayKichHoat().isAfter(ky.getNgayBatDau())
-                ? thueBao.getNgayKichHoat() : ky.getNgayBatDau();
-        LocalDate denNgay = (thueBao.getNgayHuy() != null
-                && thueBao.getNgayHuy().isBefore(ky.getNgayKetThuc()))
-                ? thueBao.getNgayHuy() : ky.getNgayKetThuc();
-
-        if (tuNgay.isAfter(denNgay)) {
-            return null;
-        }
-        return new KhoangSuDung(tuNgay, denNgay,
-                ChronoUnit.DAYS.between(tuNgay, denNgay) + 1, soNgayTrongKy);
+        return khoang.orElse(null);
     }
 
     /**
@@ -273,14 +242,10 @@ public class BillingService {
      */
     private GoiCuoc timGoiCuocCuoiKy(ThueBao thueBao, KyCuoc ky, NguonBilling nguon) {
         LocalDate ngay = ky.getNgayKetThuc();
-        for (DangKyGoiCuoc dangKy : nguon.dangKyTheoThueBao()
-                .getOrDefault(thueBao.getId(), List.of())) {
-            boolean daBatDau = !dangKy.getNgayBatDau().isAfter(ngay);
-            boolean chuaKetThuc = dangKy.getNgayKetThuc() == null
-                    || !dangKy.getNgayKetThuc().isBefore(ngay);
-            if (daBatDau && chuaKetThuc) {
-                return dangKy.getGoiCuoc();
-            }
+        Optional<GoiCuoc> goi = QuyTacKyCuoc.goiCuocHieuLucTai(
+                nguon.dangKyTheoThueBao().getOrDefault(thueBao.getId(), List.of()), ngay);
+        if (goi.isPresent()) {
+            return goi.get();
         }
         log.warn("Thuê bao {} không có bản ghi dang_ky_goi_cuoc nào hiệu lực ngày {} — "
                         + "lùi về gói hiện hành. Kiểm tra lại lịch sử đăng ký gói.",

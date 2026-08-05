@@ -4,6 +4,7 @@ import com.hanzo.billing.dto.KyCuocForm;
 import com.hanzo.billing.entity.KyCuoc;
 import com.hanzo.billing.enums.TrangThaiKyCuoc;
 import com.hanzo.billing.exception.NghiepVuException;
+import com.hanzo.billing.repository.HoaDonRepository;
 import com.hanzo.billing.repository.KyCuocRepository;
 import com.hanzo.billing.service.KyCuocService;
 import com.hanzo.billing.service.NhatKyService;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
 public class KyCuocServiceImpl implements KyCuocService {
 
     private final KyCuocRepository kyCuocRepository;
+    private final HoaDonRepository hoaDonRepository;
     private final NhatKyService nhatKyService;
 
     @Override
@@ -71,6 +74,47 @@ public class KyCuocServiceImpl implements KyCuocService {
                 "Tạo kỳ cước tháng " + daLuu.getThang() + "/" + daLuu.getNam()
                         + " (" + ngayBatDau + " đến " + ngayKetThuc + ")");
 
+        return daLuu;
+    }
+
+    /**
+     * Chốt kỳ cước — thao tác <b>một chiều</b>, không có đường quay lại.
+     *
+     * <p>Sau khi chốt, mọi thao tác tính cước, lập hóa đơn và hủy đều bị từ chối. Đây là
+     * chốt chặn cuối để số liệu của một kỳ đã quyết toán không thể đổi nữa.</p>
+     *
+     * <p>Bắt buộc kỳ phải <b>đã có hóa đơn</b>: chốt một kỳ chưa lập hóa đơn nào sẽ khóa
+     * vĩnh viễn một kỳ trống, và không có cách nào sửa ngoài can thiệp thẳng vào CSDL.</p>
+     */
+    @Override
+    @Transactional
+    public KyCuoc chotKy(Long id) {
+        KyCuoc ky = layTheoId(id);
+
+        if (ky.getTrangThai() == TrangThaiKyCuoc.DA_CHOT) {
+            throw new NghiepVuException("Kỳ cước tháng " + ky.getThang() + "/" + ky.getNam()
+                    + " đã được chốt trước đó rồi");
+        }
+        if (ky.getTrangThai() == TrangThaiKyCuoc.DANG_TINH) {
+            throw new NghiepVuException("Kỳ cước tháng " + ky.getThang() + "/" + ky.getNam()
+                    + " đang ở trạng thái Đang tính, không thể chốt. Nếu lần chạy trước bị "
+                    + "dừng giữa chừng, dùng chức năng \"Gỡ kỳ bị kẹt\" trước.");
+        }
+        long soHoaDon = hoaDonRepository.countByKyCuocId(id);
+        if (soHoaDon == 0) {
+            throw new NghiepVuException("Kỳ cước tháng " + ky.getThang() + "/" + ky.getNam()
+                    + " chưa có hóa đơn nào. Chốt một kỳ trống sẽ khóa vĩnh viễn kỳ đó — "
+                    + "phải chạy tính cước và lập hóa đơn trước khi chốt.");
+        }
+
+        ky.setTrangThai(TrangThaiKyCuoc.DA_CHOT);
+        ky.setNgayChot(LocalDateTime.now());
+        KyCuoc daLuu = kyCuocRepository.save(ky);
+
+        nhatKyService.ghiNhatKy("CHOT_KY_CUOC", "KY_CUOC", id,
+                "Chốt kỳ cước tháng " + ky.getThang() + "/" + ky.getNam() + " với "
+                        + soHoaDon + " hóa đơn, tổng doanh thu " + ky.getTongDoanhThu()
+                        + " đ. Từ nay kỳ này không thể tính lại hay sửa đổi.");
         return daLuu;
     }
 }

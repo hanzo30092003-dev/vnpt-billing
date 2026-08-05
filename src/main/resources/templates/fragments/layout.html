@@ -72,7 +72,10 @@
                    th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/ky-cuoc')} ? 'active'">
                     <i class="bi bi-calendar3"></i> Kỳ cước
                 </a>
-                <a class="nav-item" href="#"><i class="bi bi-calculator"></i> Tính cước</a>
+                <a class="nav-item" th:href="@{/tinh-cuoc}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/tinh-cuoc')} ? 'active'">
+                    <i class="bi bi-calculator"></i> Tính cước
+                </a>
             </div>
 
             <!--/* Kế toán */-->

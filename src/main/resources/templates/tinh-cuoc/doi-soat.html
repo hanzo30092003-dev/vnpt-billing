@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Đối soát cước', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-start mb-3 khong-in">
+        <h2 class="h4 mb-0"><i class="bi bi-clipboard-check me-2"></i>Bảng đối soát cước</h2>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                <i class="bi bi-printer"></i> In
+            </button>
+            <a th:href="@{/tinh-cuoc/ky/{id}(id=${bang.kyCuoc.id})}"
+               class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Danh sách hóa đơn
+            </a>
+        </div>
+    </div>
+
+    <!--/* Tiêu đề chỉ hiện khi in ra giấy */-->
+    <div class="chi-in mb-3">
+        <h1 class="h5 mb-1">BẢNG ĐỐI SOÁT CƯỚC</h1>
+        <div th:text="'Thuê bao ' + ${bang.thueBao.soThueBao} + ' — kỳ '
+                      + ${bang.kyCuoc.thang} + '/' + ${bang.kyCuoc.nam}"></div>
+    </div>
+
+    <!--/* ============ Không có hóa đơn: trang thông báo thân thiện ============ */-->
+    <div class="alert alert-warning" th:if="${bang.hoaDon == null}">
+        <h5 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Chưa có hóa đơn</h5>
+        <p class="mb-2">
+            Thuê bao <strong th:text="${bang.thueBao.soThueBao}"></strong> chưa có hóa đơn cho kỳ
+            <strong th:text="${bang.kyCuoc.thang} + '/' + ${bang.kyCuoc.nam}"></strong>.
+        </p>
+        <p class="small mb-0">
+            Có thể vì kỳ chưa được lập hóa đơn, hoặc vì thuê bao không thuộc diện lập hóa đơn
+            tháng — thuê bao <strong>trả trước</strong> có cước trên từng bản ghi nhưng không có
+            hóa đơn tháng, còn thuê bao đã thanh lý trước kỳ thì không lập hóa đơn.
+            Bảng sản lượng bên dưới vẫn xem được.
+        </p>
+    </div>
+
+    <!--/* ================== KHỐI 1 — THUÊ BAO VÀ GÓI CƯỚC ================== */-->
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white fw-semibold">1. Thuê bao và gói cước</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <table class="table table-sm mb-0 bang-thong-tin">
+                        <tr>
+                            <th>Số thuê bao</th>
+                            <td class="fw-semibold" th:text="${bang.thueBao.soThueBao}"></td>
+                        </tr>
+                        <tr>
+                            <th>Khách hàng</th>
+                            <td th:text="${bang.thueBao.khachHang.tenKh}
+                                         + ' (' + ${bang.thueBao.khachHang.maKh} + ')'"></td>
+                        </tr>
+                        <tr>
+                            <th>Loại thuê bao</th>
+                            <td th:text="${bang.thueBao.loaiThueBao.name() == 'TRA_SAU'}
+                                         ? 'Trả sau' : 'Trả trước'"></td>
+                        </tr>
+                        <tr>
+                            <th>Trạng thái</th>
+                            <td th:text="${bang.thueBao.trangThai.nhan}"></td>
+                        </tr>
+                        <tr>
+                            <th>Ngày kích hoạt</th>
+                            <td th:text="${#temporals.format(bang.thueBao.ngayKichHoat, 'dd/MM/yyyy')}"></td>
+                        </tr>
+                        <tr>
+                            <th>Kỳ cước</th>
+                            <td th:text="'Tháng ' + ${bang.kyCuoc.thang} + '/' + ${bang.kyCuoc.nam}
+                                 + ' (' + ${#temporals.format(bang.kyCuoc.ngayBatDau, 'dd/MM')} + ' → '
+                                 + ${#temporals.format(bang.kyCuoc.ngayKetThuc, 'dd/MM/yyyy')} + ')'"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-sm mb-0 bang-thong-tin">
+                        <tr>
+                            <th>Gói cước</th>
+                            <td class="fw-semibold"
+                                th:text="${bang.goiCuoc.maGoi} + ' — ' + ${bang.goiCuoc.tenGoi}"></td>
+                        </tr>
+                        <tr>
+                            <th>Cước thuê bao tháng</th>
+                            <td th:text="${#numbers.formatDecimal(bang.goiCuoc.cuocThueBaoThang, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                        </tr>
+                        <tr>
+                            <th>Ưu đãi phút nội mạng</th>
+                            <td th:text="${bang.goiCuoc.phutNoiMangMienPhi} + ' phút'"></td>
+                        </tr>
+                        <tr>
+                            <th>Ưu đãi phút ngoại mạng</th>
+                            <td th:text="${bang.goiCuoc.phutNgoaiMangMienPhi} + ' phút'"></td>
+                        </tr>
+                        <tr>
+                            <th>Ưu đãi tin nhắn</th>
+                            <td th:text="${bang.goiCuoc.smsMienPhi} + ' tin'"></td>
+                        </tr>
+                        <tr>
+                            <th>Ưu đãi dữ liệu</th>
+                            <td th:text="${bang.goiCuoc.dataMienPhiMb} + ' MB'"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="alert alert-secondary mt-3 mb-0 py-2 small" th:if="${bang.prorate != null}">
+                <span th:if="${bang.prorate.prorate}">
+                    <i class="bi bi-calendar-range me-1"></i>
+                    <strong>Cước thuê bao được tính theo tỷ lệ ngày.</strong>
+                    Thuê bao dùng <strong th:text="${bang.prorate.soNgaySuDung} + '/'
+                        + ${bang.prorate.soNgayTrongKy} + ' ngày'"></strong>
+                    (<span th:text="${#temporals.format(bang.prorate.tuNgay, 'dd/MM')}"></span>
+                    → <span th:text="${#temporals.format(bang.prorate.denNgay, 'dd/MM/yyyy')}"></span>,
+                    tính cả ngày đầu).
+                    Cách tính:
+                    <code th:text="${#numbers.formatDecimal(bang.prorate.cuocThueBaoThang, 0, 'POINT', 0, 'COMMA')}
+                        + ' × ' + ${bang.prorate.soNgaySuDung} + ' ÷ ' + ${bang.prorate.soNgayTrongKy}
+                        + ' = ' + ${#numbers.formatDecimal(bang.prorate.cuocThueBaoThuc, 0, 'POINT', 0, 'COMMA')} + ' đ'"></code>.
+                    Ưu đãi <strong>không</strong> bị chia theo ngày — thuê bao vẫn được trọn quỹ tháng.
+                </span>
+                <span th:unless="${bang.prorate.prorate}">
+                    <i class="bi bi-calendar-check me-1"></i>
+                    Thuê bao dùng trọn kỳ
+                    (<span th:text="${bang.prorate.soNgaySuDung}"></span> ngày), thu đủ cước thuê bao tháng.
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!--/* ================== KHỐI 2 — SẢN LƯỢNG VÀ ƯU ĐÃI ================== */-->
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white fw-semibold">2. Sản lượng và ưu đãi</div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered bang-du-lieu align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Loại</th>
+                        <th class="text-end">Đã dùng</th>
+                        <th class="text-end">Quota của gói</th>
+                        <th class="text-end">Được miễn phí</th>
+                        <th class="text-end">Vượt ưu đãi</th>
+                        <th class="text-end">Thành tiền</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${bang.dongUuDai}"
+                        th:classappend="${!d.coUuDai} ? 'table-warning'">
+                        <td>
+                            <div class="fw-semibold" th:text="${d.loai}"></div>
+                            <div class="small text-secondary" th:if="${d.ghiChu != null}" th:text="${d.ghiChu}"></div>
+                        </td>
+                        <td class="text-end">
+                            <div class="fw-semibold" th:text="${d.daDungHienThi}"></div>
+                            <!--/* Giá trị gốc trong ngoặc: bằng chứng trực quan hệ thống quy đổi đúng */-->
+                            <div class="small text-secondary" th:text="'(' + ${d.daDungGoc} + ')'"></div>
+                        </td>
+                        <td class="text-end" th:text="${d.quotaHienThi}"></td>
+                        <td class="text-end text-success" th:text="${d.mienPhiHienThi}"></td>
+                        <td class="text-end" th:text="${d.vuotHienThi}"></td>
+                        <td class="text-end fw-semibold"
+                            th:text="${#numbers.formatDecimal(d.thanhTien, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="small text-secondary mt-3 mb-0">
+                <i class="bi bi-lightbulb me-1"></i>
+                Con số trong ngoặc là <strong>sản lượng gốc lưu trong cơ sở dữ liệu</strong>: thoại
+                lưu bằng giây còn quota khai bằng phút, dữ liệu lưu bằng KB còn quota khai bằng MB.
+                Hệ thống so sánh ở <strong>đơn vị nhỏ nhất</strong> (giây và KB) nên không có phép
+                làm tròn nào ăn vào quỹ của khách.
+            </p>
+        </div>
+    </div>
+
+    <!--/* ================== KHỐI 3 — CHI TIẾT TỪNG BẢN GHI ================== */-->
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">
+                3. Chi tiết từng bản ghi
+                <span class="badge text-bg-secondary ms-1" th:text="${#lists.size(bang.dongCdr)}">0</span>
+                <span class="badge text-bg-success ms-1"
+                      th:text="${bang.soDongMienPhi} + ' miễn phí'"></span>
+            </span>
+            <button type="button" class="btn btn-sm btn-outline-secondary khong-in" id="nutXemTatCa"
+                    th:if="${#lists.size(bang.dongCdr) > 50}">
+                Xem tất cả <span th:text="'(' + ${#lists.size(bang.dongCdr)} + ' dòng)'"></span>
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm bang-du-lieu bang-cdr align-middle mb-0" id="bangCdr">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Số bị gọi</th>
+                        <th>Dịch vụ</th>
+                        <th>Hướng</th>
+                        <th>Cao điểm</th>
+                        <th class="text-end">Sản lượng</th>
+                        <th class="text-end">Block</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-end">Cước</th>
+                        <th>Miễn phí</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(bang.dongCdr)}">
+                        <td colspan="10" class="text-center text-secondary py-4">
+                            Thuê bao không phát sinh bản ghi nào trong kỳ này.
+                        </td>
+                    </tr>
+                    <tr th:each="c, tt : ${bang.dongCdr}"
+                        th:classappend="${c.laDongLamVuot} ? 'dong-lam-vuot' : (${tt.index >= 50} ? 'dong-an')">
+                        <td class="small text-nowrap"
+                            th:text="${#temporals.format(c.thoiGian, 'dd/MM HH:mm:ss')}"></td>
+                        <td class="small" th:text="${c.soBiGoi != null} ? ${c.soBiGoi} : '—'"></td>
+                        <td th:text="${c.loaiDichVu}"></td>
+                        <td class="small" th:text="${c.huong}"></td>
+                        <td class="text-center">
+                            <span th:if="${c.gioCaoDiem}" class="badge text-bg-warning">CĐ</span>
+                            <span th:unless="${c.gioCaoDiem}" class="text-secondary">—</span>
+                        </td>
+                        <td class="text-end small text-nowrap" th:text="${c.sanLuongHienThi}"></td>
+                        <td class="text-end" th:text="${c.soBlock != null} ? ${c.soBlock} : '—'"></td>
+                        <td class="text-end"
+                            th:text="${c.donGia != null}
+                                ? ${#numbers.formatDecimal(c.donGia, 0, 'POINT', 0, 'COMMA')} : '—'"></td>
+                        <td class="text-end"
+                            th:text="${c.cuocPhi != null}
+                                ? ${#numbers.formatDecimal(c.cuocPhi, 0, 'POINT', 0, 'COMMA')} : '—'"></td>
+                        <td>
+                            <span th:if="${c.mienPhi}" class="badge text-bg-success">Miễn phí</span>
+                            <span th:unless="${c.mienPhi}" class="text-secondary small">Tính tiền</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-secondary mt-3 mb-0 py-2 small">
+                <p class="mb-1">
+                    <span class="o-mau-vi-du dong-lam-vuot"></span>
+                    <strong>Dòng tô nền</strong> là bản ghi <strong>làm vượt ưu đãi</strong> — bản ghi
+                    đầu tiên bị tính tiền của loại đó. Theo quy tắc <strong>không cắt đôi bản ghi</strong>,
+                    nó bị thu tiền toàn bộ chứ không chia phần trong và phần ngoài ưu đãi; phần quota
+                    còn dư coi như không dùng tới.
+                </p>
+                <p class="mb-0">
+                    Cột <strong>Đơn giá</strong> lấy từ dòng bảng giá <strong>đã được ghi lại tại thời
+                    điểm định giá</strong> (<code>chi_tiet_su_dung.bang_gia_cuoc_id</code>), không phải
+                    tra lại bảng giá hiện hành. Nhờ vậy hóa đơn cũ vẫn truy nguyên đúng đơn giá đã thu
+                    ngay cả sau khi bảng giá thay đổi.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!--/* ================== KHỐI 4 — ĐỐI CHIẾU VỚI HÓA ĐƠN ================== */-->
+    <div class="card shadow-sm mb-3" th:if="${bang.hoaDon != null}">
+        <div class="card-header bg-white fw-semibold">
+            4. Đối chiếu với hóa đơn
+            <span class="ms-1" th:text="${bang.hoaDon.maHoaDon}"></span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered bang-du-lieu align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Khoản mục</th>
+                        <th class="text-end">Tính từ chi tiết sử dụng</th>
+                        <th class="text-end">Trên hóa đơn</th>
+                        <th class="text-end">Chênh lệch</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${bang.doiChieu}">
+                        <td th:text="${d.khoanMuc}"></td>
+                        <td class="text-end"
+                            th:text="${#numbers.formatDecimal(d.tuCdr, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                        <td class="text-end"
+                            th:text="${#numbers.formatDecimal(d.trenHoaDon, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                        <td class="text-end fw-semibold"
+                            th:classappend="${d.chenhLech.signum() == 0} ? 'text-success' : 'text-danger'"
+                            th:text="${#numbers.formatDecimal(d.chenhLech, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert mt-3 mb-0 py-2"
+                 th:classappend="${bang.coChenhLech} ? 'alert-danger' : 'alert-success'">
+                <span th:if="${!bang.coChenhLech}">
+                    <i class="bi bi-check-circle-fill me-1"></i>
+                    <strong>Khớp tuyệt đối.</strong> Mọi khoản mục đều chênh lệch 0 đồng. Đây là bằng
+                    chứng của bất biến cộng dồn: cước được làm tròn ở <strong>đúng một tầng</strong> —
+                    tầng từng bản ghi CDR — còn các mức trên chỉ cộng dồn, không làm tròn lại.
+                </span>
+                <span th:if="${bang.coChenhLech}">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Có chênh lệch.</strong> Hóa đơn không khớp với chi tiết sử dụng. Nguyên nhân
+                    thường gặp: chi tiết sử dụng đã được tính lại sau khi hóa đơn được lập. Hãy huỷ hóa
+                    đơn của kỳ và lập lại.
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!--/* Chọn kỳ khác cho cùng thuê bao */-->
+    <div class="card shadow-sm khong-in">
+        <div class="card-body py-2 d-flex align-items-center gap-2 flex-wrap">
+            <span class="small text-secondary">Xem kỳ khác:</span>
+            <a th:each="k : ${danhSachKy}" class="btn btn-sm"
+               th:classappend="${k.id == bang.kyCuoc.id} ? 'btn-primary' : 'btn-outline-secondary'"
+               th:href="@{/tinh-cuoc/doi-soat/{tb}/{ky}(tb=${bang.thueBao.id},ky=${k.id})}"
+               th:text="${k.thang} + '/' + ${k.nam}"></a>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // Mac dinh chi hien 50 dong dau cho de nhin; nut nay bo gioi han de chup anh va in.
+        document.addEventListener('DOMContentLoaded', function () {
+            var nut = document.getElementById('nutXemTatCa');
+            if (!nut) return;
+            nut.addEventListener('click', function () {
+                document.querySelectorAll('#bangCdr tr.dong-an')
+                        .forEach(function (tr) { tr.classList.remove('dong-an'); });
+                nut.remove();
+            });
+        });
+    </script>
+
+</div>
+
+</body>
+</html>

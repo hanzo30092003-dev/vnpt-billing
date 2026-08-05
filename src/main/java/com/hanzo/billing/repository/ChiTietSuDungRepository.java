@@ -126,6 +126,22 @@ public interface ChiTietSuDungRepository extends JpaRepository<ChiTietSuDung, Lo
                                        @Param("denLuc") LocalDateTime denLuc);
 
     /**
+     * Toàn bộ CDR của một thuê bao trong một kỳ, kèm dòng bảng giá đã áp dụng.
+     *
+     * <p>Phục vụ bảng đối soát cước. {@code LEFT JOIN FETCH} chứ không {@code JOIN FETCH}:
+     * bản ghi chưa tính cước hoặc lỗi thì {@code bang_gia_cuoc_id} còn trống, dùng
+     * {@code JOIN} sẽ loại mất chính những bản ghi cần soi nhất.</p>
+     */
+    @Query("""
+            SELECT c FROM ChiTietSuDung c
+            LEFT JOIN FETCH c.bangGiaCuoc
+            WHERE c.thueBao.id = :thueBaoId AND c.kyCuoc.id = :kyCuocId
+            ORDER BY c.thoiGianBatDau, c.id
+            """)
+    List<ChiTietSuDung> timTheoThueBaoVaKy(@Param("thueBaoId") Long thueBaoId,
+                                           @Param("kyCuocId") Long kyCuocId);
+
+    /**
      * CDR đã định giá của một kỳ, sắp xếp để duyệt quỹ ưu đãi theo từng thuê bao.
      *
      * <p>Thứ tự {@code (thuê bao, thời gian, id)} là <b>bắt buộc</b>: quỹ ưu đãi trừ dần

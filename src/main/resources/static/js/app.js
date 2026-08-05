@@ -41,8 +41,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
         modalEl.querySelector('.nut-dong-y').addEventListener('click', function () {
             if (formDangCho) {
+                danhDauDangXuLy(formDangCho);
                 formDangCho.submit();
             }
         });
     }
+
+    // -----------------------------------------------------------------
+    // Chi bao "dang xu ly" cho cac thao tac cham (tinh cuoc, lap hoa don...).
+    // Form khai class="form-thao-tac"; khi gui thi moi nut trong form bi vo
+    // hieu hoa va nut vua bam doi thanh spinner.
+    //
+    // Phai xu ly o CA HAI cho: su kien submit (nut gui thang) va trong nut dong
+    // y cua modal - vi form.submit() bang JavaScript KHONG kich hoat su kien
+    // submit, neu chi nghe su kien thi cac thao tac co modal se khong co chi bao.
+    // -----------------------------------------------------------------
+    function danhDauDangXuLy(form) {
+        if (form.dataset.dangXuLy === '1') {
+            return;
+        }
+        form.dataset.dangXuLy = '1';
+
+        // Vo hieu hoa nut cua MOI form tren trang, tranh bam hai thao tac cung luc
+        document.querySelectorAll('.form-thao-tac button').forEach(function (btn) {
+            btn.disabled = true;
+        });
+
+        var nutChinh = form.querySelector('button');
+        if (nutChinh) {
+            nutChinh.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-1"></span>Đang xử lý...';
+        }
+    }
+
+    document.querySelectorAll('form.form-thao-tac').forEach(function (form) {
+        form.addEventListener('submit', function () {
+            danhDauDangXuLy(form);
+        });
+    });
 });
