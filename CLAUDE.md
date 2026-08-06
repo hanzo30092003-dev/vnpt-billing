@@ -125,27 +125,22 @@ Phase 0–4 ✅ · **đang vào Phase 5**.
 | 6 | Báo cáo, thống kê, dashboard | ⏳ |
 | 7 | Hoàn thiện, kiểm thử, tài liệu | ⏳ |
 
-**Dữ liệu bàn giao cho Phase 5** (`PHASE-4-REPORT.md` mục 45): 8.714 CDR (tất cả `DA_TINH`) ·
-112 hóa đơn (54 kỳ 5 + 58 kỳ 6, tất cả `CHUA_TT`) · 264 chi tiết hóa đơn ·
-`thanh_toan`/`nap_tien`/`giam_tru` **cố ý rỗng** · kỳ 5/2026 `DA_CHOT`, kỳ 6/2026 `MO`.
+**Dữ liệu hiện tại:** 8.714 CDR (tất cả `DA_TINH`) · 112 hóa đơn (54 kỳ 5 + 58 kỳ 6, tất cả
+`CHUA_TT`) · 264 chi tiết hóa đơn · 34 dòng `bien_dong_so_du` (18 mở sổ + 16 trừ cước kỳ 6) ·
+`thanh_toan`/`giam_tru` vẫn rỗng · kỳ 5/2026 `DA_CHOT`, kỳ 6/2026 `MO`.
 
-**Ba việc Phase 5 nhận từ Phase 4:**
+**Phase 5 đã làm** (mục A–F chưa được giao): A0 rà số liệu tài liệu · G1 sổ cái
+`bien_dong_so_du` (đổi tên từ `nap_tien`, +18 dòng mở sổ `DIEU_CHINH`) · G2
+`TruCuocTraTruocService` + hoàn tác · G3 dự đoán 7/7 đúng · G4 giao diện. Kỳ 6 đã trừ
+**1.991.417 đ** cho 16 thuê bao; kỳ 5 **chưa** trừ và sẽ bị chặn vì không giao hoán.
 
-1. Chuyển 54 hóa đơn quá hạn của kỳ 5/2026 (hạn 15/06/2026) sang `QUA_HAN`. ⏳ chưa làm
-2. ~~Trừ cước vào `so_du` thuê bao trả trước~~ ✅ **xong ở mục G**.
-3. `BillingService.huyBillingKy` từ chối xoá hóa đơn khi kỳ đã có thanh toán ⇒ tạo dữ liệu
-   thanh toán ở **kỳ 5 (đã chốt)** trước, giữ kỳ 6 linh hoạt để demo.
-
-**Đã làm ở Phase 5** (mục A–F chưa được giao): A0 rà số liệu tài liệu · G1 sổ cái
-`bien_dong_so_du` (đổi tên từ `nap_tien`, +18 dòng mở sổ `DIEU_CHINH`) · G2 `TruCuocTraTruocService`
-+ hoàn tác · G3 dự đoán 7/7 đúng · G4 giao diện. Kỳ 6/2026 đã trừ **1.991.417 đ** cho 16 thuê bao;
-kỳ 5 **chưa** trừ và sẽ bị chặn vì trừ cước không giao hoán theo thời gian.
+**Còn nợ từ Phase 4:** chuyển 54 hóa đơn quá hạn kỳ 5 (hạn 15/06/2026) sang `QUA_HAN`; và
+`huyBillingKy` từ chối xoá hóa đơn khi kỳ đã có thanh toán ⇒ tạo thanh toán ở **kỳ 5** trước,
+giữ kỳ 6 linh hoạt để demo.
 
 **Ràng buộc mới sinh ra ở mục G — đừng phá:**
 
-* Bất biến sổ cái `so_du = SUM(nạp + điều chỉnh) − SUM(trừ)` phải đúng với **mọi** thuê bao;
-  `KiemTraSoCaiSoDuTest` kiểm sau mỗi thay đổi. Sửa thẳng `thue_bao.so_du` mà không ghi sổ là
-  vi phạm.
+* Bất biến sổ cái `so_du = SUM(nạp + điều chỉnh) − SUM(trừ)` đúng với **mọi** thuê bao;
+  `KiemTraSoCaiSoDuTest` kiểm sau mỗi thay đổi. Sửa thẳng `thue_bao.so_du` mà không ghi sổ là vi phạm.
 * Quy tắc dấu chỉ nằm trong enum `LoaiBienDongSoDu`, không chép ra chỗ khác.
-* Trừ cước **không giao hoán theo kỳ** — chạy kỳ cũ sau kỳ mới bị từ chối.
-* `huyRatingKy` bị chặn khi kỳ đã trừ cước (cùng lý do với hóa đơn).
+* Trừ cước **không giao hoán theo kỳ**; `huyRatingKy` bị chặn khi kỳ đã trừ cước.
