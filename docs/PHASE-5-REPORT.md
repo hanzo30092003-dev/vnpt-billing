@@ -345,9 +345,59 @@ phải ca *"số dư mẫu thấp"*, đúng như phân tích ở mục 10.
    chiều. Cần điều chỉnh giảm thì phải thêm giá trị enum riêng, không đổi dấu giá trị hiện có.
 2. **Trừ cước theo kỳ, không real-time.** Khách vẫn dùng được dịch vụ khi số dư đã cạn cho tới
    lần chạy kế tiếp. Tính cước thời gian thực nằm ở "Hướng phát triển".
-3. **Phần cước không thu được (10.446 đ) không được ghi nhận ở đâu cả.** Không có bảng nợ cho
-   thuê bao trả trước, nên số tiền đó biến mất khỏi hệ thống sau khi chạy. Đây là hệ quả trực
-   tiếp của quy tắc không cắt đôi bản ghi cộng với việc trả trước không có hóa đơn — nêu ra để
-   Phase 6 quyết, không tự ý thêm bảng.
+3. ~~Phần cước không thu được không được ghi nhận ở đâu cả.~~ ✅ **Đã xử lý — xem mục 18.**
 4. **Chưa chạy trừ cước cho kỳ 5/2026.** Kỳ 5 đã `DA_CHOT` và chốt chặn thứ tự sẽ từ chối chạy
    kỳ cũ sau kỳ 6. Đây là lựa chọn có chủ đích theo mục 11, không phải thiếu sót.
+
+## 18. ⭐ Phần cước không thu được — ghi nhận, nhưng KHÔNG phải là nợ
+
+Hạn chế số 3 ở mục 17 đã được xử lý, và cách xử lý mới là phần đáng ghi lại.
+
+### 18.1. Vì sao KHÔNG thêm bảng nợ
+
+Phản xạ đầu tiên khi thấy 10.446 đ *"biến mất"* là thêm một bảng công nợ cho thuê bao trả
+trước. Đó là quyết định sai, vì nó **mô hình hoá một thứ không tồn tại**.
+
+Thuê bao trả trước **không có nợ**. Với trả trước thời gian thực — cách nhà mạng thật vận hành
+— cuộc gọi làm cạn số dư bị **chặn ngay tại thời điểm phát sinh**, nên số tiền này không bao
+giờ ra đời. Nó chỉ xuất hiện trong hệ thống này vì hai lựa chọn của mô hình:
+
+1. Định giá trước, trừ sau, **theo lô cuối kỳ** (phạm vi G2, không real-time)
+2. Quy tắc **không cắt đôi bản ghi** (quyết định 5.3)
+
+Thêm bảng nợ sẽ biến một **hiện vật của mô hình** thành một **thực thể nghiệp vụ** — đúng loại
+lỗi mục 4A đã gặp với `DATA/NGOAI_MANG`: bộ sinh tạo ra tổ hợp không nên tồn tại, và cách chữa
+đúng là **cấm sinh** chứ không phải thêm dòng bảng giá cho nó.
+
+### 18.2. Cách đã chọn: hai cột trên chính dòng `TRU_CUOC`
+
+```sql
+ALTER TABLE bien_dong_so_du
+    ADD COLUMN so_cdr_da_tru          INT           NULL AFTER ky_cuoc_id,
+    ADD COLUMN so_tien_khong_thu_duoc DECIMAL(15,2) NULL AFTER so_cdr_da_tru;
+```
+
+Số liệu đi cùng chính bút toán sinh ra nó, nên đối soát ngược được mà không tạo thêm thực thể
+nào. Cả hai cột để `NULL` với dòng `NAP_TIEN` / `DIEU_CHINH` — kiểm chứng: **0 vi phạm**.
+
+Javadoc của `BienDongSoDu.soTienKhongThuDuoc` và chú thích trong `schema.sql` đều ghi thẳng
+*"đây là hiện vật của việc trừ theo lô, không phải một khoản nợ"*, để người đọc sau không diễn
+giải nó thành khoản phải thu.
+
+### 18.3. Kiểm chứng
+
+Không `UPDATE` tay để lấp hai cột: **hủy trừ cước rồi chạy lại qua giao diện**, để dữ liệu đi
+đúng đường code sẽ chạy thật. Việc này đồng thời chứng minh lại tiêu chí 4 lần thứ hai.
+
+| Chỉ tiêu | Giá trị |
+|---|---|
+| Số dòng `TRU_CUOC` | 16 |
+| Tổng đã trừ | 1.991.417 đ |
+| `SUM(so_cdr_da_tru)` | **1.119** — khớp con số đã dự đoán ở mục 9 |
+| `SUM(so_tien_khong_thu_duoc)` | **10.446 đ** — khớp mục 9 |
+| Dòng không phải `TRU_CUOC` mà có hai cột khác NULL | **0** |
+| Bất biến sổ cái | **0 lệch** |
+
+Thuê bao 4 giờ đọc được trọn câu chuyện trên **một dòng**: trừ 204.780 đ qua **69** bản ghi,
+số dư 205.000 → 220 đ, **10.446 đ** không thu được. Trước khi có hai cột này thì ba con số sau
+phải đi tra lại CDR mới biết.

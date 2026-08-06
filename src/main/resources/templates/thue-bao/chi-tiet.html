@@ -237,13 +237,17 @@
                             <th>Số dư trước</th>
                             <th>Số dư sau</th>
                             <th>Kỳ cước</th>
+                            <th class="text-end">Bản ghi đã trừ</th>
+                            <th class="text-end" title="Phần cước không thu được vì hết số dư giữa chừng">
+                                Không thu được
+                            </th>
                             <th>Hình thức</th>
                             <th>Người thực hiện</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(soCaiSoDu)}">
-                            <td colspan="8" class="text-center text-secondary py-4">Chưa có biến động số dư nào.</td>
+                            <td colspan="10" class="text-center text-secondary py-4">Chưa có biến động số dư nào.</td>
                         </tr>
                         <tr th:each="bd : ${soCaiSoDu}">
                             <td th:text="${#temporals.format(bd.ngayGhiNhan, 'dd/MM/yyyy HH:mm')}"></td>
@@ -261,6 +265,13 @@
                             <td th:text="${#numbers.formatDecimal(bd.soDuTruoc, 0, 'POINT', 0, 'COMMA')}"></td>
                             <td th:text="${#numbers.formatDecimal(bd.soDuSau, 0, 'POINT', 0, 'COMMA')}"></td>
                             <td th:text="${bd.kyCuoc != null} ? (${bd.kyCuoc.thang} + '/' + ${bd.kyCuoc.nam}) : '—'"></td>
+                            <td class="text-end" th:text="${bd.soCdrDaTru != null} ? ${bd.soCdrDaTru} : '—'"></td>
+                            <td class="text-end"
+                                th:classappend="${bd.soTienKhongThuDuoc != null
+                                                  and bd.soTienKhongThuDuoc.signum() > 0} ? 'text-danger fw-semibold' : ''"
+                                th:text="${bd.soTienKhongThuDuoc != null}
+                                         ? (${#numbers.formatDecimal(bd.soTienKhongThuDuoc, 0, 'POINT', 0, 'COMMA')} + ' đ')
+                                         : '—'"></td>
                             <td th:text="${bd.hinhThuc != null} ? ${bd.hinhThuc.nhan} : '—'"></td>
                             <td th:text="${bd.nguoiThucHien != null} ? ${bd.nguoiThucHien.hoTen} : '—'"></td>
                         </tr>

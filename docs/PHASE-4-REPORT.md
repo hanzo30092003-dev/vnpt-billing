@@ -1888,8 +1888,11 @@ và không có dấu hiệu nào để phát hiện ngoài việc ngồi đối 
 
 ## 43. ⭐ BÀI HỌC PHƯƠNG PHÁP
 
-Sáu bài học rút từ chính những sai lệch ở mục 42. Chúng không phải lý thuyết — mỗi cái đều
+Bảy bài học rút từ chính những sai lệch ở mục 42. Chúng không phải lý thuyết — mỗi cái đều
 gắn với một lỗi thật đã bắt được hoặc đã suýt bỏ sót.
+
+> Bài học 43.7 được **bổ sung sau**, ở mục G3 của Phase 5. Nó nằm trong báo cáo này vì lỗi nó
+> mô tả là lỗi của **mục 4F**, chỉ có điều hậu quả tới Phase 5 mới lộ ra.
 
 ### 43.1. Kiểm **bất biến**, đừng kiểm **luật cụ thể**
 
@@ -1953,6 +1956,29 @@ chứng minh chính nó.
 Hệ quả kéo theo: khoảng ngày sử dụng và gói cước hiệu lực phải **dùng chung** lớp
 `QuyTacKyCuoc` với engine lập hóa đơn. Hai cách tính song song là hai nguồn sự thật, và bảng
 đối soát sẽ có lúc mâu thuẫn với chính hóa đơn nó đang đối soát.
+
+### 43.7. Dữ liệu thử thiết kế theo **một chiều** chỉ đúng theo **chiều đó**
+
+Mục 40 điều chỉnh số dư thuê bao trả trước và **cố ý** để ba thuê bao ở mức thấp
+(18.000 / 20.000 / 22.000 đ), ghi rõ mục đích: *"Phase 5 cần trường hợp thật để minh hoạ cảnh
+báo số dư không đủ"*. Việc chọn đó đúng — theo trục **số dư**.
+
+Nhưng để một thuê bao thật sự hết số dư giữa chừng thì cần **hai** điều kiện cùng xảy ra trên
+**cùng một** bản ghi: số dư thấp **và** có lưu lượng đủ lớn. Cả ba thuê bao được chọn đều
+`TAM_NGUNG_1C` — trạng thái mà bộ sinh CDR hầu như không tạo bản ghi. Tổng lưu lượng của cả ba
+trên hai kỳ là **1 bản ghi 99 đ**. Số dư thấp không bao giờ bị chạm tới.
+
+Khi Phase 5 chạy thật, ca *"hết số dư"* duy nhất lại là `0944567804` — thuộc nhóm *"đủ tiền"*
+205.000 đ, hoạt động bình thường, hết số dư vì **lưu lượng cao**. Ca thử dựng sẵn không xảy ra;
+ca thử thật xuất hiện ở chỗ không ai chuẩn bị.
+
+> **Muốn dựng một tình huống thử, phải kiểm mọi điều kiện cần của nó cùng xảy ra trên CÙNG một
+> bản ghi — không phải đặt từng điều kiện trên từng trục rồi tin rằng chúng gặp nhau.**
+
+Đây là cùng một hình dạng lỗi với 42.1: ở đó bộ sinh chọn `huong` **độc lập** với
+`loai_dich_vu` nên tạo ra tổ hợp không có giá; ở đây số dư được đặt **độc lập** với trạng thái
+thuê bao nên tạo ra ca thử không bao giờ kích hoạt. Hai thuộc tính đặt độc lập, không ai đối
+chiếu chéo. Cách phát hiện cũng giống nhau: **đo trên dữ liệu thật trước khi tin**.
 
 ---
 

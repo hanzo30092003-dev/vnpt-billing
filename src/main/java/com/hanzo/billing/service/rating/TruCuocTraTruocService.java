@@ -182,6 +182,11 @@ public class TruCuocTraTruocService {
         bienDong.setSoDuTruoc(soDuTruoc);
         bienDong.setSoDuSau(soDuSau);
         bienDong.setKyCuoc(ky);
+        // Hai cột này là HIỆN VẬT CỦA VIỆC TRỪ THEO LÔ, không phải khoản nợ — xem javadoc
+        // của BienDongSoDu.soTienKhongThuDuoc. Ghi lại để đối soát được phần chênh của mô
+        // hình, thay vì để nó biến mất không dấu vết.
+        bienDong.setSoCdrDaTru(soBanGhiDaTru);
+        bienDong.setSoTienKhongThuDuoc(tongCuocCaKy.subtract(daTru));
         bienDong.setNgayGhiNhan(bayGio);
         SecurityUtils.layNguoiDungHienTai().ifPresent(p ->
                 bienDong.setNguoiThucHien(nguoiDungRepository.getReferenceById(p.getId())));

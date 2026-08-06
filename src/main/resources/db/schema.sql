@@ -308,8 +308,15 @@ CREATE TABLE bien_dong_so_du (
     so_du_truoc          DECIMAL(15,2),
     so_du_sau            DECIMAL(15,2),
     hinh_thuc            ENUM('THE_CAO','CHUYEN_KHOAN','TAI_QUAY'),
-    -- Chi co gia tri voi dong TRU_CUOC: tru cuoc luon gan voi mot ky
+    -- Ba cot duoi chi co gia tri voi dong TRU_CUOC
     ky_cuoc_id           BIGINT,
+    so_cdr_da_tru        INT,
+    -- HIEN VAT CUA VIEC TRU THEO LO, KHONG phai mot khoan no. Thue bao tra
+    -- truoc khong co no: voi tra truoc thoi gian thuc, cuoc goi lam can so du
+    -- bi chan ngay nen so tien nay khong bao gio phat sinh. No chi ton tai vi
+    -- he thong mo phong dinh gia truoc roi moi tru sau, theo lo cuoi ky.
+    -- Ghi lai de doi soat duoc chenh lech cua mo hinh - CO Y khong co bang no.
+    so_tien_khong_thu_duoc DECIMAL(15,2),
     ngay_ghi_nhan        DATETIME      NOT NULL,
     nguoi_thuc_hien_id   BIGINT,
     PRIMARY KEY (id),

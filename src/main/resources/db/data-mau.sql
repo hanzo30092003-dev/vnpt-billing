@@ -312,6 +312,8 @@ INSERT INTO lich_su_thue_bao (id, thue_bao_id, trang_thai_cu, trang_thai_moi, ly
 --
 -- ID co dinh 1-18 de doi chieu duoc giua cac lan chay profile reset.
 -- ---------------------------------------------------------------------
+-- Dong mo so la DIEU_CHINH nen ba cot rieng cua TRU_CUOC (ky_cuoc_id,
+-- so_cdr_da_tru, so_tien_khong_thu_duoc) deu de NULL.
 INSERT INTO bien_dong_so_du
     (id, thue_bao_id, loai_bien_dong, so_tien, so_du_truoc, so_du_sau, hinh_thuc, ky_cuoc_id, ngay_ghi_nhan, nguoi_thuc_hien_id) VALUES
 ( 1,  1, 'DIEU_CHINH', 285000, 0, 285000, NULL, NULL, '2024-01-15 00:00:00', NULL),

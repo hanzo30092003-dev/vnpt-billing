@@ -303,12 +303,26 @@ erDiagram
 | `so_du_sau` | DECIMAL(15,2) | | Số dư sau giao dịch |
 | `hinh_thuc` | ENUM | | `THE_CAO` / `CHUYEN_KHOAN` / `TAI_QUAY` — chỉ có nghĩa với `NAP_TIEN` |
 | `ky_cuoc_id` | BIGINT | FK → `ky_cuoc(id)`, INDEX | Chỉ có giá trị với `TRU_CUOC` |
+| `so_cdr_da_tru` | INT | | Số bản ghi CDR thực sự được trừ — chỉ với `TRU_CUOC` |
+| `so_tien_khong_thu_duoc` | DECIMAL(15,2) | | Phần cước không thu được vì hết số dư — chỉ với `TRU_CUOC` |
 | `ngay_ghi_nhan` | DATETIME | NOT NULL | Thời điểm ghi sổ |
 | `nguoi_thuc_hien_id` | BIGINT | FK → `nguoi_dung(id)` | Người thực hiện (null nếu do hệ thống) |
 
 > Hai cột `so_du_truoc` / `so_du_sau` lưu ảnh chụp số dư để **đối soát** về sau,
 > không phải dữ liệu suy ra được sau khi số dư đã thay đổi nhiều lần. Chính hai cột này
 > làm bảng thành **sổ cái** chứ không phải một danh sách giao dịch.
+
+> ### ⚠️ `so_tien_khong_thu_duoc` KHÔNG phải một khoản nợ
+>
+> **Thuê bao trả trước không có nợ.** Với trả trước thời gian thực, cuộc gọi làm cạn số dư bị
+> chặn ngay tại thời điểm phát sinh, nên số tiền này *không bao giờ tồn tại*.
+>
+> Nó chỉ xuất hiện vì hệ thống mô phỏng **định giá trước, trừ sau, theo lô cuối kỳ** — cộng với
+> quy tắc không cắt đôi bản ghi. Đây là **hiện vật của mô hình**, không phải nghiệp vụ.
+>
+> Vì vậy cột này ghi lại chênh lệch để đối soát được, và **cố ý không có bảng nợ** cho thuê bao
+> trả trước. Thêm bảng nợ sẽ là mô hình hoá một thứ không tồn tại — đúng loại lỗi mà mục 4A đã
+> gặp với `DATA/NGOAI_MANG`.
 
 **Quy tắc dấu** gom trong enum `LoaiBienDongSoDu`, không rải ra chỗ khác: `NAP_TIEN` và
 `DIEU_CHINH` cộng vào số dư, `TRU_CUOC` trừ đi. Nếu về sau cần điều chỉnh *giảm* thì phải

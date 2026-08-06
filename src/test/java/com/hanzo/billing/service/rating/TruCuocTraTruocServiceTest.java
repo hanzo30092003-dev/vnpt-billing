@@ -117,6 +117,9 @@ class TruCuocTraTruocServiceTest {
             assertThat(bd.getSoDuSau()).isEqualByComparingTo("94000");
             assertThat(bd.getKyCuoc()).isSameAs(k);
             assertThat(tb.getSoDu()).isEqualByComparingTo("94000");
+            // Trừ trọn thì không có gì không thu được
+            assertThat(bd.getSoCdrDaTru()).isEqualTo(3);
+            assertThat(bd.getSoTienKhongThuDuoc()).isEqualByComparingTo("0");
         }
 
         /**
@@ -146,6 +149,10 @@ class TruCuocTraTruocServiceTest {
                     .isEqualByComparingTo("400");
             assertThat(soCai.get(0).getSoDuSau()).isEqualByComparingTo("600");
             assertThat(tb.getSoDu()).isEqualByComparingTo("600");
+
+            // Hiện vật của việc trừ theo lô: 1/3 bản ghi được trừ, 900 + 300 không thu được
+            assertThat(soCai.get(0).getSoCdrDaTru()).isEqualTo(1);
+            assertThat(soCai.get(0).getSoTienKhongThuDuoc()).isEqualByComparingTo("1200");
         }
 
         @Test

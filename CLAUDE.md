@@ -89,7 +89,7 @@ Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định 
    5.3: quỹ cạn dần, bản ghi làm cạn quỹ **KHÔNG được cắt đôi**. Bắt buộc
    `ORDER BY thoi_gian_bat_dau, id`; chạy hai lần phải ra cùng kết quả.
 
-## Sáu chuẩn làm việc lập ở Phase 4 (`PHASE-4-REPORT.md` mục 43)
+## Bảy chuẩn làm việc lập ở Phase 4 (`PHASE-4-REPORT.md` mục 43)
 
 1. **Kiểm bất biến, đừng kiểm luật cụ thể** — tiêu chí viết sau khi hiểu vấn đề chỉ bắt được
    phần đã hiểu.
@@ -100,6 +100,8 @@ Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định 
 5. **Một phép kiểm sai nguy hiểm ngang thiếu phép kiểm** — báo động giả làm hỏng lòng tin vào
    mọi phép kiểm còn lại.
 6. **Đối soát phải đọc lại, không được tính lại.**
+7. **Dữ liệu thử thiết kế theo một chiều chỉ đúng theo chiều đó** — muốn dựng một tình huống
+   phải kiểm mọi điều kiện cần cùng xảy ra trên **cùng một** bản ghi.
 
 ## Cách làm việc mong đợi
 
