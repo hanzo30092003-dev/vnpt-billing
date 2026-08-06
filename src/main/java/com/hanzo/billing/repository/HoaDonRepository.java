@@ -2,12 +2,15 @@ package com.hanzo.billing.repository;
 
 import com.hanzo.billing.entity.HoaDon;
 import com.hanzo.billing.enums.TrangThaiHoaDon;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,4 +70,82 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Long> {
     @Modifying
     @Query("DELETE FROM HoaDon h WHERE h.kyCuoc.id = :kyCuocId")
     int xoaTheoKy(@Param("kyCuocId") Long kyCuocId);
+
+    // =================================================================
+    // PHASE 5 — TRA CỨU, CÔNG NỢ, QUÁ HẠN
+    // =================================================================
+
+    String DIEU_KIEN_LOC = """
+             WHERE (:kyCuocId  IS NULL OR h.kyCuoc.id = :kyCuocId)
+               AND (:trangThai IS NULL OR h.trangThai = :trangThai)
+               AND (:khachHang IS NULL OR LOWER(kh.tenKh) LIKE LOWER(CONCAT('%', :khachHang, '%'))
+                    OR kh.maKh LIKE CONCAT('%', :khachHang, '%'))
+               AND (:soThueBao IS NULL OR tb.soThueBao LIKE CONCAT('%', :soThueBao, '%'))
+               AND (:tuSoTien  IS NULL OR h.tongThanhToan >= :tuSoTien)
+               AND (:denSoTien IS NULL OR h.tongThanhToan <= :denSoTien)
+            """;
+
+    @Query(value = "SELECT h FROM HoaDon h JOIN FETCH h.thueBao tb JOIN FETCH h.khachHang kh "
+            + "JOIN FETCH h.kyCuoc " + DIEU_KIEN_LOC + " ORDER BY h.maHoaDon DESC",
+            countQuery = "SELECT COUNT(h) FROM HoaDon h JOIN h.thueBao tb JOIN h.khachHang kh "
+                    + DIEU_KIEN_LOC)
+    Page<HoaDon> timKiem(@Param("kyCuocId") Long kyCuocId,
+                         @Param("trangThai") TrangThaiHoaDon trangThai,
+                         @Param("khachHang") String khachHang,
+                         @Param("soThueBao") String soThueBao,
+                         @Param("tuSoTien") BigDecimal tuSoTien,
+                         @Param("denSoTien") BigDecimal denSoTien,
+                         Pageable pageable);
+
+    /** Toàn bộ kết quả lọc, không phân trang — dùng cho xuất Excel và dòng tổng. */
+    @Query("SELECT h FROM HoaDon h JOIN FETCH h.thueBao tb JOIN FETCH h.khachHang kh "
+            + "JOIN FETCH h.kyCuoc " + DIEU_KIEN_LOC + " ORDER BY h.maHoaDon DESC")
+    List<HoaDon> timTatCaCoLoc(@Param("kyCuocId") Long kyCuocId,
+                               @Param("trangThai") TrangThaiHoaDon trangThai,
+                               @Param("khachHang") String khachHang,
+                               @Param("soThueBao") String soThueBao,
+                               @Param("tuSoTien") BigDecimal tuSoTien,
+                               @Param("denSoTien") BigDecimal denSoTien);
+
+    /** Một hóa đơn kèm mọi quan hệ cần cho màn hình chi tiết và bản PDF. */
+    @Query("""
+            SELECT h FROM HoaDon h
+            JOIN FETCH h.thueBao tb
+            JOIN FETCH tb.goiCuoc
+            JOIN FETCH h.khachHang
+            JOIN FETCH h.kyCuoc
+            WHERE h.id = :id
+            """)
+    Optional<HoaDon> timKemQuanHe(@Param("id") Long id);
+
+    /**
+     * Hóa đơn cần chuyển sang {@code QUA_HAN}: quá hạn thanh toán mà vẫn còn nợ.
+     *
+     * <p>⚠️ Điều kiện {@code trangThai <> DA_TT} là bắt buộc chứ không thừa. Một hóa đơn đã
+     * thu đủ thì {@code con_no = 0} nên tự nhiên rơi ra ngoài, nhưng viết rõ ra để ý định
+     * "không bao giờ ghi đè DA_TT" nằm ngay trong truy vấn thay vì phụ thuộc vào một suy
+     * luận gián tiếp.</p>
+     */
+    @Query("""
+            SELECT h FROM HoaDon h
+            WHERE h.hanThanhToan < :homNay
+              AND h.conNo > 0
+              AND h.trangThai <> com.hanzo.billing.enums.TrangThaiHoaDon.DA_TT
+              AND h.trangThai <> com.hanzo.billing.enums.TrangThaiHoaDon.QUA_HAN
+            """)
+    List<HoaDon> timCanChuyenQuaHan(@Param("homNay") LocalDate homNay);
+
+    /** Hóa đơn còn nợ kèm quan hệ, để dựng màn hình công nợ và bảng tuổi nợ. */
+    @Query("""
+            SELECT h FROM HoaDon h
+            JOIN FETCH h.thueBao tb
+            JOIN FETCH h.khachHang kh
+            JOIN FETCH h.kyCuoc
+            WHERE h.conNo > 0
+              AND (:khachHang IS NULL
+                   OR LOWER(kh.tenKh) LIKE LOWER(CONCAT('%', :khachHang, '%'))
+                   OR kh.maKh LIKE CONCAT('%', :khachHang, '%'))
+            ORDER BY h.hanThanhToan ASC, h.maHoaDon ASC
+            """)
+    List<HoaDon> timConNo(@Param("khachHang") String khachHang);
 }

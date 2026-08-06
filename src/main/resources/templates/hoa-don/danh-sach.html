@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Hóa đơn', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-receipt me-2"></i>Danh sách hóa đơn</h2>
+        <a class="btn btn-outline-success" th:href="@{'/hoa-don/xuat-excel?' + ${chuoiLoc}}">
+            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" th:action="@{/hoa-don}" th:object="${boLoc}" class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Kỳ cước</label>
+                    <select class="form-select" th:field="*{kyCuocId}">
+                        <option value="">Tất cả</option>
+                        <option th:each="k : ${danhSachKy}" th:value="${k.id}"
+                                th:text="${k.thang} + '/' + ${k.nam}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Trạng thái</label>
+                    <select class="form-select" th:field="*{trangThai}">
+                        <option value="">Tất cả</option>
+                        <option th:each="t : ${danhSachTrangThai}" th:value="${t}" th:text="${t.nhan}"></option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Khách hàng</label>
+                    <input type="text" class="form-control" th:field="*{khachHang}" placeholder="Tên hoặc mã KH">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Số thuê bao</label>
+                    <input type="text" class="form-control" th:field="*{soThueBao}" placeholder="09xxxxxxxx">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Số tiền từ</label>
+                    <input type="number" step="1000" class="form-control" th:field="*{tuSoTien}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-1">Đến</label>
+                    <input type="number" step="1000" class="form-control" th:field="*{denSoTien}">
+                </div>
+                <div class="col-12 d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-search me-1"></i> Lọc
+                    </button>
+                    <a class="btn btn-outline-secondary btn-sm" th:href="@{/hoa-don}">Xoá bộ lọc</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center">
+            <strong th:text="${tongHop.soHoaDon} + ' hóa đơn'">0 hóa đơn</strong>
+            <span class="text-secondary ms-2" th:if="${ketQua.totalPages > 1}">
+                &mdash; trang <span th:text="${ketQua.number + 1}">1</span>/<span th:text="${ketQua.totalPages}">1</span>
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Mã hóa đơn</th>
+                        <th>Kỳ</th>
+                        <th>Khách hàng</th>
+                        <th>Số thuê bao</th>
+                        <th>Hạn thanh toán</th>
+                        <th class="text-end">Tổng thanh toán</th>
+                        <th class="text-end">Đã thu</th>
+                        <th class="text-end">Còn nợ</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${ketQua.isEmpty()}">
+                        <td colspan="10" class="text-center text-secondary py-4">
+                            Không có hóa đơn nào khớp bộ lọc.
+                        </td>
+                    </tr>
+                    <tr th:each="h : ${ketQua.content}">
+                        <td><a th:href="@{/hoa-don/{id}(id=${h.id})}" th:text="${h.maHoaDon}"></a></td>
+                        <td th:text="${h.kyCuoc.thang} + '/' + ${h.kyCuoc.nam}"></td>
+                        <td th:text="${h.khachHang.tenKh}"></td>
+                        <td th:text="${h.thueBao.soThueBao}"></td>
+                        <td th:text="${#temporals.format(h.hanThanhToan, 'dd/MM/yyyy')}"></td>
+                        <td class="text-end fw-semibold"
+                            th:text="${#numbers.formatDecimal(h.tongThanhToan, 0, 'POINT', 0, 'COMMA')}"></td>
+                        <td class="text-end"
+                            th:text="${#numbers.formatDecimal(h.daThanhToan, 0, 'POINT', 0, 'COMMA')}"></td>
+                        <td class="text-end"
+                            th:classappend="${h.conNo.signum() > 0} ? 'text-danger fw-semibold' : ''"
+                            th:text="${#numbers.formatDecimal(h.conNo, 0, 'POINT', 0, 'COMMA')}"></td>
+                        <!--/* Mau badge lay tu enum, khong dat dieu kien trong template - bon
+                               man hinh dung chung mot quy tac mau */-->
+                        <td>
+                            <span class="badge" th:classappend="${h.trangThai.lopBadge}"
+                                  th:text="${h.trangThai.nhan}"></span>
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:href="@{/hoa-don/{id}(id=${h.id})}">Xem</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot class="table-light fw-semibold" th:if="${tongHop.soHoaDon > 0}">
+                    <tr>
+                        <td colspan="5" class="text-end">TỔNG THEO BỘ LỌC</td>
+                        <td class="text-end"
+                            th:text="${#numbers.formatDecimal(tongHop.tongPhatSinh, 0, 'POINT', 0, 'COMMA')}"></td>
+                        <td class="text-end"
+                            th:text="${#numbers.formatDecimal(tongHop.tongDaThu, 0, 'POINT', 0, 'COMMA')}"></td>
+                        <td class="text-end text-danger"
+                            th:text="${#numbers.formatDecimal(tongHop.tongConNo, 0, 'POINT', 0, 'COMMA')}"></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <nav th:if="${ketQua.totalPages > 1}" class="mt-3">
+                <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
+                    <li class="page-item" th:classappend="${ketQua.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/hoa-don?trang=' + ${ketQua.number - 1} + ${chuoiLoc}}">Trước</a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(
+                            ketQua.number - 3 < 0 ? 0 : ketQua.number - 3,
+                            ketQua.number + 3 >= ketQua.totalPages ? ketQua.totalPages - 1 : ketQua.number + 3)}"
+                        th:classappend="${i == ketQua.number} ? 'active'">
+                        <a class="page-link" th:href="@{'/hoa-don?trang=' + ${i} + ${chuoiLoc}}" th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${ketQua.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/hoa-don?trang=' + ${ketQua.number + 1} + ${chuoiLoc}}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <p class="small text-secondary mt-3 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Dòng tổng tính trên <strong>toàn bộ</strong> kết quả lọc, không phải trang đang xem.
+                Cột <strong>Còn nợ</strong> đọc thẳng từ hóa đơn — không cộng lại từ bảng thanh toán.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
