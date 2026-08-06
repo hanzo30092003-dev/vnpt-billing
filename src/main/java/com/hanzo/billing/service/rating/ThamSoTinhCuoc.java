@@ -31,6 +31,14 @@ public final class ThamSoTinhCuoc {
     public static final RoundingMode LAM_TRON = RoundingMode.HALF_UP;
 
     /**
+     * Ngưỡng cảnh báo số dư thấp của thuê bao trả trước, 50.000 đ.
+     *
+     * <p>Chỉ dùng để tô cảnh báo trên giao diện, <b>không</b> chặn nghiệp vụ nào — thuê bao
+     * dưới ngưỡng vẫn dùng dịch vụ và vẫn bị trừ cước bình thường.</p>
+     */
+    public static final BigDecimal NGUONG_CANH_BAO_SO_DU = new BigDecimal("50000");
+
+    /**
      * Số chữ số thập phân khi làm tròn tiền: 0, vì VND không có đơn vị nhỏ hơn đồng.
      *
      * <p>Cột trong CSDL vẫn là {@code DECIMAL(15,2)} nên giá trị lưu xuống có dạng

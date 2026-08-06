@@ -4,15 +4,20 @@ import com.hanzo.billing.dto.KetQuaBilling;
 import com.hanzo.billing.dto.KetQuaRating;
 import com.hanzo.billing.dto.TinhTrangKy;
 import com.hanzo.billing.entity.KyCuoc;
+import com.hanzo.billing.enums.LoaiBienDongSoDu;
 import com.hanzo.billing.enums.TrangThaiTinhCuoc;
 import com.hanzo.billing.exception.NghiepVuException;
+import com.hanzo.billing.repository.BienDongSoDuRepository;
 import com.hanzo.billing.repository.ChiTietSuDungRepository;
 import com.hanzo.billing.repository.HoaDonRepository;
 import com.hanzo.billing.repository.ThanhToanRepository;
+import com.hanzo.billing.repository.ThueBaoRepository;
 import com.hanzo.billing.service.KyCuocService;
 import com.hanzo.billing.service.rating.BillingService;
 import com.hanzo.billing.service.rating.DoiSoatCuocService;
 import com.hanzo.billing.service.rating.RatingService;
+import com.hanzo.billing.service.rating.ThamSoTinhCuoc;
+import com.hanzo.billing.service.rating.TruCuocTraTruocService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,6 +51,9 @@ public class TinhCuocController {
     private final ChiTietSuDungRepository chiTietSuDungRepository;
     private final HoaDonRepository hoaDonRepository;
     private final ThanhToanRepository thanhToanRepository;
+    private final BienDongSoDuRepository bienDongSoDuRepository;
+    private final ThueBaoRepository thueBaoRepository;
+    private final TruCuocTraTruocService truCuocTraTruocService;
 
     // =================================================================
     // DANH SÁCH KỲ VÀ CÁC THAO TÁC
@@ -58,6 +66,9 @@ public class TinhCuocController {
             danhSach.add(tinhTrang(ky));
         }
         model.addAttribute("danhSach", danhSach);
+        model.addAttribute("nguongCanhBaoSoDu", ThamSoTinhCuoc.NGUONG_CANH_BAO_SO_DU);
+        model.addAttribute("thueBaoSoDuThap", thueBaoRepository.timSoDuDuoiNguong(
+                ThamSoTinhCuoc.NGUONG_CANH_BAO_SO_DU));
         return "tinh-cuoc/danh-sach";
     }
 
@@ -72,7 +83,9 @@ public class TinhCuocController {
                 chiTietSuDungRepository.countByKyCuocIdAndTrangThaiTinhCuoc(
                         ky.getId(), TrangThaiTinhCuoc.DA_TINH),
                 hoaDonRepository.countByKyCuocId(ky.getId()),
-                thanhToanRepository.demTheoKyCuoc(ky.getId()));
+                thanhToanRepository.demTheoKyCuoc(ky.getId()),
+                bienDongSoDuRepository.countByKyCuocIdAndLoaiBienDong(
+                        ky.getId(), LoaiBienDongSoDu.TRU_CUOC));
     }
 
     @PostMapping("/{id}/tinh-cuoc")
@@ -102,6 +115,28 @@ public class TinhCuocController {
             int so = billingService.huyBillingKy(kyCuocService.layTheoId(id));
             return "Đã hủy " + so + " hóa đơn của kỳ. Cước phí trên chi tiết sử dụng "
                     + "giữ nguyên — có thể lập lại hóa đơn ngay.";
+        });
+    }
+
+    @PostMapping("/{id}/tru-cuoc-tra-truoc")
+    public String truCuocTraTruoc(@PathVariable Long id, RedirectAttributes ra) {
+        return chay(ra, () -> {
+            TruCuocTraTruocService.KetQuaTruCuoc kq =
+                    truCuocTraTruocService.truCuocKy(kyCuocService.layTheoId(id));
+            return "Đã trừ cước vào số dư " + kq.getSoThueBaoXuLy() + " thuê bao trả trước · "
+                    + "Trừ " + tien(kq.getTongDaTru()) + " qua " + kq.getSoBanGhiDaTru()
+                    + " bản ghi · " + kq.getSoThueBaoHetSoDu() + " thuê bao hết số dư giữa "
+                    + "chừng, không thu được " + tien(kq.getTongKhongThuDuoc())
+                    + " · Thời gian " + kq.getThoiGianMs() + " ms";
+        });
+    }
+
+    @PostMapping("/{id}/huy-tru-cuoc-tra-truoc")
+    public String huyTruCuocTraTruoc(@PathVariable Long id, RedirectAttributes ra) {
+        return chay(ra, () -> {
+            int so = truCuocTraTruocService.huyTruCuocKy(kyCuocService.layTheoId(id));
+            return "Đã hoàn trả số dư cho " + so + " thuê bao trả trước. Cước phí trên chi "
+                    + "tiết sử dụng giữ nguyên — có thể trừ lại ngay.";
         });
     }
 

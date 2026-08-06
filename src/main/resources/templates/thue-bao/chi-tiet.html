@@ -143,7 +143,15 @@
                                 Số dư tài khoản
                             </dt>
                             <dd class="col-7" th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}">
-                                <strong th:text="${#numbers.formatDecimal(thueBao.soDu, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong>
+                                <strong th:classappend="${soDuDuoiNguong} ? 'text-danger' : ''"
+                                        th:text="${#numbers.formatDecimal(thueBao.soDu, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong>
+                                <!--/* Canh bao khong chi dua vao mau: co ca icon va chu, de ban in
+                                       den trang va nguoi kho phan biet mau van doc duoc */-->
+                                <span th:if="${soDuDuoiNguong}" class="badge text-bg-danger ms-1"
+                                      th:title="'Dưới ngưỡng cảnh báo '
+                                                + ${#numbers.formatDecimal(nguongCanhBaoSoDu, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Số dư thấp
+                                </span>
                             </dd>
 
                             <dt class="col-5 text-secondary" th:if="${thueBao.loaiThueBao.name() == 'TRA_SAU'}">

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -123,4 +124,20 @@ public interface ThueBaoRepository extends JpaRepository<ThueBao, Long> {
                           @Param("loaiThueBao") LoaiThueBao loaiThueBao,
                           @Param("goiCuocId") Long goiCuocId,
                           Pageable pageable);
+
+    /**
+     * Thuê bao trả trước có số dư dưới ngưỡng cảnh báo, số dư thấp nhất trước.
+     *
+     * <p>Bỏ qua thuê bao đã thanh lý: chúng luôn có số dư 0 nên sẽ chiếm hết đầu danh sách
+     * mà chẳng cảnh báo điều gì có ích.</p>
+     */
+    @Query("""
+            SELECT tb FROM ThueBao tb
+            JOIN FETCH tb.khachHang
+            WHERE tb.loaiThueBao = com.hanzo.billing.enums.LoaiThueBao.TRA_TRUOC
+              AND tb.trangThai <> com.hanzo.billing.enums.TrangThaiThueBao.DA_THANH_LY
+              AND tb.soDu < :nguong
+            ORDER BY tb.soDu ASC, tb.id ASC
+            """)
+    List<ThueBao> timSoDuDuoiNguong(@Param("nguong") BigDecimal nguong);
 }

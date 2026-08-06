@@ -17,6 +17,8 @@ import com.hanzo.billing.enums.TrangThaiDangKyGoi;
 import com.hanzo.billing.enums.TrangThaiKyCuoc;
 import com.hanzo.billing.enums.TrangThaiTinhCuoc;
 import com.hanzo.billing.exception.NghiepVuException;
+import com.hanzo.billing.enums.LoaiBienDongSoDu;
+import com.hanzo.billing.repository.BienDongSoDuRepository;
 import com.hanzo.billing.repository.ChiTietSuDungRepository;
 import com.hanzo.billing.repository.DangKyGoiCuocRepository;
 import com.hanzo.billing.repository.HoaDonRepository;
@@ -71,6 +73,7 @@ class RatingServiceTest {
     @Mock private DangKyGoiCuocRepository dangKyGoiCuocRepository;
     @Mock private KyCuocRepository kyCuocRepository;
     @Mock private HoaDonRepository hoaDonRepository;
+    @Mock private BienDongSoDuRepository bienDongSoDuRepository;
     @Mock private BangGiaLookup bangGiaLookup;
     @Mock private NhatKyService nhatKyService;
 
@@ -353,6 +356,8 @@ class RatingServiceTest {
             KyCuoc ky = ky(TrangThaiKyCuoc.MO);
             ky.setSoCdrXuLy(5017);
             when(hoaDonRepository.countByKyCuocId(KY_ID)).thenReturn(0L);
+            when(bienDongSoDuRepository.countByKyCuocIdAndLoaiBienDong(
+                    KY_ID, LoaiBienDongSoDu.TRU_CUOC)).thenReturn(0L);
             when(jdbcTemplate.update(anyString(), eq(KY_ID))).thenReturn(5017);
 
             int soBanGhi = service.huyRatingKy(ky);
@@ -372,6 +377,28 @@ class RatingServiceTest {
             assertThatThrownBy(() -> service.huyRatingKy(ky))
                     .isInstanceOf(NghiepVuException.class)
                     .hasMessageContaining("58 hóa đơn");
+
+            verifyNoInteractions(jdbcTemplate);
+        }
+
+        /**
+         * Nhánh trả trước của cùng một lý do với test 18.
+         *
+         * <p>Dòng {@code TRU_CUOC} lấy số tiền từ {@code cuoc_phi} của chính các bản ghi
+         * này. Xóa {@code cuoc_phi} mà giữ dòng trừ thì số dư đã trừ không còn dữ liệu nào
+         * giải thích — đúng thứ mục G1 sinh ra để tránh.</p>
+         */
+        @Test
+        @DisplayName("18b. Kỳ đã trừ cước vào số dư thì không cho hủy kết quả tính cước")
+        void kyDaTruCuocTraTruoc_thiKhongChoHuy() {
+            KyCuoc ky = ky(TrangThaiKyCuoc.MO);
+            when(hoaDonRepository.countByKyCuocId(KY_ID)).thenReturn(0L);
+            when(bienDongSoDuRepository.countByKyCuocIdAndLoaiBienDong(
+                    KY_ID, LoaiBienDongSoDu.TRU_CUOC)).thenReturn(16L);
+
+            assertThatThrownBy(() -> service.huyRatingKy(ky))
+                    .isInstanceOf(NghiepVuException.class)
+                    .hasMessageContaining("16 thuê bao trả trước");
 
             verifyNoInteractions(jdbcTemplate);
         }

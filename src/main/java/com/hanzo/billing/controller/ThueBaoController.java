@@ -9,6 +9,7 @@ import com.hanzo.billing.exception.NghiepVuException;
 import com.hanzo.billing.service.KhachHangService;
 import com.hanzo.billing.service.KyCuocService;
 import com.hanzo.billing.service.ThueBaoService;
+import com.hanzo.billing.service.rating.ThamSoTinhCuoc;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -104,6 +105,13 @@ public class ThueBaoController {
         model.addAttribute("lichSuGoiCuoc", thueBaoService.layLichSuGoiCuoc(id));
         model.addAttribute("lichSuTrangThai", thueBaoService.layLichSuTrangThai(id));
         model.addAttribute("soCaiSoDu", thueBaoService.layLichSuBienDongSoDu(id));
+        model.addAttribute("nguongCanhBaoSoDu", ThamSoTinhCuoc.NGUONG_CANH_BAO_SO_DU);
+        model.addAttribute("soDuDuoiNguong",
+                thueBao.getLoaiThueBao() == LoaiThueBao.TRA_TRUOC
+                        && thueBao.getTrangThai() != TrangThaiThueBao.DA_THANH_LY
+                        && thueBao.getSoDu() != null
+                        && thueBao.getSoDu().compareTo(
+                                ThamSoTinhCuoc.NGUONG_CANH_BAO_SO_DU) < 0);
         model.addAttribute("trangThaiCoTheChuyen",
                 thueBaoService.cacTrangThaiCoTheChuyen(thueBao.getTrangThai()));
         model.addAttribute("danhSachGoiCuoc", thueBaoService.layGoiCuocConHieuLuc());

@@ -5,9 +5,11 @@ import com.hanzo.billing.entity.BangGiaCuoc;
 import com.hanzo.billing.entity.ChiTietSuDung;
 import com.hanzo.billing.entity.DangKyGoiCuoc;
 import com.hanzo.billing.entity.KyCuoc;
+import com.hanzo.billing.enums.LoaiBienDongSoDu;
 import com.hanzo.billing.enums.TrangThaiKyCuoc;
 import com.hanzo.billing.enums.TrangThaiTinhCuoc;
 import com.hanzo.billing.exception.NghiepVuException;
+import com.hanzo.billing.repository.BienDongSoDuRepository;
 import com.hanzo.billing.repository.ChiTietSuDungRepository;
 import com.hanzo.billing.repository.DangKyGoiCuocRepository;
 import com.hanzo.billing.repository.HoaDonRepository;
@@ -96,6 +98,7 @@ public class RatingService {
     private final DangKyGoiCuocRepository dangKyGoiCuocRepository;
     private final KyCuocRepository kyCuocRepository;
     private final HoaDonRepository hoaDonRepository;
+    private final BienDongSoDuRepository bienDongSoDuRepository;
     private final BangGiaLookup bangGiaLookup;
     private final NhatKyService nhatKyService;
 
@@ -412,6 +415,17 @@ public class RatingService {
                     + " đã phát hành " + soHoaDon + " hóa đơn. Phải xóa các hóa đơn đó trước "
                     + "khi hủy kết quả tính cước, nếu không hóa đơn sẽ không còn khớp với "
                     + "chi tiết sử dụng.");
+        }
+        // Cùng lý do với hóa đơn, cho nhánh trả trước: các dòng TRU_CUOC đã ghi số tiền
+        // lấy từ cuoc_phi của chính các bản ghi này. Xóa cuoc_phi đi mà giữ dòng trừ thì
+        // số dư không còn giải thích được bằng dữ liệu nào nữa.
+        long soTruCuoc = bienDongSoDuRepository.countByKyCuocIdAndLoaiBienDong(
+                ky.getId(), LoaiBienDongSoDu.TRU_CUOC);
+        if (soTruCuoc > 0) {
+            throw new NghiepVuException("Kỳ cước tháng " + ky.getThang() + "/" + ky.getNam()
+                    + " đã trừ cước vào số dư của " + soTruCuoc + " thuê bao trả trước. "
+                    + "Phải hủy kết quả trừ cước trước khi hủy kết quả tính cước, nếu không "
+                    + "số dư đã trừ sẽ không còn khớp với chi tiết sử dụng.");
         }
 
         int soBanGhi = jdbcTemplate.update(SQL_HUY, ky.getId());

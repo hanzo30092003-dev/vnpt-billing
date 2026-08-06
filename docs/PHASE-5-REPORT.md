@@ -229,3 +229,125 @@ thì kết quả sẽ khác hẳn tuỳ thứ tự:
 
 Trừ cước là thao tác **có thứ tự theo thời gian**, không giao hoán. Mục G2 sẽ chặn ở tầng
 nghiệp vụ để không chạy được kỳ cũ sau khi kỳ mới đã trừ, và ghi rõ vào báo cáo kết quả.
+
+---
+
+# PHẦN III — MỤC G2 VÀ G4: TRỪ CƯỚC VÀ GIAO DIỆN
+
+## 12. Thuật toán và ba chốt chặn
+
+`TruCuocTraTruocService` duyệt CDR đã định giá của thuê bao trả trước theo
+`ORDER BY thueBao.id, thoiGianBatDau, id`, trừ dần vào quỹ, **dừng hẳn** ở bản ghi đầu tiên
+không đủ quỹ, rồi ghi **đúng một dòng** `TRU_CUOC` cho mỗi thuê bao.
+
+**Một dòng cho cả kỳ chứ không phải một dòng mỗi CDR.** Sổ cái ghi lại *biến động số dư*, mà
+biến động ở đây là một lần trừ cước kỳ. Ghi 76 dòng cho 76 bản ghi sẽ làm sổ cái phình lên mà
+không nói thêm được gì — đường đi tới từng bản ghi đã có sẵn ở bảng đối soát cước của mục 4E.
+
+Ba chốt chặn đặt ở **tầng nghiệp vụ**, không trông vào giao diện (bài học 4.4 của Phase 3):
+
+| # | Chặn khi | Lý do |
+|---|---|---|
+| 1 | Kỳ đã có dòng `TRU_CUOC` | Chạy lại sẽ trừ chồng |
+| 2 | Đã trừ cước cho kỳ **muộn hơn** | Trừ cước không giao hoán theo thời gian |
+| 3 | Kỳ đã `DA_CHOT` (khi hủy) | Đối xứng với `huyBillingKy` |
+
+**Chốt chặn thứ tư, thêm ở `RatingService`.** Phát hiện khi rà: `huyRatingKy` từ chối chạy khi
+kỳ đã có hóa đơn, nhưng **không** biết gì về dòng trừ cước. Hủy tính cước sau khi đã trừ số dư
+sẽ xoá sạch `cuoc_phi` trong khi các dòng `TRU_CUOC` vẫn giữ số tiền lấy từ chính chúng — số dư
+trở lại thành con số không giải thích được, đúng thứ mục G1 sinh ra để tránh. Đã thêm chốt chặn
+đối xứng cho nhánh trả trước.
+
+## 13. Hoàn tác: cộng trả lại, không gán thẳng
+
+Đặc tả viết *"trả `so_du` về giá trị trước khi trừ"*. Cài đặt **cộng trả lại số tiền** thay vì
+gán `so_du = so_du_truoc`.
+
+Hai cách cho cùng kết quả khi không có biến động nào xen giữa. Nhưng nếu khách **nạp tiền sau**
+lần trừ thì gán thẳng sẽ **xoá mất khoản nạp đó**: trừ 400 (1000 → 600), nạp 500 (600 → 1100),
+hoàn tác gán thẳng ra 1000 — mất 500 đ của khách. Cộng trả lại ra 1500, đúng bằng 1000 + 500.
+
+Cộng trả lại còn giữ đúng bất biến sổ cái trong mọi trường hợp, vì nó xoá dòng **và** hoàn số
+tiền của đúng dòng đó. Có test riêng cho tình huống này (`coNapTienXenGiua_congTraLai`).
+
+## 14. ⭐ Đối chiếu dự đoán — khớp tuyệt đối
+
+Chạy **toàn bộ qua giao diện** (đăng nhập `admin`, nút *Trừ cước trả trước* trên `/tinh-cuoc`).
+
+| # | Chỉ tiêu | Dự đoán (mục 9) | Thực tế | |
+|---|---|---|---|---|
+| 1 | Số dòng `TRU_CUOC` | **16** | **16** | ✅ |
+| 2 | Tổng đã trừ | **1.991.417 đ** | **1.991.417 đ** | ✅ |
+| 3 | Không thu được | **10.446 đ** | **10.446 đ** | ✅ |
+| 4 | Thuê bao hết số dư giữa chừng | **1** | **1** | ✅ |
+| 5 | Thuê bao 4 — đã trừ | **204.780 đ** | **204.780 đ** | ✅ |
+| 6 | Thuê bao 4 — số dư còn lại | **220 đ** | **220 đ** | ✅ |
+| 7 | Số bản ghi được trừ | **1.119** | **1.119** | ✅ |
+
+**Cả bảy dự đoán đúng, sáu trong số đó đúng tới từng đồng.** Thời gian chạy 150 ms.
+
+Con số 1.119 đáng chú ý: nó bằng 1.126 bản ghi của thuê bao trả trước trong kỳ, **trừ đi đúng
+7 bản ghi** của thuê bao 4 nằm sau điểm dừng — khớp với bảng kiểm tay ở mục 10.3.
+
+## 15. Nghiệm thu mục G
+
+| # | Tiêu chí | Kết quả |
+|---|---|---|
+| 1 | Bất biến sổ cái `so_du = SUM(nạp) − SUM(trừ)` | ✅ **0 lệch** trên 80 thuê bao / 34 dòng sổ cái |
+| 2 | Dự đoán G3 khớp thực tế | ✅ **7/7**, xem mục 14 |
+| 3 | Chạy trừ cước hai lần → không trừ chồng | ✅ vẫn 16 dòng / 1.991.417 đ, kèm thông báo tiếng Việt |
+| 4 | Hoàn tác → chạy lại → `so_du` giống hệt lần đầu | ✅ so khớp **cả 20 thuê bao**, không lệch dòng nào |
+| 5 | Thuê bao trả trước vẫn KHÔNG có hóa đơn nào | ✅ **0** hóa đơn |
+| — | `mvnw test` | ✅ **164 test**, 0 lỗi, BUILD SUCCESS |
+
+Thông báo khi chặn chạy lại, nguyên văn từ giao diện:
+
+> Kỳ cước tháng 6/2026 đã trừ cước vào số dư (16 thuê bao). Chạy lại sẽ trừ chồng.
+> Phải hủy kết quả trừ cước trước nếu muốn chạy lại.
+
+### 15.1. Một sự cố nhỏ khi kiểm chứng
+
+Lần kiểm tiêu chí 3 đầu tiên báo *"không thấy thông báo lỗi"*, và suýt bị hiểu là chốt chặn
+không chạy. Truy ra nguyên nhân nằm ở **phép kiểm**, không ở engine: script `POST` rồi mới `GET`
+lại trang để tìm thông báo, nhưng `RedirectAttributes` là **flash attribute** — nó đã bị tiêu
+thụ ngay ở lần redirect sau `POST`, nên lần `GET` thứ hai đương nhiên không còn gì. Đọc thẳng
+body của `POST` thì thông báo hiện đủ.
+
+Đây là lần thứ hai trong dự án gặp đúng bài học 43.5: một phép kiểm sai tạo báo động giả, và
+nếu tin nó thì đã đi "sửa" một chốt chặn đang chạy đúng.
+
+## 16. Mục G4 — giao diện
+
+| Việc | Cài đặt |
+|---|---|
+| Tab **"Biến động số dư"** | Thay *"Lịch sử nạp tiền"* trên chi tiết thuê bao trả trước. Thêm cột **Loại** và **Kỳ cước**; dấu `+/−` lấy từ `loaiBienDong.congVaoSoDu` |
+| Cảnh báo số dư thấp | Badge đỏ cạnh số dư trên chi tiết thuê bao, kèm **icon và chữ** chứ không chỉ màu |
+| Bảng cảnh báo tập trung | Khối cuối trang `/tinh-cuoc` liệt kê thuê bao dưới ngưỡng, sắp xếp số dư tăng dần |
+| Nút chạy / hoàn tác | Trên `/tinh-cuoc` cạnh nút lập hóa đơn, kèm modal xác nhận cho nút hủy |
+
+Ngưỡng cảnh báo **50.000 đ** đặt trong `ThamSoTinhCuoc.NGUONG_CANH_BAO_SO_DU`, cùng chỗ với VAT
+và hạn thanh toán — không rải hằng số ra template.
+
+Hai điểm giữ nguyên chuẩn đã đặt từ 4E:
+
+- **Không dùng màu làm phương tiện duy nhất.** Cảnh báo có icon `⚠` và chữ *"Số dư thấp"*; dấu
+  cộng/trừ trong sổ cái là ký tự thật. Bản in đen trắng vẫn đọc được.
+- **Cảnh báo không chặn nghiệp vụ nào.** Thuê bao dưới ngưỡng vẫn dùng dịch vụ và vẫn bị trừ
+  cước bình thường. Ghi rõ ngay dưới bảng để không ai hiểu nhầm.
+
+Số thuê bao dưới ngưỡng tăng từ **3** lên **6** sau khi trừ cước kỳ 6 — bảng cảnh báo có nội
+dung thật để chụp ảnh, và ba thuê bao mới vào danh sách đều là ca *"lưu lượng cao"* chứ không
+phải ca *"số dư mẫu thấp"*, đúng như phân tích ở mục 10.
+
+## 17. Hạn chế đã biết của mục G
+
+1. **`DIEU_CHINH` chỉ cộng, không trừ.** Quy tắc dấu suy từ loại nên một loại chỉ mang được một
+   chiều. Cần điều chỉnh giảm thì phải thêm giá trị enum riêng, không đổi dấu giá trị hiện có.
+2. **Trừ cước theo kỳ, không real-time.** Khách vẫn dùng được dịch vụ khi số dư đã cạn cho tới
+   lần chạy kế tiếp. Tính cước thời gian thực nằm ở "Hướng phát triển".
+3. **Phần cước không thu được (10.446 đ) không được ghi nhận ở đâu cả.** Không có bảng nợ cho
+   thuê bao trả trước, nên số tiền đó biến mất khỏi hệ thống sau khi chạy. Đây là hệ quả trực
+   tiếp của quy tắc không cắt đôi bản ghi cộng với việc trả trước không có hóa đơn — nêu ra để
+   Phase 6 quyết, không tự ý thêm bảng.
+4. **Chưa chạy trừ cước cho kỳ 5/2026.** Kỳ 5 đã `DA_CHOT` và chốt chặn thứ tự sẽ từ chối chạy
+   kỳ cũ sau kỳ 6. Đây là lựa chọn có chủ đích theo mục 11, không phải thiếu sót.

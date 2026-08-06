@@ -109,6 +109,28 @@
                                 </button>
                             </form>
 
+                            <!--/* Tru cuoc tra truoc: doc lap voi lap hoa don, vi thue bao tra
+                                   truoc khong co hoa don thang (quyet dinh 5.4) */-->
+                            <form th:if="${t.choPhepTruCuoc}" method="post" class="d-inline form-thao-tac"
+                                  th:action="@{/tinh-cuoc/{id}/tru-cuoc-tra-truoc(id=${t.ky.id})}">
+                                <button type="submit" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-wallet2"></i> Trừ cước trả trước
+                                </button>
+                            </form>
+
+                            <form th:if="${t.choPhepHuyTruCuoc}" method="post" class="d-inline form-thao-tac"
+                                  th:action="@{/tinh-cuoc/{id}/huy-tru-cuoc-tra-truoc(id=${t.ky.id})}">
+                                <button type="button" class="btn btn-sm btn-outline-warning"
+                                        th:data-xac-nhan="'Hoàn trả số dư đã trừ của ' + ${t.soTruCuoc}
+                                            + ' thuê bao trả trước ở kỳ ' + ${t.ky.thang} + '/' + ${t.ky.nam}
+                                            + '? Số tiền đã trừ sẽ được cộng trả lại vào số dư và các dòng '
+                                            + 'trừ cước trong sổ cái sẽ bị xoá. Cước phí trên chi tiết sử '
+                                            + 'dụng giữ nguyên.'"
+                                        data-xac-nhan-tieu-de="Huỷ trừ cước trả trước">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Huỷ trừ cước
+                                </button>
+                            </form>
+
                             <form th:if="${t.choPhepHuyTinhCuoc}" method="post" class="d-inline form-thao-tac"
                                   th:action="@{/tinh-cuoc/{id}/huy-tinh-cuoc(id=${t.ky.id})}">
                                 <button type="button" class="btn btn-sm btn-outline-danger"
@@ -154,8 +176,54 @@
             <p class="small text-secondary mt-3 mb-0">
                 <i class="bi bi-shield-check me-1"></i>
                 Giao diện chỉ ẩn bớt nút cho gọn mắt. Chốt chặn thật nằm ở tầng nghiệp vụ:
-                kỳ đã chốt, kỳ còn bản ghi chưa tính, hay kỳ đã ghi nhận thanh toán đều bị
-                từ chối ngay cả khi gõ thẳng đường dẫn.
+                kỳ đã chốt, kỳ còn bản ghi chưa tính, kỳ đã ghi nhận thanh toán, hay kỳ đã
+                trừ cước vào số dư đều bị từ chối ngay cả khi gõ thẳng đường dẫn.
+            </p>
+        </div>
+    </div>
+
+    <!--/* ---------- Canh bao so du thap sau khi tru cuoc ---------- */-->
+    <div class="card shadow-sm mt-3" th:if="${!#lists.isEmpty(thueBaoSoDuThap)}">
+        <div class="card-header d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+            <strong>Thuê bao trả trước có số dư thấp</strong>
+            <span class="badge text-bg-danger ms-2" th:text="${#lists.size(thueBaoSoDuThap)}">0</span>
+            <span class="ms-auto small text-secondary">
+                Ngưỡng cảnh báo
+                <span th:text="${#numbers.formatDecimal(nguongCanhBaoSoDu, 0, 'POINT', 0, 'COMMA')} + ' đ'"></span>
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Số thuê bao</th>
+                        <th>Khách hàng</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Số dư</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="tb : ${thueBaoSoDuThap}">
+                        <td th:text="${tb.soThueBao}"></td>
+                        <td th:text="${tb.khachHang.tenKh}"></td>
+                        <td th:text="${tb.trangThai.nhan}"></td>
+                        <td class="text-end fw-semibold text-danger"
+                            th:text="${#numbers.formatDecimal(tb.soDu, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:href="@{/thue-bao/{id}(id=${tb.id})}">Xem</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="small text-secondary mt-2 mb-0">
+                Danh sách này chỉ để cảnh báo, <strong>không chặn nghiệp vụ nào</strong> —
+                thuê bao dưới ngưỡng vẫn dùng dịch vụ và vẫn bị trừ cước bình thường.
+                Thuê bao đã thanh lý không hiện ở đây vì số dư của họ luôn bằng 0.
             </p>
         </div>
     </div>

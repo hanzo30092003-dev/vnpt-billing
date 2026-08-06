@@ -132,7 +132,7 @@ mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 mvnw test
 ```
 
-Hiện có **150 test**. Ba lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
+Hiện có **164 test**. Ba lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
 với schema thật, `KiemTraDoPhuBangGiaTest` và `KiemTraSoCaiSoDuTest` kiểm bất biến trên dữ
 liệu thật); các lớp còn lại chạy độc lập không cần CSDL.
 
@@ -255,9 +255,17 @@ Tài khoản dùng thử (mật khẩu đều là `123456`): `admin`, `nhanvien0
 Dữ liệu hiện có: **kỳ 5/2026** đã chốt (3697 CDR · 54 hóa đơn · 21.289.162 đ) và
 **kỳ 6/2026** đang mở (5017 CDR · 58 hóa đơn · 23.940.596 đ).
 
+**Phase 5 — hóa đơn, thanh toán, công nợ** 🔄 đang làm
+
+- [x] **A0** — rà soát và sửa số liệu chép lại trong tài liệu
+- [x] **G1** — tổng quát hoá `nap_tien` thành sổ cái `bien_dong_so_du`, 18 dòng mở sổ
+- [x] **G2** — trừ cước kỳ vào số dư trả trước, kèm đường hoàn tác
+- [x] **G3** — công bố dự đoán trước khi viết code; 7/7 dự đoán đúng
+- [x] **G4** — tab *Biến động số dư*, cảnh báo số dư thấp, nút chạy/hủy trên `/tinh-cuoc`
+- [ ] **A–F** — chưa được giao
+
 Chưa làm (thuộc các phase sau):
 
-- [ ] Phase 5 — hóa đơn, thanh toán, công nợ
 - [ ] Phase 6 — báo cáo, thống kê, dashboard
 - [ ] Phase 7 — hoàn thiện, kiểm thử, tài liệu
 
@@ -269,6 +277,7 @@ Tài liệu:
 - [`docs/PHASE-4-PLAN.md`](docs/PHASE-4-PLAN.md) — rà soát đầu vào Phase 4, 10 quyết định nghiệp vụ và tiêu chí nghiệm thu
 - [`docs/PHASE-4-REPORT.md`](docs/PHASE-4-REPORT.md) — báo cáo Phase 4 (**mục 3: bài học phương pháp kiểm thử — kiểm bất biến thay vì kiểm luật**)
 - [`docs/PHASE-5-PLAN.md`](docs/PHASE-5-PLAN.md) — kế hoạch Phase 5: ba ràng buộc bắt buộc và mục G (sổ cái biến động số dư)
+- [`docs/PHASE-5-REPORT.md`](docs/PHASE-5-REPORT.md) — báo cáo Phase 5 (**mục 10: hai phát hiện khi đo dự đoán — ba thuê bao dựng sẵn không dùng được**)
 - [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) — mô tả chi tiết 15 bảng và 2 view (**mục 6: cảnh báo quy đổi đơn vị DATA cho Phase 4**)
 - [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) — số đo tối ưu ghi hàng loạt CDR
 - [`docs/mau-cdr.csv`](docs/mau-cdr.csv) — file CSV mẫu để thử chức năng nhập CDR

@@ -24,4 +24,19 @@ public interface BienDongSoDuRepository extends JpaRepository<BienDongSoDu, Long
     List<BienDongSoDu> findByKyCuocIdAndLoaiBienDong(Long kyCuocId, LoaiBienDongSoDu loaiBienDong);
 
     long countByKyCuocIdAndLoaiBienDong(Long kyCuocId, LoaiBienDongSoDu loaiBienDong);
+
+    /**
+     * Đếm dòng trừ cước của các kỳ <b>muộn hơn</b> kỳ đang xét.
+     *
+     * <p>Trừ cước <b>không giao hoán</b>: chạy kỳ 5 sau khi đã chạy kỳ 6 cho ra kết quả khác
+     * hẳn chạy đúng thứ tự thời gian, vì số dư vào mỗi kỳ phụ thuộc kỳ trước đó. Truy vấn này
+     * là căn cứ để chặn ở tầng nghiệp vụ.</p>
+     */
+    @Query("""
+            SELECT COUNT(b) FROM BienDongSoDu b
+            WHERE b.loaiBienDong = com.hanzo.billing.enums.LoaiBienDongSoDu.TRU_CUOC
+              AND (b.kyCuoc.nam > :nam
+                   OR (b.kyCuoc.nam = :nam AND b.kyCuoc.thang > :thang))
+            """)
+    long demTruCuocCuaKyMuonHon(@Param("nam") int nam, @Param("thang") int thang);
 }

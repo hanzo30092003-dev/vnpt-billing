@@ -159,6 +159,24 @@ public interface ChiTietSuDungRepository extends JpaRepository<ChiTietSuDung, Lo
     List<ChiTietSuDung> timDaTinhTheoKyDeApUuDai(@Param("kyCuocId") Long kyCuocId);
 
     /**
+     * CDR đã định giá của thuê bao <b>trả trước</b> trong một kỳ, để trừ vào số dư.
+     *
+     * <p>Thứ tự {@code (thuê bao, thời gian, id)} là <b>bắt buộc</b> và vì đúng lý do đã nêu
+     * ở {@link #timDaTinhTheoKyDeApUuDai}: số dư là một quỹ cạn dần, bản ghi làm cạn quỹ
+     * không được cắt đôi, nên thứ tự duyệt quyết định bản ghi nào được trừ. Đổi thứ tự là
+     * đổi kết quả — xem {@code docs/PHASE-5-REPORT.md} mục 10.3.</p>
+     */
+    @Query("""
+            SELECT c FROM ChiTietSuDung c
+            JOIN FETCH c.thueBao tb
+            WHERE c.kyCuoc.id = :kyCuocId
+              AND c.trangThaiTinhCuoc = com.hanzo.billing.enums.TrangThaiTinhCuoc.DA_TINH
+              AND tb.loaiThueBao = com.hanzo.billing.enums.LoaiThueBao.TRA_TRUOC
+            ORDER BY tb.id, c.thoiGianBatDau, c.id
+            """)
+    List<ChiTietSuDung> timDaTinhTheoKyChoTraTruoc(@Param("kyCuocId") Long kyCuocId);
+
+    /**
      * Tổng cước và sản lượng của một kỳ, gom theo (thuê bao, loại dịch vụ).
      *
      * <p>Một truy vấn duy nhất cho cả kỳ thay vì ba truy vấn cho mỗi thuê bao — với 58

@@ -121,7 +121,7 @@ Phase 0–4 ✅ · **đang vào Phase 5**.
 | 2 | Xác thực, khách hàng, thuê bao | `docs/PHASE-2-REPORT.md` |
 | 3 | Gói cước, bảng giá, CDR, kỳ cước | `docs/PHASE-3-REPORT.md` |
 | 4 | Engine tính cước (rating + billing) | `docs/PHASE-4-PLAN.md` · `docs/PHASE-4-REPORT.md` |
-| 5 | Hóa đơn, thanh toán, công nợ | ⏳ |
+| 5 | Hóa đơn, thanh toán, công nợ | 🔄 `docs/PHASE-5-PLAN.md` · `docs/PHASE-5-REPORT.md` |
 | 6 | Báo cáo, thống kê, dashboard | ⏳ |
 | 7 | Hoàn thiện, kiểm thử, tài liệu | ⏳ |
 
@@ -131,9 +131,21 @@ Phase 0–4 ✅ · **đang vào Phase 5**.
 
 **Ba việc Phase 5 nhận từ Phase 4:**
 
-1. Chuyển 54 hóa đơn quá hạn của kỳ 5/2026 (hạn 15/06/2026) sang `QUA_HAN`.
-2. Trừ cước vào `so_du` thuê bao trả trước — engine đã tính `cuoc_phi` nhưng cố ý chưa động vào
-   số dư (quyết định 5.4). 20 thuê bao trả trước; kỳ 5: 15 thuê bao / 921 CDR / 1.643.768 đ,
-   kỳ 6: 16 thuê bao / 1.126 CDR / 2.001.863 đ. Chi tiết ở **mục G** của `PHASE-5-PLAN.md`.
+1. Chuyển 54 hóa đơn quá hạn của kỳ 5/2026 (hạn 15/06/2026) sang `QUA_HAN`. ⏳ chưa làm
+2. ~~Trừ cước vào `so_du` thuê bao trả trước~~ ✅ **xong ở mục G**.
 3. `BillingService.huyBillingKy` từ chối xoá hóa đơn khi kỳ đã có thanh toán ⇒ tạo dữ liệu
    thanh toán ở **kỳ 5 (đã chốt)** trước, giữ kỳ 6 linh hoạt để demo.
+
+**Đã làm ở Phase 5** (mục A–F chưa được giao): A0 rà số liệu tài liệu · G1 sổ cái
+`bien_dong_so_du` (đổi tên từ `nap_tien`, +18 dòng mở sổ `DIEU_CHINH`) · G2 `TruCuocTraTruocService`
++ hoàn tác · G3 dự đoán 7/7 đúng · G4 giao diện. Kỳ 6/2026 đã trừ **1.991.417 đ** cho 16 thuê bao;
+kỳ 5 **chưa** trừ và sẽ bị chặn vì trừ cước không giao hoán theo thời gian.
+
+**Ràng buộc mới sinh ra ở mục G — đừng phá:**
+
+* Bất biến sổ cái `so_du = SUM(nạp + điều chỉnh) − SUM(trừ)` phải đúng với **mọi** thuê bao;
+  `KiemTraSoCaiSoDuTest` kiểm sau mỗi thay đổi. Sửa thẳng `thue_bao.so_du` mà không ghi sổ là
+  vi phạm.
+* Quy tắc dấu chỉ nằm trong enum `LoaiBienDongSoDu`, không chép ra chỗ khác.
+* Trừ cước **không giao hoán theo kỳ** — chạy kỳ cũ sau kỳ mới bị từ chối.
+* `huyRatingKy` bị chặn khi kỳ đã trừ cước (cùng lý do với hóa đơn).

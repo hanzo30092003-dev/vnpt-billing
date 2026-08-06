@@ -14,7 +14,7 @@ import com.hanzo.billing.enums.TrangThaiKyCuoc;
  * @param soCdrDaTinh   bản ghi đã gán vào kỳ và đã tính cước
  */
 public record TinhTrangKy(KyCuoc ky, long soCdrChuaTinh, long soCdrLoi, long soCdrDaTinh,
-                          long soHoaDon, long soThanhToan) {
+                          long soHoaDon, long soThanhToan, long soTruCuoc) {
 
     public boolean daChot() {
         return ky.getTrangThai() == TrangThaiKyCuoc.DA_CHOT;
@@ -43,9 +43,29 @@ public record TinhTrangKy(KyCuoc ky, long soCdrChuaTinh, long soCdrLoi, long soC
         return dangMo() && soHoaDon > 0 && soThanhToan == 0;
     }
 
-    /** Phải hủy hóa đơn trước mới hủy được kết quả tính cước. */
+    /**
+     * Phải hủy hóa đơn <b>và</b> kết quả trừ cước trước mới hủy được kết quả tính cước.
+     *
+     * <p>Hai nhánh cùng một lý do: hóa đơn và dòng trừ cước đều lấy số tiền từ
+     * {@code cuoc_phi} của chính các bản ghi này. Xóa {@code cuoc_phi} mà giữ chúng lại thì
+     * con số đã phát hành không còn dữ liệu nào giải thích.</p>
+     */
     public boolean choPhepHuyTinhCuoc() {
-        return dangMo() && soHoaDon == 0 && soCdrDaTinh > 0;
+        return dangMo() && soHoaDon == 0 && soTruCuoc == 0 && soCdrDaTinh > 0;
+    }
+
+    /**
+     * Trừ cước trả trước độc lập với lập hóa đơn — chỉ cần định giá xong.
+     *
+     * <p>Thuê bao trả trước không có hóa đơn tháng (quyết định 5.4), nên hai nhánh trả sau
+     * và trả trước chạy song song được, không nhánh nào chờ nhánh nào.</p>
+     */
+    public boolean choPhepTruCuoc() {
+        return dangMo() && soCdrChuaTinh == 0 && soCdrDaTinh > 0 && soTruCuoc == 0;
+    }
+
+    public boolean choPhepHuyTruCuoc() {
+        return dangMo() && soTruCuoc > 0;
     }
 
     public boolean choPhepChotKy() {
@@ -71,8 +91,14 @@ public record TinhTrangKy(KyCuoc ky, long soCdrChuaTinh, long soCdrLoi, long soC
         if (choPhepLapHoaDon()) {
             return "Đã tính cước xong, chờ lập hóa đơn";
         }
+        if (soHoaDon > 0 && choPhepTruCuoc()) {
+            return "Đã lập " + soHoaDon + " hóa đơn, còn chờ trừ cước trả trước";
+        }
         if (soHoaDon > 0) {
             return "Đã lập " + soHoaDon + " hóa đơn, có thể chốt kỳ";
+        }
+        if (choPhepTruCuoc()) {
+            return "Đã tính cước xong, chờ trừ cước trả trước";
         }
         return "Chưa có bản ghi nào trong kỳ";
     }
