@@ -39,6 +39,15 @@ public final class ThamSoTinhCuoc {
     public static final BigDecimal NGUONG_CANH_BAO_SO_DU = new BigDecimal("50000");
 
     /**
+     * Số ngày quá hạn để hệ thống <b>đề xuất</b> tạm ngừng thuê bao, mặc định 15 ngày.
+     *
+     * <p>Chỉ là <b>đề xuất</b>: hệ thống liệt kê ra và người dùng bấm nút, không tự động
+     * chuyển trạng thái. Cắt dịch vụ của khách là quyết định nghiệp vụ có hậu quả thật, và
+     * dữ liệu công nợ có thể chưa cập nhật (khách vừa nộp tiền ở quầy khác).</p>
+     */
+    public static final int SO_NGAY_QUA_HAN_DE_XUAT_TAM_NGUNG = 15;
+
+    /**
      * Số chữ số thập phân khi làm tròn tiền: 0, vì VND không có đơn vị nhỏ hơn đồng.
      *
      * <p>Cột trong CSDL vẫn là {@code DECIMAL(15,2)} nên giá trị lưu xuống có dạng

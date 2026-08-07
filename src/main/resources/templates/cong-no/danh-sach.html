@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Công nợ', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-exclamation-circle me-2"></i>Công nợ</h2>
+        <a class="btn btn-outline-success" th:href="@{'/cong-no/xuat-excel?' + ${chuoiLoc}}">
+            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+        </a>
+    </div>
+
+    <!--/* ---------- Bang tuoi no + bieu do ---------- */-->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex align-items-center">
+                    <strong>Bảng tuổi nợ</strong>
+                    <span class="ms-auto">
+                        Tổng còn nợ:
+                        <strong class="text-danger"
+                                th:text="${#numbers.formatDecimal(tongConNo, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Nhóm</th>
+                            <th class="text-end">Số hóa đơn</th>
+                            <th class="text-end">Tổng tiền</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="o : ${bangTuoiNo}">
+                            <td>
+                                <span class="badge" th:classappend="${o.nhom.lopBadge}"
+                                      th:text="${o.nhom.nhan}"></span>
+                            </td>
+                            <td class="text-end" th:text="${o.soHoaDon}"></td>
+                            <td class="text-end fw-semibold"
+                                th:text="${#numbers.formatDecimal(o.tongTien, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header"><strong>Phân bố nợ theo tuổi</strong></div>
+                <div class="card-body">
+                    <canvas id="bieuDoTuoiNo" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--/* ---------- De xuat tam ngung ---------- */-->
+    <div class="card shadow-sm mb-3" th:if="${!#lists.isEmpty(deXuatTamNgung)}">
+        <div class="card-header d-flex align-items-center">
+            <i class="bi bi-slash-circle text-danger me-2"></i>
+            <strong>Đề xuất tạm ngừng</strong>
+            <span class="badge text-bg-danger ms-2" th:text="${#lists.size(deXuatTamNgung)}">0</span>
+            <span class="ms-auto small text-secondary">
+                Hóa đơn quá hạn trên <span th:text="${nguongTamNgung}">15</span> ngày
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Số thuê bao</th>
+                        <th>Khách hàng</th>
+                        <th>Hóa đơn</th>
+                        <th class="text-end">Quá hạn</th>
+                        <th class="text-end">Còn nợ</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${deXuatTamNgung}">
+                        <td th:text="${d.hoaDon.thueBao.soThueBao}"></td>
+                        <td th:text="${d.hoaDon.khachHang.tenKh}"></td>
+                        <td>
+                            <a th:href="@{/hoa-don/{id}(id=${d.hoaDon.id})}"
+                               th:text="${d.hoaDon.maHoaDon}"></a>
+                        </td>
+                        <td class="text-end text-danger fw-semibold"
+                            th:text="${d.soNgayQuaHan} + ' ngày'"></td>
+                        <td class="text-end"
+                            th:text="${#numbers.formatDecimal(d.conNo, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+                        <td class="text-end">
+                            <form method="post" class="d-inline form-thao-tac"
+                                  th:action="@{/cong-no/{id}/tam-ngung(id=${d.hoaDon.id})}">
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        th:data-xac-nhan="'Chuyển thuê bao ' + ${d.hoaDon.thueBao.soThueBao}
+                                            + ' sang Tạm ngừng một chiều do nợ hóa đơn '
+                                            + ${d.hoaDon.maHoaDon} + ' quá hạn ' + ${d.soNgayQuaHan}
+                                            + ' ngày? Thuê bao sẽ không gọi đi được nữa.'"
+                                        data-xac-nhan-tieu-de="Tạm ngừng do nợ cước">
+                                    <i class="bi bi-slash-circle"></i> Tạm ngừng
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="small text-secondary mt-2 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Đây chỉ là <strong>đề xuất</strong> — hệ thống không tự cắt dịch vụ.
+                Thao tác chuyển trạng thái dùng lại đúng nghiệp vụ của màn hình thuê bao nên
+                vẫn qua ma trận chuyển trạng thái và vẫn ghi lịch sử.
+            </p>
+        </div>
+    </div>
+
+    <!--/* ---------- Danh sach hoa don con no ---------- */-->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <form method="get" th:action="@{/cong-no}" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small mb-1">Khách hàng</label>
+                    <input type="text" class="form-control form-control-sm" name="khachHang"
+                           th:value="${khachHang}" placeholder="Tên hoặc mã KH">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small mb-1">Nhóm tuổi nợ</label>
+                    <select class="form-select form-select-sm" name="nhomTuoiNo">
+                        <option value="">Tất cả</option>
+                        <option th:each="n : ${danhSachNhom}" th:value="${n}" th:text="${n.nhan}"
+                                th:selected="${n == nhomTuoiNo}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-search me-1"></i> Lọc
+                    </button>
+                    <a class="btn btn-outline-secondary btn-sm" th:href="@{/cong-no}">Xoá bộ lọc</a>
+                </div>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Mã hóa đơn</th>
+                        <th>Kỳ</th>
+                        <th>Khách hàng</th>
+                        <th>Số thuê bao</th>
+                        <th>Hạn thanh toán</th>
+                        <th class="text-end">Quá hạn</th>
+                        <th>Nhóm tuổi nợ</th>
+                        <th class="text-end">Còn nợ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(danhSach)}">
+                        <td colspan="8" class="text-center text-secondary py-4">
+                            Không có hóa đơn nào còn nợ khớp bộ lọc.
+                        </td>
+                    </tr>
+                    <tr th:each="d : ${danhSach}">
+                        <td>
+                            <a th:href="@{/hoa-don/{id}(id=${d.hoaDon.id})}"
+                               th:text="${d.hoaDon.maHoaDon}"></a>
+                        </td>
+                        <td th:text="${d.hoaDon.kyCuoc.thang} + '/' + ${d.hoaDon.kyCuoc.nam}"></td>
+                        <td th:text="${d.hoaDon.khachHang.tenKh}"></td>
+                        <td th:text="${d.hoaDon.thueBao.soThueBao}"></td>
+                        <td th:text="${#temporals.format(d.hoaDon.hanThanhToan, 'dd/MM/yyyy')}"></td>
+                        <td class="text-end"
+                            th:classappend="${d.nhomTuoiNo.quaHan} ? 'text-danger fw-semibold' : ''"
+                            th:text="${d.soNgayQuaHan > 0} ? (${d.soNgayQuaHan} + ' ngày') : '—'"></td>
+                        <td>
+                            <span class="badge" th:classappend="${d.nhomTuoiNo.lopBadge}"
+                                  th:text="${d.nhomTuoiNo.nhan}"></span>
+                        </td>
+                        <td class="text-end fw-semibold text-danger"
+                            th:text="${#numbers.formatDecimal(d.conNo, 0, 'POINT', 0, 'COMMA')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="small text-secondary mt-3 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Sắp theo số ngày quá hạn giảm dần — khoản nợ lâu nhất lên đầu.
+                Cột <strong>Còn nợ</strong> đọc thẳng từ hóa đơn, không cộng lại từ bảng thanh toán.
+            </p>
+        </div>
+    </div>
+
+    <!--/* Layout nap Chart.js o CUOI trang, sau khoi noi dung. Boc trong
+           DOMContentLoaded de doan nay chay sau khi thu vien da san sang -
+           the script co src la script chan phan tich nen luon chay xong truoc
+           su kien do. Nho vay khong phai sua fragment layout dung chung. */-->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const nhanTuoiNo = /*[[${nhanTuoiNo}]]*/ [];
+        const tienTuoiNo = /*[[${tienTuoiNo}]]*/ [];
+        /*]]>*/
+        document.addEventListener('DOMContentLoaded', function () {
+            new Chart(document.getElementById('bieuDoTuoiNo'), {
+                type: 'bar',
+                data: {
+                    labels: nhanTuoiNo,
+                    datasets: [{
+                        label: 'Còn nợ (đ)',
+                        data: tienTuoiNo,
+                        backgroundColor: ['#6c757d', '#ffc107', '#fd7e14', '#dc3545', '#8b0000']
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => new Intl.NumberFormat('vi-VN').format(v) }
+                        },
+                        x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 30 } }
+                    }
+                }
+            });
+        });
+    </script>
+
+</div>
+
+</body>
+</html>
