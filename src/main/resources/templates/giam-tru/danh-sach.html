@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Giảm trừ', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-dash-circle me-2"></i>Khoản giảm trừ</h2>
+        <a class="btn btn-primary" th:href="@{/giam-tru/moi}">
+            <i class="bi bi-plus-lg me-1"></i> Thêm giảm trừ
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" th:action="@{/giam-tru}" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Kỳ cước</label>
+                    <select class="form-select form-select-sm" name="kyCuocId">
+                        <option value="">Tất cả</option>
+                        <option th:each="k : ${danhSachKy}" th:value="${k.id}"
+                                th:text="${k.thang} + '/' + ${k.nam}"
+                                th:selected="${k.id == kyCuocId}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Trạng thái</label>
+                    <select class="form-select form-select-sm" name="trangThai">
+                        <option value="">Tất cả</option>
+                        <option th:each="t : ${danhSachTrangThai}" th:value="${t}" th:text="${t.nhan}"
+                                th:selected="${t == trangThai}"></option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-search me-1"></i> Lọc
+                    </button>
+                    <a class="btn btn-outline-secondary btn-sm" th:href="@{/giam-tru}">Xoá bộ lọc</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <strong th:text="${#lists.size(danhSach)} + ' khoản giảm trừ'">0</strong>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Thuê bao</th>
+                        <th>Khách hàng</th>
+                        <th>Kỳ cước</th>
+                        <th>Loại</th>
+                        <th class="text-end">Mức giảm</th>
+                        <th>Lý do</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(danhSach)}">
+                        <td colspan="8" class="text-center text-secondary py-4">
+                            Chưa có khoản giảm trừ nào.
+                        </td>
+                    </tr>
+                    <tr th:each="gt : ${danhSach}">
+                        <td th:text="${gt.thueBao.soThueBao}"></td>
+                        <td th:text="${gt.thueBao.khachHang.tenKh}"></td>
+                        <td th:text="${gt.kyCuoc != null} ? (${gt.kyCuoc.thang} + '/' + ${gt.kyCuoc.nam}) : 'Dùng chung'"></td>
+                        <td th:text="${gt.loai.nhan}"></td>
+                        <!--/* Hien dung cach khai da luu: so tien tuyet doi HOAC ty le,
+                               khong bao gio ca hai */-->
+                        <td class="text-end fw-semibold"
+                            th:text="${gt.soTien != null}
+                                     ? (${#numbers.formatDecimal(gt.soTien, 0, 'POINT', 0, 'COMMA')} + ' đ')
+                                     : (${gt.tyLePhanTram} + '%')"></td>
+                        <td th:text="${gt.lyDo != null} ? ${gt.lyDo} : '—'"></td>
+                        <td>
+                            <span class="badge" th:classappend="${gt.trangThai.lopBadge}"
+                                  th:text="${gt.trangThai.nhan}"></span>
+                        </td>
+                        <td class="text-end">
+                            <div th:if="${gt.trangThai.name() == 'CHUA_AP_DUNG'}" class="d-inline">
+                                <a class="btn btn-sm btn-outline-secondary"
+                                   th:href="@{/giam-tru/{id}/sua(id=${gt.id})}">Sửa</a>
+                                <form method="post" class="d-inline form-thao-tac"
+                                      th:action="@{/giam-tru/{id}/xoa(id=${gt.id})}">
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            th:data-xac-nhan="'Xoá khoản giảm trừ của thuê bao '
+                                                + ${gt.thueBao.soThueBao} + '?'"
+                                            data-xac-nhan-tieu-de="Xoá khoản giảm trừ">Xoá</button>
+                                </form>
+                            </div>
+                            <span th:unless="${gt.trangThai.name() == 'CHUA_AP_DUNG'}"
+                                  class="small text-secondary">Đã vào hóa đơn</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="small text-secondary mt-3 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Khoản <strong>Đã áp dụng</strong> không sửa hay xoá được: số tiền của nó đã nằm
+                trong hóa đơn. Muốn đổi thì huỷ hóa đơn của kỳ trước — khoản sẽ tự quay về
+                <em>Chưa áp dụng</em>.
+                Tỷ lệ phần trăm được quy thành số tiền <strong>đúng một lần</strong> lúc lập
+                hóa đơn, sau đó chỉ cộng trừ.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -55,4 +55,7 @@ public interface ThueBaoService {
      * (thêm/sửa/ngừng bán) thuộc phạm vi Phase 3.</p>
      */
     List<GoiCuoc> layGoiCuocConHieuLuc();
+
+    /** Danh sách thuê bao trả sau đang dùng được, để chọn trong ô select của form. */
+    List<ThueBao> layTraSauDeChon();
 }

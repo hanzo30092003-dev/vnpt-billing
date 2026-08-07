@@ -31,6 +31,21 @@ public interface GiamTruRepository extends JpaRepository<GiamTru, Long> {
             """)
     List<GiamTru> timApDungChoKy(@Param("kyCuocId") Long kyCuocId);
 
+    /** Danh sách giảm trừ có lọc, kèm quan hệ để hiển thị. */
+    @Query("""
+            SELECT gt FROM GiamTru gt
+            JOIN FETCH gt.thueBao tb
+            JOIN FETCH tb.khachHang
+            LEFT JOIN FETCH gt.kyCuoc
+            WHERE (:kyCuocId  IS NULL OR gt.kyCuoc.id = :kyCuocId)
+              AND (:thueBaoId IS NULL OR tb.id = :thueBaoId)
+              AND (:trangThai IS NULL OR gt.trangThai = :trangThai)
+            ORDER BY gt.id DESC
+            """)
+    List<GiamTru> timKiem(@Param("kyCuocId") Long kyCuocId,
+                          @Param("thueBaoId") Long thueBaoId,
+                          @Param("trangThai") TrangThaiGiamTru trangThai);
+
     /** Trả các khoản giảm trừ của một kỳ về chưa áp dụng, khi hủy lập hóa đơn. */
     @Modifying
     @Query("""

@@ -45,7 +45,8 @@ public class SecurityConfig {
                         .hasAnyRole("NHAN_VIEN", "ADMIN")
 
                         // Kế toán
-                        .requestMatchers("/hoa-don/**", "/thanh-toan/**", "/cong-no/**")
+                        .requestMatchers("/hoa-don/**", "/thanh-toan/**", "/cong-no/**",
+                                "/giam-tru/**")
                         .hasAnyRole("KE_TOAN", "ADMIN")
 
                         // Danh mục và nghiệp vụ tính cước: chỉ quản trị viên

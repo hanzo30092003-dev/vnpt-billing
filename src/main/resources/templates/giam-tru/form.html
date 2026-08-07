@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Khoản giảm trừ', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">
+            <i class="bi bi-dash-circle me-2"></i>
+            <span th:text="${form.id == null} ? 'Thêm khoản giảm trừ' : 'Sửa khoản giảm trừ'"></span>
+        </h2>
+        <a class="btn btn-outline-secondary" th:href="@{/giam-tru}">
+            <i class="bi bi-arrow-left me-1"></i> Danh sách
+        </a>
+    </div>
+
+    <div class="alert alert-danger" th:if="${thongBaoLoi}">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+        <span th:text="${thongBaoLoi}"></span>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post" th:action="@{/giam-tru}" th:object="${form}" class="row g-3">
+                <input type="hidden" th:field="*{id}">
+
+                <div class="col-md-6">
+                    <label class="form-label">Thuê bao <span class="text-danger">*</span></label>
+                    <select class="form-select" th:field="*{thueBaoId}"
+                            th:classappend="${#fields.hasErrors('thueBaoId')} ? 'is-invalid'">
+                        <option value="">— Chọn thuê bao —</option>
+                        <option th:each="tb : ${danhSachThueBao}" th:value="${tb.id}"
+                                th:text="${tb.soThueBao} + ' — ' + ${tb.khachHang.tenKh}"></option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{thueBaoId}"></div>
+                    <div class="form-text">
+                        Chỉ liệt kê thuê bao <strong>trả sau</strong> — giảm trừ áp lên hóa đơn
+                        tháng, mà thuê bao trả trước không có hóa đơn tháng.
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Kỳ cước</label>
+                    <select class="form-select" th:field="*{kyCuocId}">
+                        <option value="">Dùng chung (áp cho kỳ lập hóa đơn kế tiếp)</option>
+                        <option th:each="k : ${danhSachKy}" th:value="${k.id}"
+                                th:text="${k.thang} + '/' + ${k.nam}"></option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Loại giảm trừ <span class="text-danger">*</span></label>
+                    <select class="form-select" th:field="*{loai}"
+                            th:classappend="${#fields.hasErrors('loai')} ? 'is-invalid'">
+                        <option value="">— Chọn loại —</option>
+                        <option th:each="l : ${danhSachLoai}" th:value="${l}" th:text="${l.nhan}"></option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{loai}"></div>
+                </div>
+
+                <div class="col-12">
+                    <div class="alert alert-warning py-2 mb-2"
+                         th:if="${#fields.hasErrors('chiMotCachKhai')}">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <span th:errors="*{chiMotCachKhai}"></span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Số tiền giảm trừ</label>
+                            <div class="input-group">
+                                <input type="number" step="1" class="form-control" th:field="*{soTien}"
+                                       th:classappend="${#fields.hasErrors('soTien')} ? 'is-invalid'">
+                                <span class="input-group-text">đ</span>
+                                <div class="invalid-feedback" th:errors="*{soTien}"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">HOẶC tỷ lệ phần trăm</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control"
+                                       th:field="*{tyLePhanTram}"
+                                       th:classappend="${#fields.hasErrors('tyLePhanTram')} ? 'is-invalid'">
+                                <span class="input-group-text">%</span>
+                                <div class="invalid-feedback" th:errors="*{tyLePhanTram}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-text">
+                        Nhập <strong>đúng một</strong> trong hai ô. Tỷ lệ được quy thành số tiền
+                        đúng một lần tại thời điểm lập hóa đơn, tính trên tổng cước trước giảm trừ.
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Lý do</label>
+                    <textarea class="form-control" rows="2" th:field="*{lyDo}"
+                              th:classappend="${#fields.hasErrors('lyDo')} ? 'is-invalid'"></textarea>
+                    <div class="invalid-feedback" th:errors="*{lyDo}"></div>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Lưu
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/giam-tru}">Huỷ</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

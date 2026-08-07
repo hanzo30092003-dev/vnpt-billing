@@ -401,3 +401,57 @@ Không `UPDATE` tay để lấp hai cột: **hủy trừ cước rồi chạy l�
 Thuê bao 4 giờ đọc được trọn câu chuyện trên **một dòng**: trừ 204.780 đ qua **69** bản ghi,
 số dư 205.000 → 220 đ, **10.446 đ** không thu được. Trước khi có hai cột này thì ba con số sau
 phải đi tra lại CDR mới biết.
+
+---
+
+# PHẦN IV — MỤC A–F: HÓA ĐƠN, THANH TOÁN, CÔNG NỢ
+
+## 19. ⭐ Dự đoán đường giảm trừ — công bố TRƯỚC khi chạy
+
+> **Commit này nằm trước commit chạy thật.** Đường giảm trừ được viết ở mục 4C nhưng
+> **chưa từng chạy với `giamTru > 0`** — bảng `giam_tru` rỗng suốt Phase 4. Đây đúng dạng
+> nhánh code chưa ai đi, cùng loại với nhánh *prorate do huỷ giữa kỳ* mà mục 4F phát hiện.
+
+### 19.1. Hai khoản giảm trừ sẽ thêm cho kỳ 6/2026
+
+| Thuê bao | Hóa đơn | Cước trước giảm trừ | Cách khai |
+|---|---|---|---|
+| `0941234541` (id 41) | HD202606-000020 | 730.400 đ | **Số tiền tuyệt đối 50.000 đ** |
+| `0930123440` (id 40) | HD202606-000019 | 690.800 đ | **Tỷ lệ 7,5%** |
+
+### 19.2. Con số kỳ vọng — tính tay theo công thức của mục 4C
+
+**Thuê bao 41 — giảm trừ tuyệt đối:**
+
+| Bước | Phép tính | Kỳ vọng |
+|---|---|---|
+| `giam_tru` | khai tuyệt đối, không quy đổi | **50.000 đ** |
+| `tong_truoc_thue` | 730.400 − 50.000 | **680.400 đ** |
+| `thue_vat` | ROUND(680.400 × 10%) | **68.040 đ** |
+| `tong_thanh_toan` | 680.400 + 68.040 | **748.440 đ** |
+| `con_no` | = tổng thanh toán (chưa thu) | **748.440 đ** |
+| Giảm so với hiện tại | 803.440 − 748.440 | **55.000 đ** |
+
+**Thuê bao 40 — giảm trừ theo tỷ lệ:**
+
+| Bước | Phép tính | Kỳ vọng |
+|---|---|---|
+| `giam_tru` | ROUND(690.800 × 7,5 / 100) = ROUND(51.810,0) | **51.810 đ** |
+| `tong_truoc_thue` | 690.800 − 51.810 | **638.990 đ** |
+| `thue_vat` | ROUND(638.990 × 10%) = ROUND(63.899,0) | **63.899 đ** |
+| `tong_thanh_toan` | 638.990 + 63.899 | **702.889 đ** |
+| `con_no` | = tổng thanh toán | **702.889 đ** |
+| Giảm so với hiện tại | 759.880 − 702.889 | **56.991 đ** |
+
+**Toàn kỳ 6/2026:**
+
+| Chỉ tiêu | Kỳ vọng |
+|---|---|
+| `SUM(giam_tru)` | **101.810 đ** (50.000 + 51.810) |
+| Doanh thu kỳ | **23.828.605 đ** (23.940.596 − 55.000 − 56.991) |
+| Số hóa đơn | **58** — không đổi |
+| Dòng `chi_tiet_hoa_don` tăng thêm | **2** dòng "Giảm trừ", thành tiền **âm** |
+| Trạng thái hai khoản giảm trừ | `CHUA_AP_DUNG` → **`DA_AP_DUNG`** |
+| Sau khi huỷ hóa đơn lần nữa | quay lại **`CHUA_AP_DUNG`** |
+
+Nếu bất kỳ con số nào lệch → **DỪNG, phân tích trước khi sửa.**

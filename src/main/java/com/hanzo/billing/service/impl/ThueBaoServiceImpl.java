@@ -301,6 +301,17 @@ public class ThueBaoServiceImpl implements ThueBaoService {
         return lichSuThueBaoRepository.timLichSuTheoThueBao(thueBaoId);
     }
 
+    /**
+     * Chỉ lấy thuê bao <b>trả sau</b>: giảm trừ áp lên hóa đơn tháng, mà thuê bao trả trước
+     * không có hóa đơn tháng (quyết định 5.4). Cho chọn thuê bao trả trước sẽ tạo ra khoản
+     * giảm trừ không bao giờ được áp vào đâu cả.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<ThueBao> layTraSauDeChon() {
+        return thueBaoRepository.timTheoLoaiKemQuanHe(LoaiThueBao.TRA_SAU);
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<BienDongSoDu> layLichSuBienDongSoDu(Long thueBaoId) {
