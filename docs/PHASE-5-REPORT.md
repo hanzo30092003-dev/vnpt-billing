@@ -455,3 +455,64 @@ phải đi tra lại CDR mới biết.
 | Sau khi huỷ hóa đơn lần nữa | quay lại **`CHUA_AP_DUNG`** |
 
 Nếu bất kỳ con số nào lệch → **DỪNG, phân tích trước khi sửa.**
+
+## 20. ⭐ Kết quả đường giảm trừ — khớp tuyệt đối
+
+Chạy toàn bộ **qua giao diện**: huỷ hóa đơn kỳ 6 → lập lại.
+
+| # | Chỉ tiêu | Dự đoán (mục 19) | Thực tế | |
+|---|---|---|---|---|
+| 1 | TB 41 — `giam_tru` | 50.000 đ | 50.000 đ | ✅ |
+| 2 | TB 41 — `tong_truoc_thue` | 680.400 đ | 680.400 đ | ✅ |
+| 3 | TB 41 — `thue_vat` | 68.040 đ | 68.040 đ | ✅ |
+| 4 | TB 41 — `tong_thanh_toan` / `con_no` | 748.440 đ | 748.440 đ | ✅ |
+| 5 | TB 40 — `giam_tru` (7,5%) | 51.810 đ | 51.810 đ | ✅ |
+| 6 | TB 40 — `tong_truoc_thue` | 638.990 đ | 638.990 đ | ✅ |
+| 7 | TB 40 — `thue_vat` | 63.899 đ | 63.899 đ | ✅ |
+| 8 | TB 40 — `tong_thanh_toan` / `con_no` | 702.889 đ | 702.889 đ | ✅ |
+| 9 | `SUM(giam_tru)` toàn kỳ | 101.810 đ | 101.810 đ | ✅ |
+| 10 | Doanh thu kỳ 6 | 23.828.605 đ | 23.828.605 đ | ✅ |
+| 11 | Số hóa đơn | 58 | 58 | ✅ |
+| 12 | Dòng `chi_tiet_hoa_don` "Giảm trừ" | 2 dòng, âm | −50.000 và −51.810 | ✅ |
+| 13 | Trạng thái hai khoản | → `DA_AP_DUNG` | `DA_AP_DUNG` | ✅ |
+
+**Mười ba dự đoán đúng, tất cả đúng tới từng đồng.**
+
+Chiều ngược lại cũng đúng: huỷ hóa đơn lần nữa → cả hai khoản quay về `CHUA_AP_DUNG`, kỳ 6
+còn 0 hóa đơn; lập lại → ra **đúng cùng con số** 101.810 đ / 23.828.605 đ. Đây là lần thứ tư
+tính xác định của engine được chứng minh, và là lần đầu **có giảm trừ tham gia**.
+
+## 21. Ràng buộc ① đã được thoả sẵn từ 4C — việc của E là kiểm chứng
+
+Điểm đáng ghi lại: đọc kỹ `BillingService.tinhGiamTru` thì thấy nó **đã** làm đúng ràng buộc ①
+từ Phase 4C — quy tỷ lệ thành số tiền tuyệt đối **đúng một lần**
+(`lamTronTien(truocGiamTru × tyLe / 100)`), ghi vào `hoa_don.giam_tru`, rồi snapshot thành một
+dòng `chi_tiet_hoa_don`. Không có phép nhân nào lặp lại về sau.
+
+Vì vậy mục E **không sửa gì** ở tầng tính tiền. `GiamTruServiceImpl` cố ý **không** có phép
+nhân nào với `tyLePhanTram` — thêm một phép quy đổi ở tầng nhập liệu chính là tạo ra tầng làm
+tròn thứ hai mà ràng buộc ① cấm. Có test riêng khẳng định: lưu theo tỷ lệ thì cột `so_tien`
+phải để **NULL**.
+
+### 21.1. Một chỗ đặc tả chồng nhau, đã xử lý
+
+Javadoc của `tinhGiamTru` (viết ở 4C) ghi: *"khi khai cả hai thì số tiền tuyệt đối thắng"*.
+Đặc tả E.2 lại yêu cầu **chặn** việc khai cả hai. Hai câu không mâu thuẫn nhưng chồng nhau:
+sau khi form chặn, nhánh "cả hai thì tuyệt đối thắng" trở thành **phòng thủ cho dữ liệu nhập
+thẳng bằng SQL**, không còn là luật nghiệp vụ.
+
+Giữ nguyên cả hai và ghi rõ ở đây, thay vì xoá nhánh phòng thủ: dữ liệu mẫu và các script
+migration vẫn ghi thẳng vào bảng, nên nhánh đó còn có việc để làm. Ngoài ra `GiamTruServiceImpl`
+ép cột còn lại về `NULL` khi lưu, nên bản ghi đi qua giao diện **không bao giờ** mang hai cách
+khai cùng lúc.
+
+## 22. Nghiệm thu mục E
+
+| # | Tiêu chí | Kết quả |
+|---|---|---|
+| 1 | Danh sách, lọc theo kỳ / thuê bao / trạng thái | ✅ `/giam-tru` |
+| 2 | Nhập số tiền **hoặc** tỷ lệ, chặn cả hai và chặn không nhập gì | ✅ `@AssertTrue` + 3 test |
+| 3 | Chỉ sửa/xoá khi kỳ chưa chốt và khoản `CHUA_AP_DUNG` | ✅ 3 test chốt chặn |
+| 4 | Tỷ lệ quy thành tiền đúng một lần lúc lập hóa đơn | ✅ đã có từ 4C, mục 21 |
+| 5 | Kiểm chứng end-to-end khớp con số công bố trước | ✅ **13/13**, mục 20 |
+| — | `mvnw test` | ✅ **242 test**, 0 lỗi |
