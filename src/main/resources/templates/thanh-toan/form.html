@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Ghi nhận thanh toán', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-cash-coin me-2"></i>Ghi nhận thanh toán</h2>
+        <a class="btn btn-outline-secondary" th:href="@{/hoa-don/{id}(id=${hoaDon.id})}">
+            <i class="bi bi-arrow-left me-1"></i> Về hóa đơn
+        </a>
+    </div>
+
+    <div class="alert alert-danger" th:if="${thongBaoLoi}">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+        <span th:text="${thongBaoLoi}"></span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header"><strong>Hóa đơn</strong></div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-5 text-secondary">Mã hóa đơn</dt>
+                        <dd class="col-7 fw-semibold" th:text="${hoaDon.maHoaDon}"></dd>
+
+                        <dt class="col-5 text-secondary">Kỳ cước</dt>
+                        <dd class="col-7" th:text="${hoaDon.kyCuoc.thang} + '/' + ${hoaDon.kyCuoc.nam}"></dd>
+
+                        <dt class="col-5 text-secondary">Khách hàng</dt>
+                        <dd class="col-7" th:text="${hoaDon.khachHang.tenKh}"></dd>
+
+                        <dt class="col-5 text-secondary">Số thuê bao</dt>
+                        <dd class="col-7" th:text="${hoaDon.thueBao.soThueBao}"></dd>
+
+                        <dt class="col-5 text-secondary">Tổng thanh toán</dt>
+                        <dd class="col-7"
+                            th:text="${#numbers.formatDecimal(hoaDon.tongThanhToan, 0, 'POINT', 0, 'COMMA')} + ' đ'"></dd>
+
+                        <dt class="col-5 text-secondary">Đã thu</dt>
+                        <dd class="col-7"
+                            th:text="${#numbers.formatDecimal(hoaDon.daThanhToan, 0, 'POINT', 0, 'COMMA')} + ' đ'"></dd>
+
+                        <dt class="col-5 text-secondary">Còn nợ</dt>
+                        <dd class="col-7 fw-bold text-danger h5 mb-0"
+                            th:text="${#numbers.formatDecimal(hoaDon.conNo, 0, 'POINT', 0, 'COMMA')} + ' đ'"></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header"><strong>Thông tin thu tiền</strong></div>
+                <div class="card-body">
+                    <form method="post" th:action="@{/thanh-toan}" th:object="${form}">
+                        <input type="hidden" th:field="*{hoaDonId}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Số tiền thu <span class="text-danger">*</span></label>
+                            <input type="number" step="1" class="form-control form-control-lg"
+                                   th:field="*{soTien}"
+                                   th:classappend="${#fields.hasErrors('soTien')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{soTien}"></div>
+                            <div class="form-text">
+                                Mặc định bằng số còn nợ. Không được vượt quá
+                                <span th:text="${#numbers.formatDecimal(hoaDon.conNo, 0, 'POINT', 0, 'COMMA')} + ' đ'"></span>.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Hình thức <span class="text-danger">*</span></label>
+                            <select class="form-select" th:field="*{hinhThuc}"
+                                    th:classappend="${#fields.hasErrors('hinhThuc')} ? 'is-invalid'">
+                                <option value="">— Chọn hình thức —</option>
+                                <option th:each="h : ${danhSachHinhThuc}" th:value="${h}" th:text="${h.nhan}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{hinhThuc}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ngày thanh toán <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" th:field="*{ngayThanhToan}"
+                                   th:max="${homNay}"
+                                   th:classappend="${#fields.hasErrors('ngayThanhToan')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{ngayThanhToan}"></div>
+                            <div class="form-text">Không được chọn ngày ở tương lai.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea class="form-control" rows="2" th:field="*{ghiChu}"
+                                      th:classappend="${#fields.hasErrors('ghiChu')} ? 'is-invalid'"></textarea>
+                            <div class="invalid-feedback" th:errors="*{ghiChu}"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i> Ghi nhận thanh toán
+                        </button>
+                        <a class="btn btn-outline-secondary" th:href="@{/hoa-don/{id}(id=${hoaDon.id})}">Huỷ</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

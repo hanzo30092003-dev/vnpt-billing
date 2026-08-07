@@ -20,4 +20,16 @@ public interface SinhMaService {
      * @return ví dụ {@code HD202606-000001}
      */
     String sinhMaHoaDon(int thang, int nam);
+
+    /**
+     * Sinh mã giao dịch thanh toán kế tiếp, định dạng {@code TT} + {@code yyyyMMdd}
+     * + 4 chữ số.
+     *
+     * <p>Số thứ tự đếm riêng theo <b>từng ngày</b>, nên nhìn mã là biết ngay giao dịch phát
+     * sinh hôm nào — đúng cách sổ quỹ của kế toán đánh số phiếu thu.</p>
+     *
+     * @param ngay ngày ghi nhận giao dịch
+     * @return ví dụ {@code TT20260615-0001}
+     */
+    String sinhMaThanhToan(java.time.LocalDate ngay);
 }

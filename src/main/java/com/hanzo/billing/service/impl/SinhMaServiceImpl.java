@@ -1,6 +1,7 @@
 package com.hanzo.billing.service.impl;
 
 import com.hanzo.billing.repository.HoaDonRepository;
+import com.hanzo.billing.repository.ThanhToanRepository;
 import com.hanzo.billing.repository.KhachHangRepository;
 import com.hanzo.billing.service.SinhMaService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,14 @@ public class SinhMaServiceImpl implements SinhMaService {
     /** Số chữ số của phần số thứ tự trong mã hóa đơn. */
     static final int SO_CHU_SO_HD = 6;
 
+    static final String TIEN_TO_TT = "TT";
+
+    /** Bốn chữ số là đủ cho 9.999 giao dịch một ngày — vượt xa quy mô của đồ án. */
+    static final int SO_CHU_SO_TT = 4;
+
     private final KhachHangRepository khachHangRepository;
     private final HoaDonRepository hoaDonRepository;
+    private final ThanhToanRepository thanhToanRepository;
 
     /**
      * Sinh mã khách hàng kế tiếp.
@@ -74,6 +81,22 @@ public class SinhMaServiceImpl implements SinhMaService {
         String maLonNhat = hoaDonRepository.timMaHoaDonLonNhatTheoTienTo(tienTo);
         int soTiepTheo = tachSoThuTu(maLonNhat, tienTo) + 1;
         return tienTo + String.format("%0" + SO_CHU_SO_HD + "d", soTiepTheo);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Đếm riêng theo ngày nên tiền tố gồm cả ngày: hai giao dịch khác ngày không bao giờ
+     * tranh nhau số thứ tự, và mã cũ của ngày hôm trước không ảnh hưởng tới ngày hôm nay.</p>
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public String sinhMaThanhToan(java.time.LocalDate ngay) {
+        String tienTo = TIEN_TO_TT + ngay.format(
+                java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + "-";
+        String maLonNhat = thanhToanRepository.timMaLonNhatTheoTienTo(tienTo);
+        int soTiepTheo = tachSoThuTu(maLonNhat, tienTo) + 1;
+        return tienTo + String.format("%0" + SO_CHU_SO_TT + "d", soTiepTheo);
     }
 
     /**

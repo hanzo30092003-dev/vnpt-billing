@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Giao dịch thanh toán', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-cash-stack me-2"></i>Giao dịch thanh toán</h2>
+        <a class="btn btn-outline-success" th:href="@{'/thanh-toan/xuat-excel?' + ${chuoiLoc}}">
+            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" th:action="@{/thanh-toan}" th:object="${boLoc}" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Từ ngày</label>
+                    <input type="date" class="form-control" th:field="*{tuNgay}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Đến ngày</label>
+                    <input type="date" class="form-control" th:field="*{denNgay}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-1">Hình thức</label>
+                    <select class="form-select" th:field="*{hinhThuc}">
+                        <option value="">Tất cả</option>
+                        <option th:each="h : ${danhSachHinhThuc}" th:value="${h}" th:text="${h.nhan}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-search me-1"></i> Lọc
+                    </button>
+                    <a class="btn btn-outline-secondary btn-sm" th:href="@{/thanh-toan}">Xoá bộ lọc</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center">
+            <strong th:text="${ketQua.totalElements} + ' giao dịch'">0 giao dịch</strong>
+            <span class="ms-auto">
+                Tổng thu:
+                <strong class="text-success"
+                        th:text="${#numbers.formatDecimal(tongThu, 0, 'POINT', 0, 'COMMA')} + ' đ'"></strong>
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Mã giao dịch</th>
+                        <th>Thời điểm</th>
+                        <th>Hóa đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Số thuê bao</th>
+                        <th class="text-end">Số tiền</th>
+                        <th>Hình thức</th>
+                        <th>Người thu</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${ketQua.isEmpty()}">
+                        <td colspan="9" class="text-center text-secondary py-4">
+                            Không có giao dịch nào khớp bộ lọc.
+                        </td>
+                    </tr>
+                    <tr th:each="t : ${ketQua.content}">
+                        <td th:text="${t.maGiaoDich}"></td>
+                        <td th:text="${#temporals.format(t.ngayThanhToan, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td>
+                            <a th:href="@{/hoa-don/{id}(id=${t.hoaDon.id})}"
+                               th:text="${t.hoaDon.maHoaDon}"></a>
+                        </td>
+                        <td th:text="${t.hoaDon.khachHang.tenKh}"></td>
+                        <td th:text="${t.hoaDon.thueBao.soThueBao}"></td>
+                        <td class="text-end fw-semibold text-success"
+                            th:text="${#numbers.formatDecimal(t.soTien, 0, 'POINT', 0, 'COMMA')}"></td>
+                        <td th:text="${t.hinhThuc.nhan}"></td>
+                        <td th:text="${t.nguoiThu != null} ? ${t.nguoiThu.hoTen} : '—'"></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:href="@{/thanh-toan/{id}/phieu-thu(id=${t.id})}">
+                                <i class="bi bi-printer"></i> Phiếu thu
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav th:if="${ketQua.totalPages > 1}" class="mt-3">
+                <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
+                    <li class="page-item" th:classappend="${ketQua.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/thanh-toan?trang=' + ${ketQua.number - 1} + ${chuoiLoc}}">Trước</a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(
+                            ketQua.number - 3 < 0 ? 0 : ketQua.number - 3,
+                            ketQua.number + 3 >= ketQua.totalPages ? ketQua.totalPages - 1 : ketQua.number + 3)}"
+                        th:classappend="${i == ketQua.number} ? 'active'">
+                        <a class="page-link" th:href="@{'/thanh-toan?trang=' + ${i} + ${chuoiLoc}}" th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${ketQua.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/thanh-toan?trang=' + ${ketQua.number + 1} + ${chuoiLoc}}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <p class="small text-secondary mt-3 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Tổng thu tính trên <strong>toàn bộ</strong> kết quả lọc, không phải trang đang xem.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

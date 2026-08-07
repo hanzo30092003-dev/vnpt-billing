@@ -8,9 +8,6 @@ import com.hanzo.billing.entity.KyCuoc;
 import com.hanzo.billing.entity.ThueBao;
 import com.hanzo.billing.enums.LoaiThueBao;
 import com.hanzo.billing.enums.TrangThaiHoaDon;
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,14 +46,7 @@ class HoaDonPdfServiceTest {
     }
 
     private static String trichVanBan(byte[] noiDung) throws IOException {
-        try (PDDocument taiLieu = Loader.loadPDF(noiDung)) {
-            PDFTextStripper boTrich = new PDFTextStripper();
-            // Sắp theo vị trí trên trang để văn bản trích ra đúng thứ tự đọc. Mặc định
-            // PDFBox trả theo thứ tự lệnh vẽ trong file, nên chân trang và các khối vẽ
-            // bằng ColumnText có thể nhảy lên đầu chuỗi.
-            boTrich.setSortByPosition(true);
-            return boTrich.getText(taiLieu);
-        }
+        return TrichVanBanPdf.trich(noiDung);
     }
 
     // =================================================================
