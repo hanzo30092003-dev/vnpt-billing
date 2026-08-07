@@ -34,11 +34,15 @@ Nạp lại dữ liệu mẫu — **XOÁ SẠCH CSDL** (`schema.sql` mở đầu
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-Chạy test (148 test, cần MySQL đang chạy):
+Chạy test (246 test, cần MySQL đang chạy):
 
 ```bash
 mvnw test
 ```
+
+> Từ Phase 5 mục F, `reset` **tái lập đúng** bộ dữ liệu mà báo cáo mô tả chứ không còn xoá
+> sổ nó: `db/data-van-hanh.sql` chứa bản dump của CDR, hóa đơn, thanh toán và sổ cái. File đó
+> do máy sinh — **sửa tay là sai**, phải dump lại từ CSDL.
 
 Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định `root`) và `MYSQL_PASSWORD` —
 **không** ghi mật khẩu vào mã nguồn.
@@ -114,7 +118,7 @@ Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định 
 
 ## Tiến độ
 
-Phase 0–4 ✅ · **đang vào Phase 5**.
+Phase 0–5 ✅ · **đang vào Phase 6**.
 
 | Phase | Nội dung | Báo cáo |
 |---|---|---|
@@ -123,26 +127,29 @@ Phase 0–4 ✅ · **đang vào Phase 5**.
 | 2 | Xác thực, khách hàng, thuê bao | `docs/PHASE-2-REPORT.md` |
 | 3 | Gói cước, bảng giá, CDR, kỳ cước | `docs/PHASE-3-REPORT.md` |
 | 4 | Engine tính cước (rating + billing) | `docs/PHASE-4-PLAN.md` · `docs/PHASE-4-REPORT.md` |
-| 5 | Hóa đơn, thanh toán, công nợ | 🔄 `docs/PHASE-5-PLAN.md` · `docs/PHASE-5-REPORT.md` |
-| 6 | Báo cáo, thống kê, dashboard | ⏳ |
+| 5 | Hóa đơn, thanh toán, công nợ | `docs/PHASE-5-PLAN.md` · `docs/PHASE-5-REPORT.md` |
+| 6 | Báo cáo, thống kê, dashboard | 🔄 |
 | 7 | Hoàn thiện, kiểm thử, tài liệu | ⏳ |
 
-**Dữ liệu hiện tại:** 8.714 CDR (tất cả `DA_TINH`) · 112 hóa đơn (54 kỳ 5 + 58 kỳ 6, tất cả
-`CHUA_TT`) · 264 chi tiết hóa đơn · 34 dòng `bien_dong_so_du` (18 mở sổ + 16 trừ cước kỳ 6) ·
-`thanh_toan`/`giam_tru` vẫn rỗng · kỳ 5/2026 `DA_CHOT`, kỳ 6/2026 `MO`.
+**Dữ liệu hiện tại:** 8.714 CDR (tất cả `DA_TINH`) · 112 hóa đơn (54 kỳ 5 + 58 kỳ 6) · 266 chi
+tiết hóa đơn · **48 thanh toán** (toàn bộ kỳ 5) · 34 dòng `bien_dong_so_du` (18 mở sổ + 16 trừ
+cước kỳ 6) · 2 giảm trừ `DA_AP_DUNG` · kỳ 5/2026 `DA_CHOT`, kỳ 6/2026 `MO`.
 
-**Phase 5 đã làm** (mục A–F chưa được giao): A0 rà số liệu tài liệu · G1 sổ cái
-`bien_dong_so_du` (đổi tên từ `nap_tien`, +18 dòng mở sổ `DIEU_CHINH`) · G2
-`TruCuocTraTruocService` + hoàn tác · G3 dự đoán 7/7 đúng · G4 giao diện. Kỳ 6 đã trừ
-**1.991.417 đ** cho 16 thuê bao; kỳ 5 **chưa** trừ và sẽ bị chặn vì không giao hoán.
+Tiền: doanh thu **45.117.767 đ**, đã thu **15.117.474 đ**, còn nợ **30.000.293 đ**.
+Kỳ 5 phân bố 32 `DA_TT` / 8 `TT_MOT_PHAN` / 14 `QUA_HAN`; kỳ 6 toàn bộ 58 `QUA_HAN`.
+Chi tiết bàn giao: `PHASE-5-REPORT.md` mục 31.
 
-**Còn nợ từ Phase 4:** chuyển 54 hóa đơn quá hạn kỳ 5 (hạn 15/06/2026) sang `QUA_HAN`; và
-`huyBillingKy` từ chối xoá hóa đơn khi kỳ đã có thanh toán ⇒ tạo thanh toán ở **kỳ 5** trước,
-giữ kỳ 6 linh hoạt để demo.
-
-**Ràng buộc mới sinh ra ở mục G — đừng phá:**
+**Ràng buộc sinh ra ở Phase 5 — đừng phá:**
 
 * Bất biến sổ cái `so_du = SUM(nạp + điều chỉnh) − SUM(trừ)` đúng với **mọi** thuê bao;
   `KiemTraSoCaiSoDuTest` kiểm sau mỗi thay đổi. Sửa thẳng `thue_bao.so_du` mà không ghi sổ là vi phạm.
+* Bất biến thanh toán `con_no = tong_thanh_toan − da_thanh_toan` và
+  `da_thanh_toan = SUM(thanh_toan.so_tien)` đúng với **mọi** hóa đơn;
+  `KiemTraBatBienThanhToanTest` kiểm. `ThanhToanService` là nơi ghi **duy nhất**.
+* Quét quá hạn **chỉ chạm hóa đơn chưa thu đồng nào**. Bỏ điều kiện đó thì `TT_MOT_PHAN` thành
+  trạng thái không thể tồn tại sau ngày hết hạn — xem báo cáo mục 23.2.
 * Quy tắc dấu chỉ nằm trong enum `LoaiBienDongSoDu`, không chép ra chỗ khác.
 * Trừ cước **không giao hoán theo kỳ**; `huyRatingKy` bị chặn khi kỳ đã trừ cước.
+* **Kỳ 6 phải giữ 0 giao dịch thanh toán.** Có thanh toán là `huyBillingKy` từ chối xoá hóa
+  đơn, và mất luôn kỳ duy nhất còn demo được trọn vòng huỷ → lập lại.
+* `db/data-van-hanh.sql` là **bản dump**, không phải file soạn tay — sửa qua service rồi dump lại.

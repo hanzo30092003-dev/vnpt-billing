@@ -336,8 +336,23 @@ INSERT INTO bien_dong_so_du
 (18, 20, 'DIEU_CHINH',  20000, 0,  20000, NULL, NULL, '2025-03-07 00:00:00', NULL);
 
 -- ---------------------------------------------------------------------
--- 10. CHUA tao du lieu cho cac bang sau - thuoc pham vi cac phase ke tiep:
---    chi_tiet_su_dung (CDR)  -> Phase 3
---    hoa_don, chi_tiet_hoa_don, thanh_toan -> Phase 4, 5
---    giam_tru, nhat_ky_he_thong -> phat sinh trong van hanh
+-- 10. HET PHAN DU LIEU GOC - phan van hanh nam o file ke tiep
+-- ---------------------------------------------------------------------
+-- File nay dung lai o day. Toan bo ket qua van hanh - chi_tiet_su_dung
+-- (CDR), hoa_don, chi_tiet_hoa_don, thanh_toan, giam_tru va cac dong
+-- TRU_CUOC cua bien_dong_so_du - nam trong db/data-van-hanh.sql, chay
+-- ngay sau file nay.
+--
+-- Ranh gioi giua hai file la ranh gioi ve NGUON GOC, khong phai ve chu de:
+--   file nay             nguoi viet ra, doc va sua tay duoc
+--   data-van-hanh.sql    may sinh ra qua dung duong code nghiep vu, la ban
+--                        dump - sua tay la sai, phai dump lai tu CSDL
+--
+-- Truoc muc F cua Phase 5, phan van hanh khong duoc luu o dau ca: no chi
+-- ton tai trong CSDL dang chay, nen moi lan "reset" la mat sach va sinh
+-- lai ra bo so hoan toan khac (bo sinh CDR khong co hat giong co dinh).
+--
+-- Bang nhat_ky_he_thong CO Y de trong: no la vet thao tac cua nguoi dung,
+-- tai lap lai vet do trong du lieu mau la dung ra mot lich su khong ai
+-- thuc hien.
 -- ---------------------------------------------------------------------

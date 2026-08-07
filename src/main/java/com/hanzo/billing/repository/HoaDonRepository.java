@@ -119,17 +119,30 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Long> {
     Optional<HoaDon> timKemQuanHe(@Param("id") Long id);
 
     /**
-     * Hóa đơn cần chuyển sang {@code QUA_HAN}: quá hạn thanh toán mà vẫn còn nợ.
+     * Hóa đơn cần chuyển sang {@code QUA_HAN}: quá hạn thanh toán mà <b>chưa thu được đồng
+     * nào</b>.
      *
      * <p>⚠️ Điều kiện {@code trangThai <> DA_TT} là bắt buộc chứ không thừa. Một hóa đơn đã
      * thu đủ thì {@code con_no = 0} nên tự nhiên rơi ra ngoài, nhưng viết rõ ra để ý định
      * "không bao giờ ghi đè DA_TT" nằm ngay trong truy vấn thay vì phụ thuộc vào một suy
      * luận gián tiếp.</p>
+     *
+     * <p>⭐ <b>Điều kiện {@code da_thanh_toan = 0} thêm ở mục F, và nó sửa một lỗi thật.</b>
+     * Bản đầu chỉ loại {@code DA_TT}, nên hóa đơn <b>trả một phần</b> quá hạn cũng bị quét
+     * về {@code QUA_HAN}. Hệ quả: {@code TT_MOT_PHAN} là một trạng thái <i>không thể tồn
+     * tại</i> khi hạn đã qua — mọi hóa đơn trả dở đều bị xoá dấu vết "đã thu được một phần"
+     * ngay lần kế tiếp có ai đó mở màn hình hóa đơn hoặc công nợ.</p>
+     *
+     * <p>Ranh giới đúng: quét đổi trạng thái của <b>tiền</b> chỉ được phép ghi đè khi chưa
+     * có đồng tiền nào đi vào. Thông tin "đã quá hạn" của hóa đơn trả dở <b>không mất</b> —
+     * màn hình công nợ suy nó từ {@code han_thanh_toan} qua cột <i>số ngày quá hạn</i> và
+     * {@link com.hanzo.billing.enums.NhomTuoiNo}, độc lập hoàn toàn với cột trạng thái.</p>
      */
     @Query("""
             SELECT h FROM HoaDon h
             WHERE h.hanThanhToan < :homNay
               AND h.conNo > 0
+              AND (h.daThanhToan IS NULL OR h.daThanhToan = 0)
               AND h.trangThai <> com.hanzo.billing.enums.TrangThaiHoaDon.DA_TT
               AND h.trangThai <> com.hanzo.billing.enums.TrangThaiHoaDon.QUA_HAN
             """)

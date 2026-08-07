@@ -120,11 +120,26 @@ mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 >
 > Profile này bật `spring.sql.init.mode=always`, khiến `schema.sql` chạy lại. File đó
 > mở đầu bằng `DROP TABLE IF EXISTS` cho cả 15 bảng, nên mọi khách hàng, thuê bao,
-> giao dịch bạn đã nhập qua giao diện đều **mất sạch** và CSDL trở về đúng bộ dữ liệu
-> mẫu ban đầu (50 khách hàng / 80 thuê bao / 5 gói cước).
+> giao dịch bạn đã nhập qua giao diện đều **mất sạch**.
 >
 > Chỉ dùng khi bạn **chủ đích** muốn làm mới CSDL, ví dụ trước khi demo hoặc khi dữ
 > liệu thử nghiệm đã lộn xộn.
+
+Hai file dữ liệu chạy nối tiếp nhau, và ranh giới giữa chúng là ranh giới về **nguồn gốc**:
+
+| File | Nội dung | Nguồn gốc |
+|---|---|---|
+| `db/data-mau.sql` | 3 tài khoản · 50 khách hàng · 80 thuê bao · 5 gói cước · 10 dòng bảng giá · 3 kỳ cước · 18 dòng mở sổ số dư | Viết tay — sửa được |
+| `db/data-van-hanh.sql` | 8.714 CDR đã định giá · 112 hóa đơn · 266 chi tiết · 48 thanh toán · 16 dòng trừ cước · 2 giảm trừ | **Bản dump** do máy sinh |
+
+> ℹ️ **Từ Phase 5 mục F, `reset` TÁI LẬP đúng bộ dữ liệu mà báo cáo mô tả.** Trước đó
+> `data-mau.sql` không chứa hóa đơn nào, mà `CdrGeneratorService` lại dùng `new Random()`
+> không hạt giống — nên `reset` sinh ra một bộ số hoàn toàn khác và làm mọi con số trong
+> `PHASE-4-REPORT.md` / `PHASE-5-REPORT.md` mất khả năng tái lập.
+>
+> ⚠️ `data-van-hanh.sql` **không phải file soạn tay.** Muốn đổi dữ liệu vận hành thì đổi qua
+> giao diện hoặc qua service rồi dump lại cả file — sửa tay một con số trong đó là dựng ra
+> nguồn sự thật thứ hai cạnh đoạn mã sinh ra nó.
 
 ### 4.3. Chạy kiểm thử
 
@@ -132,13 +147,16 @@ mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 mvnw test
 ```
 
-Hiện có **164 test**. Ba lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
-với schema thật, `KiemTraDoPhuBangGiaTest` và `KiemTraSoCaiSoDuTest` kiểm bất biến trên dữ
-liệu thật); các lớp còn lại chạy độc lập không cần CSDL.
+Hiện có **246 test**. Bốn lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
+với schema thật; `KiemTraDoPhuBangGiaTest`, `KiemTraSoCaiSoDuTest` và
+`KiemTraBatBienThanhToanTest` kiểm bất biến trên dữ liệu thật); các lớp còn lại chạy độc lập
+không cần CSDL.
+
+> ⚠️ **Dừng ứng dụng trước khi chạy `mvnw test`** — bộ test chạy trên CSDL thật.
 
 > ⚠️ Dòng phân rã theo lớp có thể in ra `Tests run: 0 ... in Ma trận chuyển trạng thái thuê bao`.
 > Đó là cách Surefire đếm lớp `@Nested`, **không phải lỗi** — con số đúng nằm ở dòng tổng
-> `Results: Tests run: 148`.
+> `Results: Tests run: 246`.
 
 ### 4.4. Chạy engine tính cước
 
@@ -191,7 +209,8 @@ vnpt-billing/
         ├── application.yml
         ├── db/
         │   ├── schema.sql               # script tạo bảng
-        │   └── data-mau.sql             # script chèn dữ liệu mẫu
+        │   ├── data-mau.sql             # dữ liệu gốc, viết tay
+        │   └── data-van-hanh.sql        # kết quả vận hành, bản dump do máy sinh
         ├── static/css/app.css
         └── templates/
             ├── index.html               # trang chủ

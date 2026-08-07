@@ -406,7 +406,7 @@ chưa có hóa đơn nào vẫn xuất hiện với giá trị 0.
 | `dang_ky_goi_cuoc` | 80 | Mỗi thuê bao một bản ghi `DANG_AP_DUNG` |
 | `ky_cuoc` | 3 | Tháng 5, 6, 7/2026 — đều khởi tạo ở trạng thái `MO` |
 | `bien_dong_so_du` | 18 | Dòng **mở sổ** cho 18 thuê bao trả trước có số dư > 0 — xem ghi chú dưới |
-| Các bảng còn lại | 0 | Phát sinh ở các phase sau |
+| `nhat_ky_he_thong` | 0 | Vết thao tác người dùng — cố ý không đưa vào dữ liệu mẫu |
 
 > **Vì sao có 18 dòng mở sổ.** Số dư mẫu được nạp thẳng vào `thue_bao.so_du`, không có dòng
 > sổ cái nào chống lưng, nên bất biến `so_du = SUM(nạp) − SUM(trừ)` sẽ **sai ngay từ đầu**
@@ -414,10 +414,34 @@ chưa có hóa đơn nào vẫn xuất hiện với giá trị 0.
 > 0 lên đúng giá trị mẫu, `ngay_ghi_nhan` lấy theo `ngay_kich_hoat` của chính thuê bao đó.
 > Hai thuê bao còn lại (id 8, 15) có số dư 0 nên không cần dòng mở sổ: `0 = 0 − 0`.
 
-> Bảng trên là nội dung **của script `data-mau.sql`**, tức trạng thái ngay sau khi chạy
-> profile `reset`. Dữ liệu CDR, hóa đơn và chi tiết hóa đơn **không** nằm trong script — chúng
-> được sinh ra lúc chạy, qua màn hình *Sinh dữ liệu CDR* và *Tính cước*. Trạng thái dữ liệu
-> đang có sau Phase 4 xem `PHASE-4-REPORT.md` mục 45.1.
+> Bảng trên là nội dung **của script `data-mau.sql`** — phần dữ liệu **gốc, viết tay**.
+
+### 4.1. Phần vận hành — `data-van-hanh.sql` (thêm ở Phase 5 mục F)
+
+Từ Phase 5 mục F, kết quả vận hành cũng được lưu thành script và chạy **ngay sau**
+`data-mau.sql`:
+
+| Bảng | Số bản ghi | Ghi chú |
+|---|---|---|
+| `chi_tiet_su_dung` | 8.714 | 3.697 kỳ 5 + 5.017 kỳ 6, tất cả `DA_TINH` |
+| `hoa_don` | 112 | 54 kỳ 5 + 58 kỳ 6 |
+| `chi_tiet_hoa_don` | 266 | 264 dòng cước + 2 dòng "Giảm trừ" thành tiền âm |
+| `thanh_toan` | 48 | Toàn bộ thuộc kỳ 5 — kỳ 6 cố ý để trống |
+| `bien_dong_so_du` | +16 | Dòng `TRU_CUOC` kỳ 6, cộng với 18 dòng mở sổ ở trên là 34 |
+| `giam_tru` | 2 | Cả hai `DA_AP_DUNG` cho kỳ 6 |
+
+Ranh giới giữa hai file là ranh giới về **nguồn gốc**, không phải về chủ đề: `data-mau.sql` do
+người viết ra và sửa tay được; `data-van-hanh.sql` là **bản dump** các dòng thực tế sau khi
+chạy trọn các bước nghiệp vụ qua đúng đường code — sửa tay nó là dựng ra nguồn sự thật thứ hai
+cạnh đoạn mã sinh ra nó.
+
+> **Vì sao phải có file thứ hai.** Trước mục F, toàn bộ phần vận hành chỉ tồn tại trong CSDL
+> đang chạy. Mà `CdrGeneratorService` dùng `new Random()` **không hạt giống**, nên chạy `reset`
+> rồi sinh lại CDR sẽ ra một bộ số khác hẳn — tức `reset` không phải "nạp lại dữ liệu mẫu" mà
+> là **xoá sổ** bộ dữ liệu mà `PHASE-4-REPORT.md` và `PHASE-5-REPORT.md` dựa vào. Chi tiết:
+> `PHASE-5-REPORT.md` mục 23.1.
+
+Trạng thái bàn giao đầy đủ cho Phase 6 xem `PHASE-5-REPORT.md` mục 31.
 
 **Số dư thuê bao trả trước** (điều chỉnh ở Phase 4F): 15 thuê bao có 200.000–500.000 đ,
 3 thuê bao cố ý để thấp khoảng 20.000 đ để Phase 5 có trường hợp *"số dư không đủ"*, và
@@ -442,9 +466,9 @@ thử nghiệm tính cước theo tỷ lệ ngày (prorate) ở Phase 4.
 
 ### 5.1. Script khởi tạo chỉ chạy khi được yêu cầu
 
-`application.yml` đặt `spring.sql.init.mode: never` **từ Phase 2**, nên `schema.sql` và
-`data-mau.sql` **không** chạy lại ở mỗi lần khởi động và dữ liệu nhập qua giao diện được giữ
-nguyên.
+`application.yml` đặt `spring.sql.init.mode: never` **từ Phase 2**, nên `schema.sql`,
+`data-mau.sql` và `data-van-hanh.sql` **không** chạy lại ở mỗi lần khởi động và dữ liệu nhập
+qua giao diện được giữ nguyên.
 
 Muốn nạp lại bộ dữ liệu mẫu từ đầu thì chạy với profile `reset`:
 

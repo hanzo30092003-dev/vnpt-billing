@@ -1,7 +1,13 @@
 # BÁO CÁO PHASE 5 — HÓA ĐƠN, THANH TOÁN, CÔNG NỢ
 
-> Báo cáo đang xây dựng. Mục A–F chưa được giao; hiện có mục A0 và mục G.
-> Kế hoạch và ba ràng buộc bắt buộc: [`PHASE-5-PLAN.md`](PHASE-5-PLAN.md).
+> Phase 5 đã xong toàn bộ mục A0, A–F và G. Kế hoạch và ba ràng buộc bắt buộc:
+> [`PHASE-5-PLAN.md`](PHASE-5-PLAN.md).
+>
+> ⚠️ **Nợ tài liệu:** báo cáo này chưa có phần viết cho **mục A, B, C, D** — bốn mục đã làm và
+> đã commit nhưng Phần IV mở đầu thẳng ở mục E. Xem [mục 35](#35-nợ-tài-liệu-của-phase-5).
+>
+> **Bố cục:** mục 1 (A0) · Phần I–III (mục G) · Phần IV (mục E) · Phần V (mục F) ·
+> Phần VI (tổng kết Phase 5, bàn giao Phase 6).
 
 ---
 
@@ -516,3 +522,507 @@ khai cùng lúc.
 | 4 | Tỷ lệ quy thành tiền đúng một lần lúc lập hóa đơn | ✅ đã có từ 4C, mục 21 |
 | 5 | Kiểm chứng end-to-end khớp con số công bố trước | ✅ **13/13**, mục 20 |
 | — | `mvnw test` | ✅ **242 test**, 0 lỗi |
+
+---
+
+# PHẦN V — MỤC F: DỮ LIỆU THANH TOÁN MẪU KỲ 5/2026
+
+## 23. ⭐ Hai tiền đề của đặc tả không đúng — phát hiện trước khi viết dòng code nào
+
+Đặc tả mục F đưa ra hai giả định, và **cả hai đều sai** khi đo trên kho mã thật. Đây là phần
+đáng ghi lại nhất của mục F, vì nếu làm theo đặc tả từng chữ thì kết quả sẽ là *"chạy xong,
+nhìn có vẻ đúng, và hỏng ngay lần đầu có người mở màn hình"*.
+
+### 23.1. `data-mau.sql` không có lấy một dòng hóa đơn
+
+Đặc tả yêu cầu *"dump các dòng thực tế trong `thanh_toan` cùng các cột đã đổi của `hoa_don`"*
+rồi *"chạy profile `reset` → kiểm lại bất biến trên 112 hóa đơn"*. Câu thứ hai chỉ có nghĩa
+nếu sau `reset` còn 112 hóa đơn.
+
+Đo lại:
+
+```
+$ grep -c "INSERT INTO \(hoa_don\|chi_tiet_su_dung\|thanh_toan\)" data-mau.sql
+0
+```
+
+Mục 10 của chính `data-mau.sql` nói thẳng điều đó: *"CHUA tao du lieu cho cac bang sau …
+hoa_don, chi_tiet_hoa_don, thanh_toan → Phase 4, 5"*. Toàn bộ 8.714 CDR và 112 hóa đơn chỉ
+tồn tại **trong CSDL đang chạy**, do Phase 3–5 sinh ra qua giao diện.
+
+Hệ quả nặng hơn nhiều so với việc một tiêu chí không kiểm được:
+
+| | |
+|---|---|
+| `CdrGeneratorService` dùng | `new Random()` — **không hạt giống** |
+| Nên chạy `reset` rồi sinh lại CDR sẽ ra | bộ dữ liệu **khác hẳn** |
+| Nghĩa là `reset` không phải "nạp lại dữ liệu mẫu" mà là | **xoá sổ** bộ dữ liệu mà cả `PHASE-4-REPORT.md` lẫn `PHASE-5-REPORT.md` dựa vào |
+
+Dự án đã **né** profile `reset` hai lần vì đúng lý do này mà chưa lần nào gọi tên nó: mục 4D
+ghi *"áp bằng `ALTER TABLE` chứ không dùng profile reset: reset sẽ sinh lại CDR ngẫu nhiên và
+làm mất khả năng đối chiếu"*, mục G1 lặp lại nguyên câu đó. Hai lần đi vòng quanh một cái bẫy
+là dấu hiệu cái bẫy cần được lấp, không phải cần đi vòng lần thứ ba.
+
+**Xử lý:** thêm `db/data-van-hanh.sql` — bản dump của toàn bộ trạng thái vận hành — và nạp nó
+ngay sau `data-mau.sql`. Ranh giới giữa hai file là ranh giới về **nguồn gốc**, không phải về
+chủ đề:
+
+| File | Nguồn gốc | Sửa tay |
+|---|---|---|
+| `data-mau.sql` | người viết ra | ✅ được |
+| `data-van-hanh.sql` | máy sinh ra qua đường code nghiệp vụ | ❌ phải dump lại từ CSDL |
+
+Từ đây `reset` **tái lập** đúng bộ dữ liệu mà báo cáo mô tả, thay vì phá nó.
+
+### 23.2. `TT_MOT_PHAN` là trạng thái không thể tồn tại sau ngày hết hạn
+
+Đặc tả yêu cầu ~15% hóa đơn kỳ 5 ở trạng thái `TT_MOT_PHAN`. Đọc `timCanChuyenQuaHan` thì thấy
+điều đó **không thể xảy ra**:
+
+```java
+WHERE h.hanThanhToan < :homNay
+  AND h.conNo > 0
+  AND h.trangThai <> DA_TT
+  AND h.trangThai <> QUA_HAN     // ← TT_MOT_PHAN lọt vào đây
+```
+
+Hóa đơn trả một phần vẫn còn nợ, không phải `DA_TT`, không phải `QUA_HAN` ⇒ **bị quét về
+`QUA_HAN`**. Kỳ 5 hạn 15/06/2026, hôm nay 07/08/2026, và `capNhatQuaHan()` chạy mỗi lần có
+người mở `/hoa-don` hoặc `/cong-no`. Nghĩa là nhóm 15% sẽ biến mất ở lần mở màn hình đầu tiên,
+phân bố tụt xuống 60/0/40.
+
+Điều trớ trêu: chính javadoc của `suyRaTrangThai` (viết ở mục C) đã mô tả đúng cơ chế này —
+*"lịch chạy nền sẽ đưa nó lại về `QUA_HAN` nếu vẫn còn nợ sau hạn, nên không mất thông tin"* —
+mà không nhận ra hệ quả của nó là **dòng chữ ngay phía trên trở thành vô nghĩa**. Câu *"hóa
+đơn `QUA_HAN` trả một phần thì về `TT_MOT_PHAN`"* đúng trong khoảng vài mili giây, cho tới
+lần quét kế tiếp.
+
+**Xử lý đã chốt:** siết truy vấn để quét **chỉ chạm hóa đơn chưa thu đồng nào**.
+
+```java
+AND (h.daThanhToan IS NULL OR h.daThanhToan = 0)
+```
+
+Ranh giới đúng là: một phép quét đổi trạng thái **của tiền** chỉ được ghi đè khi chưa có đồng
+tiền nào đi vào. Và thông tin *"đã quá hạn"* của hóa đơn trả dở **không mất** — màn hình công
+nợ suy nó từ `han_thanh_toan` qua cột *số ngày quá hạn* và `NhomTuoiNo`, hoàn toàn độc lập với
+cột trạng thái. Kiểm chứng ở mục 29: 8 hóa đơn `TT_MOT_PHAN` vẫn nằm đủ trong nhóm tuổi nợ
+*"Quá hạn 31–60 ngày"*.
+
+## 24. Cách làm: cho dữ liệu đi qua đúng đường code
+
+Viết tay 54 câu `UPDATE` cho `da_thanh_toan` / `con_no` / `trang_thai` là làm đúng cái việc mà
+ràng buộc ② sinh ra để cấm — `ThanhToanService` là **nơi duy nhất** ghi ba cột đó. Một bộ dữ
+liệu mẫu lách qua nơi duy nhất ấy còn làm hỏng chính phép kiểm bất biến: nó sẽ chỉ xác nhận
+rằng bộ SQL viết tay tự nhất quán, chứ không xác nhận gì về mã nghiệp vụ.
+
+Cách làm lặp lại đúng cách mục 18.3 đã lấp hai cột `TRU_CUOC`:
+
+```
+lớp seed tạm  →  gọi ThanhToanService thật  →  kiểm bất biến  →  MỚI dump thành SQL  →  xoá lớp seed
+```
+
+Lớp seed là một test dùng một lần (`SinhThanhToanMauKy5Test`), đã **xoá sau khi dump**. Dự án
+có sẵn tiền lệ cho kiểu lớp này: `ChayTinhCuocKyThuCong`, `ChayLapHoaDonKyThuCong` và
+`ChayLaiToanBoKyThuCong` của Phase 4 cũng sinh ra để chạy một lần rồi xoá.
+
+**Hạt giống cố định `20260601`.** Mọi lựa chọn ngẫu nhiên lấy từ một `Random` duy nhất; thuật
+toán của `java.util.Random` và `Collections.shuffle` đều được đặc tả tường minh trong javadoc
+JDK nên chạy lại trên máy khác vẫn ra đúng bộ này. Không có hạt giống thì mọi con số dưới đây
+chỉ đúng cho đúng một lần chạy — đúng lỗi mà `CdrGeneratorService` đang mắc (mục 23.1).
+
+Chia nhóm bằng cách **xáo trộn rồi cắt**, không bốc xác suất từng hóa đơn: bốc xác suất cho ra
+số lượng dao động quanh 60/15/25 chứ không đúng bằng, và con số viết vào báo cáo khi đó phụ
+thuộc may rủi.
+
+| Nhóm | Công thức | Số hóa đơn |
+|---|---|---|
+| Trả đủ → `DA_TT` | `round(54 × 0,60)` | **32** |
+| Trả một phần 30–70% → `TT_MOT_PHAN` | `round(54 × 0,15)` | **8** |
+| Không trả → `QUA_HAN` | phần còn lại | **14** |
+
+Trong 32 hóa đơn trả đủ, cứ 4 hóa đơn có 1 hóa đơn **trả làm hai đợt** (8 hóa đơn) — để tab
+lịch sử thu tiền trên màn hình chi tiết có hóa đơn nhiều dòng để chụp ảnh, và để đường cộng
+dồn `da_thanh_toan += soTien` thật sự được đi qua chứ không chỉ được viết ra.
+
+## 25. ⭐ Kết quả
+
+48 giao dịch = 32 (trả đủ) + 8 (đợt 2) + 8 (trả một phần).
+
+| Chỉ tiêu kỳ 5/2026 | Giá trị |
+|---|---|
+| Tổng phát sinh | 21.289.162 đ |
+| **Tổng đã thu** | **15.117.474 đ** |
+| **Còn nợ** | **6.171.688 đ** |
+
+| Trạng thái | Số hóa đơn | Tỷ lệ | Đã thu | Còn nợ |
+|---|---|---|---|---|
+| `DA_TT` | **32** | **59,3%** | 13.833.535 đ | 0 đ |
+| `TT_MOT_PHAN` | **8** | **14,8%** | 1.283.939 đ | 1.607.961 đ |
+| `QUA_HAN` | **14** | **25,9%** | 0 đ | 4.563.727 đ |
+
+Ba hình thức thanh toán đều có mặt, phân bố 45/35/20 như đã đặt:
+
+| Hình thức | Giao dịch | Số tiền |
+|---|---|---|
+| Tiền mặt | 23 | 7.042.665 đ |
+| Chuyển khoản | 15 | 5.189.359 đ |
+| Ví điện tử | 10 | 2.885.450 đ |
+
+Ngày thu rải 01/06–20/06/2026, tức **có cả trước và sau hạn 15/06** — nhờ vậy dữ liệu mẫu
+minh hoạ được cả khách trả đúng hạn lẫn khách trả muộn. Người thu là `ketoan01` trên cả 48
+giao dịch.
+
+**Bằng chứng luật siết ở mục 23.2 có hiệu lực.** Lớp seed gọi `capNhatQuaHan()` hai lần, trước
+và sau khi thu tiền:
+
+| Lần gọi | Số hóa đơn bị chuyển |
+|---|---|
+| Trước khi thu | **112** (toàn bộ, cả hai kỳ đều đã quá hạn) |
+| Sau khi thu | **0** |
+
+Số 0 ở dòng thứ hai chính là thứ cần chứng minh: 8 hóa đơn `TT_MOT_PHAN` **không** bị quét lại.
+Với truy vấn cũ, con số đó sẽ là 8 và nhóm 14,8% biến mất.
+
+## 26. Bất biến tiêu chí 4 — kiểm bằng hai nguồn độc lập
+
+Câu SQL **nguyên văn** trong `PHASE-5-PLAN.md` ràng buộc ②, chạy trên toàn bộ 112 hóa đơn:
+
+```
+Số hóa đơn đã duyệt : 112
+Số dòng lệch        : 0
+```
+
+Ngoài ra, phép kiểm này giờ là **test thường trực** chứ không phải một câu SQL chạy tay:
+`KiemTraBatBienThanhToanTest` — 4 test chạy trên CSDL thật.
+
+| # | Nội dung |
+|---|---|
+| 1 | Mọi hóa đơn: `con_no = tong_thanh_toan − da_thanh_toan` |
+| 2 | Mọi hóa đơn: `da_thanh_toan = SUM(thanh_toan.so_tien)` |
+| 3 | Trạng thái khớp số còn nợ: `DA_TT` khi và chỉ khi `con_no = 0` |
+| 4 | ⭐ Không hóa đơn nào đã thu tiền mà bị quét về `QUA_HAN` — giữ luật mục 23.2 |
+
+Ràng buộc ② đòi chạy phép kiểm này **sau mỗi mục**. Từ mục A tới E nó đúng một cách **rỗng**
+vì bảng `thanh_toan` không có dòng nào — mà một bất biến chưa từng có dữ liệu để kiểm thì chưa
+chứng minh được gì (bài học 43.5). Mục F là lúc nó có việc thật, và test 4 là chỗ nó bắt được
+một luật đã suýt bị đảo ngược.
+
+## 27. ⭐ Kết tinh thành SQL — và bằng chứng nó tương đương đường code
+
+`data-van-hanh.sql`: **1.107.256 byte**, 264 dòng, 72 câu `INSERT` + 4 câu `UPDATE`.
+
+| Mục | Bảng | Số dòng |
+|---|---|---|
+| 1 | `chi_tiet_su_dung` | 8.714 |
+| 2 | `giam_tru` | 2 |
+| 3 | `hoa_don` | 112 |
+| 4 | `chi_tiet_hoa_don` | 266 |
+| 5 | `thanh_toan` | **48** |
+| 6 | `bien_dong_so_du` (`TRU_CUOC`) | 16 |
+| 7 | `UPDATE thue_bao.so_du` | áp sổ cái lên số dư |
+| 8 | `UPDATE ky_cuoc` | trạng thái và số liệu tổng hợp |
+
+Hai chỗ **cố ý không chép số tuyệt đối**:
+
+- **`thue_bao.so_du`** suy từ chính sổ cái nằm ngay phía trên bằng một câu `UPDATE … JOIN`.
+  Viết 16 con số tuyệt đối là tạo ra cơ hội cho chúng lệch khỏi sổ cái; câu lệnh này không thể
+  lệch, vì nó **chính là** phép tính mà bất biến G1 đòi hỏi.
+- **`nhat_ky_he_thong`** để trống. Nó là vết thao tác của người dùng; tái lập vết đó trong dữ
+  liệu mẫu là dựng ra một lịch sử không ai thực hiện.
+
+### 27.1. Bằng chứng: so từng dòng, không so số tổng
+
+Chạy `reset` rồi so **ảnh chụp toàn bộ CSDL** trước và sau:
+
+| | |
+|---|---|
+| Ảnh chụp từ đường code (sau khi seed) | 9.455 dòng |
+| Ảnh chụp sau khi chạy `reset` | 9.455 dòng |
+| **Khác biệt** | **0** |
+
+Không phải *"số dòng bằng nhau"* mà là **giống hệt từng dòng một** trên cả 14 bảng — đúng
+chuẩn làm việc 43.3. Bất biến tiêu chí 4 chạy lại trên CSDL vừa dựng: **0 lệch / 112 hóa đơn**.
+Bất biến sổ cái G1 cũng vậy: **0 lệch / 80 thuê bao**.
+
+Phép so này được chạy **ba lần**, và lần thứ ba là lần có giá trị nhất:
+
+| Lần | Sau việc gì | Kết quả |
+|---|---|---|
+| 1 | `reset` lần đầu | 0 khác biệt |
+| 2 | `reset` sau khi đã huỷ + lập lại hóa đơn kỳ 6 | 0 khác biệt |
+| 3 | **Sau khi chạy trọn 246 test** | 0 khác biệt |
+
+Lần 3 khẳng định thêm một điều không hiển nhiên: bộ test chạy trên CSDL thật nhưng **không để
+lại dấu vết nào** trên dữ liệu mẫu.
+
+## 28. Ràng buộc kỳ 6 — kiểm bằng đối chứng, không chỉ bằng phép đếm
+
+| Phép kiểm | Kết quả |
+|---|---|
+| Số giao dịch thanh toán của kỳ 6 | **0** |
+| Huỷ hóa đơn **kỳ 5** | ❌ **bị chặn** — 54 hóa đơn còn nguyên |
+| Huỷ hóa đơn **kỳ 6** | ✅ chạy được — còn 0 hóa đơn, 2/2 khoản giảm trừ trả về `CHUA_AP_DUNG` |
+| Lập lại kỳ 6 | ✅ **58 hóa đơn, 23.828.605 đ** — đúng từng đồng con số cũ |
+| Bất biến tiêu chí 4 sau vòng huỷ/lập | ✅ 0 lệch / 112 |
+
+Dòng thứ hai là **đối chứng**, và nó quan trọng ngang dòng thứ ba: nếu chỉ kiểm *"kỳ 6 huỷ
+được"* thì phép kiểm vẫn xanh ngay cả khi chốt chặn đã hỏng hoàn toàn. Phải cho thấy chốt chặn
+**có** chặn ở nơi đáng chặn thì mới biết nó còn sống.
+
+Đây cũng là lần thứ năm tính xác định của engine được chứng minh, và là lần đầu chứng minh
+trong lúc **một kỳ khác đã có thanh toán**.
+
+Cách kiểm cố ý **không đọc chuỗi thông báo lỗi** mà đọc **hậu quả** (số hóa đơn còn lại). Đọc
+chuỗi thì phép kiểm gắn vào câu chữ tiếng Việt — câu chữ đổi là phép kiểm đỏ oan, mà đỏ oan
+thì lần sau không ai tin nó nữa (bài học 43.5).
+
+## 29. Màn hình công nợ và bảng tuổi nợ
+
+`scripts/test-muc-F.ps1` — **17 phép kiểm, 17 đạt**. Mọi con số đọc trên màn hình đều được đối
+chiếu chéo bằng một câu SQL độc lập, thay vì tin vào chính cái màn hình đang kiểm.
+
+| Chỉ tiêu | Màn hình | SQL độc lập |
+|---|---|---|
+| Tổng công nợ | 30.000.293 đ | 30.000.293 đ ✅ |
+| Số hóa đơn còn nợ | 80 | 80 ✅ |
+| Nhóm *Quá hạn 1–30 ngày* | 23.828.605 đ | 58 hóa đơn kỳ 6 ✅ |
+| Nhóm *Quá hạn 31–60 ngày* | 6.171.688 đ | 22 hóa đơn kỳ 5 ✅ |
+
+Con số 22 của nhóm 31–60 ngày là **14 `QUA_HAN` + 8 `TT_MOT_PHAN`** — bằng chứng cụ thể cho
+lập luận ở mục 23.2: 8 hóa đơn trả dở vẫn được xếp đúng nhóm tuổi nợ dù cột trạng thái của
+chúng không còn ghi chữ *"Quá hạn"*. Thông tin quá hạn nằm ở ngày, không nằm ở enum.
+
+### 29.1. Hạn chế đã biết: chỉ 2 trong 5 nhóm tuổi nợ có nội dung
+
+Hệ thống mới có hai kỳ cước, hạn 15/06 và 15/07/2026. So với mốc 07/08/2026 thì chúng cách 53
+và 23 ngày, rơi đúng vào hai nhóm giữa. Ba nhóm *Trong hạn*, *61–90 ngày* và *trên 90 ngày*
+**rỗng**, và đó là sự thật số học chứ không phải lỗi.
+
+Làm cho chúng có nội dung đòi hỏi bịa thêm một kỳ cước cũ hơn hoặc sửa `han_thanh_toan` — cả
+hai đều là **dựng dữ liệu cho khớp ảnh chụp**, đúng loại lỗi mà mục 10.1 đã phê phán ở 4F. Ghi
+lại thành nợ cho Phase 6: nếu cần biểu đồ aging đủ 5 cột thì phải thêm một kỳ cước thật.
+
+## 30. Nghiệm thu mục F
+
+| # | Tiêu chí | Kết quả |
+|---|---|---|
+| 1 | `mvnw test` PASS, không giảm số test | ✅ **246 test** (242 → 246), 0 lỗi, BUILD SUCCESS |
+| 2 | Bất biến 0 lệch trên 112 hóa đơn, trước **và** sau `reset` | ✅ 0 lệch cả hai lần; thêm so từng dòng 9.455/9.455 |
+| 3 | Kỳ 5 phân bố ≈ 60/15/25, có hóa đơn `QUA_HAN` | ✅ **59,3 / 14,8 / 25,9** — 14 hóa đơn `QUA_HAN` |
+| 4 | Kỳ 6: 0 thanh toán, vẫn huỷ được hóa đơn | ✅ 0 giao dịch; huỷ + lập lại ra đúng 58 hóa đơn / 23.828.605 đ |
+| 5 | Màn hình công nợ và biểu đồ aging có dữ liệu thật | ✅ 30.000.293 đ / 80 hóa đơn; 2/5 nhóm có nội dung — xem 29.1 |
+
+---
+
+# PHẦN VI — TỔNG KẾT PHASE 5
+
+## 31. Bàn giao cho Phase 6
+
+### 31.1. Trạng thái dữ liệu
+
+| Bảng | Số bản ghi | Ghi chú |
+|---|---|---|
+| `khach_hang` · `thue_bao` · `goi_cuoc` | 50 · 80 · 5 | Không đổi từ Phase 1 |
+| `bang_gia_cuoc` | 10 | Không đổi từ 4A |
+| `ky_cuoc` | 3 | **5/2026 đã chốt** · **6/2026 mở** · 7/2026 chưa dùng |
+| `chi_tiet_su_dung` | **8.714** | 3.697 kỳ 5 + 5.017 kỳ 6, tất cả `DA_TINH` |
+| `hoa_don` | **112** | 54 kỳ 5 + 58 kỳ 6 — **không còn hóa đơn nào `CHUA_TT`** |
+| `chi_tiet_hoa_don` | **266** | 264 dòng cước + 2 dòng "Giảm trừ" thành tiền âm |
+| `thanh_toan` | **48** | Toàn bộ thuộc kỳ 5 — kỳ 6 **cố ý để trống** |
+| `bien_dong_so_du` | **34** | 18 dòng mở sổ `DIEU_CHINH` + 16 dòng `TRU_CUOC` kỳ 6 |
+| `giam_tru` | **2** | Cả hai `DA_AP_DUNG` cho kỳ 6 |
+| `nhat_ky_he_thong` | phát sinh khi vận hành | Cố ý không đưa vào dữ liệu mẫu |
+
+**Tiền — số liệu Phase 6 sẽ dựng báo cáo lên trên:**
+
+| Chỉ tiêu | Kỳ 5/2026 | Kỳ 6/2026 | Tổng |
+|---|---|---|---|
+| Doanh thu (tổng thanh toán) | 21.289.162 đ | 23.828.605 đ | **45.117.767 đ** |
+| Đã thu | **15.117.474 đ** | 0 đ | **15.117.474 đ** |
+| Còn nợ | **6.171.688 đ** | 23.828.605 đ | **30.000.293 đ** |
+| Tỷ lệ thu được | **71,0%** | 0% | 33,5% |
+| Giảm trừ | 0 đ | 101.810 đ | 101.810 đ |
+
+**Phân bố trạng thái hóa đơn** — dữ liệu cho biểu đồ tròn của dashboard Phase 6:
+
+| Trạng thái | Kỳ 5 | Kỳ 6 | Tổng |
+|---|---|---|---|
+| `DA_TT` | 32 | 0 | 32 |
+| `TT_MOT_PHAN` | 8 | 0 | 8 |
+| `QUA_HAN` | 14 | 58 | 72 |
+| `CHUA_TT` | 0 | 0 | 0 |
+
+**Bảng tuổi nợ tại mốc 07/08/2026:**
+
+| Nhóm | Số hóa đơn | Số tiền |
+|---|---|---|
+| Trong hạn | 0 | 0 đ |
+| Quá hạn 1–30 ngày | 58 | 23.828.605 đ |
+| Quá hạn 31–60 ngày | 22 | 6.171.688 đ |
+| Quá hạn 61–90 ngày | 0 | 0 đ |
+| Quá hạn trên 90 ngày | 0 | 0 đ |
+
+**Số dư trả trước:** 20 thuê bao, tổng còn **2.532.583 đ** sau khi trừ cước kỳ 6; **6** thuê
+bao dưới ngưỡng cảnh báo 50.000 đ (đếm theo đúng điều kiện của `timSoDuDuoiNguong`, tức đã
+loại thuê bao `DA_THANH_LY`).
+
+### 31.2. Bốn việc Phase 6 nhận từ Phase 5
+
+1. **Bộ dữ liệu giờ tái lập được.** Chạy `mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"`
+   là dựng lại **đúng** bộ số trong báo cáo này, không còn phải sinh lại CDR ngẫu nhiên. Đây là
+   thứ Phase 4 và mục G đều không có.
+2. **Hai view CSDL chưa ai dùng.** `v_thong_ke_thue_bao` và `v_doanh_thu_thang` có từ Phase 1,
+   `v_doanh_thu_thang` giờ đã có số thật (cả `da_thu` lẫn `con_no`). Phase 6 nên đọc chúng
+   thay vì viết truy vấn tổng hợp mới — hai cách tính là hai nguồn sự thật.
+3. **Kỳ 6 còn nguyên khả năng demo trọn vòng.** Không có giao dịch nào nên `huyBillingKy` vẫn
+   chạy. **Đừng ghi nhận thanh toán cho kỳ 6** nếu chưa chụp xong ảnh vòng huỷ/lập.
+4. **Nợ tài liệu:** báo cáo này **chưa có phần viết cho mục A, B, C, D**. Phần IV mở đầu bằng
+   mục 19 (mục E) mà không có mục nào trước đó — bốn mục ấy đã làm và đã commit nhưng chưa
+   được viết lại. Xem mục 35.
+
+### 31.3. Lưu ý khi đổi dữ liệu
+
+`data-van-hanh.sql` là **bản dump**, không phải file soạn tay. Muốn đổi dữ liệu vận hành thì
+đổi qua giao diện hoặc qua service rồi dump lại cả file — sửa tay một con số trong đó là dựng
+ra nguồn sự thật thứ hai cạnh đoạn mã sinh ra nó.
+
+## 32. Danh sách màn hình chụp ảnh cho toàn Phase 5
+
+Đăng nhập `admin`. **Nhóm 1** là các ảnh nên đưa vào phần trình bày chính.
+
+### Nhóm 1 — Ảnh bắt buộc ⭐
+
+| # | Màn hình | Cách lấy | Điểm cần thấy rõ |
+|---|---|---|---|
+| 1 | **Công nợ + biểu đồ tuổi nợ** | `/cong-no` | Tổng **30.000.293 đ / 80 hóa đơn**; biểu đồ có hai cột thật; bảng aging đủ 5 nhóm |
+| 2 | **Danh sách hóa đơn kỳ 5** | `/hoa-don?kyCuocId=2` | Đủ **ba** badge khác nhau: Đã thanh toán / Thanh toán một phần / Quá hạn |
+| 3 | **Chi tiết hóa đơn trả hai đợt** | `/hoa-don/307` | Tab lịch sử thu tiền có **2 dòng**; `đã thu` + `còn nợ` = `tổng thanh toán` |
+| 4 | **Chi tiết hóa đơn trả một phần** | Lọc `trangThai=TT_MOT_PHAN`, mở một hóa đơn | Còn nợ > 0 nhưng badge là *Thanh toán một phần*, **không** phải *Quá hạn* |
+| 5 | **Hóa đơn PDF** | Nút *Xuất PDF* trên ảnh 3 | Dấu tiếng Việt hiện đủ — bằng chứng font đã nhúng (mục 34.3) |
+| 6 | **Phiếu thu PDF** | `/thanh-toan` → một giao dịch → *In phiếu thu* | Số tiền bằng chữ; tiêu đề *PHIẾU THU TIỀN* liền mạch |
+| 7 | **Danh sách giao dịch thanh toán** | `/thanh-toan` | 48 giao dịch, đủ 3 hình thức, cột người thu là `ketoan01`, dòng tổng 15.117.474 đ |
+
+### Nhóm 2 — Chức năng và chốt chặn
+
+| # | Màn hình | Cách lấy | Điểm cần thấy rõ |
+|---|---|---|---|
+| 8 | Form ghi nhận thanh toán | `/thanh-toan/moi?hoaDonId=…` | Số còn nợ hiện sẵn để đối chiếu |
+| 9 | Chặn thu vượt số còn nợ | Nhập số tiền lớn hơn còn nợ | Thông báo *"vượt quá số còn nợ"* |
+| 10 | **Chặn huỷ hóa đơn kỳ đã thu tiền** | `/tinh-cuoc` → *Huỷ hóa đơn* kỳ 5 | Thông báo nêu rõ **48 giao dịch** — chốt chặn nói ra con số |
+| 11 | Huỷ + lập lại hóa đơn kỳ 6 | `/tinh-cuoc` → kỳ 6 | Ra đúng 58 hóa đơn / 23.828.605 đ |
+| 12 | Quản lý giảm trừ | `/giam-tru` | Hai khoản `DA_AP_DUNG`, một khai tiền một khai tỷ lệ |
+| 13 | Chặn khai cả tiền lẫn tỷ lệ | `/giam-tru/moi`, nhập cả hai | Thông báo từ `@AssertTrue` |
+| 14 | Đề xuất tạm ngừng vì nợ cước | `/cong-no`, khối cuối trang | Danh sách thuê bao quá ngưỡng, kèm ghi chú cảnh báo không chặn nghiệp vụ |
+| 15 | Biến động số dư | `/thue-bao/4` → tab *Biến động số dư* | Dòng `TRU_CUOC` 204.780 đ, số dư 205.000 → 220 đ, **10.446 đ** không thu được |
+| 16 | Cảnh báo số dư thấp | `/tinh-cuoc`, khối cuối trang | 6 thuê bao dưới ngưỡng, có icon và chữ chứ không chỉ màu |
+
+### Nhóm 3 — Minh chứng kỹ thuật
+
+| # | Ảnh | Cách lấy |
+|---|---|---|
+| 17 | **Kết quả 246 test** | Console `mvnw test`, phóng to dòng `Tests run: 246, Failures: 0` |
+| 18 | **Test bất biến thanh toán** | Chạy `KiemTraBatBienThanhToanTest`, 4 test xanh |
+| 19 | Test bất biến sổ cái số dư | Chạy `KiemTraSoCaiSoDuTest`, 2 test xanh |
+| 20 | **`test-muc-F.ps1` — 17 đạt / 0 sai** | `.\scripts\test-muc-F.ps1` khi app đang bật |
+| 21 | Lịch sử Git Phase 5 | `git log --oneline -12` |
+
+## 33. ⭐ Năm điểm sai lệch đặc tả phát hiện ở Phase 5
+
+| # | Ở đâu | Vấn đề | Xử lý |
+|---|---|---|---|
+| 1 | Kế hoạch G3 | Dự kiến *"≥ 3 thuê bao 18.000/20.000/22.000 đ hết số dư giữa chừng"*. Cả ba đều `TAM_NGUNG_1C` nên gần như không phát sinh cước — số dư thấp không bao giờ bị chạm tới | Đo lại, ca thật nằm ở thuê bao **4** với lý do ngược hẳn: lưu lượng cao. Ghi ở mục 10 |
+| 2 | Javadoc `tinhGiamTru` vs đặc tả E.2 | *"Khai cả hai thì số tiền tuyệt đối thắng"* chồng lên yêu cầu **chặn** khai cả hai | Giữ cả hai, nhánh cũ thành phòng thủ cho dữ liệu nhập thẳng bằng SQL. Mục 21.1 |
+| 3 | Đặc tả mục F | Giả định `data-mau.sql` có sẵn hóa đơn để `UPDATE`. Thực tế nó **không có dòng nào**, và `reset` là thao tác **xoá sổ** bộ dữ liệu của báo cáo | Thêm `data-van-hanh.sql`. Mục 23.1 |
+| 4 | Mục A vs đặc tả mục F | Quét quá hạn ghi đè cả hóa đơn trả một phần ⇒ `TT_MOT_PHAN` **không thể tồn tại** sau hạn, tiêu chí 15% không đạt được | Siết truy vấn còn hóa đơn chưa thu đồng nào. Mục 23.2 |
+| 5 | `scripts/_chung.ps1` từ Phase 2 | `Kiem-Tra` báo kết quả bằng `Write-Output` rồi bị `\| Out-Null` nuốt mất ⇒ phép kiểm **trượt** chỉ làm biến đếm tăng, không bao giờ nói trượt ở đâu | Đổi sang `Write-Host`. Mục 34.1 |
+
+## 34. ⭐ Bài học phương pháp Phase 5
+
+### 34.1. Bài học 43.5 — lần thứ ba và thứ tư, cùng một hình dạng
+
+Bài học 43.5 nói *"một phép kiểm sai nguy hiểm ngang thiếu phép kiểm"*. Phase 5 gặp lại nó
+**bốn** lần, và bốn lần đều ở dạng khác nhau:
+
+| Lần | Ở đâu | Phép kiểm sai thế nào |
+|---|---|---|
+| 1 (Phase 4) | Bảng đối soát | — |
+| 2 | Kiểm chốt chặn trừ cước (mục 15.1) | Script đọc flash attribute ở lần `GET` thứ hai, sau khi nó đã bị tiêu thụ ⇒ **báo động giả** |
+| 3 | `TrichVanBanPdf` — `setSortByPosition` | Bật sắp-theo-vị-trí để đọc PDF đẹp hơn, nhưng heuristic của nó chèn khoảng trắng giả vào giữa chữ in đậm cỡ lớn: `"PHIẾU THU TIỀN"` trích ra thành `"PHIẾU T HU TIỀN"` trong khi **bản in hoàn toàn bình thường** ⇒ **báo động giả** |
+| 4 | `_chung.ps1` + `test-tb.ps1` | Phép kiểm **trượt trong im lặng** |
+
+**Lần 3** đáng nhớ vì nếu tin phép kiểm thì sẽ đi sửa layout của một bản in đang đúng. Cách xử
+lý: bỏ hẳn `setSortByPosition` và giữ hành vi mặc định — thứ tự đọc không có giá trị gì với
+các khẳng định `contains`, nên bật nó lên chỉ mua thêm rủi ro mà không mua được gì.
+
+**Lần 4 là dạng nguy hiểm nhất vì nó ngược chiều ba lần trước.** Ba lần đầu là *báo động giả*
+— phép kiểm đỏ oan, gây khó chịu nhưng lộ ra ngay. Lần này là *im lặng oan*: `Kiem-Tra` vừa
+in kết quả vừa `return $true/$false`, mà trong PowerShell cả hai đi vào **cùng một luồng
+output**, nên `| Out-Null` ở mọi nơi gọi nuốt luôn dòng `[SAI ]`.
+
+Sửa xong một dòng (`Write-Output` → `Write-Host`) thì lộ ra ngay một phép kiểm **đã trượt từ
+mục G4**: `test-tb.ps1` còn dò tên tab cũ *"Lịch sử nạp tiền"* trong khi mục G4 đã đổi thành
+*"Biến động số dư"*. Nó trượt âm thầm qua toàn bộ mục G và mục A–E.
+
+Và phép kiểm đối xứng ngay dưới nó còn tệ hơn: `-KhongDuocCo @('Lịch sử nạp tiền')` cho thuê
+bao trả sau — sau khi chuỗi đó biến mất khỏi toàn bộ mã nguồn, phép kiểm này trở thành thứ
+**không bao giờ có thể đỏ**. Nó vẫn đếm là một phép kiểm đạt, và không kiểm gì cả.
+
+> **Rút ra:** một phép kiểm bám vào **chuỗi hiển thị** là một phép kiểm sẽ mục nát. `test-muc-F.ps1`
+> vì vậy bám vào `id`, `value` và đường dẫn — thứ không đổi khi câu chữ đổi — hoặc bám vào
+> **hậu quả đo được bằng SQL**, không bám vào thông báo.
+
+### 34.2. Đo tiền đề của đặc tả trước, đừng đo sau
+
+Cả hai vấn đề lớn nhất của mục F (23.1 và 23.2) đều **không phải lỗi cài đặt** — chúng là
+những câu đặc tả mô tả một kho mã không tồn tại. Cách phát hiện giống hệt nhau: trước khi viết
+dòng code nào, đọc lại chỗ mà đặc tả **giả định** là đã có, rồi chạy một câu lệnh kiểm.
+
+Chi phí: hai câu `grep` và một câu `SELECT`. Nếu bỏ qua, chi phí là chạy xong toàn bộ mục F,
+dump ra SQL, rồi mất sạch dữ liệu ở bước `reset` cuối cùng — với báo cáo Phase 4 mất theo.
+
+Đây là bài học 43.4 (*công bố dự đoán trước khi viết code*) áp cho một đối tượng khác: không
+chỉ dự đoán **kết quả**, mà kiểm cả **tiền đề**.
+
+### 34.3. Bản quyền font — một ràng buộc kỹ thuật đến từ ngoài kỹ thuật
+
+Mục B phải nhúng font vào PDF: PDF chỉ hiện đúng dấu tiếng Việt khi font được nhúng kèm bảng
+mã `Identity-H`. Dùng font Base14 có sẵn (Helvetica, Times) thì mọi ký tự có dấu ra ô vuông
+hoặc mất dấu — **và lỗi này không làm hỏng file**, PDF vẫn mở bình thường.
+
+Lựa chọn hiển nhiên là Times New Roman hoặc Arial trong `C:\Windows\Fonts`. Đó là lựa chọn
+**sai về pháp lý**: hai font đó do Monotype/Microsoft cấp phép và **không được phép phát hành
+lại**. Kho mã này đặt trên GitHub công khai, nên đóng gói chúng vào là vi phạm bản quyền.
+
+Đã dùng **Liberation Sans** trích từ chính jar `pdfbox:3.0.3`, giấy phép **SIL Open Font
+License 1.1** cho phép phát hành lại tự do kể cả kèm trong phần mềm. Độ phủ tiếng Việt đã kiểm
+bằng `Font.canDisplay` trên chuỗi mẫu đủ dấu, em-dash và ký hiệu đồng: **0 ký tự không hiển
+thị được**. Xuất xứ và lý do ghi trong `src/main/resources/fonts/NGUON-FONT.txt`.
+
+> Hai điều rút ra. Thứ nhất: **ràng buộc đến từ ngoài kỹ thuật vẫn là ràng buộc kỹ thuật** —
+> nó quyết định file nào được nằm trong kho mã. Thứ hai: vì lỗi thiếu font **không làm hỏng
+> file**, test bắt buộc phải **đọc lại nội dung PDF và so khớp chuỗi có dấu**, chứ kiểm "file
+> tồn tại và mở được" thì sẽ xanh trên một bản in đầy ô vuông.
+
+### 34.4. Dữ liệu mẫu phải đi qua đường code, và phải có hạt giống cố định
+
+Hai nửa của cùng một bài học, cả hai đều gặp ở mục F:
+
+- **Đi qua đường code** (mục 24): dữ liệu mẫu viết tay lách qua service sẽ làm phép kiểm bất
+  biến trở thành vô nghĩa — nó chỉ xác nhận bộ SQL tự nhất quán.
+- **Hạt giống cố định** (mục 23.1): dữ liệu sinh ngẫu nhiên **không hạt giống** thì mọi con số
+  trong báo cáo chỉ đúng cho đúng một lần chạy, và không ai kiểm lại được.
+
+`CdrGeneratorService` mắc lỗi thứ hai từ Phase 3 và hậu quả chỉ lộ ra ở Phase 5, dưới dạng
+*"không dám chạy `reset`"*. Một khiếm khuyết không gây lỗi nào cả — nó chỉ lặng lẽ làm mất khả
+năng tái lập, và biểu hiện ra ngoài thành một thói quen né tránh.
+
+## 35. Nợ tài liệu của Phase 5
+
+| # | Nợ | Ghi chú |
+|---|---|---|
+| 1 | **Chưa viết phần báo cáo cho mục A, B, C, D** | Bốn mục đã làm và đã commit (`e0ba98d`, `acc8486`, `d98366c`, `d231088`) nhưng Phần IV mở đầu thẳng ở mục E |
+| 2 | Biểu đồ aging chỉ có 2/5 nhóm có nội dung | Cần thêm một kỳ cước cũ hơn — xem 29.1 |
+| 3 | `CdrGeneratorService` chưa có hạt giống cố định | Không còn chặn `reset` nữa vì đã có `data-van-hanh.sql`, nhưng sinh CDR mới vẫn không tái lập được |
+| 4 | `DIEU_CHINH` chỉ cộng, không trừ | Từ mục 17, chưa đổi |
+| 5 | Trừ cước theo kỳ, không real-time | Từ mục 17, thuộc "Hướng phát triển" |

@@ -63,12 +63,16 @@ Kiem-Tra -Ten "Goi cuoc khac loai thue bao bi chan" -KetQua $kq -StatusMongDoi 2
 
 Muc "5. Chi tiet thue bao va 4 tab"
 $t = Get-Trang $s "/thue-bao/1"
-Kiem-Tra -Ten "Thue bao tra truoc co du 4 tab, gom tab nap tien" -KetQua $t -StatusMongDoi 200 `
-    -CanCo @('Thông tin chung', 'Lịch sử gói cước', 'Lịch sử biến động', 'Lịch sử nạp tiền') | Out-Null
+# Tab thu 4 doi ten o Phase 5 muc G4: "Lich su nap tien" -> "Bien dong so du",
+# vi tu muc G1 no hien ca chieu nap lan chieu tru cuoc. Hai phep kiem duoi day
+# van do TEN CU nen TRUOT tu luc do - va khong ai thay, vi Kiem-Tra bao ket qua
+# bang Write-Output roi bi "| Out-Null" nuot mat. Da sua ca hai o Phase 5 muc F.
+Kiem-Tra -Ten "Thue bao tra truoc co du 4 tab, gom tab bien dong so du" -KetQua $t -StatusMongDoi 200 `
+    -CanCo @('Thông tin chung', 'Lịch sử gói cước', 'Lịch sử biến động', 'Biến động số dư') | Out-Null
 
 $t = Get-Trang $s "/thue-bao/21"
-Kiem-Tra -Ten "Thue bao tra sau KHONG co tab nap tien" -KetQua $t -StatusMongDoi 200 `
-    -CanCo @('Thông tin chung') -KhongDuocCo @('Lịch sử nạp tiền') | Out-Null
+Kiem-Tra -Ten "Thue bao tra sau KHONG co tab bien dong so du" -KetQua $t -StatusMongDoi 200 `
+    -CanCo @('Thông tin chung') -KhongDuocCo @('Biến động số dư') | Out-Null
 
 Muc "6. Lich su bien dong cua du lieu mau khong rong"
 $t = Get-Trang $s "/thue-bao/5"

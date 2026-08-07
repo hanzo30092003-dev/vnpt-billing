@@ -57,11 +57,17 @@ class HoaDonServiceTest {
     @DisplayName("Chuyển trạng thái Quá hạn")
     class ChuyenQuaHan {
 
+        /**
+         * Hai hóa đơn của fixture đều {@code CHUA_TT} với {@code da_thanh_toan = 0}: từ mục F,
+         * đó là <b>trạng thái duy nhất</b> mà {@code timCanChuyenQuaHan} còn trả về. Dựng
+         * fixture bằng một hóa đơn trả dở sẽ là dựng ra tình huống truy vấn không sinh ra
+         * được — một phép kiểm xanh theo luật đã bị bỏ (bài học 43.5).
+         */
         @Test
-        @DisplayName("1. Hóa đơn quá hạn còn nợ thì chuyển sang QUA_HAN")
+        @DisplayName("1. Hóa đơn quá hạn chưa thu đồng nào thì chuyển sang QUA_HAN")
         void quaHanConNo_thiChuyen() {
             HoaDon a = hoaDon("100000", "0", "100000", TrangThaiHoaDon.CHUA_TT);
-            HoaDon b = hoaDon("200000", "50000", "150000", TrangThaiHoaDon.TT_MOT_PHAN);
+            HoaDon b = hoaDon("200000", "0", "200000", TrangThaiHoaDon.CHUA_TT);
             when(hoaDonRepository.timCanChuyenQuaHan(any())).thenReturn(List.of(a, b));
 
             int so = service.capNhatQuaHan();

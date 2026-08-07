@@ -1,7 +1,11 @@
 # KẾ HOẠCH PHASE 5 — HÓA ĐƠN, THANH TOÁN, CÔNG NỢ
 
-> Tài liệu đang xây dựng. **Mục A–F chưa được giao** — sẽ bổ sung khi có đặc tả.
-> Hiện đã chốt: mục A0 (đã làm xong), ba ràng buộc bắt buộc, và mục G.
+> ✅ **Phase 5 đã xong.** Tài liệu này giữ nguyên nội dung kế hoạch tại thời điểm lập — mục A0,
+> ba ràng buộc bắt buộc và mục G. Đặc tả mục A–F được giao sau và không chép vào đây.
+>
+> Kết quả và các điểm **đặc tả lệch so với kho mã** ghi ở
+> [`PHASE-5-REPORT.md`](PHASE-5-REPORT.md) mục 33. Riêng mục F có hai tiền đề của đặc tả không
+> đúng, đã đo lại trước khi viết code — xem mục 23 của báo cáo.
 
 ---
 

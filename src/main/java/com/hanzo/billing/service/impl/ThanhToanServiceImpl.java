@@ -144,8 +144,15 @@ public class ThanhToanServiceImpl implements ThanhToanService {
      *
      * <p>Hóa đơn đang {@code QUA_HAN} mà trả một phần thì về {@code TT_MOT_PHAN} — quá hạn
      * là một tình trạng của <i>thời gian</i>, còn ba giá trị kia là tình trạng của
-     * <i>tiền</i>. Lịch chạy nền sẽ đưa nó lại về {@code QUA_HAN} nếu vẫn còn nợ sau hạn,
-     * nên không mất thông tin.</p>
+     * <i>tiền</i>.</p>
+     *
+     * <p>⚠️ Và nó <b>ở lại</b> {@code TT_MOT_PHAN}. Bản đầu ghi rằng lịch chạy nền sẽ đưa
+     * nó về lại {@code QUA_HAN}; đúng như mô tả, nhưng hệ quả là dòng chữ ngay trên trở
+     * thành vô nghĩa — {@code TT_MOT_PHAN} chỉ sống được tới lần quét kế tiếp. Mục F đã
+     * siết {@link com.hanzo.billing.repository.HoaDonRepository#timCanChuyenQuaHan} lại để
+     * chỉ quét hóa đơn <b>chưa thu đồng nào</b>. Thông tin quá hạn của hóa đơn trả dở nằm ở
+     * cột <i>số ngày quá hạn</i> và nhóm tuổi nợ của màn hình công nợ, suy từ ngày chứ
+     * không lấy từ cột trạng thái.</p>
      */
     private static TrangThaiHoaDon suyRaTrangThai(HoaDon hoaDon, BigDecimal conNo) {
         if (conNo.signum() == 0) {

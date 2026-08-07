@@ -42,11 +42,20 @@ spring:
   #     .\mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
   # Profile do nam trong application-reset.yml va chi dat lai mode=always.
   # ---------------------------------------------------------------
+  # Hai file du lieu, chay theo dung thu tu nay:
+  #   data-mau.sql      du lieu GOC viet tay - nguoi dung, khach hang, goi cuoc,
+  #                     bang gia, thue bao, ky cuoc, dong mo so so du
+  #   data-van-hanh.sql KET QUA VAN HANH do may sinh - CDR da dinh gia, hoa don,
+  #                     chi tiet, giam tru, tru cuoc tra truoc, thanh toan
+  #
+  # Tach lam hai chu khong gop: file thu nhat nguoi doc duoc va sua tay duoc,
+  # file thu hai la ban dump 1,1 MB va SUA TAY LA SAI - phai dump lai tu CSDL.
+  # Thu tu bat buoc: data-van-hanh.sql tham chieu khoa ngoai vao data-mau.sql.
   sql:
     init:
       mode: never
       schema-locations: classpath:db/schema.sql
-      data-locations: classpath:db/data-mau.sql
+      data-locations: classpath:db/data-mau.sql,classpath:db/data-van-hanh.sql
       encoding: UTF-8
 
   thymeleaf:

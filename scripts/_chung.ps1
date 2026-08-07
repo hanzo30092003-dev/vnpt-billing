@@ -1,4 +1,4 @@
-﻿# =====================================================================
+# =====================================================================
 # _chung.ps1 - Ham dung chung cho cac script kiem thu giao dien
 # =====================================================================
 # Cac script khac nap file nay bang:  . "$PSScriptRoot\_chung.ps1"
@@ -74,6 +74,19 @@ function Post-Form($session, $trangLayCsrf, $duongDanPost, $duLieu) {
 # ---------------------------------------------------------------------
 # Ham kiem tra chinh: XET STATUS TRUOC, chi khi status dung moi do chuoi
 # ---------------------------------------------------------------------
+# LUU Y VE Write-Host (sua o Phase 5 muc F):
+# Ham nay vua bao ket qua vua "return $true/$false", ma trong PowerShell
+# ca hai deu di vao CUNG MOT LUONG output. Moi noi goi deu ket thuc bang
+# "| Out-Null" de nuot cai boolean - va thanh ra nuot luon cac dong
+# [DAT ] / [SAI ] neu chung duoc ghi bang Write-Output.
+#
+# Hau qua truoc khi sua: mot phep kiem TRUOT chi lam bien dem tang len,
+# con dong noi ro thieu chuoi nao thi khong bao gio hien ra. Nguoi chay
+# script thay "3 sai" ma khong co cach nao biet sai o dau.
+#
+# Write-Host ghi thang ra man hinh, khong qua pipeline, nen Out-Null chi
+# con nuot dung cai boolean nhu y dinh ban dau.
+# ---------------------------------------------------------------------
 function Kiem-Tra {
     param(
         [string] $Ten,
@@ -84,16 +97,16 @@ function Kiem-Tra {
     )
 
     if ($KetQua.loiLayToken) {
-        Write-Output ("  [SAI ] {0}" -f $Ten)
-        Write-Output ("         Trang lay CSRF token tra ve HTTP {0}, khong the gui form" -f $KetQua.status)
+        Write-Host ("  [SAI ] {0}" -f $Ten)
+        Write-Host ("         Trang lay CSRF token tra ve HTTP {0}, khong the gui form" -f $KetQua.status)
         $Global:SoSai++
         return $false
     }
 
     # BUOC 1 - bat buoc: ma trang thai HTTP
     if ($KetQua.status -ne $StatusMongDoi) {
-        Write-Output ("  [SAI ] {0}" -f $Ten)
-        Write-Output ("         HTTP {0}, mong doi {1}" -f $KetQua.status, $StatusMongDoi)
+        Write-Host ("  [SAI ] {0}" -f $Ten)
+        Write-Host ("         HTTP {0}, mong doi {1}" -f $KetQua.status, $StatusMongDoi)
         $Global:SoSai++
         return $false
     }
@@ -101,22 +114,22 @@ function Kiem-Tra {
     # BUOC 2 - chi chay khi status da dung
     foreach ($chuoi in $CanCo) {
         if (-not $KetQua.body.Contains($chuoi)) {
-            Write-Output ("  [SAI ] {0}" -f $Ten)
-            Write-Output ("         HTTP {0} dung nhung khong tim thay chuoi: {1}" -f $KetQua.status, $chuoi)
+            Write-Host ("  [SAI ] {0}" -f $Ten)
+            Write-Host ("         HTTP {0} dung nhung khong tim thay chuoi: {1}" -f $KetQua.status, $chuoi)
             $Global:SoSai++
             return $false
         }
     }
     foreach ($chuoi in $KhongDuocCo) {
         if ($KetQua.body.Contains($chuoi)) {
-            Write-Output ("  [SAI ] {0}" -f $Ten)
-            Write-Output ("         Khong duoc chua chuoi nhung van thay: {1}" -f $KetQua.status, $chuoi)
+            Write-Host ("  [SAI ] {0}" -f $Ten)
+            Write-Host ("         Khong duoc chua chuoi nhung van thay: {1}" -f $KetQua.status, $chuoi)
             $Global:SoSai++
             return $false
         }
     }
 
-    Write-Output ("  [DAT ] {0}" -f $Ten)
+    Write-Host ("  [DAT ] {0}" -f $Ten)
     $Global:SoDat++
     return $true
 }
