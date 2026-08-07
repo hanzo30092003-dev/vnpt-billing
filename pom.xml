@@ -25,6 +25,8 @@
         <!-- Nang Lombok len ban ho tro JDK moi (may dev dang chay JDK 25) -->
         <lombok.version>1.18.46</lombok.version>
         <poi.version>5.4.1</poi.version>
+        <openpdf.version>2.0.3</openpdf.version>
+        <pdfbox.version>3.0.3</pdfbox.version>
     </properties>
 
     <dependencies>
@@ -70,6 +72,25 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${poi.version}</version>
+        </dependency>
+
+        <!-- OpenPDF: xuat hoa don va phieu thu ra PDF.
+             Nhanh mo cua iText 4 (LGPL/MPL) nen dung duoc cho do an. -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>${openpdf.version}</version>
+        </dependency>
+
+        <!-- PDFBox: CHI dung trong test, de DOC LAI noi dung PDF vua sinh.
+             Test chi kiem "file co ton tai khong" thi khong chung minh duoc gi -
+             mot PDF hong dau tieng Viet van la mot file ton tai. Phai trich duoc
+             chuoi co dau ra moi biet font Unicode da nhung dung. -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>${pdfbox.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- Driver MySQL 8 -->

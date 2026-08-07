@@ -1,0 +1,28 @@
+LiberationSans-Regular.ttf
+==========================
+
+NGUON GOC
+  Trich tu jar org.apache.pdfbox:pdfbox:3.0.3, duong dan trong jar:
+      org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf
+  Kich thuoc: 410.712 bytes
+
+GIAY PHEP
+  SIL Open Font License 1.1 (OFL-1.1) - cho phep su dung, sua doi va PHAT HANH LAI
+  tu do, ke ca kem trong phan mem. Vi vay dong goi file nay vao ma nguon la hop le.
+
+VI SAO KHONG DUNG FONT CUA WINDOWS
+  Times New Roman / Arial trong C:\Windows\Fonts do Monotype/Microsoft cap phep,
+  KHONG duoc phep phat hanh lai. Kho ma nguon nay dat tren GitHub cong khai nen
+  dong goi cac font do vao se la vi pham ban quyen. Liberation Sans co do phu
+  tuong duong cho tieng Viet ma khong vuong rang buoc do.
+
+VI SAO PHAI NHUNG FONT
+  PDF chi hien dung dau tieng Viet khi font duoc NHUNG vao file kem bang ma
+  Identity-H. Dung font Base14 co san cua PDF (Helvetica, Times) thi moi ky tu co
+  dau se ra o vuong hoac bi mat dau - va loi nay KHONG lam hong file, PDF van mo
+  duoc binh thuong. Do la ly do test bat buoc phai DOC LAI noi dung PDF va so khop
+  chuoi co dau, chu khong chi kiem file ton tai.
+
+DO PHU DA KIEM
+  Kiem bang java.awt.Font.canDisplay tren chuoi mau gom day du dau tieng Viet,
+  em-dash va ky hieu dong: 0 ky tu khong hien thi duoc.

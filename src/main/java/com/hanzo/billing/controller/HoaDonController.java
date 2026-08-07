@@ -5,6 +5,7 @@ import com.hanzo.billing.entity.HoaDon;
 import com.hanzo.billing.enums.TrangThaiHoaDon;
 import com.hanzo.billing.service.HoaDonService;
 import com.hanzo.billing.service.KyCuocService;
+import com.hanzo.billing.service.pdf.HoaDonPdfService;
 import com.hanzo.billing.util.DocSoTienUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,12 @@ public class HoaDonController {
 
     private final HoaDonService hoaDonService;
     private final KyCuocService kyCuocService;
+    private final HoaDonPdfService hoaDonPdfService;
+
+    /** Tên file trong header {@code Content-Disposition} phải mã hoá theo RFC 5987. */
+    private static String maHoaUrl(String tenFile) {
+        return URLEncoder.encode(tenFile, StandardCharsets.UTF_8).replace("+", "%20");
+    }
 
     @GetMapping
     public String danhSach(@ModelAttribute("boLoc") BoLocHoaDon boLoc,
@@ -69,14 +76,23 @@ public class HoaDonController {
         return "hoa-don/chi-tiet";
     }
 
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> xuatPdf(@PathVariable Long id) {
+        HoaDon hoaDon = hoaDonService.layTheoId(id);
+        byte[] noiDung = hoaDonPdfService.xuat(hoaDon, hoaDonService.layKhoanMuc(id));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename*=UTF-8''" + maHoaUrl(HoaDonPdfService.tenFile(hoaDon)))
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(noiDung);
+    }
+
     @GetMapping("/xuat-excel")
     public ResponseEntity<byte[]> xuatExcel(@ModelAttribute("boLoc") BoLocHoaDon boLoc) {
         byte[] noiDung = hoaDonService.xuatExcel(boLoc);
-        String tenFile = URLEncoder.encode("DanhSachHoaDon.xlsx", StandardCharsets.UTF_8)
-                .replace("+", "%20");
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename*=UTF-8''" + tenFile)
+                        "attachment; filename*=UTF-8''" + maHoaUrl("DanhSachHoaDon.xlsx"))
                 .contentType(MediaType.parseMediaType(
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(noiDung);
