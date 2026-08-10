@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -67,14 +68,24 @@ public class CdrGeneratorService {
     private final ThueBaoRepository thueBaoRepository;
     private final NhatKyService nhatKyService;
 
-    private final Random ngauNhien = new Random();
-
     /** Một bản ghi CDR đã dựng xong, chờ ghi xuống CSDL theo lô. */
     private record BanGhiCdr(Long thueBaoId, String soThueBao, String soBiGoi,
                              String loaiDichVu, String huong, LocalDateTime thoiGian,
                              int thoiLuongGiay, int soLuong, boolean gioCaoDiem) {
     }
 
+    /**
+     * Sinh CDR giả lập.
+     *
+     * <h2>Hạt giống — thêm ở Phase 6 mục A1</h2>
+     * <p>Trước Phase 6, lớp này giữ một {@code Random} khởi tạo bằng {@code new Random()} ở mức
+     * <b>field</b>. Hai khiếm khuyết cùng lúc: bộ dữ liệu sinh ra <b>không tái lập được</b>, và
+     * một field khả biến dùng chung giữa các request là thứ không nên có trong một singleton.</p>
+     *
+     * <p>Nay {@code Random} là <b>biến cục bộ</b> của đúng lần chạy này, khởi tạo từ hạt giống
+     * người dùng nhập — hoặc từ một hạt giống hệ thống tự bốc rồi <b>trả về trong kết quả</b>.
+     * Nhờ vậy mọi lần sinh đều nói ra được con số dựng lại chính nó.</p>
+     */
     @Transactional
     public KetQuaSinhCdr sinh(SinhCdrForm form) {
         long batDau = System.currentTimeMillis();
@@ -82,6 +93,10 @@ public class CdrGeneratorService {
         if (form.getDenNgay().isBefore(form.getTuNgay())) {
             throw new NghiepVuException("Ngày kết thúc phải sau hoặc bằng ngày bắt đầu");
         }
+
+        // Bốc hạt giống TRƯỚC khi dùng, để con số ghi vào kết quả đúng là con số đã dùng.
+        long hatGiong = form.getHatGiong() != null ? form.getHatGiong() : new Random().nextLong();
+        Random ngauNhien = new Random(hatGiong);
 
         List<ThueBao> dsThueBao = layThueBaoHopLe(form);
         if (dsThueBao.isEmpty()) {
@@ -100,24 +115,25 @@ public class CdrGeneratorService {
             int viTri = ngauNhien.nextInt(dsThueBao.size());
             ThueBao thueBao = dsThueBao.get(viTri);
 
-            LocalDateTime thoiDiem = sinhThoiDiem(thueBao, form.getTuNgay(), form.getDenNgay());
+            LocalDateTime thoiDiem = sinhThoiDiem(
+                    thueBao, form.getTuNgay(), form.getDenNgay(), ngauNhien);
             if (thoiDiem == null) {
                 // Thuê bao này kích hoạt sau khoảng yêu cầu, bỏ qua lượt sinh
                 continue;
             }
 
-            LoaiDichVu dichVu = chonLoaiDichVu();
-            HuongCuocGoi huong = chonHuong(dichVu);
+            LoaiDichVu dichVu = chonLoaiDichVu(ngauNhien);
+            HuongCuocGoi huong = chonHuong(dichVu, ngauNhien);
 
             BanGhiCdr banGhi = new BanGhiCdr(
                     thueBao.getId(),
                     thueBao.getSoThueBao(),
-                    sinhSoBiGoi(huong, soNoiMang, thueBao.getSoThueBao()),
+                    sinhSoBiGoi(huong, soNoiMang, thueBao.getSoThueBao(), ngauNhien),
                     dichVu.name(),
                     huong.name(),
                     thoiDiem,
-                    dichVu == LoaiDichVu.THOAI ? sinhThoiLuongGoi() : 0,
-                    sinhSoLuong(dichVu),
+                    dichVu == LoaiDichVu.THOAI ? sinhThoiLuongGoi(ngauNhien) : 0,
+                    sinhSoLuong(dichVu, ngauNhien),
                     // Quy tắc giờ cao điểm nằm ở QuyTacGioCaoDiem, dùng chung với bộ nhập CSV
                     QuyTacGioCaoDiem.apDung(dichVu, thoiDiem));
 
@@ -148,11 +164,16 @@ public class CdrGeneratorService {
         ketQua.setSoThueBaoCoPhatSinh(soCoPhatSinh);
         ketQua.setSoThueBaoBoQua(dsThueBao.size() - soCoPhatSinh);
         ketQua.setThoiGianMs(System.currentTimeMillis() - batDau);
+        ketQua.setHatGiongDaDung(hatGiong);
 
-        log.info("Đã sinh {} bản ghi CDR trong {} ms", daSinh, ketQua.getThoiGianMs());
+        log.info("Đã sinh {} bản ghi CDR trong {} ms, hạt giống {}",
+                daSinh, ketQua.getThoiGianMs(), hatGiong);
+        // Ghi hạt giống vào nhật ký: đây là chỗ duy nhất còn lưu lại con số đó sau khi người
+        // dùng rời màn hình, và là thứ duy nhất dựng lại được đúng bộ CDR này.
         nhatKyService.ghiNhatKy("SINH_CDR", "CHI_TIET_SU_DUNG", null,
                 "Sinh " + daSinh + " bản ghi CDR từ " + form.getTuNgay() + " đến "
-                        + form.getDenNgay() + ", mất " + ketQua.getThoiGianMs() + " ms");
+                        + form.getDenNgay() + ", hạt giống " + hatGiong
+                        + ", mất " + ketQua.getThoiGianMs() + " ms");
 
         return ketQua;
     }
@@ -217,6 +238,12 @@ public class CdrGeneratorService {
         return dsGoc.stream()
                 .filter(tb -> tb.getTrangThai() != TrangThaiThueBao.TAM_NGUNG_2C
                         && tb.getTrangThai() != TrangThaiThueBao.DA_THANH_LY)
+                // ⭐ SẮP THEO id LÀ ĐIỀU KIỆN CỦA HẠT GIỐNG, không phải để cho gọn.
+                // Bộ sinh bốc thuê bao bằng chỉ số trong danh sách này, nên cùng một hạt giống
+                // chỉ cho ra cùng bộ dữ liệu khi danh sách có cùng thứ tự. Hai truy vấn ở trên
+                // đều KHÔNG có ORDER BY — thứ tự chúng trả về là chi tiết cài đặt của CSDL,
+                // đúng loại thứ hôm nay ổn định và ngày mai thì không.
+                .sorted(Comparator.comparing(ThueBao::getId))
                 .toList();
     }
 
@@ -230,7 +257,8 @@ public class CdrGeneratorService {
      *
      * @return null nếu thuê bao kích hoạt sau cả khoảng yêu cầu
      */
-    private LocalDateTime sinhThoiDiem(ThueBao thueBao, LocalDate tuNgay, LocalDate denNgay) {
+    private LocalDateTime sinhThoiDiem(ThueBao thueBao, LocalDate tuNgay, LocalDate denNgay,
+                                       Random ngauNhien) {
         LocalDate batDau = thueBao.getNgayKichHoat().isAfter(tuNgay)
                 ? thueBao.getNgayKichHoat() : tuNgay;
         if (batDau.isAfter(denNgay)) {
@@ -246,7 +274,7 @@ public class CdrGeneratorService {
     }
 
     /** 70% THOAI, 20% SMS, 10% DATA. */
-    private LoaiDichVu chonLoaiDichVu() {
+    private LoaiDichVu chonLoaiDichVu(Random ngauNhien) {
         int r = ngauNhien.nextInt(100);
         if (r < NGUONG_THOAI) {
             return LoaiDichVu.THOAI;
@@ -266,7 +294,7 @@ public class CdrGeneratorService {
      * hai tổ hợp không tồn tại về mặt nghiệp vụ và không có dòng bảng giá nào khớp.
      * Danh sách hướng hợp lệ nằm ở {@link QuyTacToHopDichVu}, dùng chung với bộ nhập CSV.</p>
      */
-    private HuongCuocGoi chonHuong(LoaiDichVu dichVu) {
+    private HuongCuocGoi chonHuong(LoaiDichVu dichVu, Random ngauNhien) {
         Set<HuongCuocGoi> hopLe = QuyTacToHopDichVu.huongHopLe(dichVu);
         if (hopLe.size() == 1) {
             return hopLe.iterator().next();
@@ -287,7 +315,7 @@ public class CdrGeneratorService {
      *   <li>15% còn lại rải tới 1800 giây</li>
      * </ul>
      */
-    private int sinhThoiLuongGoi() {
+    private int sinhThoiLuongGoi(Random ngauNhien) {
         int r = ngauNhien.nextInt(100);
         if (r < 80) {
             return 30 + ngauNhien.nextInt(151);
@@ -306,7 +334,7 @@ public class CdrGeneratorService {
      * Bảng giá DATA hiện có {@code block_giay = 1} và đơn giá 25đ — nếu engine tính cước
      * hiểu block là 1 MB thì phải chia {@code so_luong} cho 1024 trước khi nhân đơn giá.</p>
      */
-    private int sinhSoLuong(LoaiDichVu dichVu) {
+    private int sinhSoLuong(LoaiDichVu dichVu, Random ngauNhien) {
         if (dichVu == LoaiDichVu.SMS) {
             return 1;
         }
@@ -324,7 +352,8 @@ public class CdrGeneratorService {
      *   <li>QUỐC TẾ: dạng +xx theo một số mã quốc gia thông dụng</li>
      * </ul>
      */
-    private String sinhSoBiGoi(HuongCuocGoi huong, List<String> soNoiMang, String soGoiDi) {
+    private String sinhSoBiGoi(HuongCuocGoi huong, List<String> soNoiMang, String soGoiDi,
+                               Random ngauNhien) {
         if (huong == HuongCuocGoi.NOI_MANG) {
             if (soNoiMang.size() <= 1) {
                 return soNoiMang.isEmpty() ? null : soNoiMang.get(0);

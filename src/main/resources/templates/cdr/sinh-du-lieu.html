@@ -54,6 +54,20 @@
                             </div>
 
                             <div class="col-12">
+                                <label class="form-label" for="hatGiong">
+                                    Hạt giống ngẫu nhiên
+                                    <span class="text-secondary fw-normal">(tuỳ chọn)</span>
+                                </label>
+                                <input type="number" class="form-control" id="hatGiong"
+                                       th:field="*{hatGiong}" placeholder="Để trống thì hệ thống tự bốc">
+                                <div class="form-text">
+                                    Nhập lại đúng hạt giống cũ với cùng khoảng ngày và số lượng thì
+                                    sinh ra <strong>đúng bộ dữ liệu cũ</strong>. Để trống vẫn tái lập
+                                    được — hạt giống hệ thống bốc sẽ hiện ở khối kết quả bên phải.
+                                </div>
+                            </div>
+
+                            <div class="col-12">
                                 <label class="form-label">Phạm vi thuê bao</label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" id="pvTatCa"
@@ -131,6 +145,18 @@
                             <div class="border rounded py-2">
                                 <div class="h4 mb-0 text-primary" th:text="${ketQua.thoiGianMs} + ' ms'">0</div>
                                 <div class="small text-secondary">thời gian</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info py-2 small d-flex align-items-start">
+                        <i class="bi bi-key me-2 mt-1"></i>
+                        <div>
+                            <strong>Hạt giống đã dùng:</strong>
+                            <code class="user-select-all" th:text="${ketQua.hatGiongDaDung}">0</code>
+                            <div class="mt-1">
+                                Chép lại con số này. Nhập đúng nó cùng khoảng ngày và số lượng vừa
+                                rồi là dựng lại được y hệt bộ dữ liệu vừa sinh.
                             </div>
                         </div>
                     </div>

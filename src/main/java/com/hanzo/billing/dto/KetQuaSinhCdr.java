@@ -26,4 +26,14 @@ public class KetQuaSinhCdr {
 
     /** Số thuê bao bị bỏ qua vì kích hoạt sau khoảng thời gian yêu cầu. */
     private int soThueBaoBoQua;
+
+    /**
+     * Hạt giống <b>thực sự đã dùng</b> cho lần sinh này.
+     *
+     * <p>Luôn có giá trị, kể cả khi người dùng để trống ô hạt giống — khi đó hệ thống tự bốc
+     * một số rồi trả nó về đây. Đó là điểm mấu chốt: một lần sinh "ngẫu nhiên" vẫn phải nói ra
+     * được con số để dựng lại chính nó. Không ghi lại thì bộ dữ liệu vừa sinh là thứ không
+     * bao giờ tái lập được.</p>
+     */
+    private long hatGiongDaDung;
 }

@@ -34,4 +34,17 @@ public class SinhCdrForm {
     private String phamVi = "TAT_CA";
 
     private List<Long> thueBaoIds;
+
+    /**
+     * Hạt giống cho bộ sinh ngẫu nhiên. Để trống thì hệ thống tự bốc.
+     *
+     * <p><b>Vì sao cần.</b> Tới hết Phase 5 bộ sinh dùng {@code new Random()} không hạt giống,
+     * nên bộ CDR sinh ra <b>không tái lập được</b>: mất dữ liệu là mất luôn mọi con số đã viết
+     * vào báo cáo. Khiếm khuyết đó không gây lỗi nào cả, nó chỉ lặng lẽ biến {@code reset}
+     * thành thao tác không ai dám chạy — xem `PHASE-5-REPORT.md` mục 23.1.</p>
+     *
+     * <p>Để trống <b>vẫn tái lập được</b>: hệ thống bốc một hạt giống rồi trả về trong
+     * {@link KetQuaSinhCdr#getHatGiongDaDung()} và hiện lên màn hình để chép lại.</p>
+     */
+    private Long hatGiong;
 }
