@@ -125,6 +125,15 @@
 
         <!--/* ================= HEADER ================= */-->
         <header class="topbar">
+            <!--/*
+                Nút mở/đóng sidebar. Chỉ hiện trên màn hình hẹp (xem app.css), vì trên màn
+                hình rộng sidebar luôn mở và một nút đóng nó chỉ gây bối rối.
+            */-->
+            <button type="button" class="btn btn-sm btn-outline-secondary nut-mo-sidebar khong-in"
+                    id="nutMoSidebar" aria-label="Mở menu">
+                <i class="bi bi-list"></i>
+            </button>
+
             <h1 class="topbar-title">HỆ THỐNG QUẢN LÝ THUÊ BAO &amp; TÍNH CƯỚC</h1>
 
             <div class="topbar-user" sec:authorize="isAuthenticated()">
@@ -144,6 +153,25 @@
 
         <!--/* ================= NỘI DUNG TRANG ================= */-->
         <main class="content">
+
+            <!--/*
+                Breadcrumb suy TỰ ĐỘNG từ đường dẫn trong LayoutAdvice, nên mọi màn hình
+                đang có và sẽ có đều tự có — không màn hình nào bị quên. Ẩn khi in.
+            */-->
+            <nav class="khong-in mb-2" th:if="${!#lists.isEmpty(breadcrumb)}">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item">
+                        <a class="text-decoration-none" th:href="@{/}">Trang chủ</a>
+                    </li>
+                    <li class="breadcrumb-item" th:each="m, lap : ${breadcrumb}"
+                        th:classappend="${lap.last} ? 'active'">
+                        <span th:if="${lap.last}" th:text="${m.nhan}">Trang</span>
+                        <a th:unless="${lap.last}" class="text-decoration-none"
+                           th:href="@{${m.duongDan}}" th:text="${m.nhan}">Mục</a>
+                    </li>
+                </ol>
+            </nav>
+
 
             <!--/* Thông báo truyền qua RedirectAttributes, tự ẩn sau 5 giây (xem app.js) */-->
             <div class="alert alert-success alert-dismissible fade show tu-an" role="alert"

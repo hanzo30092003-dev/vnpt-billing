@@ -343,3 +343,60 @@ body {
         margin: 12mm;
     }
 }
+
+/* =====================================================================
+   RESPONSIVE - Phase 7 muc B4
+   =====================================================================
+   Duoi 992px sidebar truot ra ngoai man hinh va chi hien khi bam nut.
+   Chon 992px vi day la moc "lg" cua Bootstrap, dung moc ma cac lop
+   col-lg-* trong template da dung - de bo cuc doi cung mot luc thay vi
+   doi so le nhau.
+   ===================================================================== */
+.nut-mo-sidebar {
+    display: none;
+    margin-right: .75rem;
+}
+
+@media (max-width: 991.98px) {
+    .nut-mo-sidebar {
+        display: inline-flex;
+    }
+
+    /* Dung LEFT chu khong dung transform: translateX(-100%).
+       Phan tram trong transform duoc giai theo BORDER BOX cua chinh phan tu,
+       ma phan tu nay lai duoc mot @media khac dat width: 100% - hai quy tac
+       o hai khoi media khac nhau phu thuoc lan nhau la thu rat de sai va rat
+       kho nhin ra. "left" thi khong co cho hieu nham: am bao nhieu thi ra
+       ngoai man hinh bay nhieu. */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: -100vw;
+        width: min(280px, 85vw);
+        z-index: 1045;
+        transition: left .2s ease-in-out;
+    }
+
+    .sidebar.dang-mo {
+        left: 0;
+    }
+
+    /* Lop phu mo phia sau sidebar - bam vao la dong */
+    .lop-phu-sidebar {
+        position: fixed;
+        inset: 0;
+        z-index: 1040;
+        background: rgba(0, 0, 0, .45);
+    }
+
+    .topbar-title {
+        font-size: 1rem;
+    }
+
+    /* Bang rong hon man hinh thi cuon ngang trong khung cua no,
+       KHONG de ca trang bi cuon ngang */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+}

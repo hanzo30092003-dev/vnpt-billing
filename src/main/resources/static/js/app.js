@@ -79,4 +79,50 @@ document.addEventListener('DOMContentLoaded', function () {
             danhDauDangXuLy(form);
         });
     });
+
+    // -----------------------------------------------------------------
+    // Sidebar thu gon tren man hinh hep (Phase 7 muc B4).
+    //
+    // Nut chi hien duoi 992px (xem app.css). Lop phu mo phia sau vua de
+    // lam ro sidebar dang che noi dung, vua la vung bam de dong - tren
+    // dien thoai khong co phim Esc.
+    // -----------------------------------------------------------------
+    var sidebar = document.querySelector('.sidebar');
+    var nutMo = document.getElementById('nutMoSidebar');
+    if (sidebar && nutMo) {
+        var lopPhu = null;
+
+        function dongSidebar() {
+            sidebar.classList.remove('dang-mo');
+            if (lopPhu) {
+                lopPhu.remove();
+                lopPhu = null;
+            }
+        }
+
+        nutMo.addEventListener('click', function () {
+            if (sidebar.classList.contains('dang-mo')) {
+                dongSidebar();
+                return;
+            }
+            sidebar.classList.add('dang-mo');
+            lopPhu = document.createElement('div');
+            lopPhu.className = 'lop-phu-sidebar';
+            lopPhu.addEventListener('click', dongSidebar);
+            document.body.appendChild(lopPhu);
+        });
+
+        // Bam mot muc menu thi dong luon - neu khong, sidebar van che noi
+        // dung cua chinh trang vua mo
+        sidebar.querySelectorAll('.nav-item').forEach(function (a) {
+            a.addEventListener('click', dongSidebar);
+        });
+
+        // Keo rong man hinh tro lai thi bo trang thai mo, tranh ket lop phu
+        window.addEventListener('resize', function () {
+            if (window.innerWidth >= 992) {
+                dongSidebar();
+            }
+        });
+    }
 });
