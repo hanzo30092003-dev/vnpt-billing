@@ -28,11 +28,23 @@ Kiem-Tra -Ten "admin voi mat khau sai van chi thay form dang nhap" -KetQua $t -S
     -CanCo @('name="matKhau"') | Out-Null
 
 Muc "4. Dang nhap dung va phan quyen menu sidebar"
+# SUA O PHASE 6: truoc day phep kiem nay do CHU trong sidebar ('Hoa don',
+# 'Khach hang'). No dung tinh co, vi trang chu cu la trang gioi thieu tam
+# khong chua nhung chu do. Tu khi trang chu thanh dashboard, cac chu ay xuat
+# hien hop le trong THAN TRANG - cot bang "Khach hang", dong "... hoa don" -
+# va phep kiem bao dong gia.
+#
+# Nay do DUONG DAN cua lien ket sidebar. Dau nhay dong sau ten la co y:
+# 'href="/hoa-don"' KHONG khop voi 'href="/hoa-don/307"' cua bang top thue
+# bao, nen phep kiem chi noi ve muc menu chu khong dinh vao du lieu.
 $phien = @{ }
 $mongDoi = @{
-    "admin"      = @{ co = @('Khách hàng', 'Hóa đơn', 'Gói cước', 'Báo cáo'); khong = @() }
-    "nhanvien01" = @{ co = @('Khách hàng', 'Báo cáo'); khong = @('Hóa đơn', 'Gói cước') }
-    "ketoan01"   = @{ co = @('Hóa đơn', 'Báo cáo'); khong = @('Khách hàng', 'Gói cước') }
+    "admin"      = @{ co = @('href="/khach-hang"', 'href="/hoa-don"', 'href="/goi-cuoc"',
+                             'href="/bao-cao"'); khong = @() }
+    "nhanvien01" = @{ co = @('href="/khach-hang"', 'href="/bao-cao"')
+                      khong = @('href="/hoa-don"', 'href="/goi-cuoc"') }
+    "ketoan01"   = @{ co = @('href="/hoa-don"', 'href="/bao-cao"')
+                      khong = @('href="/khach-hang"', 'href="/goi-cuoc"') }
 }
 foreach ($tk in @("admin", "nhanvien01", "ketoan01")) {
     $s = Connect-App $tk "123456"

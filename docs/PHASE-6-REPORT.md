@@ -187,3 +187,326 @@ vụ, và nó làm hỏng chính cơ chế mà mục này dựng lên.
 **Cả năm nhóm đều khác 0** — đó là điều tiêu chí nghiệm thu số 2 đòi hỏi.
 
 Nếu bất kỳ con số nào lệch → **DỪNG, phân tích trước khi sửa.**
+
+## 5. ⭐ Đối chiếu dự đoán — khớp tuyệt đối 5/5
+
+| Nhóm tuổi nợ | Dự đoán | Thực tế | |
+|---|---|---|---|
+| Trong hạn | 58 | **58** | ✅ |
+| Quá hạn 1–30 ngày | 58 | **58** | ✅ |
+| Quá hạn 31–60 ngày | 22 | **22** | ✅ |
+| Quá hạn 61–90 ngày | 16 | **16** | ✅ |
+| Quá hạn trên 90 ngày | 11 | **11** | ✅ |
+| **Tổng hóa đơn còn nợ** | **165** | **165** | ✅ |
+
+Phân bố trạng thái từng kỳ cũng khớp từng con số:
+
+| Kỳ | Dự đoán `DA_TT`/`TT_MOT_PHAN`/`QUA_HAN` | Thực tế | |
+|---|---|---|---|
+| 3/2026 | 44 / 3 / 8 | **44 / 3 / 8** | ✅ |
+| 4/2026 | 39 / 6 / 10 | **39 / 6 / 10** | ✅ |
+
+**Bằng chứng luật siết ở mục F Phase 5 vẫn còn hiệu lực.** Lớp seed gọi `capNhatQuaHan()` hai
+lần: **trước** khi thu đổi 110 hóa đơn, **sau** khi thu đổi **0** hóa đơn. Số 0 đó khẳng định 9
+hóa đơn trả một phần của hai kỳ mới không bị kéo về `QUA_HAN`.
+
+## 6. Mục A5 — dump lại và kiểm chứng reset
+
+`data-van-hanh.sql`: **2.393.851 byte**, 352 dòng, 151 `INSERT` + 6 `UPDATE`. Đầu file nay có
+dòng cảnh báo **"FILE SINH TỰ ĐỘNG — KHÔNG SỬA TAY"**, tham số `mysqldump` để tái sinh, và
+**hạt giống của ba kỳ mới** để dựng lại được nếu mất dữ liệu.
+
+Hai kỳ 3/2026 và 4/2026 thêm vào `data-mau.sql` mục 7 (**định nghĩa kỳ** là dữ liệu gốc); trạng
+thái chốt và các cột tổng hợp nằm ở `data-van-hanh.sql` vì chúng là **kết quả chạy engine**. Các
+câu `UPDATE ky_cuoc` đó sinh từ chính CSDL, không gõ tay.
+
+| Phép kiểm sau `reset` | Kết quả |
+|---|---|
+| Ảnh chụp CSDL trước / sau `reset` | **20.101 / 20.101 dòng, 0 khác biệt** |
+| Bất biến tiêu chí 4 | **0 lệch / 280 hóa đơn** |
+| Bất biến sổ cái số dư | **0 lệch / 80 thuê bao** |
+| Bảng tuổi nợ | cả **5 nhóm** đều có nội dung |
+| Kỳ 6 và kỳ 7 | **0 giao dịch** thanh toán |
+
+---
+
+# PHẦN II — MỤC B: DASHBOARD
+
+## 7. Nội dung
+
+Thay trang giới thiệu tạm của Phase 0. Bốn thẻ số liệu, một biểu đồ cột doanh thu **5 kỳ**, hai
+biểu đồ tròn (theo gói cước, theo trạng thái), bảng top 5 thuê bao cước cao và bảng 5 giao dịch
+gần nhất.
+
+**Mọi con số đọc từ cột đã ghi** — `hoa_don.con_no`, `hoa_don.tong_thanh_toan` — chứ không cộng
+lại từ bảng `thanh_toan`. Ràng buộc ② của Phase 5 áp cho tầng báo cáo: hai cách tính song song
+là hai nguồn sự thật, và chúng sẽ mâu thuẫn nhau đúng vào lúc khó truy nhất.
+
+Hai chi tiết đáng ghi:
+
+- **"Kỳ gần nhất" là kỳ mới nhất CÓ hóa đơn**, không phải kỳ mới nhất. Một kỳ vừa tạo mà chưa
+  chạy gì sẽ làm thẻ doanh thu hiện `0 đ` và trông như hệ thống mất số liệu.
+- **Mảng cho biểu đồ dựng sẵn ở controller**, không để template tự chiếu. Bảng và biểu đồ khi đó
+  chắc chắn đọc cùng một nguồn, cùng thứ tự — cách `CongNoController` đã làm từ Phase 5.
+
+## 8. Sidebar: bốn màn hình Phase 5 chưa bao giờ được nối vào menu
+
+Phát hiện khi thêm mục *Báo cáo* vào sidebar: các mục **Hóa đơn**, **Thanh toán**, **Công nợ**
+vẫn để `href="#"` từ Phase 0, và **Giảm trừ** thì không có trong menu.
+
+Bốn màn hình ấy dựng ở Phase 5, có test, có ảnh chụp — nhưng người dùng **không có đường nào tới
+chúng ngoài việc gõ thẳng URL**. Lý do không ai phát hiện: mọi phép kiểm của Phase 5 đều gọi
+`Get-Trang $s "/cong-no"` bằng đường dẫn tuyệt đối, tức là đi vòng qua đúng cái thứ bị hỏng.
+
+> **Bài học:** kiểm một màn hình bằng cách gõ thẳng URL của nó chứng minh màn hình chạy được,
+> **không** chứng minh người dùng tới được nó.
+
+Đã nối cả bốn, cộng mục *Báo cáo thống kê*.
+
+---
+
+# PHẦN III — MỤC C VÀ D: BẢY BÁO CÁO
+
+## 9. Bảy báo cáo
+
+| # | Đường dẫn | Nội dung |
+|---|---|---|
+| C.1 | `/bao-cao/doanh-thu-ky` | Bảng + biểu đồ cột kết hợp đường tỷ lệ thu |
+| C.2 | `/bao-cao/doanh-thu-goi-cuoc` | Bảng + biểu đồ tròn + tỷ trọng, chọn kỳ |
+| C.3 | `/bao-cao/doanh-thu-dich-vu` | Cơ cấu cước thuê bao / thoại / SMS / dữ liệu |
+| C.4 | `/bao-cao/thue-bao` | Theo trạng thái, theo loại, mới và rời mạng theo tháng |
+| C.5 | `/bao-cao/top-thue-bao` | Chọn kỳ và số lượng 10 / 20 / 50 |
+| C.6 | `/bao-cao/san-luong` | Phút gọi ba hướng, SMS, dữ liệu, so với kỳ liền trước |
+| C.7 | `/bao-cao/cong-no` | Bảng tuổi nợ + top 10 khách hàng nợ nhiều nhất |
+
+## 10. Mục D — bốn quyết định kỹ thuật
+
+### 10.1. `BaoCaoExcel` — một khuôn cho cả bảy báo cáo
+
+Ba lớp của Phase 3–5 mỗi lớp tự viết lại đúng cùng một đoạn: tạo workbook, tạo kiểu chữ đậm, đổ
+tiêu đề, tự động giãn cột. Bảy báo cáo của Phase 6 sẽ thành bảy bản sao nữa nếu không gom.
+
+Khuôn chung đúng bằng yêu cầu D.1: tiêu đề, phạm vi, ngày xuất, header in đậm có nền,
+**freeze pane**, số tiền có phân cách nghìn, dòng tổng in đậm, chân trang *"Dữ liệu mẫu phục vụ
+mục đích học tập"*.
+
+> **Freeze pane đặt ngay dưới dòng header**, không phải dòng 1 — phía trên header còn ba dòng
+> tiêu đề báo cáo. Khoá nhầm chỗ thì cuộn xuống sẽ mất tên cột, tức mất đúng thứ mà freeze pane
+> sinh ra để giữ.
+
+### 10.2. `DinhDangTien` — một helper định dạng duy nhất
+
+Trước Phase 6, mỗi template tự viết `#numbers.formatDecimal(x, 0, 'POINT', 0, 'COMMA')` — chuỗi
+đó lặp lại hàng chục lần trên mười mấy file.
+
+Bean tên **`soLieu`** chứ không phải `dinhDang`: tên đó đã thuộc về `DinhDangCdr` từ Phase 3, và
+hai bean trùng tên làm ứng dụng **không khởi động được**.
+
+**Một ranh giới cố ý không gộp.** `DonViCuoc.giaySangPhut` làm tròn **lên** vì đó là *luật tính
+tiền* — dùng dở một block thì trả trọn block. Với một bảng *thống kê sản lượng*, làm tròn lên là
+sai: 5.978 giây phải hiện **99,6 phút** chứ không phải 100. Hai phép quy đổi khác nhau về **mục
+đích** nên khác nhau về chế độ làm tròn; cái chung là **hệ số**, và hệ số vẫn chỉ khai báo một
+lần trong `DonViCuoc`. Dùng chung hằng số, không dùng chung luật.
+
+### 10.3. Truy vấn gom nhóm trong CSDL
+
+Mọi truy vấn thống kê đều `SELECT new ... + GROUP BY`, không load entity rồi cộng trong Java.
+Với 280 hóa đơn hai cách đều nhanh; nhưng cách sau tăng tuyến tính theo số bản ghi và sẽ hỏng
+**lặng lẽ** khi dữ liệu lớn lên.
+
+### 10.4. Đo trước khi thêm index — và kết luận là **không thêm**
+
+Chi tiết ở [`toi-uu-hieu-nang.md`](toi-uu-hieu-nang.md) Phần II. Tóm tắt:
+
+- Mọi màn hình đáp ứng trong **40–137 ms**.
+- Truy vấn nặng nhất (sản lượng, quét CDR một kỳ) đã có index: `EXPLAIN` cho `type=ref`,
+  `key=fk_cdr_ky_cuoc`, `Using index`. Index đó **không ai tạo cho báo cáo** — MySQL tự sinh nó
+  cho ràng buộc khóa ngoại từ Phase 1.
+- Chỗ duy nhất còn quét toàn bảng là `WHERE con_no > 0` trên `hoa_don`. **Không thêm index**:
+  280 dòng, điều kiện đúng với 59% số dòng nên tính chọn lọc quá kém, và màn hình đã chạy 50 ms.
+  Đã ghi **ngưỡng để xem lại** vào tài liệu thay vì để lần sau phải đoán lại.
+
+> Kết luận của Phần II là *không thêm gì cả* — nhưng đó là kết luận **có số liệu chống lưng**,
+> khác hẳn với việc quên mất.
+
+## 11. ⭐ Ba lỗi thật bắt được khi kiểm chứng
+
+### 11.1. `SUM` trên kỳ rỗng trả `NULL` — cả trang báo cáo HTTP 500
+
+`SanLuongDichVu` có sáu tham số kiểu `long` **nguyên thuỷ**. Với một kỳ chưa có bản ghi CDR nào,
+`SUM(...)` trả về `NULL`, Hibernate không mở hộp được và toàn bộ trang trả về **HTTP 500**.
+
+Điều đáng nói: lỗi này **không bao giờ lộ ra trên dữ liệu mẫu**, vì cả năm kỳ đều có CDR. Nó chỉ
+xảy ra đúng lúc người dùng vừa tạo một kỳ mới rồi mở báo cáo lên xem — tức đúng lúc khó đoán
+nhất và khó tái hiện nhất.
+
+Bắt được nhờ tiêu chí nghiệm thu số 7 (*"mọi báo cáo chạy được khi không có dữ liệu"*), và cách
+kiểm là **tạo một kỳ trống thật** rồi mở cả bốn báo cáo có tham số kỳ. Đã thêm `COALESCE` quanh
+mọi `SUM`, và thêm phép kiểm 11 của `BaoCaoServiceTest` dựng lại đúng tình huống đó bằng một kỳ
+tạm (`@Transactional` rollback ngay sau khi chạy).
+
+### 11.2. Biểu thức Thymeleaf lồng nhau làm vỡ cả trang
+
+Viết `${a} != null and ${a}.signum() < 0 ? 'x' : 'y'` trong `th:classappend`: Thymeleaf **không
+cho lồng `${...}` bên trong một biểu thức khác**, và cả trang ném `TemplateInputException`.
+
+Đáng ghi vì lỗi này **không hiện ra lúc biên dịch** — Java compile sạch, test đơn vị xanh, chỉ
+lộ ra khi thật sự mở đúng trang đó lên. Đã chuyển phần tính màu vào `DinhDangTien.lopBienThien`,
+để biểu thức trong template chỉ còn một lời gọi phẳng.
+
+### 11.3. Sidebar `href="#"` — xem mục 8
+
+## 12. Nghiệm thu mục B, C, D
+
+`scripts/test-bao-cao.ps1` — **38 phép kiểm, 38 đạt**:
+
+| Nhóm | Nội dung |
+|---|---|
+| **13 con số đối chiếu chéo** | Mỗi con số trên màn hình so với một câu SQL **độc lập** |
+| **11 file Excel** | Đều là xlsx thật (chữ ký ZIP `PK`), 3,9–5,0 KB |
+| **Bảng tuổi nợ** | Cả 5 nhóm đều có nội dung |
+| **Kỳ rỗng** | Bốn báo cáo có tham số kỳ đều chạy, không lỗi 500 |
+
+`BaoCaoServiceTest` — **11 test**, và điểm mạnh của nó là **kiểm chéo giữa các đường truy vấn**
+thay vì so với hằng số chép tay:
+
+```
+SUM gom theo KỲ  ==  SUM gom theo GÓI CƯỚC  ==  SUM của bảng CƠ CẤU CƯỚC
+```
+
+Ba câu truy vấn gom nhóm theo ba cách hoàn toàn khác nhau. Nếu một câu sai điều kiện join hoặc
+sót một nhóm, con số của nó lệch khỏi hai câu còn lại — mà đó đúng là loại lỗi một hằng số chép
+tay **không bắt được**, vì hằng số chỉ chứng minh hôm nay dữ liệu vẫn như hôm qua.
+
+---
+
+# PHẦN IV — TỔNG KẾT PHASE 6
+
+## 13. Nghiệm thu
+
+| # | Tiêu chí | Kết quả |
+|---|---|---|
+| 1 | `mvnw test` PASS, không giảm số test | ✅ **260 test** (246 → 260), 0 lỗi |
+| 2 | Bốn kỳ có dữ liệu; aging đủ **5 nhóm** | ✅ **5 kỳ**; cả 5 nhóm có nội dung — xem cảnh báo 1.2 |
+| 3 | Dự đoán A.4 khớp thực tế | ✅ **5/5**, và 6/6 cả phân bố trạng thái từng kỳ |
+| 4 | Bất biến thanh toán, trước và sau `reset` | ✅ **0 lệch / 280 hóa đơn** cả hai lần |
+| 5 | `data-van-hanh.sql` dump lại; reset tái lập giống hệt | ✅ **20.101/20.101 dòng, 0 khác biệt** |
+| 6 | Kiểm chéo ≥ 5 con số bằng SQL | ✅ **13 con số**, tất cả khớp |
+| 7 | Báo cáo chạy được khi không có dữ liệu | ✅ 4 báo cáo × (màn hình + Excel) trên một kỳ rỗng |
+| 8 | Kỳ 6 vẫn 0 thanh toán, vẫn huỷ được hóa đơn | ✅ huỷ + lập lại ra đúng 58 hóa đơn / 23.828.605 đ |
+
+**Tổng kiểm thử giao diện: 5 script, 94 phép kiểm, 94 đạt.**
+
+## 14. Số liệu bàn giao cho Phase 7
+
+| Bảng | Số bản ghi | Ghi chú |
+|---|---|---|
+| `khach_hang` · `thue_bao` · `goi_cuoc` | 50 · 80 · 5 | Không đổi |
+| `ky_cuoc` | **5** | 3, 4, 5/2026 `DA_CHOT` · 6, 7/2026 `MO` |
+| `chi_tiet_su_dung` | **18.723** | Tất cả `DA_TINH` |
+| `hoa_don` | **280** | 55 · 55 · 54 · 58 · 58 |
+| `chi_tiet_hoa_don` | **620** | Gồm 2 dòng "Giảm trừ" thành tiền âm |
+| `thanh_toan` | **161** | Kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · kỳ 6–7: **0** |
+| `bien_dong_so_du` | **34** | 18 mở sổ + 16 `TRU_CUOC` kỳ 6 |
+| `giam_tru` | **2** | Cả hai `DA_AP_DUNG` |
+
+**Tiền:**
+
+| Chỉ tiêu | Giá trị |
+|---|---|
+| Doanh thu 5 kỳ | **111.513.012 đ** |
+| Đã thu | **49.190.687 đ** |
+| Còn nợ | **62.322.325 đ** |
+| Tỷ lệ thu chung | **44,1%** |
+
+## 15. Danh sách màn hình chụp ảnh cho Phase 6
+
+### Nhóm 1 — Ảnh bắt buộc ⭐
+
+| # | Màn hình | Cách lấy | Điểm cần thấy rõ |
+|---|---|---|---|
+| 1 | **Dashboard** | `/` | 4 thẻ số liệu; biểu đồ **5 cột**; 2 biểu đồ tròn; 2 bảng có nội dung |
+| 2 | **Doanh thu theo kỳ** | `/bao-cao/doanh-thu-ky` | Biểu đồ cột **5 kỳ** kèm đường tỷ lệ thu trên trục phải |
+| 3 | **Bảng tuổi nợ đủ 5 nhóm** ⚠️ | `/bao-cao/cong-no` | Cả 5 nhóm khác 0 — **chụp trước 14/08/2026**, xem mục 1.2 |
+| 4 | Sản lượng dịch vụ | `/bao-cao/san-luong` | Cột "kỳ trước" và biến động % có dấu |
+| 5 | Thống kê thuê bao | `/bao-cao/thue-bao` | Biểu đồ đường thuê bao mới / rời mạng trên cùng một trục |
+
+### Nhóm 2 — Báo cáo còn lại và xuất file
+
+| # | Màn hình | Cách lấy | Điểm cần thấy rõ |
+|---|---|---|---|
+| 6 | Menu báo cáo | `/bao-cao` | 7 thẻ + bảng số liệu nhanh 5 kỳ |
+| 7 | Doanh thu theo gói cước | `/bao-cao/doanh-thu-goi-cuoc` | Tỷ trọng cộng đủ 100% |
+| 8 | Doanh thu theo loại dịch vụ | `/bao-cao/doanh-thu-dich-vu` | Dòng giảm trừ mang **dấu âm** |
+| 9 | Top thuê bao cước cao | `/bao-cao/top-thue-bao?soLuong=50` | Đổi 10/20/50 giữ nguyên kỳ đang chọn |
+| 10 | **File Excel mở trong Excel** | Bấm *Xuất Excel* ở ảnh 2 | Header có nền, **freeze pane**, dòng tổng đậm, chân trang |
+| 11 | **Bản in A4** | Bấm *In* ở ảnh 3 → xem trước | Không còn sidebar/nút; có tiêu đề riêng cho bản in |
+| 12 | Sinh CDR có hạt giống | `/cdr/sinh-du-lieu` | Ô **Hạt giống** và khối kết quả hiện hạt giống đã dùng |
+
+### Nhóm 3 — Minh chứng kỹ thuật
+
+| # | Ảnh | Cách lấy |
+|---|---|---|
+| 13 | **260 test PASS** | Console `mvnw test`, dòng `Tests run: 260, Failures: 0` |
+| 14 | **`test-bao-cao.ps1` — 38 đạt / 0 sai** | `.\scripts\test-bao-cao.ps1` |
+| 15 | Kiểm chéo ba đường truy vấn | Chạy `BaoCaoServiceTest`, 11 test xanh |
+| 16 | Lịch sử Git Phase 6 | `git log --oneline -6` |
+
+## 16. ⭐ Bài học phương pháp Phase 6
+
+### 16.1. Bài học 43.5 — lần thứ năm và thứ sáu
+
+Phase 5 đã gặp bài học *"một phép kiểm sai nguy hiểm ngang thiếu phép kiểm"* bốn lần. Phase 6
+gặp thêm hai, và cả hai đều là **phép kiểm buộc vào chuỗi hiển thị**:
+
+| Lần | Ở đâu | Sai thế nào |
+|---|---|---|
+| 5 | `test-auth.ps1` | Kiểm phân quyền sidebar bằng cách dò **chữ** `'Hóa đơn'` trên cả trang. Nó đúng *tình cờ*, vì trang chủ cũ là trang giới thiệu không chứa chữ đó. Trang chủ thành dashboard → chữ ấy xuất hiện hợp lệ trong thân trang → **báo động giả** |
+| 6 | `test-muc-F.ps1` | Ghim cứng `soHd -eq 112`. Phase 6 thêm ba kỳ thành 280 → phép kiểm **đỏ oan** dù bất biến hoàn toàn sạch |
+
+Đã sửa cả hai theo cùng một nguyên tắc: **buộc phép kiểm vào thứ nó thật sự nói về**. Kiểm menu
+thì dò `href="/hoa-don"` — chính xác tới mức không nhầm với `href="/hoa-don/307"` của bảng dữ
+liệu. Kiểm bất biến thì lấy số hóa đơn **từ CSDL**, vì bất biến nói về *quan hệ giữa các cột*,
+không nói gì về *số lượng dòng*.
+
+> Một phép kiểm ghim vào con số dữ liệu sẽ đỏ oan mỗi lần bộ dữ liệu lớn lên. Và đỏ oan vài lần
+> thì lần sau không ai tin nó nữa — đó mới là thiệt hại thật.
+
+### 16.2. Kiểm bằng URL trực tiếp không chứng minh người dùng tới được
+
+Bốn màn hình của Phase 5 có test, có ảnh chụp, có tài liệu — và **không có đường nào tới chúng
+từ menu** suốt cả một phase. Mọi phép kiểm đều gọi thẳng `/cong-no`, tức đi vòng qua đúng cái
+thứ bị hỏng.
+
+Muốn bắt loại lỗi này thì phép kiểm phải **xuất phát từ trang chủ và đi theo liên kết**, hoặc
+tối thiểu là khẳng định liên kết có tồn tại — như `test-auth.ps1` sau khi sửa đang làm.
+
+### 16.3. Lỗi chỉ xuất hiện trên dữ liệu mà bộ dữ liệu mẫu không có
+
+Lỗi `SUM` trả `NULL` (mục 11.1) không thể lộ ra trên dữ liệu mẫu, vì mọi kỳ đều có CDR. Nó cần
+một **kỳ rỗng** — thứ chỉ tồn tại trong khoảnh khắc giữa lúc người dùng tạo kỳ và lúc chạy tính
+cước.
+
+Tiêu chí nghiệm thu số 7 (*"báo cáo chạy được khi không có dữ liệu"*) chính là thứ ép phải dựng
+ra trạng thái đó. Đây là biến thể của bài học 43.7: **dữ liệu thử thiết kế theo một chiều chỉ
+đúng theo chiều đó** — bộ dữ liệu mẫu được dựng để *có* số liệu, nên nó không bao giờ tự kiểm
+được nhánh *không có* số liệu.
+
+### 16.4. Tiền đề của đặc tả vẫn là thứ phải đo đầu tiên
+
+Lần thứ hai liên tiếp (sau mục F), hai câu trong đặc tả mô tả một kho mã không tồn tại: *"thêm
+hai kỳ là đủ 5 nhóm"* (thiếu một kỳ) và *"chạy trừ cước cho kỳ mới"* (bị chốt chặn từ chối).
+
+Chi phí phát hiện: một bảng tính số ngày quá hạn và một lần đọc `kiemTraTruocKhiChay`. Chi phí
+nếu bỏ qua: dựng xong toàn bộ dữ liệu rồi mới thấy nhóm *Trong hạn* rỗng, và một chốt chặn nghiệp
+vụ nổ ra giữa chừng.
+
+## 17. Nợ tài liệu của Phase 6
+
+| # | Nợ | Ghi chú |
+|---|---|---|
+| 1 | **Bảng aging đủ 5 nhóm chỉ đúng tới 13/08/2026** | Tính chất của ngày xem, không phải của dữ liệu — mục 1.2. Muốn bền thì phải nới dải tuổi nợ hoặc thêm kỳ theo thời gian |
+| 2 | **Bốn kỳ có CDR trả trước chưa trừ vào số dư** | Kỳ 3, 4, 5, 7. Hệ quả của quyết định ở mục 1.3; không vi phạm bất biến sổ cái |
+| 3 | Dashboard hiện liên kết `/hoa-don/{id}` cho mọi vai trò | `nhanvien01` bấm vào sẽ nhận 403. Phân quyền phía máy chủ vẫn đúng, chỉ là trải nghiệm chưa gọn |
+| 4 | Báo cáo chưa có bộ lọc theo khách hàng | Chỉ `/cong-no` của Phase 5 có; bảy báo cáo mới lọc theo kỳ |
+| 5 | Vẫn còn nợ **phần viết cho mục A–D của Phase 5** | Từ `PHASE-5-REPORT.md` mục 35, chưa xử lý |

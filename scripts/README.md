@@ -1,8 +1,9 @@
 # Script kiểm thử giao diện
 
-Ba script PowerShell kiểm thử các luồng nghiệp vụ qua HTTP thật, bổ sung cho unit test
-trong `src/test/java`. Unit test kiểm tra logic nghiệp vụ ở tầng service; các script này
-kiểm tra cả chuỗi controller → template → bảo mật, tức những thứ unit test không chạm tới.
+Năm script PowerShell kiểm thử các luồng nghiệp vụ qua HTTP thật — tổng **94 phép kiểm** —
+bổ sung cho unit test trong `src/test/java`. Unit test kiểm tra logic nghiệp vụ ở tầng
+service; các script này kiểm tra cả chuỗi controller → template → bảo mật, tức những thứ
+unit test không chạm tới.
 
 ## Yêu cầu trước khi chạy
 
@@ -21,7 +22,14 @@ mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 | `test-auth.ps1` | Đăng nhập, đăng xuất, phân quyền 3 vai trò, trang 403, sidebar theo vai trò | Không |
 | `test-kh.ps1` | Danh sách/lọc/phân trang khách hàng, validation CCCD và MST, trùng giấy tờ, chặn ngừng giao dịch | Không (mọi ca đều là ca bị chặn) |
 | `test-tb.ps1` | Danh sách/lọc thuê bao, validation đăng ký, 4 tab chi tiết, lịch sử biến động, chặn khôi phục thuê bao đã thanh lý | Không |
+| `test-muc-F.ps1` | Công nợ, bảng tuổi nợ, danh sách thanh toán; chốt chặn huỷ hóa đơn kỳ đã thu tiền | **Có** — huỷ rồi lập lại hóa đơn kỳ 6 |
+| `test-bao-cao.ps1` | Dashboard và bảy báo cáo, 13 con số đối chiếu chéo bằng SQL, 11 file Excel, báo cáo trên kỳ rỗng | **Có** — tạo rồi xoá một kỳ thử |
+| `chay-ky-moi-phase6.ps1` | Dựng kỳ 3, 4, 7/2026: tạo kỳ → sinh CDR → tính cước → lập hóa đơn → chốt | **Có** — chỉ chạy một lần ở Phase 6 |
 | `_chung.ps1` | Hàm dùng chung, không chạy trực tiếp | — |
+
+> ⚠️ Ba script cuối **ghi vào CSDL**. `test-muc-F.ps1` và `test-bao-cao.ps1` tự trả dữ liệu về
+> như cũ, nhưng ID hóa đơn kỳ 6 sẽ đổi sau vòng huỷ/lập — chạy profile `reset` sau đó nếu cần
+> khớp lại đúng `data-van-hanh.sql`.
 
 ## Cách chạy
 
@@ -58,6 +66,22 @@ phải được sửa lại chính nó.
 
 Hàm `Post-Form` cũng được siết theo hướng đó: nếu trang dùng để lấy CSRF token trả về
 mã khác 200 thì báo lỗi ngay, thay vì âm thầm lấy token từ một trang lỗi.
+
+## Nguyên tắc thứ hai: đừng buộc phép kiểm vào chuỗi hiển thị
+
+Rút ra ở Phase 6 sau hai lần báo động giả liên tiếp (`PHASE-6-REPORT.md` mục 16.1):
+
+- `test-auth.ps1` từng kiểm phân quyền sidebar bằng cách dò **chữ** `'Hóa đơn'` trên cả trang.
+  Nó đúng *tình cờ*, vì trang chủ cũ không chứa chữ đó. Trang chủ thành dashboard → chữ ấy xuất
+  hiện hợp lệ trong thân trang → phép kiểm đỏ oan. Nay dò `href="/hoa-don"`, chính xác tới mức
+  không nhầm với `href="/hoa-don/307"` của bảng dữ liệu.
+- `test-muc-F.ps1` từng ghim cứng `112` hóa đơn. Phase 6 thêm ba kỳ thành 280 → đỏ oan dù bất
+  biến hoàn toàn sạch. Nay lấy số hóa đơn **từ CSDL**, vì bất biến nói về *quan hệ giữa các cột*
+  chứ không nói gì về *số lượng dòng*.
+
+Quy tắc chung: **buộc phép kiểm vào thứ nó thật sự nói về** — `id`, `href`, giá trị đọc lại từ
+CSDL — chứ không vào câu chữ hay vào quy mô dữ liệu. Một phép kiểm đỏ oan vài lần thì lần sau
+không ai tin nó nữa, và đó mới là thiệt hại thật.
 
 ## Lưu ý về mã hoá file
 

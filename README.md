@@ -130,7 +130,7 @@ Hai file dữ liệu chạy nối tiếp nhau, và ranh giới giữa chúng là
 | File | Nội dung | Nguồn gốc |
 |---|---|---|
 | `db/data-mau.sql` | 3 tài khoản · 50 khách hàng · 80 thuê bao · 5 gói cước · 10 dòng bảng giá · 3 kỳ cước · 18 dòng mở sổ số dư | Viết tay — sửa được |
-| `db/data-van-hanh.sql` | 8.714 CDR đã định giá · 112 hóa đơn · 266 chi tiết · 48 thanh toán · 16 dòng trừ cước · 2 giảm trừ | **Bản dump** do máy sinh |
+| `db/data-van-hanh.sql` | 18.723 CDR đã định giá · 280 hóa đơn · 620 chi tiết · 161 thanh toán · 16 dòng trừ cước · 2 giảm trừ | **Bản dump** do máy sinh |
 
 > ℹ️ **Từ Phase 5 mục F, `reset` TÁI LẬP đúng bộ dữ liệu mà báo cáo mô tả.** Trước đó
 > `data-mau.sql` không chứa hóa đơn nào, mà `CdrGeneratorService` lại dùng `new Random()`
@@ -147,16 +147,21 @@ Hai file dữ liệu chạy nối tiếp nhau, và ranh giới giữa chúng là
 mvnw test
 ```
 
-Hiện có **246 test**. Bốn lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
+Hiện có **260 test**. Sáu lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
 với schema thật; `KiemTraDoPhuBangGiaTest`, `KiemTraSoCaiSoDuTest` và
-`KiemTraBatBienThanhToanTest` kiểm bất biến trên dữ liệu thật); các lớp còn lại chạy độc lập
-không cần CSDL.
+`KiemTraBatBienThanhToanTest` kiểm bất biến trên dữ liệu thật; `CdrGeneratorHatGiongTest` kiểm
+tính tái lập của bộ sinh; `BaoCaoServiceTest` kiểm chéo số liệu báo cáo); các lớp còn lại chạy
+độc lập không cần CSDL.
 
 > ⚠️ **Dừng ứng dụng trước khi chạy `mvnw test`** — bộ test chạy trên CSDL thật.
 
 > ⚠️ Dòng phân rã theo lớp có thể in ra `Tests run: 0 ... in Ma trận chuyển trạng thái thuê bao`.
 > Đó là cách Surefire đếm lớp `@Nested`, **không phải lỗi** — con số đúng nằm ở dòng tổng
-> `Results: Tests run: 246`.
+> `Results: Tests run: 260`.
+
+Ngoài ra có **5 script kiểm thử giao diện** trong `scripts/` (chạy khi ứng dụng đang bật),
+tổng **94 phép kiểm**: `test-auth.ps1`, `test-kh.ps1`, `test-tb.ps1`, `test-muc-F.ps1` và
+`test-bao-cao.ps1`. Xem [`scripts/README.md`](scripts/README.md).
 
 ### 4.4. Chạy engine tính cước
 

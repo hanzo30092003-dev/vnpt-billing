@@ -146,7 +146,10 @@ SELECT COUNT(*) FROM (
       OR h.da_thanh_toan <> COALESCE(SUM(t.so_tien), 0)) x;
 "@)
 $soHd = [int](Sql-Value "SELECT COUNT(*) FROM hoa_don;")
-Xac-Nhan "Bat bien tieu chi 4 van sach" ($lech -eq 0 -and $soHd -eq 112) `
+# So hoa don LAY TU CSDL chu khong ghi cung 112 nhu ban dau: Phase 6 them ba ky
+# nen con so do thanh 280. Mot phep kiem ghim vao so luong du lieu se do oan moi
+# lan bo du lieu mau lon len - va do oan thi lan sau khong ai tin no nua.
+Xac-Nhan "Bat bien tieu chi 4 van sach" ($lech -eq 0 -and $soHd -gt 0) `
     ("{0} dong lech tren {1} hoa don" -f $lech, $soHd)
 
 Ket-Thuc

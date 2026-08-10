@@ -118,7 +118,7 @@ Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định 
 
 ## Tiến độ
 
-Phase 0–5 ✅ · **đang vào Phase 6**.
+Phase 0–6 ✅ · **đang vào Phase 7**.
 
 | Phase | Nội dung | Báo cáo |
 |---|---|---|
@@ -128,16 +128,19 @@ Phase 0–5 ✅ · **đang vào Phase 6**.
 | 3 | Gói cước, bảng giá, CDR, kỳ cước | `docs/PHASE-3-REPORT.md` |
 | 4 | Engine tính cước (rating + billing) | `docs/PHASE-4-PLAN.md` · `docs/PHASE-4-REPORT.md` |
 | 5 | Hóa đơn, thanh toán, công nợ | `docs/PHASE-5-PLAN.md` · `docs/PHASE-5-REPORT.md` |
-| 6 | Báo cáo, thống kê, dashboard | 🔄 |
-| 7 | Hoàn thiện, kiểm thử, tài liệu | ⏳ |
+| 6 | Báo cáo, thống kê, dashboard | `docs/PHASE-6-REPORT.md` |
+| 7 | Hoàn thiện, kiểm thử, tài liệu | 🔄 |
 
-**Dữ liệu hiện tại:** 8.714 CDR (tất cả `DA_TINH`) · 112 hóa đơn (54 kỳ 5 + 58 kỳ 6) · 266 chi
-tiết hóa đơn · **48 thanh toán** (toàn bộ kỳ 5) · 34 dòng `bien_dong_so_du` (18 mở sổ + 16 trừ
-cước kỳ 6) · 2 giảm trừ `DA_AP_DUNG` · kỳ 5/2026 `DA_CHOT`, kỳ 6/2026 `MO`.
+**Dữ liệu hiện tại:** **5 kỳ cước** (3, 4, 5/2026 `DA_CHOT` · 6, 7/2026 `MO`) · 18.723 CDR (tất
+cả `DA_TINH`) · **280 hóa đơn** (55 · 55 · 54 · 58 · 58) · 620 chi tiết hóa đơn · **161 thanh
+toán** (kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · kỳ 6–7: **0**) · 34 dòng `bien_dong_so_du` · 2 giảm trừ.
 
-Tiền: doanh thu **45.117.767 đ**, đã thu **15.117.474 đ**, còn nợ **30.000.293 đ**.
-Kỳ 5 phân bố 32 `DA_TT` / 8 `TT_MOT_PHAN` / 14 `QUA_HAN`; kỳ 6 toàn bộ 58 `QUA_HAN`.
-Chi tiết bàn giao: `PHASE-5-REPORT.md` mục 31.
+Tiền: doanh thu **111.513.012 đ**, đã thu **49.190.687 đ**, còn nợ **62.322.325 đ** (44,1%).
+Chi tiết bàn giao: `PHASE-6-REPORT.md` mục 14.
+
+**Hạt giống CDR** (thứ duy nhất dựng lại được dữ liệu nếu mất): kỳ 3 `20260300` · kỳ 4
+`20260400` · kỳ 7 `20260700`. Kỳ 5 và 6 sinh trước khi có tham số hạt giống nên **chỉ còn bản
+dump** `data-van-hanh.sql`.
 
 **Ràng buộc sinh ra ở Phase 5 — đừng phá:**
 
@@ -150,6 +153,12 @@ Chi tiết bàn giao: `PHASE-5-REPORT.md` mục 31.
   trạng thái không thể tồn tại sau ngày hết hạn — xem báo cáo mục 23.2.
 * Quy tắc dấu chỉ nằm trong enum `LoaiBienDongSoDu`, không chép ra chỗ khác.
 * Trừ cước **không giao hoán theo kỳ**; `huyRatingKy` bị chặn khi kỳ đã trừ cước.
-* **Kỳ 6 phải giữ 0 giao dịch thanh toán.** Có thanh toán là `huyBillingKy` từ chối xoá hóa
-  đơn, và mất luôn kỳ duy nhất còn demo được trọn vòng huỷ → lập lại.
+* **Kỳ 6 và kỳ 7 phải giữ 0 giao dịch thanh toán.** Có thanh toán là `huyBillingKy` từ chối xoá
+  hóa đơn, và mất luôn hai kỳ còn demo được trọn vòng huỷ → lập lại.
 * `db/data-van-hanh.sql` là **bản dump**, không phải file soạn tay — sửa qua service rồi dump lại.
+* **Quét quá hạn chỉ chạm hóa đơn chưa thu đồng nào** — bỏ điều kiện đó thì `TT_MOT_PHAN` thành
+  trạng thái không thể tồn tại sau hạn.
+* Mọi truy vấn thống kê **gom nhóm trong CSDL** (`SELECT new` + `GROUP BY`), không load entity
+  rồi cộng trong Java. Định dạng số đi qua bean `soLieu` (`DinhDangTien`), không viết lặp.
+* **Bảng aging đủ 5 nhóm chỉ đúng tới 13/08/2026** — đó là tính chất của ngày xem chứ không phải
+  của dữ liệu. Xem `PHASE-6-REPORT.md` mục 1.2 trước khi tưởng có gì hỏng.
