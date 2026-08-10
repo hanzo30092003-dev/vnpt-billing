@@ -34,7 +34,7 @@ Nạp lại dữ liệu mẫu — **XOÁ SẠCH CSDL** (`schema.sql` mở đầu
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-Chạy test (246 test, cần MySQL đang chạy):
+Chạy test (275 test, cần MySQL đang chạy):
 
 ```bash
 mvnw test
@@ -118,7 +118,7 @@ Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định 
 
 ## Tiến độ
 
-Phase 0–6 ✅ · **đang vào Phase 7**.
+Phase 0–7 ✅ — **dự án đã hoàn tất**.
 
 | Phase | Nội dung | Báo cáo |
 |---|---|---|
@@ -129,11 +129,11 @@ Phase 0–6 ✅ · **đang vào Phase 7**.
 | 4 | Engine tính cước (rating + billing) | `docs/PHASE-4-PLAN.md` · `docs/PHASE-4-REPORT.md` |
 | 5 | Hóa đơn, thanh toán, công nợ | `docs/PHASE-5-PLAN.md` · `docs/PHASE-5-REPORT.md` |
 | 6 | Báo cáo, thống kê, dashboard | `docs/PHASE-6-REPORT.md` |
-| 7 | Hoàn thiện, kiểm thử, tài liệu | 🔄 |
+| 7 | Hoàn thiện, kiểm thử, tài liệu | `docs/PHASE-7-REPORT.md` |
 
-**Dữ liệu hiện tại:** **5 kỳ cước** (3, 4, 5/2026 `DA_CHOT` · 6, 7/2026 `MO`) · 18.723 CDR (tất
+**Dữ liệu hiện tại:** **6 kỳ cước** (3, 4, 5/2026 `DA_CHOT` · 6, 7, 8/2026 `MO`; **kỳ 8 rỗng có chủ đích**) · 18.723 CDR (tất
 cả `DA_TINH`) · **280 hóa đơn** (55 · 55 · 54 · 58 · 58) · 620 chi tiết hóa đơn · **161 thanh
-toán** (kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · kỳ 6–7: **0**) · 34 dòng `bien_dong_so_du` · 2 giảm trừ.
+toán** (kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · kỳ 6–8: **0**) · 34 dòng `bien_dong_so_du` · 2 giảm trừ.
 
 Tiền: doanh thu **111.513.012 đ**, đã thu **49.190.687 đ**, còn nợ **62.322.325 đ** (44,1%).
 Chi tiết bàn giao: `PHASE-6-REPORT.md` mục 14.
@@ -153,6 +153,7 @@ dump** `data-van-hanh.sql`.
   trạng thái không thể tồn tại sau ngày hết hạn — xem báo cáo mục 23.2.
 * Quy tắc dấu chỉ nằm trong enum `LoaiBienDongSoDu`, không chép ra chỗ khác.
 * Trừ cước **không giao hoán theo kỳ**; `huyRatingKy` bị chặn khi kỳ đã trừ cước.
+* **Kỳ 8/2026 phải giữ RỖNG** — đó là kỳ demo trực tiếp và là kỳ kiểm "màn hình chịu được kỳ rỗng".
 * **Kỳ 6 và kỳ 7 phải giữ 0 giao dịch thanh toán.** Có thanh toán là `huyBillingKy` từ chối xoá
   hóa đơn, và mất luôn hai kỳ còn demo được trọn vòng huỷ → lập lại.
 * `db/data-van-hanh.sql` là **bản dump**, không phải file soạn tay — sửa qua service rồi dump lại.

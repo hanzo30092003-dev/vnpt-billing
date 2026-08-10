@@ -176,7 +176,7 @@ Sáu kỳ cước sau khi nạp:
 > Mọi khách hàng, thuê bao, giao dịch nhập qua giao diện đều **mất sạch**.
 
 Bù lại, `reset` **tái lập đúng** bộ dữ liệu mà báo cáo mô tả: chạy lại bao nhiêu lần cũng ra
-đúng 20.101 dòng giống hệt nhau. Trước Phase 5 mục F thì không — `data-mau.sql` không chứa hóa
+đúng 20.102 dòng giống hệt nhau. Trước Phase 5 mục F thì không — `data-mau.sql` không chứa hóa
 đơn nào, mà bộ sinh CDR lại dùng `new Random()` không hạt giống, nên mỗi lần `reset` ra một bộ
 số khác và mọi con số trong báo cáo mất khả năng tái lập.
 
@@ -190,7 +190,7 @@ số khác và mọi con số trong báo cáo mất khả năng tái lập.
 mvnw test
 ```
 
-**279 test.** Trong đó 241 test chạy độc lập không cần CSDL; 38 test ở 8 lớp cần MySQL đang
+**275 test.** Trong đó 237 test chạy độc lập không cần CSDL; 38 test ở 8 lớp cần MySQL đang
 chạy vì chúng kiểm bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng sẵn.
 
 > ⚠️ **Dừng ứng dụng trước khi chạy `mvnw test`** — bộ test chạy trên CSDL thật.
@@ -259,7 +259,7 @@ vnpt-billing/
     │           ├── fragments/layout.html
     │           ├── error/{400,403,404,500}.html
     │           └── <phân-hệ>/*.html
-    └── test/java/com/hanzo/billing/     # 279 test
+    └── test/java/com/hanzo/billing/     # 275 test
 ```
 
 ---

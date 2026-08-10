@@ -155,8 +155,8 @@ Cột **Kết quả thực tế** và **Đạt/Không** để trống cho ngư�
 
 | Loại | Số lượng | Ghi chú |
 |---|---|---|
-| **Test tự động (JUnit)** | **269** | `mvnw test`, 0 lỗi |
-| — chạy độc lập, không cần CSDL | 231 | Logic nghiệp vụ, quy đổi đơn vị, ma trận trạng thái, PDF, đọc số tiền, phân trang |
+| **Test tự động (JUnit)** | **275** | `mvnw test`, 0 lỗi |
+| — chạy độc lập, không cần CSDL | 237 | Logic nghiệp vụ, quy đổi đơn vị, ma trận trạng thái, PDF, đọc số tiền, phân trang |
 | — cần MySQL, chạy trên dữ liệu thật | 38 | 8 lớp, liệt kê dưới đây |
 
 Tám lớp cần MySQL:
