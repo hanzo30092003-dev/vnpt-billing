@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Yêu cầu không hợp lệ', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang" class="text-center py-5">
+    <i class="bi bi-question-octagon display-1 text-warning"></i>
+    <h2 class="h3 mt-3">400 &mdash; Yêu cầu không hợp lệ</h2>
+    <p class="text-secondary">
+        Địa chỉ chứa tham số không đúng định dạng. Thường là do sửa tay trên thanh địa chỉ
+        hoặc mở một liên kết đã cũ.
+    </p>
+
+    <!--/*
+        Nói RÕ tham số nào sai. Một trang 400 chỉ ghi "yêu cầu không hợp lệ" thì người dùng
+        không có cách nào biết phải sửa gì.
+    */-->
+    <div class="d-inline-block text-start bg-light border rounded p-3 my-3" th:if="${thamSoSai}">
+        <div class="small text-secondary">Tham số không đọc được:</div>
+        <code class="fs-6">
+            <span th:text="${thamSoSai}">id</span> = <span th:text="${giaTriSai}">abc</span>
+        </code>
+    </div>
+
+    <div>
+        <a class="btn btn-primary" th:href="@{/}">
+            <i class="bi bi-house-door me-1"></i> Về trang chủ
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

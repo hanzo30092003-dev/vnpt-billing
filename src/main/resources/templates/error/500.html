@@ -7,9 +7,26 @@
     <i class="bi bi-exclamation-octagon display-1 text-danger"></i>
     <h2 class="h3 mt-3">500 &mdash; Lỗi hệ thống</h2>
     <p class="text-secondary">Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại hoặc liên hệ quản trị viên.</p>
-    <a class="btn btn-primary" th:href="@{/}">
-        <i class="bi bi-house-door me-1"></i> Về trang chủ
-    </a>
+
+    <!--/*
+        Mã sự cố là mốc để tra đúng dòng trong file log. Không có nó thì người dùng chỉ
+        báo được "hệ thống lỗi", còn người hỗ trợ phải dò cả file log để đoán xem là lần
+        nào. Chỉ hiện khi lỗi đi qua GlobalExceptionHandler — trang 500 mặc định của
+        Spring Boot không có biến này.
+    */-->
+    <div class="d-inline-block text-start bg-light border rounded p-3 my-3" th:if="${maSuCo}">
+        <div class="small text-secondary">Mã sự cố &mdash; đọc mã này cho người hỗ trợ:</div>
+        <code class="fs-6 user-select-all" th:text="${maSuCo}">20260810-134500</code>
+        <div class="small text-secondary mt-2" th:if="${duongDanLoi}">
+            Đường dẫn: <span th:text="${duongDanLoi}"></span>
+        </div>
+    </div>
+
+    <div>
+        <a class="btn btn-primary" th:href="@{/}">
+            <i class="bi bi-house-door me-1"></i> Về trang chủ
+        </a>
+    </div>
 </div>
 
 </body>

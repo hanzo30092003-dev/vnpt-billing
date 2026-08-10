@@ -61,3 +61,25 @@ spring:
   thymeleaf:
     cache: false
     encoding: UTF-8
+
+# ---------------------------------------------------------------------
+# GHI LOG RA FILE - them o Phase 7 muc C1
+#
+# Khong co muc nay thi stacktrace chi nam trong console, ma dong console lai
+# la mat sach. GlobalExceptionHandler sinh mot MA SU CO cho moi loi khong
+# luong truoc va hien no len trang 500; ma do chi co ich khi con file log de
+# tra nguoc lai.
+#
+# File nam trong logs/ (da co trong .gitignore qua quy tac *.log). Cat theo
+# ngay va giu 30 ban de khong phinh vo han.
+# ---------------------------------------------------------------------
+logging:
+  file:
+    name: logs/vnpt-billing.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: logs/vnpt-billing-%d{yyyy-MM-dd}.%i.log
+      max-file-size: 10MB
+      max-history: 30
+  level:
+    com.hanzo.billing: INFO
