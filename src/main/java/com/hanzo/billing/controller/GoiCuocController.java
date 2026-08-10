@@ -5,6 +5,7 @@ import com.hanzo.billing.entity.GoiCuoc;
 import com.hanzo.billing.enums.LoaiThueBao;
 import com.hanzo.billing.exception.NghiepVuException;
 import com.hanzo.billing.service.GoiCuocService;
+import com.hanzo.billing.util.ThamSoPhanTrang;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -85,7 +86,8 @@ public class GoiCuocController {
         model.addAttribute("bangGiaRieng", goiCuocService.layBangGiaRieng(id));
         model.addAttribute("soThueBao", goiCuocService.demThueBaoDangDung(id));
         model.addAttribute("trangThueBao", goiCuocService.layThueBaoDangDung(id,
-                PageRequest.of(Math.max(trang, 0), SO_DONG_MOI_TRANG, Sort.by("soThueBao"))));
+                PageRequest.of(ThamSoPhanTrang.trangHopLe(trang), SO_DONG_MOI_TRANG,
+                        Sort.by("soThueBao"))));
         return "goi-cuoc/chi-tiet";
     }
 

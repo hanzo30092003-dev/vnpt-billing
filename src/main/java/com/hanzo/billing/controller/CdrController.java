@@ -13,6 +13,7 @@ import com.hanzo.billing.service.ChiTietSuDungService;
 import com.hanzo.billing.service.ThueBaoService;
 import com.hanzo.billing.service.rating.CdrGeneratorService;
 import com.hanzo.billing.service.rating.CdrImportService;
+import com.hanzo.billing.util.ThamSoPhanTrang;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
@@ -52,7 +53,8 @@ public class CdrController {
                            @RequestParam(defaultValue = "0") int trang,
                            Model model) {
 
-        Pageable phanTrang = PageRequest.of(Math.max(trang, 0), SO_DONG_MOI_TRANG);
+        Pageable phanTrang = PageRequest.of(
+                ThamSoPhanTrang.trangHopLe(trang), SO_DONG_MOI_TRANG);
         model.addAttribute("ketQua", chiTietSuDungService.timCoLoc(boLoc, phanTrang));
         model.addAttribute("tongHop", chiTietSuDungService.tinhTong(boLoc));
         model.addAttribute("chuoiLoc", boLoc.chuoiQuery());

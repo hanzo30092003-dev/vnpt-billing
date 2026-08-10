@@ -7,6 +7,7 @@ import com.hanzo.billing.service.HoaDonService;
 import com.hanzo.billing.service.KyCuocService;
 import com.hanzo.billing.service.pdf.HoaDonPdfService;
 import com.hanzo.billing.util.DocSoTienUtil;
+import com.hanzo.billing.util.ThamSoPhanTrang;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -56,7 +57,7 @@ public class HoaDonController {
         hoaDonService.capNhatQuaHan();
 
         Page<HoaDon> ketQua = hoaDonService.timKiem(
-                boLoc, PageRequest.of(trang, SO_DONG_MOI_TRANG));
+                boLoc, PageRequest.of(ThamSoPhanTrang.trangHopLe(trang), SO_DONG_MOI_TRANG));
 
         model.addAttribute("ketQua", ketQua);
         model.addAttribute("tongHop", hoaDonService.tongHop(boLoc));

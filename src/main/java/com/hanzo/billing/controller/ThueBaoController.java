@@ -10,6 +10,7 @@ import com.hanzo.billing.service.KhachHangService;
 import com.hanzo.billing.service.KyCuocService;
 import com.hanzo.billing.service.ThueBaoService;
 import com.hanzo.billing.service.rating.ThamSoTinhCuoc;
+import com.hanzo.billing.util.ThamSoPhanTrang;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,7 +45,7 @@ public class ThueBaoController {
                            @RequestParam(defaultValue = "0") int trang,
                            Model model) {
 
-        Pageable phanTrang = PageRequest.of(Math.max(trang, 0), SO_DONG_MOI_TRANG,
+        Pageable phanTrang = PageRequest.of(ThamSoPhanTrang.trangHopLe(trang), SO_DONG_MOI_TRANG,
                 Sort.by(Sort.Direction.DESC, "id"));
         Page<ThueBao> ketQua = thueBaoService.timKiem(tuKhoa, trangThai, loaiThueBao, goiCuocId, phanTrang);
 

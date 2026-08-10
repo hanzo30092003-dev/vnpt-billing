@@ -6,6 +6,7 @@ import com.hanzo.billing.enums.LoaiKhachHang;
 import com.hanzo.billing.enums.TrangThaiKhachHang;
 import com.hanzo.billing.exception.NghiepVuException;
 import com.hanzo.billing.service.KhachHangService;
+import com.hanzo.billing.util.ThamSoPhanTrang;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,7 +38,7 @@ public class KhachHangController {
                            @RequestParam(defaultValue = "0") int trang,
                            Model model) {
 
-        Pageable phanTrang = PageRequest.of(Math.max(trang, 0), SO_DONG_MOI_TRANG,
+        Pageable phanTrang = PageRequest.of(ThamSoPhanTrang.trangHopLe(trang), SO_DONG_MOI_TRANG,
                 Sort.by(Sort.Direction.DESC, "id"));
         Page<KhachHang> ketQua = khachHangService.timKiem(tuKhoa, loaiKh, trangThai, phanTrang);
 

@@ -67,35 +67,35 @@
                             Chưa có khoản giảm trừ nào.
                         </td>
                     </tr>
-                    <tr th:each="gt : ${danhSach}">
-                        <td th:text="${gt.thueBao.soThueBao}"></td>
-                        <td th:text="${gt.thueBao.khachHang.tenKh}"></td>
-                        <td th:text="${gt.kyCuoc != null} ? (${gt.kyCuoc.thang} + '/' + ${gt.kyCuoc.nam}) : 'Dùng chung'"></td>
-                        <td th:text="${gt.loai.nhan}"></td>
+                    <tr th:each="khoan : ${danhSach}">
+                        <td th:text="${khoan.thueBao.soThueBao}"></td>
+                        <td th:text="${khoan.thueBao.khachHang.tenKh}"></td>
+                        <td th:text="${khoan.kyCuoc != null} ? (${khoan.kyCuoc.thang} + '/' + ${khoan.kyCuoc.nam}) : 'Dùng chung'"></td>
+                        <td th:text="${khoan.loai.nhan}"></td>
                         <!--/* Hien dung cach khai da luu: so tien tuyet doi HOAC ty le,
                                khong bao gio ca hai */-->
                         <td class="text-end fw-semibold"
-                            th:text="${gt.soTien != null}
-                                     ? (${#numbers.formatDecimal(gt.soTien, 0, 'POINT', 0, 'COMMA')} + ' đ')
-                                     : (${gt.tyLePhanTram} + '%')"></td>
-                        <td th:text="${gt.lyDo != null} ? ${gt.lyDo} : '—'"></td>
+                            th:text="${khoan.soTien != null}
+                                     ? (${#numbers.formatDecimal(khoan.soTien, 0, 'POINT', 0, 'COMMA')} + ' đ')
+                                     : (${khoan.tyLePhanTram} + '%')"></td>
+                        <td th:text="${khoan.lyDo != null} ? ${khoan.lyDo} : '—'"></td>
                         <td>
-                            <span class="badge" th:classappend="${gt.trangThai.lopBadge}"
-                                  th:text="${gt.trangThai.nhan}"></span>
+                            <span class="badge" th:classappend="${khoan.trangThai.lopBadge}"
+                                  th:text="${khoan.trangThai.nhan}"></span>
                         </td>
                         <td class="text-end">
-                            <div th:if="${gt.trangThai.name() == 'CHUA_AP_DUNG'}" class="d-inline">
+                            <div th:if="${khoan.trangThai.name() == 'CHUA_AP_DUNG'}" class="d-inline">
                                 <a class="btn btn-sm btn-outline-secondary"
-                                   th:href="@{/giam-tru/{id}/sua(id=${gt.id})}">Sửa</a>
+                                   th:href="@{/giam-tru/{id}/sua(id=${khoan.id})}">Sửa</a>
                                 <form method="post" class="d-inline form-thao-tac"
-                                      th:action="@{/giam-tru/{id}/xoa(id=${gt.id})}">
+                                      th:action="@{/giam-tru/{id}/xoa(id=${khoan.id})}">
                                     <button type="button" class="btn btn-sm btn-outline-danger"
                                             th:data-xac-nhan="'Xoá khoản giảm trừ của thuê bao '
-                                                + ${gt.thueBao.soThueBao} + '?'"
+                                                + ${khoan.thueBao.soThueBao} + '?'"
                                             data-xac-nhan-tieu-de="Xoá khoản giảm trừ">Xoá</button>
                                 </form>
                             </div>
-                            <span th:unless="${gt.trangThai.name() == 'CHUA_AP_DUNG'}"
+                            <span th:unless="${khoan.trangThai.name() == 'CHUA_AP_DUNG'}"
                                   class="small text-secondary">Đã vào hóa đơn</span>
                         </td>
                     </tr>

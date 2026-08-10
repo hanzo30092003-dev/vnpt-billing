@@ -9,6 +9,7 @@ import com.hanzo.billing.exception.NghiepVuException;
 import com.hanzo.billing.service.HoaDonService;
 import com.hanzo.billing.service.ThanhToanService;
 import com.hanzo.billing.service.pdf.PhieuThuPdfService;
+import com.hanzo.billing.util.ThamSoPhanTrang;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -99,7 +100,7 @@ public class ThanhToanController {
                            @RequestParam(defaultValue = "0") int trang,
                            Model model) {
         Page<ThanhToan> ketQua = thanhToanService.timKiem(
-                boLoc, PageRequest.of(trang, SO_DONG_MOI_TRANG));
+                boLoc, PageRequest.of(ThamSoPhanTrang.trangHopLe(trang), SO_DONG_MOI_TRANG));
 
         model.addAttribute("ketQua", ketQua);
         model.addAttribute("tongThu", thanhToanService.tongThu(boLoc));

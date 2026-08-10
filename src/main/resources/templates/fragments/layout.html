@@ -109,11 +109,15 @@
                 <i class="bi bi-bar-chart-line"></i> Báo cáo thống kê
             </a>
 
-            <!--/* Quản trị hệ thống: chỉ quản trị viên */-->
-            <div sec:authorize="hasRole('ADMIN')">
-                <div class="nav-group">Hệ thống</div>
-                <a class="nav-item" href="#"><i class="bi bi-gear"></i> Quản trị</a>
-            </div>
+            <!--/*
+                Mục "Quản trị" đã BỎ ở Phase 7. Nó để href="#" từ Phase 0 và không hề có
+                controller nào phục vụ /quan-tri — tức một nút bấm không phản hồi, nằm suốt
+                bảy phase. Bỏ hẳn thay vì để đó: một mục menu không dẫn đi đâu làm người dùng
+                tưởng chức năng hỏng, còn tệ hơn là không có mục đó.
+
+                Luật chặn /quan-tri/** trong SecurityConfig CỐ Ý giữ lại: nó vô hại, và nó ghi
+                lại ý định phân quyền cho phân hệ quản trị nếu về sau có người làm tiếp.
+            */-->
         </nav>
     </aside>
 
