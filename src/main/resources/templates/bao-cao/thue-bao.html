@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Thống kê thuê bao', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div th:replace="~{bao-cao/fragments :: thanhCongCu('Thống kê thuê bao', 'bi-sim',
+                       @{/bao-cao/thue-bao/xuat-excel})}"></div>
+    <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO THỐNG KÊ THUÊ BAO',
+                       'Toàn bộ hệ thống')}"></div>
+
+    <div th:if="${thongKe.rong()}"
+         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Chưa có thuê bao nào.')}"></div>
+
+    <div th:unless="${thongKe.rong()}">
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-secondary">Tổng thuê bao</div>
+                        <div class="h4 mb-0" th:text="${@soLieu.so(thongKe.tongThueBao)}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-secondary">Đang hoạt động</div>
+                        <div class="h4 mb-0 text-success" th:text="${@soLieu.so(thongKe.dangHoatDong)}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-secondary">Đã thanh lý</div>
+                        <div class="h4 mb-0 text-danger" th:text="${@soLieu.so(thongKe.daThanhLy)}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="small text-secondary">Tỷ lệ rời mạng</div>
+                        <div class="h4 mb-0" th:text="${@soLieu.phanTram(thongKe.tyLeRoiMang())}">—</div>
+                        <div class="small text-secondary">luỹ kế trên tổng thuê bao</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-semibold">Theo trạng thái</div>
+                    <div class="card-body">
+                        <canvas id="bieuDoTrangThai" height="200"></canvas>
+                        <table class="table table-sm bang-du-lieu mt-3 mb-0">
+                            <tbody>
+                            <tr th:each="m : ${thongKe.theoTrangThai}">
+                                <td th:text="${m.nhan}">Hoạt động</td>
+                                <td class="text-end fw-semibold" th:text="${@soLieu.so(m.soLuong)}">0</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white fw-semibold">Theo loại thuê bao</div>
+                    <div class="card-body">
+                        <canvas id="bieuDoLoai" height="200"></canvas>
+                        <table class="table table-sm bang-du-lieu mt-3 mb-0">
+                            <tbody>
+                            <tr th:each="m : ${thongKe.theoLoai}">
+                                <td th:text="${m.nhan}">Trả sau</td>
+                                <td class="text-end fw-semibold" th:text="${@soLieu.so(m.soLuong)}">0</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">
+                Thuê bao mới và rời mạng theo tháng
+            </div>
+            <div class="card-body">
+                <canvas id="bieuDoBienDong" height="110"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const nhanTrangThai = /*[[${thongKe.theoTrangThai.![nhan]}]]*/ [];
+        const soTrangThai = /*[[${thongKe.theoTrangThai.![soLuong]}]]*/ [];
+        const nhanLoai = /*[[${thongKe.theoLoai.![nhan]}]]*/ [];
+        const soLoai = /*[[${thongKe.theoLoai.![soLuong]}]]*/ [];
+        const mocThoiGian = /*[[${thongKe.mocThoiGian}]]*/ [];
+        const thueBaoMoi = /*[[${thongKe.thueBaoMoi}]]*/ [];
+        const thueBaoRoiMang = /*[[${thongKe.thueBaoRoiMang}]]*/ [];
+        /*]]>*/
+        document.addEventListener('DOMContentLoaded', function () {
+            const oTrangThai = document.getElementById('bieuDoTrangThai');
+            if (!oTrangThai) { return; }
+            new Chart(oTrangThai, {
+                type: 'doughnut',
+                data: {
+                    labels: nhanTrangThai,
+                    datasets: [{ data: soTrangThai,
+                        backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#6c757d'] }]
+                },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+            new Chart(document.getElementById('bieuDoLoai'), {
+                type: 'doughnut',
+                data: {
+                    labels: nhanLoai,
+                    datasets: [{ data: soLoai, backgroundColor: ['#0d6efd', '#20c997'] }]
+                },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+            new Chart(document.getElementById('bieuDoBienDong'), {
+                type: 'line',
+                data: {
+                    labels: mocThoiGian,
+                    datasets: [
+                        { label: 'Thuê bao mới', data: thueBaoMoi,
+                          borderColor: '#198754', backgroundColor: '#198754', tension: 0.3 },
+                        { label: 'Rời mạng', data: thueBaoRoiMang,
+                          borderColor: '#dc3545', backgroundColor: '#dc3545', tension: 0.3 }
+                    ]
+                },
+                options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+            });
+        });
+    </script>
+
+</div>
+
+</body>
+</html>

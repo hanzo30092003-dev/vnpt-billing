@@ -61,6 +61,58 @@ public interface ThueBaoRepository extends JpaRepository<ThueBao, Long> {
     @Query("SELECT tb.goiCuoc.id, COUNT(tb) FROM ThueBao tb GROUP BY tb.goiCuoc.id")
     List<Object[]> demThueBaoTheoGoiCuoc();
 
+    // =================================================================
+    // PHASE 6 — TRUY VẤN THỐNG KÊ
+    // =================================================================
+
+    /** Số thuê bao theo từng gói, kèm tên gói — biểu đồ tròn "cơ cấu theo gói cước". */
+    @Query("""
+            SELECT g.maGoi, g.tenGoi, COUNT(tb)
+              FROM ThueBao tb JOIN tb.goiCuoc g
+             GROUP BY g.id, g.maGoi, g.tenGoi
+             ORDER BY COUNT(tb) DESC
+            """)
+    List<Object[]> demTheoGoiCuocKemTen();
+
+    /** Số thuê bao theo trạng thái — biểu đồ tròn "cơ cấu theo trạng thái". */
+    @Query("SELECT tb.trangThai, COUNT(tb) FROM ThueBao tb GROUP BY tb.trangThai")
+    List<Object[]> demTheoTrangThai();
+
+    /** Số thuê bao theo loại trả trước / trả sau. */
+    @Query("SELECT tb.loaiThueBao, COUNT(tb) FROM ThueBao tb GROUP BY tb.loaiThueBao")
+    List<Object[]> demTheoLoai();
+
+    /**
+     * Thuê bao <b>mới</b> theo từng tháng, tính theo {@code ngay_kich_hoat}.
+     *
+     * @return danh sách {@code [nam, thang, soLuong]}
+     */
+    @Query("""
+            SELECT YEAR(tb.ngayKichHoat), MONTH(tb.ngayKichHoat), COUNT(tb)
+              FROM ThueBao tb
+             GROUP BY YEAR(tb.ngayKichHoat), MONTH(tb.ngayKichHoat)
+             ORDER BY YEAR(tb.ngayKichHoat), MONTH(tb.ngayKichHoat)
+            """)
+    List<Object[]> demThueBaoMoiTheoThang();
+
+    /**
+     * Thuê bao <b>rời mạng</b> theo từng tháng, tính theo {@code ngay_huy}.
+     *
+     * <p>Chỉ thuê bao đã thanh lý mới có {@code ngay_huy}; thuê bao tạm ngừng vẫn là thuê bao
+     * của hệ thống nên <b>không</b> tính là rời mạng.</p>
+     */
+    @Query("""
+            SELECT YEAR(tb.ngayHuy), MONTH(tb.ngayHuy), COUNT(tb)
+              FROM ThueBao tb
+             WHERE tb.ngayHuy IS NOT NULL
+             GROUP BY YEAR(tb.ngayHuy), MONTH(tb.ngayHuy)
+             ORDER BY YEAR(tb.ngayHuy), MONTH(tb.ngayHuy)
+            """)
+    List<Object[]> demThueBaoRoiMangTheoThang();
+
+    /** Thuê bao kích hoạt trong một khoảng — thẻ "thuê bao mới trong tháng" trên dashboard. */
+    long countByNgayKichHoatBetween(java.time.LocalDate tuNgay, java.time.LocalDate denNgay);
+
     /** Thuê bao của một gói cước, có phân trang, nạp sẵn khách hàng để hiển thị tên. */
     @Query(value = """
             SELECT tb FROM ThueBao tb

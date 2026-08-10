@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/*
+    Các mảnh dùng chung cho bảy báo cáo. Gom lại vì cả bảy màn hình đều cần
+    đúng ba thứ: tiêu đề, nút Xuất Excel, nút In — và một ô chọn kỳ.
+
+    Lớp "khong-in" đã có sẵn trong app.css từ 4E: @media print ẩn nó đi, nên
+    bản in không dính nút bấm. Lớp "chi-in" thì ngược lại.
+*/-->
+
+<!--/* Thanh tiêu đề + hai nút thao tác */-->
+<div th:fragment="thanhCongCu(tieuDe, bieuTuong, duongDanExcel)"
+     class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">
+        <i class="bi me-2" th:classappend="${bieuTuong}"></i><span th:text="${tieuDe}">Báo cáo</span>
+    </h2>
+    <div class="khong-in">
+        <a class="btn btn-outline-success btn-sm" th:href="${duongDanExcel}">
+            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+        </a>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i> In
+        </button>
+    </div>
+</div>
+
+<!--/*
+    Tiêu đề chỉ hiện khi IN. Bản in không có sidebar lẫn topbar nên nếu không
+    có dòng này thì tờ giấy in ra không nói được nó là báo cáo gì.
+*/-->
+<div th:fragment="tieuDeBanIn(tieuDe, phamVi)" class="chi-in d-none mb-3">
+    <div class="fw-bold" style="font-size: 14pt;" th:text="${tieuDe}">Báo cáo</div>
+    <div class="small" th:text="'Phạm vi: ' + ${phamVi}">Phạm vi</div>
+    <div class="small text-secondary">
+        Dữ liệu mẫu phục vụ mục đích học tập — Đồ án Thực tập nghề nghiệp
+    </div>
+</div>
+
+<!--/* Ô chọn kỳ cước, tự gửi form khi đổi lựa chọn */-->
+<form th:fragment="chonKy(duongDan)" method="get" th:action="@{${duongDan}}"
+      class="card shadow-sm mb-3 khong-in">
+    <div class="card-body py-2 d-flex align-items-center gap-2">
+        <label class="form-label mb-0 small text-secondary" for="kyCuocId">Kỳ cước</label>
+        <select class="form-select form-select-sm w-auto" id="kyCuocId" name="kyCuocId"
+                onchange="this.form.submit()">
+            <option th:each="k : ${danhSachKy}" th:value="${k.id}"
+                    th:text="'Kỳ ' + ${k.thang} + '/' + ${k.nam} + ' — ' + ${k.trangThai.nhan}"
+                    th:selected="${ky != null and k.id == ky.id}">Kỳ</option>
+        </select>
+        <span class="small text-secondary" th:if="${ky == null}">
+            Chưa có kỳ cước nào có hóa đơn.
+        </span>
+    </div>
+</form>
+
+<!--/* Khối "không có dữ liệu" dùng chung — tiêu chí nghiệm thu số 7 */-->
+<div th:fragment="khongCoDuLieu(loiNhan)" class="card shadow-sm">
+    <div class="card-body text-center text-secondary py-5">
+        <i class="bi bi-inbox display-4"></i>
+        <p class="mt-3 mb-0" th:text="${loiNhan}">Không có dữ liệu.</p>
+    </div>
+</div>
+
+</body>
+</html>

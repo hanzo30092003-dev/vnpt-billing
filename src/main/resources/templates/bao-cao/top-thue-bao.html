@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Top thuê bao cước cao', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div th:replace="~{bao-cao/fragments :: thanhCongCu('Top thuê bao cước cao', 'bi-trophy',
+                       @{/bao-cao/top-thue-bao/xuat-excel(kyCuocId=${kyCuocId},soLuong=${soLuong})})}"></div>
+    <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO TOP THUÊ BAO CƯỚC CAO',
+                       ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
+
+    <!--/* Ô chọn kỳ và ô chọn số lượng nằm CHUNG một form: đổi một trong hai thì
+           tham số còn lại phải được gửi kèm, nếu tách form thì đổi kỳ sẽ đánh rơi
+           số lượng đang chọn về mặc định. */-->
+    <form method="get" th:action="@{/bao-cao/top-thue-bao}" class="card shadow-sm mb-3 khong-in">
+        <div class="card-body py-2 d-flex align-items-center gap-3 flex-wrap">
+            <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 small text-secondary" for="kyCuocId">Kỳ cước</label>
+                <select class="form-select form-select-sm w-auto" id="kyCuocId" name="kyCuocId"
+                        onchange="this.form.submit()">
+                    <option th:each="k : ${danhSachKy}" th:value="${k.id}"
+                            th:text="'Kỳ ' + ${k.thang} + '/' + ${k.nam} + ' — ' + ${k.trangThai.nhan}"
+                            th:selected="${ky != null and k.id == ky.id}">Kỳ</option>
+                </select>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 small text-secondary" for="soLuong">Số lượng</label>
+                <select class="form-select form-select-sm w-auto" id="soLuong" name="soLuong"
+                        onchange="this.form.submit()">
+                    <option th:each="n : ${cacMucSoLuong}" th:value="${n}" th:text="'Top ' + ${n}"
+                            th:selected="${n == soLuong}">Top 10</option>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <div th:if="${#lists.isEmpty(danhSach)}"
+         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có hóa đơn nào.')}"></div>
+
+    <div class="card shadow-sm" th:unless="${#lists.isEmpty(danhSach)}">
+        <div class="card-header bg-white fw-semibold">
+            Xếp hạng theo tổng thanh toán
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 3rem;">#</th>
+                        <th>Số thuê bao</th>
+                        <th>Khách hàng</th>
+                        <th>Gói</th>
+                        <th>Mã hóa đơn</th>
+                        <th class="text-end">Tổng thanh toán</th>
+                        <th class="text-end">Đã thu</th>
+                        <th class="text-end">Còn nợ</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d, lap : ${danhSach}">
+                        <td class="text-secondary" th:text="${lap.count}">1</td>
+                        <td class="fw-semibold" th:text="${d.soThueBao}">0900000000</td>
+                        <td th:text="${d.tenKhachHang}">Khách hàng</td>
+                        <td th:text="${d.maGoi}">CB01</td>
+                        <td>
+                            <a class="text-decoration-none" th:href="@{/hoa-don/{id}(id=${d.hoaDonId})}"
+                               th:text="${d.maHoaDon}">HD</a>
+                        </td>
+                        <td class="text-end fw-semibold" th:text="${@soLieu.tien(d.tongThanhToan)}">0</td>
+                        <td class="text-end text-success" th:text="${@soLieu.tien(d.daThanhToan)}">0</td>
+                        <td class="text-end text-danger" th:text="${@soLieu.tien(d.conNo)}">0</td>
+                        <td>
+                            <span class="badge" th:classappend="${d.trangThai.lopBadge}"
+                                  th:text="${d.trangThai.nhan}">Trạng thái</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

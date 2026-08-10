@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Công nợ tổng hợp', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div th:replace="~{bao-cao/fragments :: thanhCongCu('Công nợ tổng hợp', 'bi-wallet2',
+                       @{/bao-cao/cong-no/xuat-excel})}"></div>
+    <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO CÔNG NỢ TỔNG HỢP',
+                       'Toàn bộ hệ thống')}"></div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex align-items-center">
+                    <strong>Bảng tuổi nợ</strong>
+                    <span class="ms-auto">
+                        Tổng còn nợ:
+                        <strong class="text-danger" th:text="${@soLieu.tienDong(tongConNo)}">0 đ</strong>
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm bang-du-lieu mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Nhóm tuổi nợ</th>
+                            <th class="text-end">Số hóa đơn</th>
+                            <th class="text-end">Số tiền</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="o : ${bangTuoiNo}">
+                            <td>
+                                <span class="badge" th:classappend="${o.nhom.lopBadge}"
+                                      th:text="${o.nhom.nhan}">Nhóm</span>
+                            </td>
+                            <td class="text-end" th:text="${@soLieu.so(o.soHoaDon)}">0</td>
+                            <td class="text-end fw-semibold" th:text="${@soLieu.tien(o.tongTien)}">0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">Phân bố nợ theo tuổi</div>
+                <div class="card-body">
+                    <canvas id="bieuDoTuoiNo" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white fw-semibold">Top 10 khách hàng nợ nhiều nhất</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 3rem;">#</th>
+                        <th>Mã KH</th>
+                        <th>Tên khách hàng</th>
+                        <th class="text-end">Số hóa đơn nợ</th>
+                        <th class="text-end">Tổng còn nợ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d, lap : ${topKhachNo}">
+                        <td class="text-secondary" th:text="${lap.count}">1</td>
+                        <td th:text="${d.maKh}">KH000001</td>
+                        <td>
+                            <a class="text-decoration-none"
+                               th:href="@{/khach-hang/{id}(id=${d.khachHangId})}"
+                               th:text="${d.tenKh}">Tên</a>
+                        </td>
+                        <td class="text-end" th:text="${@soLieu.so(d.soHoaDonNo)}">0</td>
+                        <td class="text-end fw-semibold text-danger"
+                            th:text="${@soLieu.tien(d.tongConNo)}">0</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(topKhachNo)}">
+                        <td colspan="5" class="text-center text-secondary py-4">
+                            Không có khách hàng nào còn nợ.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const nhanTuoiNo = /*[[${nhanTuoiNo}]]*/ [];
+        const tienTuoiNo = /*[[${tienTuoiNo}]]*/ [];
+        /*]]>*/
+        document.addEventListener('DOMContentLoaded', function () {
+            const khung = document.getElementById('bieuDoTuoiNo');
+            if (!khung) { return; }
+            new Chart(khung, {
+                type: 'bar',
+                data: {
+                    labels: nhanTuoiNo,
+                    datasets: [{
+                        label: 'Còn nợ (đ)',
+                        data: tienTuoiNo,
+                        backgroundColor: ['#6c757d', '#ffc107', '#fd7e14', '#dc3545', '#8b0000']
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true,
+                        ticks: { callback: v => (v / 1000000).toFixed(0) + ' tr' } } }
+                }
+            });
+        });
+    </script>
+
+</div>
+
+</body>
+</html>

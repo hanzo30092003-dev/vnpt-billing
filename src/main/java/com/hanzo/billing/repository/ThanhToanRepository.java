@@ -77,4 +77,21 @@ public interface ThanhToanRepository extends JpaRepository<ThanhToan, Long> {
      */
     @Query("SELECT COALESCE(SUM(t.soTien), 0) FROM ThanhToan t WHERE t.hoaDon.id = :hoaDonId")
     BigDecimal tinhTongDaThu(@Param("hoaDonId") Long hoaDonId);
+
+    /**
+     * Giao dịch gần nhất, nạp sẵn quan hệ — bảng cuối dashboard.
+     *
+     * <p>Sắp theo {@code (ngayThanhToan, id)} chứ không chỉ theo ngày: dữ liệu mẫu có nhiều
+     * giao dịch cùng một mốc 09:00, và sắp theo một khoá không phân biệt được thì thứ tự
+     * hiển thị đổi mỗi lần tải trang.</p>
+     */
+    @Query("""
+            SELECT t FROM ThanhToan t
+            JOIN FETCH t.hoaDon h
+            JOIN FETCH h.khachHang
+            JOIN FETCH h.thueBao
+            LEFT JOIN FETCH t.nguoiThu
+            ORDER BY t.ngayThanhToan DESC, t.id DESC
+            """)
+    List<ThanhToan> timGiaoDichGanNhat(Pageable pageable);
 }

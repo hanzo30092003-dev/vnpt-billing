@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Doanh thu theo loại dịch vụ', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div th:replace="~{bao-cao/fragments :: thanhCongCu('Doanh thu theo loại dịch vụ', 'bi-pie-chart',
+                       @{/bao-cao/doanh-thu-dich-vu/xuat-excel(kyCuocId=${kyCuocId})})}"></div>
+    <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO DOANH THU THEO LOẠI DỊCH VỤ',
+                       ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
+    <div th:replace="~{bao-cao/fragments :: chonKy('/bao-cao/doanh-thu-dich-vu')}"></div>
+
+    <div th:if="${coCau.rong()}"
+         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có hóa đơn nào.')}"></div>
+
+    <div class="row g-3" th:unless="${coCau.rong()}">
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">Cơ cấu cước</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm bang-du-lieu mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Khoản mục</th>
+                                <th class="text-end">Số tiền</th>
+                                <th class="text-end">Tỷ trọng</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="m : ${khoanMuc}">
+                                <td th:text="${m.ten}">Cước thoại</td>
+                                <td class="text-end" th:text="${@soLieu.tien(m.soTien)}">0</td>
+                                <td class="text-end" th:text="${@soLieu.phanTram(m.tyTrong)}">—</td>
+                            </tr>
+                            <tr class="table-light fw-bold">
+                                <td>Tổng cước</td>
+                                <td class="text-end"
+                                    th:text="${@soLieu.tien(coCau.tongCuocTruocGiamTru())}">0</td>
+                                <td class="text-end">100,0%</td>
+                            </tr>
+                            <!--/* Giảm trừ lưu DƯƠNG trong CSDL nhưng là khoản trừ, nên hiện
+                                   dấu âm cho đúng chiều cộng dồn của chuỗi tính tiền */-->
+                            <tr>
+                                <td>Giảm trừ</td>
+                                <td class="text-end text-danger"
+                                    th:text="'−' + ${@soLieu.tien(coCau.giamTru)}">0</td>
+                                <td class="text-end"></td>
+                            </tr>
+                            <tr>
+                                <td>Tổng trước thuế</td>
+                                <td class="text-end" th:text="${@soLieu.tien(coCau.tongTruocThue)}">0</td>
+                                <td class="text-end"></td>
+                            </tr>
+                            <tr>
+                                <td>Thuế VAT</td>
+                                <td class="text-end" th:text="${@soLieu.tien(coCau.thueVat)}">0</td>
+                                <td class="text-end"></td>
+                            </tr>
+                            </tbody>
+                            <tfoot class="table-light fw-bold">
+                            <tr>
+                                <td>TỔNG THANH TOÁN</td>
+                                <td class="text-end" th:text="${@soLieu.tien(coCau.tongThanhToan)}">0</td>
+                                <td class="text-end"></td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">Tỷ trọng theo loại dịch vụ</div>
+                <div class="card-body">
+                    <canvas id="bieuDoDichVu" height="240"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const nhanKhoanMuc = /*[[${nhanKhoanMuc}]]*/ [];
+        const soTienKhoanMuc = /*[[${soTienKhoanMuc}]]*/ [];
+        /*]]>*/
+        document.addEventListener('DOMContentLoaded', function () {
+            const khung = document.getElementById('bieuDoDichVu');
+            if (!khung) { return; }
+            new Chart(khung, {
+                type: 'pie',
+                data: {
+                    labels: nhanKhoanMuc,
+                    datasets: [{
+                        data: soTienKhoanMuc,
+                        backgroundColor: ['#6f42c1', '#0d6efd', '#20c997', '#fd7e14', '#adb5bd']
+                    }]
+                },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+        });
+    </script>
+
+</div>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.hanzo.billing.repository;
 
+import com.hanzo.billing.dto.baocao.SanLuongDichVu;
 import com.hanzo.billing.entity.ChiTietSuDung;
 import com.hanzo.billing.enums.HuongCuocGoi;
 import com.hanzo.billing.enums.LoaiDichVu;
@@ -250,4 +251,47 @@ public interface ChiTietSuDungRepository extends JpaRepository<ChiTietSuDung, Lo
                                       @Param("huong") HuongCuocGoi huong,
                                       @Param("trangThaiTinhCuoc") TrangThaiTinhCuoc trangThaiTinhCuoc,
                                       @Param("nguon") NguonCdr nguon);
+
+    // =================================================================
+    // PHASE 6 — SẢN LƯỢNG DỊCH VỤ
+    // =================================================================
+
+    /**
+     * Sản lượng một kỳ, gom về <b>một dòng</b> bằng cộng có điều kiện.
+     *
+     * <p>⚠️ Cộng ở <b>đơn vị gốc</b> (giây, KB) rồi mới quy đổi một lần khi hiển thị. Quy từng
+     * bản ghi lên phút/MB rồi cộng là đúng cái lỗi đã thổi phồng sản lượng <b>+10,97%</b> ở
+     * Phase 4 — xem {@code PHASE-4-REPORT.md} mục 23.</p>
+     *
+     * <p>Ba hướng tách bằng {@code CASE WHEN} trong cùng một lần quét bảng, thay vì ba truy
+     * vấn riêng: cùng kết quả, một phần ba số vòng đi lại tới CSDL.</p>
+     *
+     * <p>⚠️ <b>{@code COALESCE} quanh MỌI {@code SUM} là bắt buộc, không phải cho gọn.</b>
+     * Với một kỳ chưa có bản ghi CDR nào, {@code SUM} trả về {@code NULL}, mà sáu tham số của
+     * {@link SanLuongDichVu} đều là {@code long} nguyên thuỷ — Hibernate không mở hộp được
+     * {@code null} và ném lỗi, làm cả trang báo cáo trả về HTTP 500. Lỗi này <b>không lộ ra
+     * trên dữ liệu mẫu</b> vì mọi kỳ đều có CDR; nó chỉ xuất hiện đúng lúc người dùng vừa tạo
+     * một kỳ mới và mở báo cáo lên xem.</p>
+     */
+    @Query("""
+            SELECT new com.hanzo.billing.dto.baocao.SanLuongDichVu(
+                COALESCE(SUM(CASE WHEN c.loaiDichVu = com.hanzo.billing.enums.LoaiDichVu.THOAI
+                                  THEN 1L ELSE 0L END), 0L),
+                COALESCE(SUM(CASE WHEN c.loaiDichVu = com.hanzo.billing.enums.LoaiDichVu.THOAI
+                                   AND c.huong = com.hanzo.billing.enums.HuongCuocGoi.NOI_MANG
+                                  THEN c.thoiLuongGiay ELSE 0 END), 0L),
+                COALESCE(SUM(CASE WHEN c.loaiDichVu = com.hanzo.billing.enums.LoaiDichVu.THOAI
+                                   AND c.huong = com.hanzo.billing.enums.HuongCuocGoi.NGOAI_MANG
+                                  THEN c.thoiLuongGiay ELSE 0 END), 0L),
+                COALESCE(SUM(CASE WHEN c.loaiDichVu = com.hanzo.billing.enums.LoaiDichVu.THOAI
+                                   AND c.huong = com.hanzo.billing.enums.HuongCuocGoi.QUOC_TE
+                                  THEN c.thoiLuongGiay ELSE 0 END), 0L),
+                COALESCE(SUM(CASE WHEN c.loaiDichVu = com.hanzo.billing.enums.LoaiDichVu.SMS
+                                  THEN c.soLuong ELSE 0 END), 0L),
+                COALESCE(SUM(CASE WHEN c.loaiDichVu = com.hanzo.billing.enums.LoaiDichVu.DATA
+                                  THEN c.soLuong ELSE 0 END), 0L))
+              FROM ChiTietSuDung c
+             WHERE c.kyCuoc.id = :kyCuocId
+            """)
+    SanLuongDichVu sanLuongTheoKy(@Param("kyCuocId") Long kyCuocId);
 }

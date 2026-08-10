@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Doanh thu theo kỳ', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div th:replace="~{bao-cao/fragments :: thanhCongCu('Doanh thu theo kỳ', 'bi-graph-up-arrow',
+                       @{/bao-cao/doanh-thu-ky/xuat-excel})}"></div>
+    <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO DOANH THU THEO KỲ',
+                       'Toàn bộ kỳ cước')}"></div>
+
+    <div th:if="${#lists.isEmpty(danhSach)}"
+         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Chưa có kỳ cước nào trong hệ thống.')}"></div>
+
+    <div th:unless="${#lists.isEmpty(danhSach)}">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-white fw-semibold">Phát sinh và đã thu theo kỳ</div>
+            <div class="card-body">
+                <canvas id="bieuDoDoanhThu" height="110"></canvas>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Chi tiết theo kỳ</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover bang-du-lieu mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Kỳ cước</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Số hóa đơn</th>
+                            <th class="text-end">Phát sinh</th>
+                            <th class="text-end">Đã thu</th>
+                            <th class="text-end">Còn nợ</th>
+                            <th class="text-end">Tỷ lệ thu</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="d : ${danhSach}">
+                            <td class="fw-semibold" th:text="${d.nhanKy()}">6/2026</td>
+                            <td>
+                                <span class="badge" th:classappend="${d.trangThai.lopBadge}"
+                                      th:text="${d.trangThai.nhan}">Mở</span>
+                            </td>
+                            <td class="text-end" th:text="${@soLieu.so(d.soHoaDon)}">0</td>
+                            <td class="text-end" th:text="${@soLieu.tien(d.phatSinh)}">0</td>
+                            <td class="text-end text-success" th:text="${@soLieu.tien(d.daThu)}">0</td>
+                            <td class="text-end text-danger" th:text="${@soLieu.tien(d.conNo)}">0</td>
+                            <td class="text-end" th:text="${@soLieu.phanTram(d.tyLeThu())}">—</td>
+                        </tr>
+                        </tbody>
+                        <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="2">TỔNG CỘNG</td>
+                            <td class="text-end" th:text="${@soLieu.so(tong.soHoaDon)}">0</td>
+                            <td class="text-end" th:text="${@soLieu.tien(tong.phatSinh)}">0</td>
+                            <td class="text-end text-success" th:text="${@soLieu.tien(tong.daThu)}">0</td>
+                            <td class="text-end text-danger" th:text="${@soLieu.tien(tong.conNo)}">0</td>
+                            <td class="text-end"></td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const nhanKy = /*[[${nhanKy}]]*/ [];
+        const soPhatSinh = /*[[${soPhatSinh}]]*/ [];
+        const soDaThu = /*[[${soDaThu}]]*/ [];
+        const soTyLeThu = /*[[${soTyLeThu}]]*/ [];
+        /*]]>*/
+        document.addEventListener('DOMContentLoaded', function () {
+            const khung = document.getElementById('bieuDoDoanhThu');
+            if (!khung) { return; }
+            new Chart(khung, {
+                data: {
+                    labels: nhanKy,
+                    datasets: [
+                        { type: 'bar', label: 'Phát sinh (đ)', data: soPhatSinh,
+                          backgroundColor: '#0d6efd', order: 2 },
+                        { type: 'bar', label: 'Đã thu (đ)', data: soDaThu,
+                          backgroundColor: '#198754', order: 2 },
+                        /* Đường tỷ lệ thu nằm trên trục phải: nó là phần trăm, ghép chung
+                           trục tiền sẽ bị bẹp thành một đường sát đáy và không đọc được. */
+                        { type: 'line', label: 'Tỷ lệ thu (%)', data: soTyLeThu,
+                          borderColor: '#dc3545', backgroundColor: '#dc3545',
+                          yAxisID: 'tyLe', tension: 0.3, order: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, position: 'left',
+                             ticks: { callback: v => (v / 1000000).toFixed(0) + ' tr' } },
+                        tyLe: { beginAtZero: true, max: 100, position: 'right',
+                                grid: { drawOnChartArea: false },
+                                ticks: { callback: v => v + '%' } }
+                    }
+                }
+            });
+        });
+    </script>
+
+</div>
+
+</body>
+</html>

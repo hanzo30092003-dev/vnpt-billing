@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Sản lượng dịch vụ', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div th:replace="~{bao-cao/fragments :: thanhCongCu('Sản lượng dịch vụ', 'bi-activity',
+                       @{/bao-cao/san-luong/xuat-excel(kyCuocId=${kyCuocId})})}"></div>
+    <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO SẢN LƯỢNG DỊCH VỤ',
+                       ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
+    <div th:replace="~{bao-cao/fragments :: chonKy('/bao-cao/san-luong')}"></div>
+
+    <div th:if="${sanLuong.rong()}"
+         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có bản ghi CDR nào.')}"></div>
+
+    <div th:unless="${sanLuong.rong()}">
+        <div class="alert alert-secondary py-2 small" th:if="${kyTruoc == null}">
+            <i class="bi bi-info-circle me-1"></i>
+            Đây là kỳ sớm nhất trong hệ thống nên <strong>không có kỳ trước để so sánh</strong>.
+            Cột biến động vì vậy để trống.
+        </div>
+        <div class="alert alert-secondary py-2 small" th:if="${kyTruoc != null}">
+            <i class="bi bi-info-circle me-1"></i>
+            So sánh với kỳ liền trước:
+            <strong th:text="${kyTruoc.thang} + '/' + ${kyTruoc.nam}">5/2026</strong>.
+            Kỳ liền trước tính theo <strong>tháng/năm</strong>, không theo thứ tự tạo kỳ.
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Sản lượng theo dịch vụ</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm bang-du-lieu mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Chỉ tiêu</th>
+                            <th class="text-end">Kỳ này</th>
+                            <th class="text-end">Kỳ trước</th>
+                            <th class="text-end">Biến động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Số cuộc gọi</td>
+                            <td class="text-end" th:text="${@soLieu.so(sanLuong.soCuocGoi)} + ' cuộc'">0</td>
+                            <td class="text-end text-secondary"
+                                th:text="${sanLuongTruoc != null} ? ${@soLieu.so(sanLuongTruoc.soCuocGoi)} : '—'">—</td>
+                            <td class="text-end"
+                                th:classappend="${@soLieu.lopBienThien(sanLuong.bienThienCuocGoi(sanLuongTruoc))}"
+                                th:text="${@soLieu.bienThien(sanLuong.bienThienCuocGoi(sanLuongTruoc))}">—</td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">Phút gọi nội mạng</td>
+                            <td class="text-end" th:text="${@soLieu.soLe(sanLuong.phutNoiMang())} + ' phút'">0</td>
+                            <td class="text-end text-secondary"
+                                th:text="${sanLuongTruoc != null} ? ${@soLieu.soLe(sanLuongTruoc.phutNoiMang())} : '—'">—</td>
+                            <td class="text-end"></td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">Phút gọi ngoại mạng</td>
+                            <td class="text-end" th:text="${@soLieu.soLe(sanLuong.phutNgoaiMang())} + ' phút'">0</td>
+                            <td class="text-end text-secondary"
+                                th:text="${sanLuongTruoc != null} ? ${@soLieu.soLe(sanLuongTruoc.phutNgoaiMang())} : '—'">—</td>
+                            <td class="text-end"></td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">Phút gọi quốc tế</td>
+                            <td class="text-end" th:text="${@soLieu.soLe(sanLuong.phutQuocTe())} + ' phút'">0</td>
+                            <td class="text-end text-secondary"
+                                th:text="${sanLuongTruoc != null} ? ${@soLieu.soLe(sanLuongTruoc.phutQuocTe())} : '—'">—</td>
+                            <td class="text-end"></td>
+                        </tr>
+                        <tr class="table-light fw-bold">
+                            <td>Tổng phút gọi</td>
+                            <td class="text-end" th:text="${@soLieu.soLe(sanLuong.tongPhut())} + ' phút'">0</td>
+                            <td class="text-end"
+                                th:text="${sanLuongTruoc != null} ? ${@soLieu.soLe(sanLuongTruoc.tongPhut())} : '—'">—</td>
+                            <td class="text-end"
+                                th:classappend="${@soLieu.lopBienThien(sanLuong.bienThienPhut(sanLuongTruoc))}"
+                                th:text="${@soLieu.bienThien(sanLuong.bienThienPhut(sanLuongTruoc))}">—</td>
+                        </tr>
+                        <tr>
+                            <td>Số tin SMS</td>
+                            <td class="text-end" th:text="${@soLieu.so(sanLuong.soSms)} + ' tin'">0</td>
+                            <td class="text-end text-secondary"
+                                th:text="${sanLuongTruoc != null} ? ${@soLieu.so(sanLuongTruoc.soSms)} : '—'">—</td>
+                            <td class="text-end"
+                                th:classappend="${@soLieu.lopBienThien(sanLuong.bienThienSms(sanLuongTruoc))}"
+                                th:text="${@soLieu.bienThien(sanLuong.bienThienSms(sanLuongTruoc))}">—</td>
+                        </tr>
+                        <tr>
+                            <td>Dung lượng dữ liệu</td>
+                            <td class="text-end" th:text="${@soLieu.soLe(sanLuong.soMb())} + ' MB'">0</td>
+                            <td class="text-end text-secondary"
+                                th:text="${sanLuongTruoc != null} ? ${@soLieu.soLe(sanLuongTruoc.soMb())} : '—'">—</td>
+                            <td class="text-end"
+                                th:classappend="${@soLieu.lopBienThien(sanLuong.bienThienData(sanLuongTruoc))}"
+                                th:text="${@soLieu.bienThien(sanLuong.bienThienData(sanLuongTruoc))}">—</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-light border mt-3 small">
+            <i class="bi bi-calculator me-1"></i>
+            Phút và MB được quy đổi <strong>một lần ở cuối</strong> từ tổng giây và tổng KB.
+            Quy đổi từng bản ghi rồi mới cộng sẽ làm tròn nhiều lần và thổi phồng sản lượng —
+            đúng lỗi đã đo được <strong>+10,97%</strong> ở Phase 4.
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

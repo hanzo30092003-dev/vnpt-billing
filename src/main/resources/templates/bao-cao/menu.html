@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Báo cáo thống kê', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <h2 class="h4 mb-3"><i class="bi bi-bar-chart-line me-2"></i>Báo cáo thống kê</h2>
+
+    <div class="alert alert-warning py-2 small">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        Toàn bộ số liệu dựng trên <strong>dữ liệu mẫu tự sinh</strong> phục vụ học tập.
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6 col-xl-4">
+            <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/doanh-thu-ky}">
+                <div class="card-body">
+                    <div class="fw-semibold mb-2">
+                        <i class="bi bi-graph-up-arrow fs-5 text-primary me-2"></i>Doanh thu theo kỳ
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Phát sinh, đã thu, còn nợ và tỷ lệ thu của từng kỳ cước.
+                    </p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/doanh-thu-goi-cuoc}">
+                <div class="card-body">
+                    <div class="fw-semibold mb-2">
+                        <i class="bi bi-box-seam fs-5 text-primary me-2"></i>Doanh thu theo gói cước
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Gói nào đóng góp bao nhiêu vào doanh thu một kỳ.
+                    </p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/doanh-thu-dich-vu}">
+                <div class="card-body">
+                    <div class="fw-semibold mb-2">
+                        <i class="bi bi-pie-chart fs-5 text-primary me-2"></i>Doanh thu theo loại dịch vụ
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Cơ cấu cước thuê bao, thoại, SMS và dữ liệu.
+                    </p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/thue-bao}">
+                <div class="card-body">
+                    <div class="fw-semibold mb-2">
+                        <i class="bi bi-sim fs-5 text-primary me-2"></i>Thống kê thuê bao
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Theo trạng thái, theo loại, thuê bao mới và rời mạng theo tháng.
+                    </p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/top-thue-bao}">
+                <div class="card-body">
+                    <div class="fw-semibold mb-2">
+                        <i class="bi bi-trophy fs-5 text-primary me-2"></i>Top thuê bao cước cao
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Xếp hạng thuê bao có cước lớn nhất trong một kỳ.
+                    </p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/san-luong}">
+                <div class="card-body">
+                    <div class="fw-semibold mb-2">
+                        <i class="bi bi-activity fs-5 text-primary me-2"></i>Sản lượng dịch vụ
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Phút gọi, tin nhắn, dung lượng và so sánh với kỳ liền trước.
+                    </p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/cong-no}">
+                <div class="card-body">
+                    <div class="fw-semibold mb-2">
+                        <i class="bi bi-wallet2 fs-5 text-primary me-2"></i>Công nợ tổng hợp
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Bảng tuổi nợ và top khách hàng nợ nhiều nhất.
+                    </p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-3">
+        <div class="card-header bg-white fw-semibold">Số liệu nhanh theo kỳ</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm bang-du-lieu mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Kỳ cước</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Số hóa đơn</th>
+                        <th class="text-end">Phát sinh</th>
+                        <th class="text-end">Đã thu</th>
+                        <th class="text-end">Còn nợ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${doanhThuCacKy}">
+                        <td class="fw-semibold" th:text="${d.nhanKy()}">6/2026</td>
+                        <td>
+                            <span class="badge" th:classappend="${d.trangThai.lopBadge}"
+                                  th:text="${d.trangThai.nhan}">Mở</span>
+                        </td>
+                        <td class="text-end" th:text="${@soLieu.so(d.soHoaDon)}">0</td>
+                        <td class="text-end" th:text="${@soLieu.tien(d.phatSinh)}">0</td>
+                        <td class="text-end text-success" th:text="${@soLieu.tien(d.daThu)}">0</td>
+                        <td class="text-end text-danger" th:text="${@soLieu.tien(d.conNo)}">0</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(doanhThuCacKy)}">
+                        <td colspan="6" class="text-center text-secondary py-4">
+                            Chưa có kỳ cước nào.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

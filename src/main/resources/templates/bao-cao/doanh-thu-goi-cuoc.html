@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Doanh thu theo gói cước', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div th:replace="~{bao-cao/fragments :: thanhCongCu('Doanh thu theo gói cước', 'bi-box-seam',
+                       @{/bao-cao/doanh-thu-goi-cuoc/xuat-excel(kyCuocId=${kyCuocId})})}"></div>
+    <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO DOANH THU THEO GÓI CƯỚC',
+                       ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
+    <div th:replace="~{bao-cao/fragments :: chonKy('/bao-cao/doanh-thu-goi-cuoc')}"></div>
+
+    <div th:if="${#lists.isEmpty(danhSach)}"
+         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có hóa đơn nào.')}"></div>
+
+    <div class="row g-3" th:unless="${#lists.isEmpty(danhSach)}">
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">Chi tiết theo gói</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover bang-du-lieu mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Mã gói</th>
+                                <th>Tên gói</th>
+                                <th class="text-end">Số hóa đơn</th>
+                                <th class="text-end">Phát sinh</th>
+                                <th class="text-end">Đã thu</th>
+                                <th class="text-end">Tỷ trọng</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="d : ${danhSach}">
+                                <td class="fw-semibold" th:text="${d.maGoi}">CB01</td>
+                                <td th:text="${d.tenGoi}">Cơ bản</td>
+                                <td class="text-end" th:text="${@soLieu.so(d.soHoaDon)}">0</td>
+                                <td class="text-end" th:text="${@soLieu.tien(d.phatSinh)}">0</td>
+                                <td class="text-end text-success" th:text="${@soLieu.tien(d.daThu)}">0</td>
+                                <td class="text-end"
+                                    th:text="${@soLieu.phanTram(d.tyTrong(tongPhatSinh))}">—</td>
+                            </tr>
+                            </tbody>
+                            <tfoot class="table-light fw-bold">
+                            <tr>
+                                <td colspan="2">TỔNG CỘNG</td>
+                                <td class="text-end" th:text="${@soLieu.so(tongSoHoaDon)}">0</td>
+                                <td class="text-end" th:text="${@soLieu.tien(tongPhatSinh)}">0</td>
+                                <td class="text-end text-success" th:text="${@soLieu.tien(tongDaThu)}">0</td>
+                                <td class="text-end">100,0%</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">Tỷ trọng doanh thu</div>
+                <div class="card-body">
+                    <canvas id="bieuDoGoi" height="240"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const nhanGoi = /*[[${nhanGoi}]]*/ [];
+        const soTien = /*[[${soTien}]]*/ [];
+        /*]]>*/
+        document.addEventListener('DOMContentLoaded', function () {
+            const khung = document.getElementById('bieuDoGoi');
+            if (!khung) { return; }
+            new Chart(khung, {
+                type: 'doughnut',
+                data: {
+                    labels: nhanGoi,
+                    datasets: [{
+                        data: soTien,
+                        backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1']
+                    }]
+                },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+        });
+    </script>
+
+</div>
+
+</body>
+</html>

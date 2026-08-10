@@ -5,26 +5,229 @@
 
 <div th:fragment="noiDungTrang">
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <p class="text-uppercase text-secondary small mb-1">Đồ án Thực tập nghề nghiệp</p>
-            <h2 class="h4 mb-3">Xây dựng phần mềm quản lý thuê bao và tính cước điện thoại</h2>
-            <p class="mb-0 text-secondary">
-                Hệ thống mô phỏng nghiệp vụ viễn thông: quản lý khách hàng, thuê bao,
-                gói cước, bảng giá, thu thập CDR, tính cước, lập hóa đơn và ghi nhận thanh toán.
-            </p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0"><i class="bi bi-speedometer2 me-2"></i>Tổng quan hệ thống</h2>
+        <a class="btn btn-outline-primary btn-sm khong-in" th:href="@{/bao-cao}">
+            <i class="bi bi-bar-chart-line me-1"></i> Báo cáo thống kê
+        </a>
+    </div>
+
+    <div class="alert alert-warning py-2 small">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        Dữ liệu trong hệ thống là <strong>dữ liệu mẫu tự sinh</strong> phục vụ học tập,
+        không phải dữ liệu thật của bất kỳ nhà mạng nào.
+    </div>
+
+    <!--/* ================== BỐN THẺ SỐ LIỆU ================== */-->
+    <div class="row g-3 mb-3">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-sim text-primary me-2 fs-5"></i>
+                        <span class="small text-secondary">Tổng thuê bao</span>
+                    </div>
+                    <div class="h3 mb-0" th:text="${@soLieu.so(dashboard.tongThueBao)}">0</div>
+                    <div class="small text-success">
+                        <span th:text="${@soLieu.so(dashboard.dangHoatDong)}">0</span> đang hoạt động
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-person-plus text-info me-2 fs-5"></i>
+                        <span class="small text-secondary">Thuê bao mới trong tháng</span>
+                    </div>
+                    <div class="h3 mb-0" th:text="${@soLieu.so(dashboard.thueBaoMoiTrongThang)}">0</div>
+                    <div class="small text-secondary">tính theo ngày kích hoạt</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-cash-stack text-success me-2 fs-5"></i>
+                        <span class="small text-secondary">Doanh thu kỳ gần nhất</span>
+                    </div>
+                    <div class="h3 mb-0" th:if="${dashboard.kyGanNhat != null}"
+                         th:text="${@soLieu.tien(dashboard.kyGanNhat.phatSinh)}">0</div>
+                    <div class="h3 mb-0 text-secondary" th:if="${dashboard.kyGanNhat == null}">—</div>
+                    <div class="small text-secondary" th:if="${dashboard.kyGanNhat != null}">
+                        kỳ <span th:text="${dashboard.kyGanNhat.nhanKy()}">6/2026</span>,
+                        <span th:text="${@soLieu.so(dashboard.kyGanNhat.soHoaDon)}">0</span> hóa đơn
+                    </div>
+                    <div class="small text-secondary" th:if="${dashboard.kyGanNhat == null}">
+                        chưa lập hóa đơn nào
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-wallet2 text-danger me-2 fs-5"></i>
+                        <span class="small text-secondary">Tổng công nợ</span>
+                    </div>
+                    <div class="h3 mb-0 text-danger" th:text="${@soLieu.tien(dashboard.tongCongNo)}">0</div>
+                    <div class="small text-secondary">đọc từ cột <code>con_no</code></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="alert alert-warning d-flex align-items-center" role="alert">
-        <i class="bi bi-info-circle me-2"></i>
-        <span>Dữ liệu trong hệ thống là dữ liệu mẫu phục vụ học tập.</span>
+    <!--/* ================== BIỂU ĐỒ DOANH THU ================== */-->
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white d-flex align-items-center">
+            <strong>Doanh thu theo kỳ</strong>
+            <a class="ms-auto small text-decoration-none khong-in" th:href="@{/bao-cao/doanh-thu-ky}">
+                Xem báo cáo <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+        <div class="card-body">
+            <canvas id="bieuDoDoanhThu" height="100"></canvas>
+        </div>
     </div>
 
-    <div class="alert alert-secondary mb-0" role="alert">
-        <i class="bi bi-hammer me-2"></i>
-        Phase 0 &mdash; bộ khung dự án đã sẵn sàng. Các chức năng nghiệp vụ sẽ được bổ sung ở các phase sau.
+    <!--/* ================== HAI BIỂU ĐỒ TRÒN ================== */-->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">Cơ cấu thuê bao theo gói cước</div>
+                <div class="card-body">
+                    <canvas id="bieuDoGoi" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">Cơ cấu thuê bao theo trạng thái</div>
+                <div class="card-body">
+                    <canvas id="bieuDoTrangThai" height="200"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!--/* ================== HAI BẢNG ================== */-->
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white d-flex align-items-center">
+                    <strong>Top 5 thuê bao cước cao nhất</strong>
+                    <span class="ms-auto small text-secondary" th:if="${dashboard.kyGanNhat != null}"
+                          th:text="'kỳ ' + ${dashboard.kyGanNhat.nhanKy()}">kỳ</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover bang-du-lieu mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Số thuê bao</th>
+                                <th>Khách hàng</th>
+                                <th class="text-end">Tổng thanh toán</th>
+                                <th class="text-end">Còn nợ</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="d : ${dashboard.topThueBao}">
+                                <td class="fw-semibold" th:text="${d.soThueBao}">0900000000</td>
+                                <td th:text="${d.tenKhachHang}">Khách hàng</td>
+                                <td class="text-end" th:text="${@soLieu.tien(d.tongThanhToan)}">0</td>
+                                <td class="text-end text-danger" th:text="${@soLieu.tien(d.conNo)}">0</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(dashboard.topThueBao)}">
+                                <td colspan="4" class="text-center text-secondary py-4">
+                                    Chưa có hóa đơn nào.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">5 giao dịch thanh toán gần nhất</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover bang-du-lieu mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Thời điểm</th>
+                                <th>Hóa đơn</th>
+                                <th class="text-end">Số tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="t : ${dashboard.giaoDichGanNhat}">
+                                <td th:text="${#temporals.format(t.ngayThanhToan, 'dd/MM/yyyy')}">01/01</td>
+                                <td th:text="${t.hoaDon.maHoaDon}">HD</td>
+                                <td class="text-end fw-semibold" th:text="${@soLieu.tien(t.soTien)}">0</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(dashboard.giaoDichGanNhat)}">
+                                <td colspan="3" class="text-center text-secondary py-4">
+                                    Chưa có giao dịch nào.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const nhanKy = /*[[${nhanKy}]]*/ [];
+        const soPhatSinh = /*[[${soPhatSinh}]]*/ [];
+        const soDaThu = /*[[${soDaThu}]]*/ [];
+        const nhanGoi = /*[[${nhanGoi}]]*/ [];
+        const soGoi = /*[[${soGoi}]]*/ [];
+        const nhanTrangThai = /*[[${nhanTrangThai}]]*/ [];
+        const soTrangThai = /*[[${soTrangThai}]]*/ [];
+        /*]]>*/
+        document.addEventListener('DOMContentLoaded', function () {
+            new Chart(document.getElementById('bieuDoDoanhThu'), {
+                type: 'bar',
+                data: {
+                    labels: nhanKy,
+                    datasets: [
+                        { label: 'Phát sinh (đ)', data: soPhatSinh, backgroundColor: '#0d6efd' },
+                        { label: 'Đã thu (đ)', data: soDaThu, backgroundColor: '#198754' }
+                    ]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true,
+                        ticks: { callback: v => (v / 1000000).toFixed(0) + ' tr' } } }
+                }
+            });
+            new Chart(document.getElementById('bieuDoGoi'), {
+                type: 'doughnut',
+                data: {
+                    labels: nhanGoi,
+                    datasets: [{ data: soGoi,
+                        backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1'] }]
+                },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+            new Chart(document.getElementById('bieuDoTrangThai'), {
+                type: 'doughnut',
+                data: {
+                    labels: nhanTrangThai,
+                    datasets: [{ data: soTrangThai,
+                        backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#6c757d'] }]
+                },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+        });
+    </script>
 
 </div>
 

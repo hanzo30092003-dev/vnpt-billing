@@ -86,11 +86,8 @@
                                     th:text="${#temporals.format(k.ngayBatDau, 'dd/MM/yyyy')} + ' → '
                                              + ${#temporals.format(k.ngayKetThuc, 'dd/MM/yyyy')}"></td>
                                 <td>
-                                    <span class="badge"
-                                          th:classappend="${k.trangThai.name() == 'MO'} ? 'text-bg-success'
-                                                        : (${k.trangThai.name() == 'DANG_TINH'} ? 'text-bg-warning' : 'text-bg-secondary')"
-                                          th:text="${k.trangThai.name() == 'MO'} ? 'Mở'
-                                                 : (${k.trangThai.name() == 'DANG_TINH'} ? 'Đang tính' : 'Đã chốt')"></span>
+                                    <span class="badge" th:classappend="${k.trangThai.lopBadge}"
+                                          th:text="${k.trangThai.nhan}"></span>
                                 </td>
                                 <td class="text-end" th:text="${k.soCdrXuLy}">0</td>
                                 <td class="text-end" th:text="${k.soHoaDonTao}">0</td>
