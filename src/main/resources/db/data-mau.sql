@@ -268,7 +268,16 @@ INSERT INTO ky_cuoc (id, thang, nam, ngay_bat_dau, ngay_ket_thuc, trang_thai,
 (2, 5, 2026, '2026-05-01', '2026-05-31', 'MO', NULL, 0, 0, 0),
 (3, 7, 2026, '2026-07-01', '2026-07-31', 'MO', NULL, 0, 0, 0),
 (4, 3, 2026, '2026-03-01', '2026-03-31', 'MO', NULL, 0, 0, 0),
-(5, 4, 2026, '2026-04-01', '2026-04-30', 'MO', NULL, 0, 0, 0);
+(5, 4, 2026, '2026-04-01', '2026-04-30', 'MO', NULL, 0, 0, 0),
+-- Ky 8/2026 them o Phase 7 muc C2. CO Y de RONG HOAN TOAN - khong CDR,
+-- khong hoa don - va giu nguyen nhu vay:
+--   1. La ky de kiem "man hinh chiu duoc ky rong" (scripts/test-ky-rong.ps1)
+--   2. La ky de DEMO TRUC TIEP: sinh CDR, tinh cuoc, lap hoa don ngay tren
+--      san khau (docs/kich-ban-demo.md buoc 5-8)
+-- ID nhay tu 5 len 8 vi id 6 va 7 da bi cac ky thu nghiem tam dung roi xoa.
+-- Giu dung ID that thay vi danh so lai - xem ghi chu tuong tu o muc 6 cua
+-- data-van-hanh.sql.
+(8, 8, 2026, '2026-08-01', '2026-08-31', 'MO', NULL, 0, 0, 0);
 
 -- ---------------------------------------------------------------------
 -- 8. lich_su_thue_bao - lich su bien dong trang thai

@@ -1,66 +1,76 @@
 package com.hanzo.billing.util;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Chuẩn hoá tham số phân trang — hồi quy cho lỗi bắt được ở Phase 7 mục A.
+ * Kiem chan phan trang.
  *
- * <p>Nút <i>"Trước"</i> ở trang đầu sinh {@code ?trang=-1}; lớp {@code disabled} của Bootstrap
- * chỉ làm liên kết <b>trông như</b> bị khoá chứ vẫn bấm được. Chỉ số âm đi thẳng vào
- * {@code PageRequest.of} và làm cả trang trả HTTP 500.</p>
- *
- * <p>Bốn màn hình đã tự chặn bằng {@code Math.max(trang, 0)} rải rác trong controller, nhưng
- * hai màn hình mới nhất của Phase 5 — hóa đơn và thanh toán — <b>không chép lại</b> đoạn chặn
- * đó. Đây đúng là hệ quả của việc để một quy tắc nằm rải thay vì gom lại và đặt tên cho nó.</p>
+ * <p>Lop {@link ThamSoPhanTrang} sinh ra o Phase 7 muc A sau khi {@code /hoa-don?trang=-1}
+ * tra ve HTTP 500: Spring Data nem {@code IllegalArgumentException} khi so trang am. Bon
+ * controller khac da co {@code Math.max(trang, 0)} viet thang trong ham - dung luat nhung
+ * moi cho mot ban sao, va hai cho con thieu. Cac test duoi day gan luat vao mot cho.
  */
-@DisplayName("Tham số phân trang")
+@DisplayName("Chan tham so phan trang")
 class ThamSoPhanTrangTest {
 
-    @Nested
-    @DisplayName("Chỉ số trang")
-    class ChiSoTrang {
-
-        @Test
-        @DisplayName("1. ⭐ Trang âm được đưa về 0 thay vì ném lỗi")
-        void trangAmVeKhong() {
-            assertThat(ThamSoPhanTrang.trangHopLe(-1)).isZero();
-            assertThat(ThamSoPhanTrang.trangHopLe(-999)).isZero();
-            assertThat(ThamSoPhanTrang.trangHopLe(Integer.MIN_VALUE)).isZero();
-        }
-
-        @Test
-        @DisplayName("2. Trang hợp lệ giữ nguyên")
-        void trangHopLeGiuNguyen() {
-            assertThat(ThamSoPhanTrang.trangHopLe(0)).isZero();
-            assertThat(ThamSoPhanTrang.trangHopLe(7)).isEqualTo(7);
-            assertThat(ThamSoPhanTrang.trangHopLe(Integer.MAX_VALUE))
-                    .as("Trang quá lớn KHÔNG bị chặn ở đây: Spring Data trả về trang rỗng, "
-                            + "và một danh sách rỗng là câu trả lời đúng cho 'trang thứ hai tỷ'")
-                    .isEqualTo(Integer.MAX_VALUE);
-        }
+    @ParameterizedTest(name = "trang={0} -> 0")
+    @ValueSource(ints = {-1, -7, Integer.MIN_VALUE})
+    @DisplayName("So trang am bi keo ve 0 thay vi de Spring Data nem ngoai le")
+    void trangAmKeoVeKhong(int trang) {
+        assertThat(ThamSoPhanTrang.trangHopLe(trang)).isZero();
     }
 
-    @Nested
-    @DisplayName("Số dòng mỗi trang")
-    class SoDongMoiTrang {
+    @Test
+    @DisplayName("So trang hop le di qua nguyen ven")
+    void trangHopLeGiuNguyen() {
+        assertThat(ThamSoPhanTrang.trangHopLe(0)).isZero();
+        assertThat(ThamSoPhanTrang.trangHopLe(3)).isEqualTo(3);
+        assertThat(ThamSoPhanTrang.trangHopLe(Integer.MAX_VALUE)).isEqualTo(Integer.MAX_VALUE);
+    }
 
-        @Test
-        @DisplayName("3. Số dòng nhỏ hơn 1 được đưa về 1")
-        void soDongQuaNhoVeMot() {
-            assertThat(ThamSoPhanTrang.soDongHopLe(0)).isEqualTo(1);
-            assertThat(ThamSoPhanTrang.soDongHopLe(-20)).isEqualTo(1);
+    @ParameterizedTest(name = "soDong={0} -> 1")
+    @ValueSource(ints = {0, -1, Integer.MIN_VALUE})
+    @DisplayName("So dong khong duong bi nang len 1")
+    void soDongKhongDuongNangLenMot(int soDong) {
+        assertThat(ThamSoPhanTrang.soDongHopLe(soDong)).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("So dong vuot tran bi cat ve 200")
+    void soDongVuotTranBiCat() {
+        // Khong chan tran thi ?soDong=1000000 keo ca bang ra mot trang: mot cau SELECT
+        // khong LIMIT thuc su, cong voi ngan the <tr> Thymeleaf phai dung. Day la duong
+        // lam nghen may chu chi bang mot dong dia chi.
+        assertThat(ThamSoPhanTrang.soDongHopLe(201)).isEqualTo(200);
+        assertThat(ThamSoPhanTrang.soDongHopLe(1_000_000)).isEqualTo(200);
+        assertThat(ThamSoPhanTrang.soDongHopLe(Integer.MAX_VALUE)).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("Hai bien cua khoang hop le khong bi dong vao")
+    void haiBienKhoangHopLe() {
+        assertThat(ThamSoPhanTrang.soDongHopLe(1)).isEqualTo(1);
+        assertThat(ThamSoPhanTrang.soDongHopLe(ThamSoPhanTrang.SO_DONG_TOI_DA))
+                .isEqualTo(ThamSoPhanTrang.SO_DONG_TOI_DA);
+    }
+
+    @Test
+    @DisplayName("Ham thuan tuy: goi hai lan tren ket qua lan dau khong doi gi them")
+    void hamLuyDang() {
+        // Tinh chat luy dang (idempotent) la thu bao dam co the goi ham o nhieu tang ma
+        // khong lech: controller goi roi service goi lai van ra cung mot so.
+        for (int trang : new int[]{-5, 0, 9}) {
+            int lanMot = ThamSoPhanTrang.trangHopLe(trang);
+            assertThat(ThamSoPhanTrang.trangHopLe(lanMot)).isEqualTo(lanMot);
         }
-
-        @Test
-        @DisplayName("4. Số dòng quá lớn bị kẹp về trần, tránh cạn bộ nhớ")
-        void soDongQuaLonBiKep() {
-            assertThat(ThamSoPhanTrang.soDongHopLe(1_000_000))
-                    .isEqualTo(ThamSoPhanTrang.SO_DONG_TOI_DA);
-            assertThat(ThamSoPhanTrang.soDongHopLe(25)).isEqualTo(25);
+        for (int soDong : new int[]{-5, 0, 1, 20, 500}) {
+            int lanMot = ThamSoPhanTrang.soDongHopLe(soDong);
+            assertThat(ThamSoPhanTrang.soDongHopLe(lanMot)).isEqualTo(lanMot);
         }
     }
 }

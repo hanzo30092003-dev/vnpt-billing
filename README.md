@@ -2,43 +2,59 @@
 
 Đồ án môn **Thực tập nghề nghiệp**.
 
-Hệ thống mô phỏng nghiệp vụ viễn thông: quản lý khách hàng, thuê bao, gói cước,
-bảng giá, thu thập CDR (Call Detail Record), tính cước theo kỳ, lập hóa đơn,
-ghi nhận thanh toán và báo cáo doanh thu.
+Hệ thống mô phỏng nghiệp vụ viễn thông: quản lý khách hàng, thuê bao, gói cước, bảng giá,
+thu thập CDR (Call Detail Record), tính cước theo kỳ, lập hóa đơn, ghi nhận thanh toán, theo
+dõi công nợ và báo cáo doanh thu.
 
-> **Ghi chú về dữ liệu:** toàn bộ dữ liệu trong hệ thống là **dữ liệu mẫu tự sinh**
-> phục vụ mục đích học tập. Hệ thống **không** sử dụng dữ liệu thật của bất kỳ
-> nhà mạng nào. Tên "VNPT" chỉ dùng làm bối cảnh giả định cho đồ án.
+> ### ⚠️ Ghi chú về dữ liệu
+> Toàn bộ dữ liệu trong hệ thống là **dữ liệu mẫu tự sinh** phục vụ mục đích học tập.
+> Hệ thống **không** sử dụng dữ liệu thật của bất kỳ nhà mạng nào. Tên "VNPT" chỉ dùng làm
+> bối cảnh giả định cho đồ án. Tên khách hàng, số CCCD, mã số thuế và số điện thoại đều do
+> bộ sinh dữ liệu tạo ra, không tương ứng với người hay tổ chức nào có thật.
 
 ---
 
-## 1. Công nghệ sử dụng
+## 1. Màn hình chính
+
+| Màn hình | Đường dẫn | Nội dung |
+|---|---|---|
+| **Bảng điều khiển** | `/` | 6 thẻ số liệu, biểu đồ doanh thu 6 kỳ, cơ cấu dịch vụ, tuổi nợ |
+| **Bảng đối soát cước** | `/tinh-cuoc/doi-soat/{tb}/{ky}` | Vì sao hóa đơn ra con số đó — từ CDR thô tới từng cột hóa đơn |
+| **Điều khiển tính cước** | `/tinh-cuoc` | Tính cước · lập hóa đơn · trừ cước trả trước · chốt kỳ, kèm đường lùi |
+| **Công nợ** | `/cong-no` | Bảng tuổi nợ 5 nhóm, danh sách nợ, đề xuất tạm ngừng |
+| **Báo cáo thống kê** | `/bao-cao` | 7 báo cáo, mỗi báo cáo xuất Excel và in được |
+
+Danh sách đầy đủ 62 màn hình cần chụp cho báo cáo: [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md).
+
+---
+
+## 2. Công nghệ sử dụng
 
 | Thành phần | Phiên bản |
 |---|---|
-| Java | 21 |
+| Java | biên dịch ở mức `release 21` (máy dev chạy JDK 25) |
 | Spring Boot | 3.5.16 |
-| Spring Web MVC, Spring Data JPA, Spring Security, Spring Validation | theo Boot BOM |
-| MySQL | 8.x |
-| Thymeleaf | theo Boot BOM |
-| Bootstrap | 5.3.3 (CDN) |
-| Bootstrap Icons | 1.11.3 (CDN) |
+| Spring Web MVC · Data JPA · Security · Validation | theo Boot BOM |
+| MySQL | 8.4 |
+| Thymeleaf | 3.1.5 (theo Boot BOM) |
+| Bootstrap · Bootstrap Icons | 5.3.3 · 1.11.3 (CDN) |
 | Chart.js | 4.4.2 (CDN) |
+| Apache POI (xuất Excel) | 5.4.1 |
+| OpenPDF (xuất PDF) | 2.0.3 |
 | Lombok | 1.18.46 |
-| Build tool | Maven |
+| Build | Maven Wrapper (`mvnw`) |
 
-**Quy ước đặt tên:** tiếng Việt không dấu — `snake_case` cho bảng/cột CSDL,
-`camelCase` cho Java, để dễ đối chiếu với báo cáo.
+**Quy ước đặt tên:** tiếng Việt không dấu — `snake_case` cho bảng/cột CSDL, `camelCase` cho
+Java, để dễ đối chiếu với báo cáo.
 
 ---
 
-## 2. Yêu cầu môi trường
+## 3. Yêu cầu môi trường
 
-- **JDK 21** trở lên (dự án biên dịch ở mức bytecode Java 21)
+- **JDK 21** trở lên
 - **MySQL 8** đang chạy tại `localhost:3306`
-- **Maven 3.9+** — hoặc dùng Maven Wrapper kèm theo (`mvnw`), không cần cài Maven
-
-Kiểm tra nhanh:
+- **Maven** — không cần cài, dùng Maven Wrapper (`mvnw`) kèm theo
+- Đường dẫn dự án phải **thuần ASCII** (xem mục 8)
 
 ```bash
 java -version
@@ -46,17 +62,17 @@ java -version
 
 ---
 
-## 3. Cài đặt
+## 4. Cài đặt từng bước
 
-### 3.1. Chuẩn bị CSDL
+### Bước 1 — Lấy mã nguồn
 
-Không cần tạo database thủ công: chuỗi kết nối đã có `createDatabaseIfNotExist=true`
-nên MySQL sẽ tự tạo schema `vnpt_billing` ở lần chạy đầu tiên.
+```bash
+git clone <đường-dẫn-repo> vnpt-billing
+```
 
-### 3.2. Cấu hình trước khi chạy — khai báo mật khẩu MySQL
+### Bước 2 — Khai báo mật khẩu MySQL
 
-**Mật khẩu không nằm trong mã nguồn.** `application.yml` đọc thông tin đăng nhập từ
-biến môi trường:
+**Mật khẩu không nằm trong mã nguồn.** `application.yml` đọc từ biến môi trường:
 
 ```yaml
 spring:
@@ -65,276 +81,234 @@ spring:
     password: "${MYSQL_PASSWORD:}"
 ```
 
-Cú pháp `${TEN_BIEN:giá_trị_mặc_định}` nghĩa là: lấy biến môi trường `TEN_BIEN`,
-nếu chưa đặt thì dùng giá trị mặc định. Mặc định của `MYSQL_USER` là `root`, còn
-`MYSQL_PASSWORD` mặc định là chuỗi rỗng.
+Cú pháp `${TEN_BIEN:mặc_định}` nghĩa là lấy biến môi trường, chưa đặt thì dùng mặc định.
 
-Đặt biến môi trường (Windows, chạy một lần duy nhất):
+Đặt vĩnh viễn (Windows):
 
 ```bash
 setx MYSQL_PASSWORD "matkhau_root_cua_ban"
 ```
 
-> ⚠️ **Bắt buộc mở lại terminal sau khi chạy `setx`.** Lệnh này ghi biến vào
-> registry của người dùng, nhưng terminal đang mở vẫn giữ bản môi trường cũ nên
-> chưa thấy biến mới. Đóng và mở lại PowerShell / Command Prompt / IntelliJ thì
-> biến mới có hiệu lực. Kiểm tra bằng `echo %MYSQL_PASSWORD%` (CMD) hoặc
-> `$env:MYSQL_PASSWORD` (PowerShell).
+> ⚠️ **Bắt buộc mở lại terminal sau `setx`.** Lệnh này ghi vào registry, terminal đang mở vẫn
+> giữ bản môi trường cũ. Kiểm bằng `$env:MYSQL_PASSWORD` (PowerShell).
 
-Nếu tài khoản MySQL không phải `root`, đặt thêm:
-
-```bash
-setx MYSQL_USER "ten_dang_nhap"
-```
-
-Cách tạm thời chỉ áp dụng cho phiên terminal hiện tại (không ghi vào registry):
+Chỉ cho phiên hiện tại:
 
 ```bash
 $env:MYSQL_PASSWORD = "matkhau_root_cua_ban"
 ```
 
----
+Tài khoản không phải `root` thì đặt thêm `MYSQL_USER`.
 
-## 4. Chạy ứng dụng
+### Bước 3 — Nạp CSDL lần đầu
 
-### 4.1. Chạy bình thường — giữ nguyên dữ liệu
-
-```bash
-mvnw spring-boot:run
-```
-
-Đây là cách chạy hằng ngày. `spring.sql.init.mode` mặc định là `never`, nên các
-script `schema.sql` / `data-mau.sql` **không** chạy lại và mọi dữ liệu nhập qua giao
-diện được giữ nguyên qua các lần khởi động.
-
-Mở trình duyệt: <http://localhost:8080>
-
-### 4.2. Nạp lại dữ liệu mẫu — profile `reset`
+Không cần tạo database thủ công — chuỗi kết nối có `createDatabaseIfNotExist=true`. Chạy một
+lần với profile `reset` để tạo bảng và nạp dữ liệu mẫu:
 
 ```bash
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-> ### ⚠️ CẢNH BÁO
-> **Profile `reset` sẽ XOÁ TOÀN BỘ dữ liệu đang có trong CSDL.**
->
-> Profile này bật `spring.sql.init.mode=always`, khiến `schema.sql` chạy lại. File đó
-> mở đầu bằng `DROP TABLE IF EXISTS` cho cả 15 bảng, nên mọi khách hàng, thuê bao,
-> giao dịch bạn đã nhập qua giao diện đều **mất sạch**.
->
-> Chỉ dùng khi bạn **chủ đích** muốn làm mới CSDL, ví dụ trước khi demo hoặc khi dữ
-> liệu thử nghiệm đã lộn xộn.
+Đợi log hiện `Started BillingApplication`, rồi **dừng lại** (`Ctrl+C`).
 
-Hai file dữ liệu chạy nối tiếp nhau, và ranh giới giữa chúng là ranh giới về **nguồn gốc**:
+### Bước 4 — Chạy ứng dụng
+
+```bash
+mvnw spring-boot:run
+```
+
+Mở <http://localhost:8080>.
+
+> Từ bước 4 trở đi, `spring.sql.init.mode` là `never` nên dữ liệu **được giữ nguyên** qua mọi
+> lần khởi động lại. Chỉ chạy lại profile `reset` khi chủ đích muốn về dữ liệu mẫu gốc.
+
+---
+
+## 5. Ba tài khoản demo
+
+Mật khẩu đều là `123456`.
+
+| Tài khoản | Vai trò | Phạm vi |
+|---|---|---|
+| `admin` | `ADMIN` | Toàn bộ hệ thống, kể cả `/tinh-cuoc` và `/ky-cuoc` |
+| `nhanvien01` | `NHANVIEN` | Khách hàng, thuê bao, gói cước, CDR, báo cáo |
+| `ketoan01` | `KETOAN` | Hóa đơn, thanh toán, công nợ, giảm trừ, báo cáo |
+
+Phân quyền kiểm **ở máy chủ**, không chỉ ẩn menu — gõ thẳng đường dẫn không có quyền vẫn ra
+trang 403.
+
+---
+
+## 6. Dữ liệu mẫu kèm theo
+
+Hai file chạy nối tiếp khi `reset`, ranh giới giữa chúng là ranh giới về **nguồn gốc**:
 
 | File | Nội dung | Nguồn gốc |
 |---|---|---|
-| `db/data-mau.sql` | 3 tài khoản · 50 khách hàng · 80 thuê bao · 5 gói cước · 10 dòng bảng giá · 3 kỳ cước · 18 dòng mở sổ số dư | Viết tay — sửa được |
-| `db/data-van-hanh.sql` | 18.723 CDR đã định giá · 280 hóa đơn · 620 chi tiết · 161 thanh toán · 16 dòng trừ cước · 2 giảm trừ | **Bản dump** do máy sinh |
+| `db/data-mau.sql` | 3 tài khoản · 50 khách hàng · 80 thuê bao · 5 gói cước · 10 dòng bảng giá · **6 kỳ cước** · 18 dòng mở sổ số dư | Viết tay — sửa được |
+| `db/data-van-hanh.sql` | 18.723 CDR đã định giá · 280 hóa đơn · 620 chi tiết · 161 thanh toán · 34 dòng sổ cái số dư · 2 giảm trừ | **Bản dump** do máy sinh |
 
-> ℹ️ **Từ Phase 5 mục F, `reset` TÁI LẬP đúng bộ dữ liệu mà báo cáo mô tả.** Trước đó
-> `data-mau.sql` không chứa hóa đơn nào, mà `CdrGeneratorService` lại dùng `new Random()`
-> không hạt giống — nên `reset` sinh ra một bộ số hoàn toàn khác và làm mọi con số trong
-> `PHASE-4-REPORT.md` / `PHASE-5-REPORT.md` mất khả năng tái lập.
+Sáu kỳ cước sau khi nạp:
+
+| Kỳ | Trạng thái | CDR | Hóa đơn | Doanh thu | Thanh toán |
+|---|---|---:|---:|---:|---:|
+| 3/2026 | Đã chốt | 2.770 | 55 | 21.497.051 đ | 58 |
+| 4/2026 | Đã chốt | 3.239 | 55 | 21.737.109 đ | 55 |
+| 5/2026 | Đã chốt | 3.697 | 54 | 21.289.162 đ | 48 |
+| 6/2026 | Mở | 5.017 | 58 | 23.828.605 đ | **0** |
+| 7/2026 | Mở | 4.000 | 58 | 23.161.085 đ | **0** |
+| **8/2026** | Mở | **0** | **0** | **0 đ** | **0** |
+
+> **Kỳ 8/2026 cố ý để rỗng** — đó là kỳ dành cho demo trực tiếp (sinh CDR → tính cước → lập
+> hóa đơn ngay trên sân khấu) và cũng là kỳ để kiểm "màn hình chịu được kỳ rỗng".
 >
+> **Kỳ 6 và 7 cố ý giữ 0 thanh toán** — có thanh toán thì `huyBillingKy` từ chối xoá hóa đơn,
+> và mất luôn hai kỳ còn demo được trọn vòng *huỷ hóa đơn → lập lại*.
+
 > ⚠️ `data-van-hanh.sql` **không phải file soạn tay.** Muốn đổi dữ liệu vận hành thì đổi qua
 > giao diện hoặc qua service rồi dump lại cả file — sửa tay một con số trong đó là dựng ra
-> nguồn sự thật thứ hai cạnh đoạn mã sinh ra nó.
+> nguồn sự thật thứ hai cạnh đoạn mã sinh ra nó. Cách tái sinh ghi ở đầu file.
 
-### 4.3. Chạy kiểm thử
+### ⚠️ Cảnh báo về profile `reset`
+
+> **Profile `reset` XOÁ TOÀN BỘ dữ liệu đang có.** Nó bật `spring.sql.init.mode=always`,
+> khiến `schema.sql` chạy lại — và file đó mở đầu bằng `DROP TABLE IF EXISTS` cho cả 15 bảng.
+> Mọi khách hàng, thuê bao, giao dịch nhập qua giao diện đều **mất sạch**.
+
+Bù lại, `reset` **tái lập đúng** bộ dữ liệu mà báo cáo mô tả: chạy lại bao nhiêu lần cũng ra
+đúng 20.101 dòng giống hệt nhau. Trước Phase 5 mục F thì không — `data-mau.sql` không chứa hóa
+đơn nào, mà bộ sinh CDR lại dùng `new Random()` không hạt giống, nên mỗi lần `reset` ra một bộ
+số khác và mọi con số trong báo cáo mất khả năng tái lập.
+
+---
+
+## 7. Chạy kiểm thử
+
+### 7.1. Test tự động (JUnit)
 
 ```bash
 mvnw test
 ```
 
-Hiện có **260 test**. Sáu lớp cần MySQL đang chạy (`SchemaValidationTest` đối chiếu entity
-với schema thật; `KiemTraDoPhuBangGiaTest`, `KiemTraSoCaiSoDuTest` và
-`KiemTraBatBienThanhToanTest` kiểm bất biến trên dữ liệu thật; `CdrGeneratorHatGiongTest` kiểm
-tính tái lập của bộ sinh; `BaoCaoServiceTest` kiểm chéo số liệu báo cáo); các lớp còn lại chạy
-độc lập không cần CSDL.
+**279 test.** Trong đó 241 test chạy độc lập không cần CSDL; 38 test ở 8 lớp cần MySQL đang
+chạy vì chúng kiểm bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng sẵn.
 
 > ⚠️ **Dừng ứng dụng trước khi chạy `mvnw test`** — bộ test chạy trên CSDL thật.
 
-> ⚠️ Dòng phân rã theo lớp có thể in ra `Tests run: 0 ... in Ma trận chuyển trạng thái thuê bao`.
-> Đó là cách Surefire đếm lớp `@Nested`, **không phải lỗi** — con số đúng nằm ở dòng tổng
-> `Results: Tests run: 260`.
+> ⚠️ Dòng phân rã theo lớp có thể in `Tests run: 0 ... in Ma trận chuyển trạng thái thuê bao`.
+> Đó là cách Surefire đếm lớp `@Nested`, **không phải lỗi** — con số đúng ở dòng tổng.
 
-Ngoài ra có **5 script kiểm thử giao diện** trong `scripts/` (chạy khi ứng dụng đang bật),
-tổng **94 phép kiểm**: `test-auth.ps1`, `test-kh.ps1`, `test-tb.ps1`, `test-muc-F.ps1` và
-`test-bao-cao.ps1`. Xem [`scripts/README.md`](scripts/README.md).
+### 7.2. Script kiểm thử giao diện
 
-### 4.4. Chạy engine tính cước
+**8 script** trong `scripts/`, tổng **177 phép kiểm**, chạy khi ứng dụng đang bật:
 
-Toàn bộ engine điều khiển qua giao diện tại **`/tinh-cuoc`** (cần vai trò `ADMIN`):
+| Script | Kiểm | Nội dung |
+|---|---:|---|
+| `test-auth.ps1` | 11 | Đăng nhập, CSRF, phân quyền 3 vai trò |
+| `test-kh.ps1` | 12 | Khách hàng: tạo, sửa, validation, trùng giấy tờ |
+| `test-tb.ps1` | 16 | Thuê bao: đăng ký, chuyển trạng thái, đổi gói |
+| `test-muc-F.ps1` | 17 | Bất biến thanh toán và công nợ |
+| `test-bao-cao.ps1` | 38 | 7 báo cáo + dashboard + xuất Excel |
+| `test-dieu-huong.ps1` | 13 | **Đi theo link thật** trên trang, không gõ URL |
+| `test-ky-rong.ps1` | 28 | Kỳ 8/2026 rỗng: 17 màn hình + 4 Excel + 3 thao tác |
+| `test-bien.ps1` | 42 | Tham số biên, dữ liệu xấu, 12 × 403 |
 
-1. **Sinh dữ liệu CDR** — `/cdr/sinh-du-lieu`, chọn khoảng ngày và số bản ghi
-2. **Chạy tính cước** — định giá từng bản ghi CDR của kỳ
-3. **Lập hóa đơn** — áp ưu đãi gói cước rồi gom thành hóa đơn cho thuê bao trả sau
-4. **Chốt kỳ** — thao tác **một chiều**, sau đó kỳ không sửa được nữa
+Xem [`scripts/README.md`](scripts/README.md).
 
-Mỗi bước đều có đường lùi (*Huỷ hóa đơn*, *Huỷ kết quả tính cước*) trừ bước chốt kỳ.
+### 7.3. Kịch bản kiểm thử thủ công
 
-**Bảng đối soát cước** tại `/tinh-cuoc/doi-soat/{thueBaoId}/{kyId}` bày ra toàn bộ đường đi
-của con số — từ sản lượng thô trên từng CDR, qua quy đổi đơn vị và quỹ ưu đãi, tới từng cột
-trên hóa đơn — và đối chiếu hai cột "tính từ CDR" với "trên hóa đơn". In ra giấy A4 được.
-
-### 4.4. Đóng gói và chạy độc lập
-
-```bash
-mvnw clean package
-```
-
-```bash
-java -jar target/billing-0.0.1-SNAPSHOT.jar
-```
+70 ca kiểm thủ công chia 9 nhóm: [`docs/kich-ban-kiem-thu.md`](docs/kich-ban-kiem-thu.md).
 
 ---
 
-## 5. Cấu trúc dự án
+## 8. Cấu trúc dự án
 
 ```
 vnpt-billing/
 ├── pom.xml
+├── mvnw / mvnw.cmd                      # Maven Wrapper
 ├── README.md
-└── src/main/
-    ├── java/com/hanzo/billing/
-    │   ├── BillingApplication.java      # lớp khởi động
-    │   ├── config/                      # cấu hình (Security, MVC, ...)
-    │   ├── controller/                  # tầng điều khiển (Spring MVC)
-    │   ├── dto/                         # đối tượng truyền dữ liệu cho form/view
-    │   ├── entity/                      # thực thể ánh xạ bảng CSDL (JPA)
-    │   ├── enums/                        # các kiểu liệt kê nghiệp vụ
-    │   ├── exception/                   # ngoại lệ và xử lý lỗi
-    │   ├── repository/                  # tầng truy xuất dữ liệu (Spring Data JPA)
-    │   ├── service/                     # giao diện nghiệp vụ
-    │   │   ├── impl/                    # cài đặt nghiệp vụ
-    │   │   └── rating/                  # thuật toán tính cước (rating engine)
-    │   └── util/                        # tiện ích dùng chung
-    └── resources/
-        ├── application.yml
-        ├── db/
-        │   ├── schema.sql               # script tạo bảng
-        │   ├── data-mau.sql             # dữ liệu gốc, viết tay
-        │   └── data-van-hanh.sql        # kết quả vận hành, bản dump do máy sinh
-        ├── static/css/app.css
-        └── templates/
-            ├── index.html               # trang chủ
-            ├── error/{404,500}.html     # trang lỗi
-            └── fragments/layout.html    # layout dùng chung
+├── CLAUDE.md                            # bối cảnh dự án, ràng buộc nghiệp vụ
+├── docs/                                # 15 tài liệu — xem mục 9
+├── scripts/                             # 8 script kiểm thử giao diện qua HTTP
+├── logs/                                # log ứng dụng, xoay vòng theo ngày (không commit)
+└── src/
+    ├── main/
+    │   ├── java/com/hanzo/billing/
+    │   │   ├── BillingApplication.java  # lớp khởi động
+    │   │   ├── config/                  # Security, MVC, khởi tạo
+    │   │   ├── controller/              # tầng điều khiển (Spring MVC)
+    │   │   ├── dto/                     # đối tượng truyền dữ liệu cho form/view
+    │   │   ├── entity/                  # 15 thực thể JPA
+    │   │   ├── enums/                   # 16 kiểu liệt kê nghiệp vụ
+    │   │   ├── exception/               # ngoại lệ nghiệp vụ + GlobalExceptionHandler
+    │   │   ├── repository/              # 15 repository Spring Data JPA
+    │   │   ├── service/
+    │   │   │   ├── impl/                # cài đặt nghiệp vụ
+    │   │   │   └── rating/              # thuật toán tính cước
+    │   │   └── util/                    # tiện ích dùng chung
+    │   └── resources/
+    │       ├── application.yml
+    │       ├── application-reset.yml
+    │       ├── db/
+    │       │   ├── schema.sql           # 15 bảng + 2 view
+    │       │   ├── data-mau.sql         # dữ liệu gốc, viết tay
+    │       │   └── data-van-hanh.sql    # kết quả vận hành, bản dump do máy sinh
+    │       ├── static/css/app.css
+    │       └── templates/
+    │           ├── fragments/layout.html
+    │           ├── error/{400,403,404,500}.html
+    │           └── <phân-hệ>/*.html
+    └── test/java/com/hanzo/billing/     # 279 test
 ```
 
 ---
 
-## 6. Trạng thái hiện tại — hết Phase 4
+## 9. Tài liệu
 
-**Phase 0 — khung dự án** ✅
+| Tài liệu | Nội dung |
+|---|---|
+| [`docs/huong-dan-su-dung.md`](docs/huong-dan-su-dung.md) | **Hướng dẫn thao tác từng chức năng** |
+| [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) | Mô tả 15 bảng + 2 view (mục 6: cảnh báo quy đổi đơn vị DATA) |
+| [`docs/kich-ban-kiem-thu.md`](docs/kich-ban-kiem-thu.md) | 70 ca kiểm thủ công + tổng hợp test tự động |
+| [`docs/kich-ban-demo.md`](docs/kich-ban-demo.md) | 12 bước demo 18 phút, kèm câu hỏi hội đồng |
+| [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md) | 62 ảnh màn hình cần chụp cho báo cáo |
+| [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) | Số đo ghi hàng loạt CDR và chỉ mục |
+| [`docs/mau-cdr.csv`](docs/mau-cdr.csv) | File CSV mẫu cho chức năng nhập CDR |
+| [`scripts/README.md`](scripts/README.md) | Script kiểm thử giao diện |
 
-- [x] Khung Maven + Spring Boot chạy được
-- [x] Cấu hình kết nối MySQL, JPA (`ddl-auto: none`), script khởi tạo CSDL
-- [x] Layout Thymeleaf dùng chung: sidebar + header + vùng nội dung
-- [x] Trang chủ, trang lỗi 404 / 500
-- [x] Spring Security **tạm mở toàn bộ** (`permitAll`) để tiện phát triển
+Báo cáo theo phase:
 
-**Phase 1 — cơ sở dữ liệu** ✅
+| Phase | Nội dung | Báo cáo |
+|---|---|---|
+| 0 | Khung dự án | [`PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md) |
+| 1 | CSDL 15 bảng + 2 view | [`mo-ta-csdl.md`](docs/mo-ta-csdl.md) |
+| 2 | Xác thực, khách hàng, thuê bao | [`PHASE-2-REPORT.md`](docs/PHASE-2-REPORT.md) |
+| 3 | Gói cước, bảng giá, CDR, kỳ cước | [`PHASE-3-REPORT.md`](docs/PHASE-3-REPORT.md) |
+| 4 | Engine tính cước | [`PHASE-4-PLAN.md`](docs/PHASE-4-PLAN.md) · [`PHASE-4-REPORT.md`](docs/PHASE-4-REPORT.md) |
+| 5 | Hóa đơn, thanh toán, công nợ | [`PHASE-5-PLAN.md`](docs/PHASE-5-PLAN.md) · [`PHASE-5-REPORT.md`](docs/PHASE-5-REPORT.md) |
+| 6 | Báo cáo, thống kê, dashboard | [`PHASE-6-REPORT.md`](docs/PHASE-6-REPORT.md) |
+| 7 | Hoàn thiện, kiểm thử, tài liệu | [`PHASE-7-REPORT.md`](docs/PHASE-7-REPORT.md) |
 
-- [x] 15 bảng + 2 view trong `schema.sql`
-- [x] 15 entity JPA + 16 enum
-- [x] 15 repository Spring Data JPA
-- [x] Dữ liệu mẫu: 50 khách hàng, 80 thuê bao, 5 gói cước, 9 dòng bảng giá
-      (nay là 10 — dòng `SMS/QUOC_TE` bổ sung ở Phase 4A)
-
-**Phase 2 — xác thực và nghiệp vụ đầu tiên** ✅
-
-- [x] Tách profile `reset` để dữ liệu nhập qua giao diện không bị mất khi khởi động lại
-- [x] `SchemaValidationTest` kiểm tra ánh xạ Entity ↔ CSDL tự động ở khâu build
-- [x] Đăng nhập thật, BCrypt, CSRF, phân quyền 3 vai trò, trang 403
-- [x] Quản lý khách hàng: danh sách/tìm kiếm/lọc, form đổi động, validation, xoá mềm
-- [x] Quản lý thuê bao: đăng ký, chi tiết 4 tab, chuyển trạng thái theo ma trận,
-      đổi gói cước, nạp tiền
-
-Tài khoản dùng thử (mật khẩu đều là `123456`): `admin`, `nhanvien01`, `ketoan01`.
-
-**Phase 3 — gói cước, bảng giá, CDR** ✅
-
-- [x] Chuẩn hoá mã khách hàng 6 chữ số, tách `SinhMaService` có unit test
-- [x] 16 unit test phủ kín ma trận chuyển trạng thái thuê bao
-- [x] Script kiểm thử chuyển vào `scripts/`, xét mã trạng thái HTTP trước
-- [x] Quản lý gói cước, chặn xoá gói đang có thuê bao dùng
-- [x] Bảng giá theo thời gian, chặn chồng khoảng hiệu lực (9 unit test)
-- [x] Bộ sinh CDR giả lập, 5000 bản ghi trong ~257 ms
-- [x] Nhập CDR từ CSV, báo lỗi từng dòng
-- [x] Tra cứu CDR, lọc, phân trang, xuất Excel
-- [x] Quản lý kỳ cước
-
-**Phase 4 — engine tính cước (Rating & Billing)** ✅
-
-- [x] **4A** — `QuyTacToHopDichVu`, `DonViCuoc`, `ThamSoTinhCuoc`, `BangGiaLookup`;
-      phát hiện và sửa 251 CDR không tra được đơn giá
-- [x] **4B** — `RatingService`: định giá từng CDR, làm tròn block, gán kỳ, đường gỡ kỳ kẹt
-- [x] **4C** — `BillingService`: gom CDR thành hóa đơn, prorate cước thuê bao, VAT
-- [x] **4D** — `UuDaiGoiCuoc`: quỹ ưu đãi bốn loại; thêm cột `bang_gia_cuoc_id` lưu ảnh chụp đơn giá
-- [x] **4E** — giao diện `/tinh-cuoc` và **bảng đối soát cước**
-- [x] **4F** — chạy kỳ 5/2026, dọn nợ tài liệu, chuẩn bị dữ liệu cho Phase 5–6
-
-Dữ liệu hiện có: **kỳ 5/2026** đã chốt (3697 CDR · 54 hóa đơn · 21.289.162 đ) và
-**kỳ 6/2026** đang mở (5017 CDR · 58 hóa đơn · 23.940.596 đ).
-
-**Phase 5 — hóa đơn, thanh toán, công nợ** 🔄 đang làm
-
-- [x] **A0** — rà soát và sửa số liệu chép lại trong tài liệu
-- [x] **G1** — tổng quát hoá `nap_tien` thành sổ cái `bien_dong_so_du`, 18 dòng mở sổ
-- [x] **G2** — trừ cước kỳ vào số dư trả trước, kèm đường hoàn tác
-- [x] **G3** — công bố dự đoán trước khi viết code; 7/7 dự đoán đúng
-- [x] **G4** — tab *Biến động số dư*, cảnh báo số dư thấp, nút chạy/hủy trên `/tinh-cuoc`
-- [ ] **A–F** — chưa được giao
-
-Chưa làm (thuộc các phase sau):
-
-- [ ] Phase 6 — báo cáo, thống kê, dashboard
-- [ ] Phase 7 — hoàn thiện, kiểm thử, tài liệu
-
-Tài liệu:
-
-- [`docs/PHASE-0-REPORT.md`](docs/PHASE-0-REPORT.md) — báo cáo quá trình và kết quả Phase 0
-- [`docs/PHASE-2-REPORT.md`](docs/PHASE-2-REPORT.md) — báo cáo Phase 2, kèm danh sách màn hình cần chụp ảnh
-- [`docs/PHASE-3-REPORT.md`](docs/PHASE-3-REPORT.md) — báo cáo Phase 3, kèm 2 điểm sai lệch đặc tả và danh sách màn hình
-- [`docs/PHASE-4-PLAN.md`](docs/PHASE-4-PLAN.md) — rà soát đầu vào Phase 4, 10 quyết định nghiệp vụ và tiêu chí nghiệm thu
-- [`docs/PHASE-4-REPORT.md`](docs/PHASE-4-REPORT.md) — báo cáo Phase 4 (**mục 3: bài học phương pháp kiểm thử — kiểm bất biến thay vì kiểm luật**)
-- [`docs/PHASE-5-PLAN.md`](docs/PHASE-5-PLAN.md) — kế hoạch Phase 5: ba ràng buộc bắt buộc và mục G (sổ cái biến động số dư)
-- [`docs/PHASE-5-REPORT.md`](docs/PHASE-5-REPORT.md) — báo cáo Phase 5 (**mục 10: hai phát hiện khi đo dự đoán — ba thuê bao dựng sẵn không dùng được**)
-- [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) — mô tả chi tiết 15 bảng và 2 view (**mục 6: cảnh báo quy đổi đơn vị DATA cho Phase 4**)
-- [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) — số đo tối ưu ghi hàng loạt CDR
-- [`docs/mau-cdr.csv`](docs/mau-cdr.csv) — file CSV mẫu để thử chức năng nhập CDR
-- [`scripts/README.md`](scripts/README.md) — script kiểm thử giao diện qua HTTP
-
-> ℹ️ **Dữ liệu được giữ nguyên qua các lần khởi động.** `application.yml` đặt
-> `spring.sql.init.mode: never` từ Phase 2, nên `schema.sql` và `data-mau.sql` **không**
-> chạy lại. Muốn nạp lại bộ dữ liệu mẫu từ đầu thì chạy profile `reset` — xem mục 4.2.
+Hai mục đáng đọc nhất nếu chỉ có thời gian đọc hai mục: **`PHASE-4-REPORT.md` mục 43** (bảy
+chuẩn làm việc, rút ra từ những phép kiểm sai) và **`PHASE-7-REPORT.md` mục tổng kết**.
 
 ---
 
-## 7. Khắc phục sự cố
+## 10. Khắc phục sự cố
 
 ### `spring-boot:run` báo `Could not find or load main class`
 
-**Triệu chứng:** `mvn clean compile` và `mvn package` chạy bình thường, nhưng
-`mvn spring-boot:run` báo lỗi:
-
-```
-Error: Could not find or load main class com.hanzo.billing.BillingApplication
-```
-
-**Nguyên nhân:** đường dẫn dự án có chứa ký tự tiếng Việt có dấu (ví dụ `D:\HỌC\...`).
-Spring Boot Maven plugin ghi classpath vào một *argfile* rồi truyền cho JVM con.
-Trình khởi động `java` đọc argfile bằng bảng mã ANSI của Windows (`windows-1258`)
-**trước khi** máy ảo khởi động, nên ký tự `Ọ` bị biến thành `?` và classpath hỏng.
-Không có tham số `-D...` nào sửa được vì lỗi xảy ra trước khi JVM đọc tham số.
+**Nguyên nhân:** đường dẫn dự án chứa ký tự tiếng Việt có dấu (ví dụ `D:\HỌC\...`). Spring Boot
+Maven plugin ghi classpath vào một *argfile* rồi truyền cho JVM con. Trình khởi động `java` đọc
+argfile bằng bảng mã ANSI của Windows (`windows-1258`) **trước khi** máy ảo khởi động, nên ký
+tự `Ọ` thành `?` và classpath hỏng. Không tham số `-D...` nào sửa được vì lỗi xảy ra trước khi
+JVM đọc tham số.
 
 **Cách khắc phục (chọn 1):**
 
-1. **Đặt dự án ở đường dẫn không dấu** — cách triệt để, mọi lệnh Maven đều chạy.
-   Ví dụ `D:\HOC\TTNN\APP\vnpt-billing` hoặc `D:\TTNN\vnpt-billing`.
-2. **Giữ nguyên đường dẫn**, chạy bằng file JAR (đã kiểm chứng là chạy tốt):
+1. **Đặt dự án ở đường dẫn không dấu** — cách triệt để. Ví dụ `D:\HOC\TTNN\APP\vnpt-billing`.
+2. **Giữ nguyên đường dẫn**, chạy bằng file JAR:
 
    ```bash
    mvnw package
@@ -344,28 +318,28 @@ Không có tham số `-D...` nào sửa được vì lỗi xảy ra trước khi
    java -jar target/billing-0.0.1-SNAPSHOT.jar
    ```
 
-3. **Chạy trực tiếp từ IntelliJ IDEA** (nút Run trên `BillingApplication`) —
-   IntelliJ tự dựng dòng lệnh nên không đi qua argfile của Maven plugin.
+3. **Chạy từ IntelliJ IDEA** (nút Run trên `BillingApplication`) — IntelliJ tự dựng dòng lệnh
+   nên không đi qua argfile.
 
-### Ứng dụng không khởi động được vì chưa có MySQL
+### Không khởi động được vì chưa có MySQL
 
-Ứng dụng cần MySQL đang chạy tại `localhost:3306`. Nếu chỉ muốn xem giao diện mà
-chưa cài MySQL, có thể tạm bỏ qua tầng CSDL bằng biến môi trường:
+Ứng dụng cần MySQL tại `localhost:3306`. Chỉ muốn xem giao diện mà chưa cài MySQL:
 
 ```bash
 java -Dspring.sql.init.mode=never -Dspring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration -jar target/billing-0.0.1-SNAPSHOT.jar
 ```
 
-### Log hiện dòng `Using generated security password: ...`
+### Sửa CSS/JS mà trình duyệt không thấy đổi
 
-Đây là thông báo bình thường của Spring Security khi chưa cấu hình người dùng.
-Phase 0 đang để `permitAll` nên mật khẩu này không dùng đến. Phase 2 sẽ thay bằng
-đăng nhập thật và thông báo sẽ tự mất.
+Spring phục vụ tài nguyên tĩnh từ `target/classes`, **không** từ `src/main/resources`. Chạy lại
+`mvnw spring-boot:run` (hoặc `mvnw compile`) để chép sang, rồi tải lại trang bỏ qua bộ nhớ đệm
+(`Ctrl+F5`).
 
----
+### Trang báo 500 kèm mã sự cố
 
-## 8. Lưu ý bảo mật khi phát triển
+Ghi lại mã (dạng `20260810-143052`) rồi tìm trong `logs/vnpt-billing.log` — đó là khoá tra cứu
+giữa cái người dùng thấy và cái nhật ký ghi. Log xoay vòng theo ngày, giữ 30 ngày.
 
-`SecurityConfig` ở Phase 0 đang mở toàn bộ endpoint và tắt CSRF.
-**Không** triển khai cấu hình này ra môi trường thật — Phase 2 sẽ thay bằng
-đăng nhập và phân quyền đầy đủ.
+### Các sự cố nghiệp vụ khác
+
+Xem [`docs/huong-dan-su-dung.md`](docs/huong-dan-su-dung.md) mục 11.

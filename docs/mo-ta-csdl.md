@@ -404,7 +404,7 @@ chưa có hóa đơn nào vẫn xuất hiện với giá trị 0.
 | `bang_gia_cuoc` | 10 | 7 dòng giá thường + 3 dòng giờ cao điểm (thoại, +20%) |
 | `thue_bao` | 80 | 60 trả sau + 20 trả trước |
 | `dang_ky_goi_cuoc` | 80 | Mỗi thuê bao một bản ghi `DANG_AP_DUNG` |
-| `ky_cuoc` | 3 | Tháng 5, 6, 7/2026 — đều khởi tạo ở trạng thái `MO` |
+| `ky_cuoc` | 6 | Tháng 3–8/2026 — đều khởi tạo ở trạng thái `MO`; kỳ 8 **cố ý để rỗng** |
 | `bien_dong_so_du` | 18 | Dòng **mở sổ** cho 18 thuê bao trả trước có số dư > 0 — xem ghi chú dưới |
 | `nhat_ky_he_thong` | 0 | Vết thao tác người dùng — cố ý không đưa vào dữ liệu mẫu |
 
@@ -419,16 +419,21 @@ chưa có hóa đơn nào vẫn xuất hiện với giá trị 0.
 ### 4.1. Phần vận hành — `data-van-hanh.sql` (thêm ở Phase 5 mục F)
 
 Từ Phase 5 mục F, kết quả vận hành cũng được lưu thành script và chạy **ngay sau**
-`data-mau.sql`:
+`data-mau.sql`. Số liệu dưới đây là bản dump hiện hành, cập nhật ở Phase 7 sau khi Phase 6
+bổ sung kỳ 3, 4 và 7:
 
 | Bảng | Số bản ghi | Ghi chú |
 |---|---|---|
-| `chi_tiet_su_dung` | 8.714 | 3.697 kỳ 5 + 5.017 kỳ 6, tất cả `DA_TINH` |
-| `hoa_don` | 112 | 54 kỳ 5 + 58 kỳ 6 |
-| `chi_tiet_hoa_don` | 266 | 264 dòng cước + 2 dòng "Giảm trừ" thành tiền âm |
-| `thanh_toan` | 48 | Toàn bộ thuộc kỳ 5 — kỳ 6 cố ý để trống |
+| `chi_tiet_su_dung` | 18.723 | 2.770 + 3.239 + 3.697 + 5.017 + 4.000 cho kỳ 3→7, tất cả `DA_TINH`; kỳ 8 không có bản ghi nào |
+| `hoa_don` | 280 | 55 · 55 · 54 · 58 · 58 theo thứ tự kỳ 3→7 |
+| `chi_tiet_hoa_don` | 620 | 618 dòng cước + 2 dòng "Giảm trừ" thành tiền âm |
+| `thanh_toan` | 161 | Kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · **kỳ 6, 7, 8: 0** |
 | `bien_dong_so_du` | +16 | Dòng `TRU_CUOC` kỳ 6, cộng với 18 dòng mở sổ ở trên là 34 |
 | `giam_tru` | 2 | Cả hai `DA_AP_DUNG` cho kỳ 6 |
+
+> **Ba kỳ cố ý giữ 0 thanh toán.** Kỳ 6 và 7 giữ 0 để `huyBillingKy` còn xoá được hóa đơn —
+> đó là hai kỳ duy nhất còn demo được trọn vòng *huỷ hóa đơn → lập lại*. Kỳ 8 giữ 0 vì nó
+> chưa có hóa đơn nào. Chi tiết: `PHASE-7-REPORT.md` mục 6.
 
 Ranh giới giữa hai file là ranh giới về **nguồn gốc**, không phải về chủ đề: `data-mau.sql` do
 người viết ra và sửa tay được; `data-van-hanh.sql` là **bản dump** các dòng thực tế sau khi
