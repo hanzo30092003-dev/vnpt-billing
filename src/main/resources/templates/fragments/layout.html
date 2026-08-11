@@ -40,9 +40,31 @@
                 <i class="bi bi-house-door"></i> Trang chủ
             </a>
 
-            <!--/* Quầy giao dịch: nhân viên và quản trị viên */-->
+            <!--/*
+                =============================================================
+                MENU GOM THEO CONG VIEC, KHONG GOM THEO BANG DU LIEU
+                =============================================================
+                Cach cu gom theo "phan he ky thuat": Quay giao dich / Danh muc
+                & tinh cuoc / Ke toan. Nguoi dung dich la nhan vien giao dich
+                quen Excel va Zalo - ho khong nghi theo phan he, ho nghi theo
+                viec: hom nay co khach den dang ky, cuoi thang phai tinh tien,
+                khach den tra tien thi thu.
+
+                Thu tu nhom xep theo TAN SUAT DUNG, khong theo thu tu ky thuat:
+                  1. Khach hang & thue bao  - dung hang ngay
+                  2. Thu tien & cong no     - dung hang ngay
+                  3. Tinh tien hang thang   - dung mot lan moi thang
+                  4. Bao cao                - xem khi can
+                  5. Danh muc               - gan nhu khong doi, de cuoi cung
+
+                "Danh muc" bi day xuong duoi cung co chu y: goi cuoc va bang
+                gia la thu khai mot lan roi de yen hang nam, nhung o ban cu no
+                nam ngay tren dau nhom cua quan tri vien.
+            */-->
+
+            <!--/* 1. Khach hang & thue bao - viec hang ngay cua nhan vien giao dich */-->
             <div sec:authorize="hasAnyRole('NHAN_VIEN','ADMIN')">
-                <div class="nav-group">Quầy giao dịch</div>
+                <div class="nav-group"><i class="bi bi-person-lines-fill me-1"></i> Khách hàng &amp; thuê bao</div>
                 <a class="nav-item" th:href="@{/khach-hang}"
                    th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/khach-hang')} ? 'active'">
                     <i class="bi bi-people"></i> Khách hàng
@@ -53,37 +75,9 @@
                 </a>
             </div>
 
-            <!--/* Danh mục và tính cước: chỉ quản trị viên. Các mục còn để # vì thuộc Phase 3-4 */-->
-            <div sec:authorize="hasRole('ADMIN')">
-                <div class="nav-group">Danh mục &amp; tính cước</div>
-                <a class="nav-item" th:href="@{/goi-cuoc}"
-                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/goi-cuoc')} ? 'active'">
-                    <i class="bi bi-box-seam"></i> Gói cước
-                </a>
-                <a class="nav-item" th:href="@{/bang-gia}"
-                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/bang-gia')} ? 'active'">
-                    <i class="bi bi-tags"></i> Bảng giá
-                </a>
-                <a class="nav-item" th:href="@{/cdr}"
-                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/cdr')} ? 'active'">
-                    <i class="bi bi-file-earmark-text"></i> Cuộc gọi &amp; tin nhắn
-                </a>
-                <a class="nav-item" th:href="@{/ky-cuoc}"
-                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/ky-cuoc')} ? 'active'">
-                    <i class="bi bi-calendar3"></i> Kỳ cước
-                </a>
-                <a class="nav-item" th:href="@{/tinh-cuoc}"
-                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/tinh-cuoc')} ? 'active'">
-                    <i class="bi bi-calculator"></i> Tính cước
-                </a>
-            </div>
-
-            <!--/*
-                Kế toán. Bốn màn hình này dựng ở Phase 5 nhưng mãi tới Phase 6 mới được
-                nối vào menu — trước đó chúng chỉ tới được bằng cách gõ thẳng đường dẫn.
-            */-->
+            <!--/* 2. Thu tien & cong no - viec hang ngay cua ke toan */-->
             <div sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
-                <div class="nav-group">Kế toán</div>
+                <div class="nav-group"><i class="bi bi-cash-stack me-1"></i> Thu tiền &amp; công nợ</div>
                 <a class="nav-item" th:href="@{/hoa-don}"
                    th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/hoa-don')} ? 'active'">
                     <i class="bi bi-receipt"></i> Hóa đơn
@@ -102,12 +96,42 @@
                 </a>
             </div>
 
-            <!--/* Báo cáo: mọi vai trò đã đăng nhập đều xem được */-->
-            <div class="nav-group">Báo cáo</div>
+            <!--/* 3. Tinh tien hang thang - lam mot lan moi thang, theo dung thu tu buoc */-->
+            <div sec:authorize="hasRole('ADMIN')">
+                <div class="nav-group"><i class="bi bi-calculator me-1"></i> Tính tiền hằng tháng</div>
+                <a class="nav-item" th:href="@{/ky-cuoc}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/ky-cuoc')} ? 'active'">
+                    <i class="bi bi-calendar3"></i> Tháng tính tiền
+                </a>
+                <a class="nav-item" th:href="@{/cdr}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/cdr')} ? 'active'">
+                    <i class="bi bi-file-earmark-text"></i> Cuộc gọi &amp; tin nhắn
+                </a>
+                <a class="nav-item" th:href="@{/tinh-cuoc}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/tinh-cuoc')} ? 'active'">
+                    <i class="bi bi-calculator"></i> Chạy tính tiền
+                </a>
+            </div>
+
+            <!--/* 4. Bao cao: moi vai tro da dang nhap deu xem duoc */-->
+            <div class="nav-group"><i class="bi bi-bar-chart-line me-1"></i> Báo cáo</div>
             <a class="nav-item" th:href="@{/bao-cao}"
                th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/bao-cao')} ? 'active'">
-                <i class="bi bi-bar-chart-line"></i> Báo cáo thống kê
+                <i class="bi bi-graph-up"></i> Báo cáo thống kê
             </a>
+
+            <!--/* 5. Danh muc - khai mot lan roi de yen, nen xep cuoi cung */-->
+            <div sec:authorize="hasRole('ADMIN')">
+                <div class="nav-group"><i class="bi bi-gear me-1"></i> Danh mục</div>
+                <a class="nav-item" th:href="@{/goi-cuoc}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/goi-cuoc')} ? 'active'">
+                    <i class="bi bi-box-seam"></i> Gói cước
+                </a>
+                <a class="nav-item" th:href="@{/bang-gia}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/bang-gia')} ? 'active'">
+                    <i class="bi bi-tags"></i> Bảng giá
+                </a>
+            </div>
 
             <!--/*
                 Mục "Quản trị" đã BỎ ở Phase 7. Nó để href="#" từ Phase 0 và không hề có

@@ -221,6 +221,150 @@ body {
     }
 }
 
+/* =====================================================================
+   LOI TAT "VIEC THUONG LAM" TREN TRANG CHU
+   =====================================================================
+   O bam to, ca the la vung bam chu khong chi rieng dong chu - nguoi dung
+   khong phai nham vao mot lien ket nho.
+   ===================================================================== */
+.loi-tat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: .15rem;
+    height: 100%;
+    min-height: 92px;
+    padding: .85rem .5rem;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    background-color: #fff;
+    color: #14304d;
+    text-decoration: none;
+    transition: border-color .15s, background-color .15s;
+}
+
+.loi-tat:hover,
+.loi-tat:focus-visible {
+    border-color: #1e88e5;
+    background-color: #f0f7ff;
+    color: #14304d;
+}
+
+.loi-tat i {
+    font-size: 1.5rem;
+    color: #1e88e5;
+    line-height: 1;
+    margin-bottom: .2rem;
+}
+
+.loi-tat span {
+    font-size: .95rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.loi-tat small {
+    font-size: .8rem;
+    color: #5c6670;
+    line-height: 1.2;
+}
+
+/* =====================================================================
+   CO CHU VA VUNG BAM
+   =====================================================================
+   Nguoi dung dich ngoi truoc man hinh nay ca ngay. Bootstrap mac dinh cho
+   .small va .btn-sm xuong 14px va cao 31px - doc moi mat va kho bam trung.
+
+   Nguong dat ra: chu trong bang >= 14px, nhan form >= 15px, moi thu bam
+   duoc >= 40x40px.
+   ===================================================================== */
+
+/* Chu trong bang: khong duoi 14px, ke ca khi da khai .table-sm hay .small */
+.bang-du-lieu,
+.bang-du-lieu td,
+.bang-du-lieu th {
+    font-size: .9rem;          /* 14.4px */
+}
+
+.bang-du-lieu .small,
+.bang-du-lieu small {
+    font-size: .875rem;        /* 14px - san bang, khong cho nho hon */
+}
+
+/* Bang doi soat CDR truoc day de .86rem = 13,8px, duoi nguong */
+.bang-cdr {
+    font-size: .875rem;
+}
+
+/* Nhan form: >= 15px, ke ca khi template da khai them class "small" */
+.form-label,
+.form-label.small,
+label.form-label {
+    font-size: .95rem;         /* 15.2px */
+    font-weight: 500;
+    margin-bottom: .3rem;
+}
+
+/* Vung bam >= 40x40. Ap cho ca .btn-sm: nut nho la de tiet kiem CHO,
+   khong phai de kho bam - giu be ngang gon nhung khong ha chieu cao. */
+.btn,
+.page-link,
+.form-select,
+.form-control {
+    min-height: 40px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+}
+
+.btn-sm {
+    font-size: .875rem;
+    padding-top: .25rem;
+    padding-bottom: .25rem;
+}
+
+/* Nut chi co bieu tuong van phai du rong de bam trung */
+.btn-icon-only {
+    min-width: 40px;
+}
+
+/* Muc menu ben trai: du cao de bam tren man hinh cam tay */
+.sidebar-nav .nav-item {
+    min-height: 40px;
+    font-size: .95rem;
+}
+
+/* O phan trang: moi so la mot vung bam rieng */
+.pagination .page-link {
+    min-width: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Lien ket nam trong bang (ma hoa don, ten khach...) van phai du cao de bam */
+.bang-du-lieu td a:not(.btn) {
+    display: inline-block;
+    padding: .3rem 0;
+}
+
+/* Ban in khong can vung bam to, tra lai co chu gon cho vua giay */
+@media print {
+    .btn,
+    .page-link,
+    .form-select,
+    .form-control,
+    .sidebar-nav .nav-item {
+        min-height: 0;
+    }
+}
+
 /* ---------- Tien ich ---------- */
 .bang-du-lieu td,
 .bang-du-lieu th {

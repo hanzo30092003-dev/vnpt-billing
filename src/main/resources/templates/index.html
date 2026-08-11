@@ -20,6 +20,76 @@
         không phải dữ liệu thật của bất kỳ nhà mạng nào.
     </div>
 
+    <!--/*
+        ================== VIỆC THƯỜNG LÀM ==================
+        Bốn lối tắt tới việc nhân viên giao dịch làm nhiều nhất trong ngày.
+
+        Vì sao cần: trang chủ trước đây chỉ có số liệu để NHÌN, không có gì để
+        BẤM. Người mới mở phần mềm lên thấy một bảng điều khiển đẹp rồi đứng
+        lại, vì không biết bắt đầu từ đâu. Bốn nút này là câu trả lời cho
+        "giờ tôi phải làm gì".
+
+        Mỗi nút bọc trong sec:authorize đúng vai trò của nó — nút dẫn tới chỗ
+        người dùng không có quyền chỉ để họ bấm vào rồi nhận trang 403.
+    */-->
+    <div class="card shadow-sm mb-3 khong-in">
+        <div class="card-header bg-white fw-semibold">
+            <i class="bi bi-lightning-charge me-1"></i> Việc thường làm
+        </div>
+        <div class="card-body">
+            <div class="row g-2 row-cols-2 row-cols-md-4">
+
+                <div class="col" sec:authorize="hasAnyRole('NHAN_VIEN','ADMIN')">
+                    <a class="loi-tat" th:href="@{/khach-hang/them}">
+                        <i class="bi bi-person-plus"></i>
+                        <span>Thêm khách hàng</span>
+                        <small>Khách mới đến đăng ký</small>
+                    </a>
+                </div>
+
+                <div class="col" sec:authorize="hasAnyRole('NHAN_VIEN','ADMIN')">
+                    <a class="loi-tat" th:href="@{/thue-bao/dang-ky}">
+                        <i class="bi bi-sim"></i>
+                        <span>Đăng ký thuê bao</span>
+                        <small>Cấp số mới cho khách</small>
+                    </a>
+                </div>
+
+                <div class="col" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
+                    <a class="loi-tat" th:href="@{/hoa-don}">
+                        <i class="bi bi-search"></i>
+                        <span>Tra cứu hóa đơn</span>
+                        <small>Xem khách nợ bao nhiêu</small>
+                    </a>
+                </div>
+
+                <div class="col" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
+                    <a class="loi-tat" th:href="@{/cong-no}">
+                        <i class="bi bi-cash-coin"></i>
+                        <span>Ghi nhận thanh toán</span>
+                        <small>Khách vừa trả tiền</small>
+                    </a>
+                </div>
+
+                <div class="col" sec:authorize="hasRole('ADMIN')">
+                    <a class="loi-tat" th:href="@{/tinh-cuoc}">
+                        <i class="bi bi-calculator"></i>
+                        <span>Tính tiền hằng tháng</span>
+                        <small>Chạy vào đầu tháng</small>
+                    </a>
+                </div>
+
+                <div class="col">
+                    <a class="loi-tat" th:href="@{/bao-cao}">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Xem báo cáo</span>
+                        <small>Doanh thu, công nợ</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!--/* ================== BỐN THẺ SỐ LIỆU ================== */-->
     <div class="row g-3 mb-3">
         <div class="col-sm-6 col-xl-3">
