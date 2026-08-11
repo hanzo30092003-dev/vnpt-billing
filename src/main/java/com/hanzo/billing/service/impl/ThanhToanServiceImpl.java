@@ -175,8 +175,16 @@ public class ThanhToanServiceImpl implements ThanhToanService {
 
     @Override
     @Transactional(readOnly = true)
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Nạp sẵn quan hệ bằng {@code JOIN FETCH} chứ <b>không</b> dùng {@code findById}: bản
+     * in phiếu thu được dựng sau khi transaction đã đóng, nên mọi quan hệ {@code LAZY} phải
+     * có mặt từ trước. Đây chính là lỗi 500 của màn hình phiếu thu — xem
+     * {@code ThanhToanRepository.timKemQuanHe}.</p>
+     */
     public ThanhToan layTheoId(Long id) {
-        return thanhToanRepository.findById(id)
+        return thanhToanRepository.timKemQuanHe(id)
                 .orElseThrow(() -> new NghiepVuException(
                         "Không tìm thấy giao dịch thanh toán id " + id));
     }

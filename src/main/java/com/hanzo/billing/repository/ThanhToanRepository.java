@@ -39,6 +39,25 @@ public interface ThanhToanRepository extends JpaRepository<ThanhToan, Long> {
             """)
     List<ThanhToan> timTheoHoaDonKemNguoiThu(@Param("hoaDonId") Long hoaDonId);
 
+    /**
+     * Một giao dịch kèm <b>mọi</b> quan hệ mà phiếu thu cần in.
+     *
+     * <p>Bắt buộc phải nạp sẵn: {@code hoaDon} và {@code nguoiThu} đều khai
+     * {@code FetchType.LAZY}, mà bản in được dựng <b>sau khi</b> transaction đã đóng. Dùng
+     * {@code findById} rồi đọc {@code hoaDon.khachHang} ở tầng trên sẽ ném
+     * {@code LazyInitializationException} và trả về trang lỗi 500.</p>
+     */
+    @Query("""
+            SELECT t FROM ThanhToan t
+            JOIN FETCH t.hoaDon h
+            JOIN FETCH h.khachHang
+            JOIN FETCH h.thueBao
+            JOIN FETCH h.kyCuoc
+            LEFT JOIN FETCH t.nguoiThu
+            WHERE t.id = :id
+            """)
+    Optional<ThanhToan> timKemQuanHe(@Param("id") Long id);
+
     /** Mã giao dịch lớn nhất trong ngày, để sinh số thứ tự kế tiếp. */
     @Query("SELECT MAX(t.maGiaoDich) FROM ThanhToan t WHERE t.maGiaoDich LIKE CONCAT(:tienTo, '%')")
     String timMaLonNhatTheoTienTo(@Param("tienTo") String tienTo);
