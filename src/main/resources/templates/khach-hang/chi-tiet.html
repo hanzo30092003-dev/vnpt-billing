@@ -21,7 +21,7 @@
             <a class="btn btn-outline-secondary" th:href="@{/khach-hang}">
                 <i class="bi bi-arrow-left me-1"></i> Danh sách
             </a>
-            <a class="btn btn-primary" th:href="@{/khach-hang/{id}/sua(id=${khachHang.id})}">
+            <a class="btn btn-outline-primary" th:href="@{/khach-hang/{id}/sua(id=${khachHang.id})}">
                 <i class="bi bi-pencil me-1"></i> Sửa
             </a>
         </div>
@@ -77,7 +77,7 @@
                         xác nhận dùng chung khai báo trong layout.
                     */-->
                     <form th:action="@{/khach-hang/{id}/ngung-giao-dich(id=${khachHang.id})}" method="post">
-                        <button type="button" class="btn btn-outline-danger btn-sm"
+                        <button type="button" class="btn btn-danger btn-sm"
                                 data-xac-nhan-tieu-de="Ngừng giao dịch khách hàng"
                                 th:attr="data-xac-nhan=|Xác nhận chuyển khách hàng ${khachHang.tenKh} sang trạng thái ngừng giao dịch?|">
                             <i class="bi bi-slash-circle me-1"></i> Ngừng giao dịch
@@ -96,7 +96,7 @@
                         <span class="badge text-bg-secondary ms-1" th:text="${#lists.size(danhSachThueBao)}">0</span>
                     </span>
                     <!--/* Truyền sẵn khachHangId sang form đăng ký để nhân viên không phải chọn lại */-->
-                    <a class="btn btn-sm btn-success"
+                    <a class="btn btn-sm btn-primary"
                        th:href="@{/thue-bao/dang-ky(khachHangId=${khachHang.id})}">
                         <i class="bi bi-plus-lg me-1"></i> Đăng ký thuê bao mới
                     </a>

@@ -35,7 +35,7 @@
                     </select>
                 </div>
                 <div class="col-md-6 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary btn-sm">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
                         <i class="bi bi-search me-1"></i> Lọc
                     </button>
                     <a class="btn btn-outline-secondary btn-sm" th:href="@{/giam-tru}">Xoá bộ lọc</a>
@@ -91,7 +91,7 @@
                                    th:href="@{/giam-tru/{id}/sua(id=${khoan.id})}">Sửa</a>
                                 <form method="post" class="d-inline form-thao-tac"
                                       th:action="@{/giam-tru/{id}/xoa(id=${khoan.id})}">
-                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                    <button type="button" class="btn btn-sm btn-danger"
                                             th:data-xac-nhan="'Xoá khoản giảm trừ của thuê bao '
                                                 + ${khoan.thueBao.soThueBao} + '?'"
                                             data-xac-nhan-tieu-de="Xoá khoản giảm trừ">Xoá</button>

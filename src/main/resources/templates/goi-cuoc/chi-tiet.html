@@ -26,7 +26,7 @@
                 <i class="bi bi-pencil me-1"></i> Sửa
             </a>
             <form th:action="@{/goi-cuoc/{id}/xoa(id=${goiCuoc.id})}" method="post" class="d-inline">
-                <button type="button" class="btn btn-outline-danger"
+                <button type="button" class="btn btn-danger"
                         data-xac-nhan-tieu-de="Xoá gói cước"
                         th:attr="data-xac-nhan=|Xác nhận xoá gói cước ${goiCuoc.maGoi}?|">
                     <i class="bi bi-trash me-1"></i> Xoá

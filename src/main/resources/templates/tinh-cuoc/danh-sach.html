@@ -97,14 +97,14 @@
 
                             <form th:if="${t.choPhepLapHoaDon}" method="post" class="d-inline form-thao-tac"
                                   th:action="@{/tinh-cuoc/{id}/lap-hoa-don(id=${t.ky.id})}">
-                                <button type="submit" class="btn btn-sm btn-success">
+                                <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="bi bi-receipt"></i> Lập hóa đơn
                                 </button>
                             </form>
 
                             <form th:if="${t.choPhepHuyHoaDon}" method="post" class="d-inline form-thao-tac"
                                   th:action="@{/tinh-cuoc/{id}/huy-hoa-don(id=${t.ky.id})}">
-                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                <button type="button" class="btn btn-sm btn-danger"
                                         th:data-xac-nhan="'Xoá toàn bộ ' + ${t.soHoaDon} + ' hóa đơn của kỳ '
                                             + ${t.ky.thang} + '/' + ${t.ky.nam} + '? Cước phí trên chi tiết sử dụng '
                                             + 'được giữ nguyên, nhưng mọi hóa đơn và dòng khoản mục sẽ bị xoá hẳn.'"
@@ -124,7 +124,7 @@
 
                             <form th:if="${t.choPhepHuyTruCuoc}" method="post" class="d-inline form-thao-tac"
                                   th:action="@{/tinh-cuoc/{id}/huy-tru-cuoc-tra-truoc(id=${t.ky.id})}">
-                                <button type="button" class="btn btn-sm btn-outline-warning"
+                                <button type="button" class="btn btn-sm btn-danger"
                                         th:data-xac-nhan="'Hoàn trả số dư đã trừ của ' + ${t.soTruCuoc}
                                             + ' thuê bao trả trước ở kỳ ' + ${t.ky.thang} + '/' + ${t.ky.nam}
                                             + '? Số tiền đã trừ sẽ được cộng trả lại vào số dư và các dòng '
@@ -137,7 +137,7 @@
 
                             <form th:if="${t.choPhepHuyTinhCuoc}" method="post" class="d-inline form-thao-tac"
                                   th:action="@{/tinh-cuoc/{id}/huy-tinh-cuoc(id=${t.ky.id})}">
-                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                <button type="button" class="btn btn-sm btn-danger"
                                         th:data-xac-nhan="'Xoá kết quả tính cước của ' + ${t.soCdrDaTinh}
                                             + ' bản ghi sử dụng trong kỳ ' + ${t.ky.thang} + '/' + ${t.ky.nam}
                                             + '? Cước phí, cờ miễn phí và tham chiếu bảng giá sẽ bị xoá, '
@@ -149,7 +149,7 @@
 
                             <form th:if="${t.choPhepChotKy}" method="post" class="d-inline form-thao-tac"
                                   th:action="@{/tinh-cuoc/{id}/chot-ky(id=${t.ky.id})}">
-                                <button type="button" class="btn btn-sm btn-outline-dark"
+                                <button type="button" class="btn btn-sm btn-danger"
                                         th:data-xac-nhan="'CHỐT KỲ ' + ${t.ky.thang} + '/' + ${t.ky.nam}
                                             + ' là thao tác MỘT CHIỀU, không có đường quay lại. Sau khi chốt, '
                                             + 'kỳ này không thể tính lại, không thể lập lại hóa đơn và không thể '

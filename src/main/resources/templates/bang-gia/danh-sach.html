@@ -125,7 +125,7 @@
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <form th:action="@{/bang-gia/{id}/xoa(id=${bg.id})}" method="post" class="d-inline">
-                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                <button type="button" class="btn btn-sm btn-danger"
                                         data-xac-nhan-tieu-de="Xoá dòng bảng giá"
                                         th:attr="data-xac-nhan=|Xác nhận xoá dòng giá ${bg.loaiDichVu}/${bg.huong}?|">
                                     <i class="bi bi-trash"></i>

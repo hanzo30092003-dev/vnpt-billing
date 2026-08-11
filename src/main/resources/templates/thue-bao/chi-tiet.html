@@ -65,7 +65,7 @@
                 <i class="bi bi-box-seam me-1"></i> Đổi gói cước
             </button>
 
-            <button type="button" class="btn btn-success" data-bs-toggle="modal"
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#modalNapTien"
                     th:if="${thueBao.loaiThueBao.name() == 'TRA_TRUOC'}"
                     th:disabled="${thueBao.trangThai.name() == 'DA_THANH_LY'}">
@@ -315,6 +315,21 @@
                             <textarea class="form-control" name="lyDo" rows="3" required
                                       placeholder="Ví dụ: Tạm ngừng theo yêu cầu khách hàng"></textarea>
                             <div class="form-text">Lý do được lưu vào lịch sử biến động, bắt buộc nhập.</div>
+                        </div>
+
+                        <!--/*
+                            Canh bao hau qua bang loi thuong. Modal nay la buoc xac nhan
+                            duy nhat cho mot thao tac co the KHONG QUAY LAI DUOC, nhung
+                            truoc do no khong he noi dieu do o bat cu dau.
+                        */-->
+                        <div class="alert alert-danger d-flex align-items-start gap-2 mt-3 mb-0 py-2 small">
+                            <i class="bi bi-exclamation-octagon-fill mt-1"></i>
+                            <div>
+                                Chọn <strong>Đã thanh lý</strong> là <strong>không quay lại được</strong>.
+                                Số điện thoại bị thu hồi và có thể cấp cho khách khác, nên hệ thống
+                                không cho mở lại. Muốn phục vụ tiếp khách này thì phải đăng ký một
+                                thuê bao mới.
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
