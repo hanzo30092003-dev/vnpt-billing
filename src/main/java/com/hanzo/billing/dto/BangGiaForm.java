@@ -37,8 +37,8 @@ public class BangGiaForm implements CoKhoangHieuLuc {
     @NotNull(message = "Vui lòng chọn khung giờ")
     private Boolean gioCaoDiem = Boolean.FALSE;
 
-    @NotNull(message = "Vui lòng nhập block tính cước")
-    @Positive(message = "Block tính cước phải lớn hơn 0")
+    @NotNull(message = "Vui lòng nhập đơn vị tính tiền")
+    @Positive(message = "Đơn vị tính tiền phải lớn hơn 0")
     private Integer blockGiay;
 
     @NotNull(message = "Vui lòng nhập đơn giá")

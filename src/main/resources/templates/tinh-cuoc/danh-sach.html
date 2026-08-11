@@ -18,7 +18,7 @@
 
     <div class="alert alert-info py-2 small">
         <i class="bi bi-info-circle me-1"></i>
-        Quy trình một kỳ: <strong>Tính cước</strong> (định giá từng bản ghi CDR) →
+        Quy trình một kỳ: <strong>Tính tiền từng cuộc</strong> (tính tiền cho từng cuộc gọi, tin nhắn, lần truy cập mạng) →
         <strong>Lập hóa đơn</strong> (áp ưu đãi gói cước rồi gom thành hóa đơn) →
         <strong>Chốt kỳ</strong>. Chốt kỳ là thao tác một chiều.
     </div>
@@ -32,7 +32,7 @@
                     <tr>
                         <th>Kỳ</th>
                         <th>Trạng thái</th>
-                        <th class="text-end">CDR</th>
+                        <th class="text-end">Bản ghi sử dụng</th>
                         <th class="text-end">Hóa đơn</th>
                         <th class="text-end">Doanh thu</th>
                         <th>Bước tiếp theo</th>
@@ -135,7 +135,7 @@
                                   th:action="@{/tinh-cuoc/{id}/huy-tinh-cuoc(id=${t.ky.id})}">
                                 <button type="button" class="btn btn-sm btn-outline-danger"
                                         th:data-xac-nhan="'Xoá kết quả tính cước của ' + ${t.soCdrDaTinh}
-                                            + ' bản ghi CDR trong kỳ ' + ${t.ky.thang} + '/' + ${t.ky.nam}
+                                            + ' bản ghi sử dụng trong kỳ ' + ${t.ky.thang} + '/' + ${t.ky.nam}
                                             + '? Cước phí, cờ miễn phí và tham chiếu bảng giá sẽ bị xoá, '
                                             + 'các bản ghi trở về trạng thái Chưa tính.'"
                                         data-xac-nhan-tieu-de="Huỷ kết quả tính cước">

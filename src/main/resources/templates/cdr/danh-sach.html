@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout('Tra cứu CDR', ~{::noiDungTrang})}">
+      th:replace="~{fragments/layout :: layout('Cuộc gọi & tin nhắn đã dùng', ~{::noiDungTrang})}">
 <body>
 
 <div th:fragment="noiDungTrang">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0"><i class="bi bi-file-earmark-text me-2"></i>Tra cứu chi tiết sử dụng (CDR)</h2>
+        <h2 class="h4 mb-0"><i class="bi bi-file-earmark-text me-2"></i>Cuộc gọi &amp; tin nhắn đã dùng</h2>
         <div class="d-flex gap-2">
             <a class="btn btn-outline-success" th:href="@{'/cdr/xuat-excel?' + ${chuoiLoc}}">
                 <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
             </a>
             <a class="btn btn-outline-primary" th:href="@{/cdr/import}">
-                <i class="bi bi-upload me-1"></i> Nhập CSV
+                <i class="bi bi-upload me-1"></i> Nhập từ file
             </a>
             <a class="btn btn-primary" th:href="@{/cdr/sinh-du-lieu}">
-                <i class="bi bi-magic me-1"></i> Sinh dữ liệu
+                <i class="bi bi-magic me-1"></i> Tạo dữ liệu thử
             </a>
         </div>
     </div>
@@ -111,9 +111,9 @@
                         <td><code th:text="${c.soThueBao}"></code></td>
                         <td th:text="${c.soBiGoi} ?: '—'"></td>
                         <td>
-                            <span class="badge text-bg-light" th:text="${c.loaiDichVu}"></span>
+                            <span class="badge text-bg-light" th:text="${c.loaiDichVu.nhan}"></span>
                         </td>
-                        <td class="small" th:text="${c.huong}"></td>
+                        <td class="small" th:text="${c.huong.nhan}"></td>
                         <td class="small" th:text="${#temporals.format(c.thoiGianBatDau, 'dd/MM/yyyy HH:mm:ss')}"></td>
                         <!--/* Thời lượng dạng mm:ss, chỉ có nghĩa với THOẠI */-->
                         <td class="text-end" th:text="${@dinhDang.thoiLuong(c)}"></td>
@@ -127,12 +127,10 @@
                         <td class="text-end" th:text="${c.cuocPhi != null}
                             ? ${#numbers.formatDecimal(c.cuocPhi, 0, 'POINT', 0, 'COMMA')} : ''"></td>
                         <td>
-                            <span class="badge"
-                                  th:classappend="${c.trangThaiTinhCuoc.name() == 'DA_TINH'} ? 'text-bg-success'
-                                                : (${c.trangThaiTinhCuoc.name() == 'LOI'} ? 'text-bg-danger' : 'text-bg-secondary')"
-                                  th:text="${c.trangThaiTinhCuoc}"></span>
+                            <span class="badge" th:classappend="${c.trangThaiTinhCuoc.lopBadge}"
+                                  th:text="${c.trangThaiTinhCuoc.nhan}"></span>
                         </td>
-                        <td class="small text-secondary" th:text="${c.nguon}"></td>
+                        <td class="small text-secondary" th:text="${c.nguon.nhan}"></td>
                     </tr>
                     </tbody>
                     <!--/* Dòng tổng tính trên TOÀN BỘ kết quả lọc, không chỉ trang đang xem */-->
@@ -168,8 +166,9 @@
 
             <p class="small text-secondary mt-2 mb-0">
                 <i class="bi bi-info-circle me-1"></i>
-                Cột <strong>Cước phí</strong> để trống vì Phase 3 chưa tính cước — mọi bản ghi
-                đang ở trạng thái <code>CHUA_TINH</code>. Engine tính cước thuộc Phase 4.
+                Cột <strong>Cước phí</strong> chỉ có số sau khi tháng đó đã được tính tiền.
+                Dòng nào còn ghi <strong>Chưa tính tiền</strong> nghĩa là tháng chứa nó chưa chạy
+                tính tiền — vào màn hình <strong>Tính tiền hằng tháng</strong> để chạy.
             </p>
         </div>
     </div>

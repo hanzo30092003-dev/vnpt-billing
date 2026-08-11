@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout('Nhập CDR từ CSV', ~{::noiDungTrang})}">
+      th:replace="~{fragments/layout :: layout('Nhập cuộc gọi & tin nhắn từ file', ~{::noiDungTrang})}">
 <body>
 
 <div th:fragment="noiDungTrang">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0"><i class="bi bi-upload me-2"></i>Nhập CDR từ file CSV</h2>
+        <h2 class="h4 mb-0"><i class="bi bi-upload me-2"></i>Nhập cuộc gọi &amp; tin nhắn từ file</h2>
         <div class="d-flex gap-2">
             <a class="btn btn-outline-secondary" th:href="@{/cdr/sinh-du-lieu}">
-                <i class="bi bi-magic me-1"></i> Bộ sinh CDR
+                <i class="bi bi-magic me-1"></i> Tạo dữ liệu thử
             </a>
             <a class="btn btn-outline-secondary" th:href="@{/cdr}">
-                <i class="bi bi-list-ul me-1"></i> Tra cứu CDR
+                <i class="bi bi-list-ul me-1"></i> Danh sách đã dùng
             </a>
         </div>
     </div>
@@ -105,7 +105,7 @@
                         <i class="bi bi-info-circle me-1"></i>
                         Cờ <strong>giờ cao điểm</strong> do hệ thống tự tính, không có trong file.
                         Chỉ bản ghi <code>THOAI</code> phát sinh trong 8h–20h các ngày Thứ Hai đến
-                        Thứ Sáu mới được đánh dấu cao điểm — dùng chung đúng quy tắc với bộ sinh CDR.
+                        Thứ Sáu mới được đánh dấu cao điểm — dùng chung đúng quy tắc với phần tạo dữ liệu thử.
                     </div>
                 </div>
             </div>

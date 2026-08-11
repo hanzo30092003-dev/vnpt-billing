@@ -31,7 +31,7 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             <i class="bi bi-broadcast-pin"></i>
-            <span>VNPT Billing</span>
+            <span>VNPT &mdash; Quản lý cước</span>
         </div>
 
         <nav class="sidebar-nav">
@@ -66,7 +66,7 @@
                 </a>
                 <a class="nav-item" th:href="@{/cdr}"
                    th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/cdr')} ? 'active'">
-                    <i class="bi bi-file-earmark-text"></i> CDR
+                    <i class="bi bi-file-earmark-text"></i> Cuộc gọi &amp; tin nhắn
                 </a>
                 <a class="nav-item" th:href="@{/ky-cuoc}"
                    th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/ky-cuoc')} ? 'active'">

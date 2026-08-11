@@ -57,7 +57,7 @@ public final class DonViCuoc {
      */
     public static long soBlock(long soLuong, int kichThuocBlock) {
         if (kichThuocBlock <= 0) {
-            throw new NghiepVuException("Block tính cước phải lớn hơn 0, đang là "
+            throw new NghiepVuException("Đơn vị tính tiền phải lớn hơn 0, đang là "
                     + kichThuocBlock + ". Kiểm tra lại cột block_giay của dòng bảng giá.");
         }
         if (soLuong <= 0) {

@@ -12,7 +12,7 @@
     <div th:replace="~{bao-cao/fragments :: chonKy('/bao-cao/san-luong')}"></div>
 
     <div th:if="${sanLuong.rong()}"
-         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có bản ghi CDR nào.')}"></div>
+         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có cuộc gọi, tin nhắn hay lần truy cập mạng nào.')}"></div>
 
     <div th:unless="${sanLuong.rong()}">
         <div class="alert alert-secondary py-2 small" th:if="${kyTruoc == null}">
@@ -107,8 +107,8 @@
         <div class="alert alert-light border mt-3 small">
             <i class="bi bi-calculator me-1"></i>
             Phút và MB được quy đổi <strong>một lần ở cuối</strong> từ tổng giây và tổng KB.
-            Quy đổi từng bản ghi rồi mới cộng sẽ làm tròn nhiều lần và thổi phồng sản lượng —
-            đúng lỗi đã đo được <strong>+10,97%</strong> ở Phase 4.
+            Quy đổi từng bản ghi rồi mới cộng sẽ làm tròn nhiều lần và thổi phồng sản lượng
+            thêm <strong>+10,97%</strong> — tức là thu tiền oan của khách.
         </div>
     </div>
 

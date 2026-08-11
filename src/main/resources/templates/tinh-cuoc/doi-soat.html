@@ -111,7 +111,7 @@
             <div class="alert alert-secondary mt-3 mb-0 py-2 small" th:if="${bang.prorate != null}">
                 <span th:if="${bang.prorate.prorate}">
                     <i class="bi bi-calendar-range me-1"></i>
-                    <strong>Cước thuê bao được tính theo tỷ lệ ngày.</strong>
+                    <strong>Cước thuê bao tính theo số ngày sử dụng.</strong>
                     Thuê bao dùng <strong th:text="${bang.prorate.soNgaySuDung} + '/'
                         + ${bang.prorate.soNgayTrongKy} + ' ngày'"></strong>
                     (<span th:text="${#temporals.format(bang.prorate.tuNgay, 'dd/MM')}"></span>
@@ -121,7 +121,8 @@
                     <code th:text="${#numbers.formatDecimal(bang.prorate.cuocThueBaoThang, 0, 'POINT', 0, 'COMMA')}
                         + ' × ' + ${bang.prorate.soNgaySuDung} + ' ÷ ' + ${bang.prorate.soNgayTrongKy}
                         + ' = ' + ${#numbers.formatDecimal(bang.prorate.cuocThueBaoThuc, 0, 'POINT', 0, 'COMMA')} + ' đ'"></code>.
-                    Ưu đãi <strong>không</strong> bị chia theo ngày — thuê bao vẫn được trọn quỹ tháng.
+                    Phần miễn phí <strong>không</strong> bị chia theo ngày — thuê bao vẫn được
+                    trọn phần miễn phí của cả tháng.
                 </span>
                 <span th:unless="${bang.prorate.prorate}">
                     <i class="bi bi-calendar-check me-1"></i>
@@ -142,7 +143,7 @@
                     <tr>
                         <th>Loại</th>
                         <th class="text-end">Đã dùng</th>
-                        <th class="text-end">Quota của gói</th>
+                        <th class="text-end">Mức miễn phí của gói</th>
                         <th class="text-end">Được miễn phí</th>
                         <th class="text-end">Vượt ưu đãi</th>
                         <th class="text-end">Thành tiền</th>
@@ -173,7 +174,7 @@
             <p class="small text-secondary mt-3 mb-0">
                 <i class="bi bi-lightbulb me-1"></i>
                 Con số trong ngoặc là <strong>sản lượng gốc lưu trong cơ sở dữ liệu</strong>: thoại
-                lưu bằng giây còn quota khai bằng phút, dữ liệu lưu bằng KB còn quota khai bằng MB.
+                lưu bằng giây còn mức miễn phí khai bằng phút, dữ liệu lưu bằng KB còn mức miễn phí khai bằng MB.
                 Hệ thống so sánh ở <strong>đơn vị nhỏ nhất</strong> (giây và KB) nên không có phép
                 làm tròn nào ăn vào quỹ của khách.
             </p>
@@ -205,7 +206,7 @@
                         <th>Hướng</th>
                         <th>Cao điểm</th>
                         <th class="text-end">Sản lượng</th>
-                        <th class="text-end">Block</th>
+                        <th class="text-end">Đơn vị tính tiền</th>
                         <th class="text-end">Đơn giá</th>
                         <th class="text-end">Cước</th>
                         <th>Miễn phí</th>
@@ -222,8 +223,8 @@
                         <td class="small text-nowrap"
                             th:text="${#temporals.format(c.thoiGian, 'dd/MM HH:mm:ss')}"></td>
                         <td class="small" th:text="${c.soBiGoi != null} ? ${c.soBiGoi} : '—'"></td>
-                        <td th:text="${c.loaiDichVu}"></td>
-                        <td class="small" th:text="${c.huong}"></td>
+                        <td th:text="${c.loaiDichVu.nhan}"></td>
+                        <td class="small" th:text="${c.huong.nhan}"></td>
                         <td class="text-center">
                             <span th:if="${c.gioCaoDiem}" class="badge text-bg-warning">CĐ</span>
                             <span th:unless="${c.gioCaoDiem}" class="text-secondary">—</span>
@@ -250,7 +251,7 @@
                     <span class="o-mau-vi-du dong-lam-vuot"></span>
                     <strong>Dòng tô nền</strong> là bản ghi <strong>làm vượt ưu đãi</strong> — bản ghi
                     đầu tiên bị tính tiền của loại đó. Theo quy tắc <strong>không cắt đôi bản ghi</strong>,
-                    nó bị thu tiền toàn bộ chứ không chia phần trong và phần ngoài ưu đãi; phần quota
+                    nó bị thu tiền toàn bộ chứ không chia phần trong và phần ngoài ưu đãi; phần miễn phí
                     còn dư coi như không dùng tới.
                 </p>
                 <p class="mb-0">
@@ -301,7 +302,7 @@
                     <i class="bi bi-check-circle-fill me-1"></i>
                     <strong>Khớp tuyệt đối.</strong> Mọi khoản mục đều chênh lệch 0 đồng. Đây là bằng
                     chứng của bất biến cộng dồn: cước được làm tròn ở <strong>đúng một tầng</strong> —
-                    tầng từng bản ghi CDR — còn các mức trên chỉ cộng dồn, không làm tròn lại.
+                    tầng từng bản ghi sử dụng — còn các mức trên chỉ cộng dồn, không làm tròn lại.
                 </span>
                 <span th:if="${bang.coChenhLech}">
                     <i class="bi bi-exclamation-triangle-fill me-1"></i>

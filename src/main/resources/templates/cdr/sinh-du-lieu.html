@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout('Sinh dữ liệu CDR', ~{::noiDungTrang})}">
+      th:replace="~{fragments/layout :: layout('Tạo dữ liệu sử dụng thử', ~{::noiDungTrang})}">
 <body>
 
 <div th:fragment="noiDungTrang">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0"><i class="bi bi-magic me-2"></i>Bộ sinh dữ liệu CDR giả lập</h2>
+        <h2 class="h4 mb-0"><i class="bi bi-magic me-2"></i>Tạo dữ liệu sử dụng thử</h2>
         <a class="btn btn-outline-secondary" th:href="@{/cdr}">
-            <i class="bi bi-list-ul me-1"></i> Tra cứu CDR
+            <i class="bi bi-list-ul me-1"></i> Danh sách đã dùng
         </a>
     </div>
 
     <div class="alert alert-warning py-2 small">
         <i class="bi bi-exclamation-triangle me-1"></i>
-        <strong>Đây là dữ liệu giả lập phục vụ học tập.</strong>
-        Bản ghi sinh ra có <code>trang_thai_tinh_cuoc = CHUA_TINH</code> và
-        <code>cuoc_phi = NULL</code>; việc tính cước thuộc Phase 4.
+        <strong>Đây là dữ liệu thử phục vụ học tập, không phải cuộc gọi thật của khách.</strong>
+        Bản ghi tạo ra ở trạng thái <strong>Chưa tính tiền</strong> và chưa có cước phí.
+        Muốn ra tiền thì sang màn hình <strong>Tính tiền hằng tháng</strong> chạy tính cho tháng đó.
     </div>
 
     <div class="row g-3">
@@ -55,15 +55,15 @@
 
                             <div class="col-12">
                                 <label class="form-label" for="hatGiong">
-                                    Hạt giống ngẫu nhiên
+                                    Mã tạo lại
                                     <span class="text-secondary fw-normal">(tuỳ chọn)</span>
                                 </label>
                                 <input type="number" class="form-control" id="hatGiong"
-                                       th:field="*{hatGiong}" placeholder="Để trống thì hệ thống tự bốc">
+                                       th:field="*{hatGiong}" placeholder="Để trống thì hệ thống tự chọn">
                                 <div class="form-text">
-                                    Nhập lại đúng hạt giống cũ với cùng khoảng ngày và số lượng thì
-                                    sinh ra <strong>đúng bộ dữ liệu cũ</strong>. Để trống vẫn tái lập
-                                    được — hạt giống hệ thống bốc sẽ hiện ở khối kết quả bên phải.
+                                    Nhập lại đúng mã cũ, cùng khoảng ngày và cùng số lượng thì tạo ra
+                                    <strong>đúng bộ dữ liệu cũ</strong>. Để trống cũng được — mã hệ thống
+                                    tự chọn sẽ hiện ở khối kết quả bên phải để bạn chép lại.
                                 </div>
                             </div>
 
@@ -152,7 +152,7 @@
                     <div class="alert alert-info py-2 small d-flex align-items-start">
                         <i class="bi bi-key me-2 mt-1"></i>
                         <div>
-                            <strong>Hạt giống đã dùng:</strong>
+                            <strong>Mã tạo lại của lần này:</strong>
                             <code class="user-select-all" th:text="${ketQua.hatGiongDaDung}">0</code>
                             <div class="mt-1">
                                 Chép lại con số này. Nhập đúng nó cùng khoảng ngày và số lượng vừa

@@ -62,18 +62,18 @@
                         </select>
                         <div class="form-text canh-bao-cao-diem text-warning d-none">
                             <i class="bi bi-exclamation-triangle"></i>
-                            Hiện chỉ dịch vụ THOẠI mới có bản ghi CDR mang cờ giờ cao điểm.
+                            Hiện chỉ có cuộc gọi mới được đánh dấu giờ cao điểm.
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label" for="blockGiay">Block tính cước <span class="text-danger">*</span></label>
+                        <label class="form-label" for="blockGiay">Đơn vị tính tiền <span class="text-danger">*</span></label>
                         <input type="number" min="1" class="form-control" id="blockGiay" th:field="*{blockGiay}"
                                th:classappend="${#fields.hasErrors('blockGiay')} ? 'is-invalid'">
                         <div class="form-text">Giây với thoại, 1 tin với SMS, 1 MB với data.</div>
                         <div class="invalid-feedback" th:errors="*{blockGiay}"></div>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label" for="donGia">Đơn giá mỗi block (đ) <span class="text-danger">*</span></label>
+                        <label class="form-label" for="donGia">Đơn giá mỗi đơn vị (đ) <span class="text-danger">*</span></label>
                         <input type="number" min="0" step="1" class="form-control" id="donGia" th:field="*{donGia}"
                                th:classappend="${#fields.hasErrors('donGia')} ? 'is-invalid'">
                         <div class="invalid-feedback" th:errors="*{donGia}"></div>

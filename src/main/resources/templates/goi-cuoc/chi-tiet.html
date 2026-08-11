@@ -94,15 +94,15 @@
                                 <th>Dịch vụ</th>
                                 <th>Hướng</th>
                                 <th>Giờ cao điểm</th>
-                                <th class="text-end">Block</th>
+                                <th class="text-end">Đơn vị tính tiền</th>
                                 <th class="text-end">Đơn giá</th>
                                 <th>Hiệu lực</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="bg : ${bangGiaRieng}">
-                                <td th:text="${bg.loaiDichVu}"></td>
-                                <td th:text="${bg.huong}"></td>
+                                <td th:text="${bg.loaiDichVu.nhan}"></td>
+                                <td th:text="${bg.huong.nhan}"></td>
                                 <td th:text="${bg.gioCaoDiem} ? 'Có' : 'Không'"></td>
                                 <td class="text-end" th:text="${bg.blockGiay}"></td>
                                 <td class="text-end"

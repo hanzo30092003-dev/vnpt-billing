@@ -37,7 +37,7 @@
                     <label class="form-label small mb-1">Loại dịch vụ</label>
                     <select class="form-select" name="loaiDichVu">
                         <option value="">-- Tất cả --</option>
-                        <option th:each="l : ${danhSachLoaiDichVu}" th:value="${l}" th:text="${l}"
+                        <option th:each="l : ${danhSachLoaiDichVu}" th:value="${l}" th:text="${l.nhan}"
                                 th:selected="${loaiDichVu != null and loaiDichVu.name() == l.name()}"></option>
                     </select>
                 </div>
@@ -45,7 +45,7 @@
                     <label class="form-label small mb-1">Hướng</label>
                     <select class="form-select" name="huong">
                         <option value="">-- Tất cả --</option>
-                        <option th:each="h : ${danhSachHuong}" th:value="${h}" th:text="${h}"
+                        <option th:each="h : ${danhSachHuong}" th:value="${h}" th:text="${h.nhan}"
                                 th:selected="${huong != null and huong.name() == h.name()}"></option>
                     </select>
                 </div>
@@ -83,7 +83,7 @@
                         <th>Dịch vụ</th>
                         <th>Hướng</th>
                         <th>Khung giờ</th>
-                        <th class="text-end">Block</th>
+                        <th class="text-end">Đơn vị tính tiền</th>
                         <th class="text-end">Đơn giá</th>
                         <th>Hiệu lực</th>
                         <th class="text-end">Thao tác</th>
@@ -102,8 +102,8 @@
                                th:href="@{/goi-cuoc/{id}(id=${bg.goiCuoc.id})}"
                                th:text="${bg.goiCuoc.maGoi}"></a>
                         </td>
-                        <td th:text="${bg.loaiDichVu}"></td>
-                        <td th:text="${bg.huong}"></td>
+                        <td th:text="${bg.loaiDichVu.nhan}"></td>
+                        <td th:text="${bg.huong.nhan}"></td>
                         <td>
                             <span class="badge" th:classappend="${bg.gioCaoDiem} ? 'text-bg-warning' : 'text-bg-light'"
                                   th:text="${bg.gioCaoDiem} ? 'Cao điểm' : 'Thường'"></span>
