@@ -1,5 +1,20 @@
 # DANH SÁCH ẢNH CHỤP MÀN HÌNH — TOÀN DỰ ÁN
 
+> ### ⚠️ Giao diện đã làm lại toàn bộ ở đợt cuối
+> Ảnh chụp **trước** đợt làm lại giao diện **không dùng lại được**. Mọi màn hình nay có thêm
+> một dòng giải thích dưới tiêu đề; menu bên trái gom thành 5 nhóm theo công việc; trang chủ
+> có thêm khối *Việc thường làm*; và chữ hiển thị đã bỏ hết thuật ngữ
+> (CDR → *Cuộc gọi & tin nhắn*, Kỳ cước → *Tháng tính tiền*, Quota → *Mức miễn phí*…).
+> Chi tiết: [`PHASE-8-REPORT.md`](PHASE-8-REPORT.md).
+>
+> **Ba ảnh cần chụp thêm cho đợt này:**
+>
+> | # | Màn hình | Cần thấy rõ |
+> |---|---|---|
+> | 63 | Trang chủ `/` | Khối **Việc thường làm** với 6 nút lớn có icon |
+> | 64 | Menu bên trái của `admin` | Đủ 5 nhóm: Khách hàng & thuê bao · Thu tiền & công nợ · Tính tiền hằng tháng · Báo cáo · Danh mục |
+> | 65 | `/hoa-don?kyCuocId=8` | Bảng rỗng có câu giải thích **vì sao** trống + nút dẫn đường |
+
 Gom từ danh sách rải trong sáu báo cáo Phase 0–6, **đánh số theo thứ tự xuất hiện trong báo
 cáo cuối**. Đăng nhập `admin` trừ khi ghi khác.
 

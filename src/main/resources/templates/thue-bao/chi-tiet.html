@@ -189,7 +189,12 @@
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(lichSuGoiCuoc)}">
-                            <td colspan="5" class="text-center text-secondary py-4">Chưa có dữ liệu.</td>
+                            <td colspan="5">
+                                <div th:replace="~{fragments/trang :: bangRong(
+                                        'bi-box-seam',
+                                        'Thuê bao này chưa từng đổi gói. Gói đang dùng được chọn lúc đăng ký và giữ nguyên từ đó tới nay.',
+                                        null, null)}"></div>
+                            </td>
                         </tr>
                         <tr th:each="dk : ${lichSuGoiCuoc}">
                             <td th:text="|${dk.goiCuoc.maGoi} - ${dk.goiCuoc.tenGoi}|"></td>
@@ -209,7 +214,7 @@
             <!--/* ---------- TAB 3: Lịch sử biến động trạng thái (timeline) ---------- */-->
             <div class="tab-pane fade" id="tab-trang-thai">
                 <p class="text-secondary text-center py-4 mb-0" th:if="${#lists.isEmpty(lichSuTrangThai)}">
-                    Chưa có biến động trạng thái nào.
+                    Thuê bao này chưa từng đổi trạng thái — vẫn giữ nguyên trạng thái từ lúc đăng ký.
                 </p>
                 <ul class="timeline" th:if="${!#lists.isEmpty(lichSuTrangThai)}">
                     <li class="timeline-item" th:each="ls : ${lichSuTrangThai}">
@@ -251,7 +256,12 @@
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(soCaiSoDu)}">
-                            <td colspan="10" class="text-center text-secondary py-4">Chưa có biến động số dư nào.</td>
+                            <td colspan="10">
+                                <div th:replace="~{fragments/trang :: bangRong(
+                                        'bi-wallet2',
+                                        'Chưa có lần nạp tiền hay trừ cước nào. Dùng nút Nạp tiền ở phía trên để nạp lần đầu cho thuê bao này.',
+                                        null, null)}"></div>
+                            </td>
                         </tr>
                         <tr th:each="bd : ${soCaiSoDu}">
                             <td th:text="${#temporals.format(bd.ngayGhiNhan, 'dd/MM/yyyy HH:mm')}"></td>

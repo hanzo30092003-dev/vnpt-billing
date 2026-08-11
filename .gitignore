@@ -56,3 +56,5 @@ logs/
 # log chay app khi phat trien
 run.log
 run.err
+reset.log
+reset.err

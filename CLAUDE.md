@@ -118,7 +118,7 @@ Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định 
 
 ## Tiến độ
 
-Phase 0–7 ✅ — **dự án đã hoàn tất**.
+Phase 0–8 ✅ — **dự án đã hoàn tất**.
 
 | Phase | Nội dung | Báo cáo |
 |---|---|---|
@@ -130,6 +130,7 @@ Phase 0–7 ✅ — **dự án đã hoàn tất**.
 | 5 | Hóa đơn, thanh toán, công nợ | `docs/PHASE-5-PLAN.md` · `docs/PHASE-5-REPORT.md` |
 | 6 | Báo cáo, thống kê, dashboard | `docs/PHASE-6-REPORT.md` |
 | 7 | Hoàn thiện, kiểm thử, tài liệu | `docs/PHASE-7-REPORT.md` |
+| 8 | Làm lại giao diện cho người không rành công nghệ | `docs/PHASE-8-REPORT.md` |
 
 **Dữ liệu hiện tại:** **6 kỳ cước** (3, 4, 5/2026 `DA_CHOT` · 6, 7, 8/2026 `MO`; **kỳ 8 rỗng có chủ đích**) · 18.723 CDR (tất
 cả `DA_TINH`) · **280 hóa đơn** (55 · 55 · 54 · 58 · 58) · 620 chi tiết hóa đơn · **161 thanh
@@ -161,5 +162,10 @@ dump** `data-van-hanh.sql`.
   trạng thái không thể tồn tại sau hạn.
 * Mọi truy vấn thống kê **gom nhóm trong CSDL** (`SELECT new` + `GROUP BY`), không load entity
   rồi cộng trong Java. Định dạng số đi qua bean `soLieu` (`DinhDangTien`), không viết lặp.
+* **Chữ hiển thị đã bỏ hết thuật ngữ** (đợt Phase 8). Trước khi thêm chữ mới vào template,
+  chạy `python scripts/kiem-tu-ngu.py` và `python scripts/kiem-giao-dien.py`. Tên biến, đường
+  dẫn, tên lớp CSS thì giữ nguyên — hai phép kiểm đó đã biết bỏ qua chúng.
+* **Mỗi màn hình đúng MỘT nút nổi bật.** Muốn phá luật thì khai `NUT-NOI-BAT-CO-Y:` kèm lý do
+  ngay trong template, đừng sửa file kiểm thử.
 * **Bảng aging đủ 5 nhóm chỉ đúng tới 13/08/2026** — đó là tính chất của ngày xem chứ không phải
   của dữ liệu. Xem `PHASE-6-REPORT.md` mục 1.2 trước khi tưởng có gì hỏng.

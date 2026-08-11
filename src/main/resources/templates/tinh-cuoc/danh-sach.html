@@ -83,6 +83,17 @@
                         <td class="small text-secondary" th:text="${t.buocTiepTheo}"></td>
 
                         <td class="text-end text-nowrap">
+                            <!--/*
+                                NUT-NOI-BAT-CO-Y: màn hình này có HAI nút btn-primary trong
+                                markup — "Chạy tính cước" và "Lập hóa đơn" — nhưng chúng gần
+                                như không bao giờ hiện cùng lúc: choPhepTinhCuoc đòi còn bản
+                                ghi chưa tính, choPhepLapHoaDon đòi đã tính hết. Đây là hai
+                                bước NỐI TIẾP của cùng một quy trình, nên cùng đeo một màu để
+                                người dùng đọc được một tín hiệu duy nhất: "nút đậm màu = việc
+                                tiếp theo của bạn". Cho hai màu khác nhau chỉ khiến họ phải đoán
+                                xem hai màu đó khác nhau chỗ nào.
+                            */-->
+
                             <!--/* Kỳ đã chốt: mọi nút thao tác biến mất, chỉ còn đường xem */-->
                             <span th:if="${t.daChot}" class="text-secondary small">
                                 <i class="bi bi-lock-fill me-1"></i>Chỉ xem

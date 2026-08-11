@@ -20,6 +20,29 @@ Mở <http://localhost:8080>. Ba tài khoản, mật khẩu đều là `123456`:
 Menu bên trái **chỉ hiện những mục vai trò đó được dùng**. Gõ thẳng đường dẫn của chức năng
 không có quyền sẽ ra trang 403 — phân quyền kiểm ở máy chủ, không chỉ ẩn menu.
 
+### Menu bên trái gom theo công việc
+
+Năm nhóm, xếp theo thứ tự bạn hay dùng trong ngày:
+
+| Nhóm | Gồm | Khi nào dùng |
+|---|---|---|
+| **Khách hàng & thuê bao** | Khách hàng · Thuê bao | Hằng ngày, khi có khách đến quầy |
+| **Thu tiền & công nợ** | Hóa đơn · Thanh toán · Công nợ · Giảm trừ | Hằng ngày, khi khách trả tiền |
+| **Tính tiền hằng tháng** | Tháng tính tiền · Cuộc gọi & tin nhắn · Chạy tính tiền | Một lần vào đầu mỗi tháng |
+| **Báo cáo** | Báo cáo thống kê | Khi cần xem số liệu |
+| **Danh mục** | Gói cước · Bảng giá | Hiếm — khai một lần rồi để yên |
+
+### Trang chủ có sẵn lối tắt
+
+Ngay dưới các thẻ số liệu là khối **Việc thường làm** với 6 nút lớn: *Thêm khách hàng*,
+*Đăng ký thuê bao*, *Tra cứu hóa đơn*, *Ghi nhận thanh toán*, *Tính tiền hằng tháng*,
+*Xem báo cáo*. Chưa quen menu thì cứ bắt đầu từ đó.
+
+### Mỗi màn hình tự giải thích
+
+Ngay dưới tiêu đề của **mọi** màn hình đều có một câu nói màn hình đó dùng để làm gì.
+Bảng nào trống cũng nói rõ **vì sao** trống và **bấm đi đâu** tiếp.
+
 ---
 
 ## 2. Trình tự nghiệp vụ
@@ -28,7 +51,7 @@ Các bước phải làm **đúng thứ tự** này; mỗi bước là đầu v�
 
 ```
 Khách hàng → Thuê bao → (gói cước, bảng giá đã có sẵn)
-   → Tạo kỳ cước → Sinh/nhập CDR → Tính cước → Lập hóa đơn
+   → Tạo tháng tính tiền → Tạo/nhập dữ liệu sử dụng → Tính tiền từng cuộc → Lập hóa đơn
    → Ghi nhận thanh toán → Theo dõi công nợ → Xem báo cáo
 ```
 
@@ -77,27 +100,28 @@ Bốn trạng thái: *Hoạt động* · *Tạm ngừng 1 chiều* · *Tạm ng�
 
 ---
 
-## 5. Kỳ cước và tính cước
+## 5. Tháng tính tiền và tính cước
 
-Toàn bộ điều khiển ở màn hình **Tính cước**.
+Toàn bộ điều khiển ở màn hình **Chạy tính tiền** (nhóm *Tính tiền hằng tháng*).
 
-### Bước 1 — Tạo kỳ cước
-**Kỳ cước** → nhập tháng và năm. Ngày đầu/cuối kỳ hệ thống tự tính.
+### Bước 1 — Tạo tháng tính tiền
+**Tháng tính tiền** → nhập tháng và năm. Ngày đầu/cuối tháng hệ thống tự tính.
 
-### Bước 2 — Đưa dữ liệu CDR vào
+### Bước 2 — Đưa dữ liệu sử dụng vào
 Hai cách:
 
-**Sinh dữ liệu giả lập** — **CDR** → **Sinh dữ liệu**:
+**Tạo dữ liệu thử** — **Cuộc gọi & tin nhắn** → **Tạo dữ liệu thử**:
 - Chọn khoảng ngày và số lượng bản ghi
-- **Hạt giống** *(nên nhập)*: ghi lại con số này thì sau có thể **dựng lại đúng bộ dữ liệu đó**.
-  Để trống cũng được — hệ thống tự bốc và hiện con số đã dùng ở khối kết quả.
+- **Mã tạo lại** *(nên nhập)*: ghi lại con số này thì sau có thể **dựng lại đúng bộ dữ liệu đó**.
+  Để trống cũng được — hệ thống tự chọn và hiện con số đã dùng ở khối kết quả.
 
-**Nhập từ file CSV** — **CDR** → **Nhập từ CSV**. Tải file mẫu để biết định dạng cột. Hệ thống
-báo rõ từng dòng lỗi và lý do, các dòng hợp lệ vẫn được nhập.
+**Nhập từ file** — **Cuộc gọi & tin nhắn** → **Nhập từ file**. Tải file mẫu để biết định dạng
+cột. Hệ thống báo rõ từng dòng lỗi và lý do, các dòng hợp lệ vẫn được nhập.
 
-### Bước 3 — Tính cước
-**Tính cước** → nút **Tính cước** ở dòng kỳ tương ứng. Hệ thống định giá **từng bản ghi**: tra
-bảng giá theo dịch vụ + hướng + giờ cao điểm, tính số block, nhân đơn giá.
+### Bước 3 — Tính tiền từng cuộc
+**Chạy tính tiền** → nút **Chạy tính cước** ở dòng tháng tương ứng. Hệ thống tính tiền cho
+**từng cuộc gọi, tin nhắn, lần truy cập mạng**: tra
+bảng giá theo dịch vụ + hướng + giờ cao điểm, tính số đơn vị, nhân đơn giá.
 
 ### Bước 4 — Lập hóa đơn
 Nút **Lập hóa đơn**. Hệ thống áp ưu đãi gói cước, trừ giảm trừ, cộng VAT 10%.
@@ -127,17 +151,17 @@ Bốn khối, đọc từ trên xuống:
 
 | Khối | Trả lời câu hỏi |
 |---|---|
-| 1. Thuê bao và gói cước | Gói nào, quota bao nhiêu, dùng trọn kỳ hay tính theo ngày |
+| 1. Thuê bao và gói cước | Gói nào, mức miễn phí bao nhiêu, dùng trọn tháng hay tính theo ngày |
 | 2. Sản lượng và ưu đãi | Đã dùng bao nhiêu, được miễn phí bao nhiêu, vượt bao nhiêu |
-| 3. Chi tiết từng bản ghi | Bản ghi nào tính tiền, bản ghi nào miễn phí, bản ghi nào làm vượt quota |
-| 4. Đối chiếu với hóa đơn | Số cộng từ CDR có khớp số trên hóa đơn không |
+| 3. Chi tiết từng bản ghi | Cuộc nào tính tiền, cuộc nào miễn phí, cuộc nào làm vượt mức miễn phí |
+| 4. Đối chiếu với hóa đơn | Số cộng từ chi tiết sử dụng có khớp số trên hóa đơn không |
 
 **Chỗ đáng chú ý nhất ở khối 2:** sản lượng hiện **hai đơn vị**, ví dụ `5.739,7 MB (5.877.492 KB)`
-hay `99,6 phút (5.978 giây)`. CSDL lưu bằng KB và giây, còn quota của gói khai bằng MB và phút —
+hay `99,6 phút (5.978 giây)`. Hệ thống lưu bằng KB và giây, còn mức miễn phí của gói khai bằng MB và phút —
 hiển thị cả hai để người đọc **tự kiểm** phép quy đổi.
 
 **Khối 4** là phần đáng tin nhất: cột chênh lệch phải **toàn 0 đ**. Nếu khác 0 thì có sai sót
-thật ở engine.
+thật ở phần tính tiền.
 
 ---
 
@@ -229,6 +253,8 @@ Mỗi báo cáo có nút **Xuất Excel** và **In**. Bản in tự bỏ menu v�
 | Không bấm được **Lập hóa đơn** | Kỳ chưa chạy tính cước, hoặc kỳ đã chốt |
 | Không huỷ được hóa đơn | Kỳ đã có giao dịch thanh toán, hoặc kỳ đã chốt |
 | Trang báo **400** | Địa chỉ có tham số sai định dạng — thường do sửa tay trên thanh địa chỉ |
+| Bảng trống mà không rõ vì sao | Đọc câu giải thích ngay trong bảng — nó nói rõ vì sao trống và bấm đi đâu tiếp |
+| Không biết màn hình này để làm gì | Đọc dòng chữ xám ngay dưới tiêu đề màn hình |
 | Trang báo **500** kèm mã sự cố | Đọc mã đó cho người quản trị; chi tiết nằm trong `logs/vnpt-billing.log` |
 | PDF hiện ô vuông thay vì chữ | Không xảy ra với bản này — font đã nhúng sẵn |
 | Muốn về lại dữ liệu mẫu ban đầu | Chạy `mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"`. ⚠️ **Xoá sạch** dữ liệu đang có |
