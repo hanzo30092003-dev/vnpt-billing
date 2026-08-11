@@ -5,11 +5,15 @@
 
 <div th:fragment="noiDungTrang">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0">
-            <i class="bi bi-person-plus me-2"></i>
-            <span th:text="${laThemMoi} ? 'Thêm khách hàng mới' : 'Sửa thông tin khách hàng'"></span>
-        </h2>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div class="dau-trang">
+            <h2 class="h4 mb-1">
+                <i class="bi bi-person-plus me-2"></i>
+                <span th:text="${laThemMoi} ? 'Thêm khách hàng mới' : 'Sửa thông tin khách hàng'"></span>
+            </h2>
+            <p th:replace="~{fragments/trang :: moTa(
+                    'Điền thông tin khách hàng. Chọn Cá nhân hay Doanh nghiệp trước, các ô bên dưới sẽ đổi theo.')}"></p>
+        </div>
         <a class="btn btn-outline-secondary" th:href="@{/khach-hang}">
             <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
         </a>

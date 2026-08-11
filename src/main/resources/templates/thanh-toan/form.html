@@ -5,8 +5,10 @@
 
 <div th:fragment="noiDungTrang">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0"><i class="bi bi-cash-coin me-2"></i>Ghi nhận thanh toán</h2>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-cash-coin', 'Ghi nhận thanh toán',
+                'Ghi lại số tiền khách vừa trả cho một hóa đơn. Trả một phần cũng ghi được.')}"></div>
         <a class="btn btn-outline-secondary" th:href="@{/hoa-don/{id}(id=${hoaDon.id})}">
             <i class="bi bi-arrow-left me-1"></i> Về hóa đơn
         </a>

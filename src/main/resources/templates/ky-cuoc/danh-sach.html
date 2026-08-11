@@ -5,7 +5,11 @@
 
 <div th:fragment="noiDungTrang">
 
-    <h2 class="h4 mb-3"><i class="bi bi-calendar3 me-2"></i>Quản lý kỳ cước</h2>
+    <div class="mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-calendar3', 'Quản lý kỳ cước (tháng tính tiền)',
+                'Mỗi kỳ là một tháng tính tiền. Tạo tháng mới ở đây trước khi chạy tính tiền cho tháng đó.')}"></div>
+    </div>
 
     <div class="alert alert-info py-2 small">
         <i class="bi bi-info-circle me-1"></i>

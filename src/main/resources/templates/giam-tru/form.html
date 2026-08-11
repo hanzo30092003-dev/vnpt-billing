@@ -5,11 +5,15 @@
 
 <div th:fragment="noiDungTrang">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0">
-            <i class="bi bi-dash-circle me-2"></i>
-            <span th:text="${form.id == null} ? 'Thêm khoản giảm trừ' : 'Sửa khoản giảm trừ'"></span>
-        </h2>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div class="dau-trang">
+            <h2 class="h4 mb-1">
+                <i class="bi bi-dash-circle me-2"></i>
+                <span th:text="${form.id == null} ? 'Thêm khoản giảm trừ' : 'Sửa khoản giảm trừ'"></span>
+            </h2>
+            <p th:replace="~{fragments/trang :: moTa(
+                    'Khai một khoản trừ bớt cho khách: theo số tiền cụ thể, hoặc theo phần trăm.')}"></p>
+        </div>
         <a class="btn btn-outline-secondary" th:href="@{/giam-tru}">
             <i class="bi bi-arrow-left me-1"></i> Danh sách
         </a>

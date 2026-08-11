@@ -6,7 +6,8 @@
 <div th:fragment="noiDungTrang">
 
     <div th:replace="~{bao-cao/fragments :: thanhCongCu('Doanh thu theo loại dịch vụ', 'bi-pie-chart',
-                       @{/bao-cao/doanh-thu-dich-vu/xuat-excel(kyCuocId=${kyCuocId})})}"></div>
+                       @{/bao-cao/doanh-thu-dich-vu/xuat-excel(kyCuocId=${kyCuocId})},
+                       'Tiền thu được chia theo cước thuê bao, cuộc gọi, tin nhắn và truy cập mạng.')}"></div>
     <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO DOANH THU THEO LOẠI DỊCH VỤ',
                        ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
     <div th:replace="~{bao-cao/fragments :: chonKy('/bao-cao/doanh-thu-dich-vu')}"></div>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/*
+    Đầu trang dùng chung: biểu tượng + tiêu đề + MỘT CÂU nói màn hình này để làm gì.
+
+    Vì sao phải có câu đó: người dùng đích của phần mềm là nhân viên giao dịch quen
+    Excel và Zalo, chưa từng dùng phần mềm nghiệp vụ. Một tiêu đề như "Đối soát cước"
+    không nói được gì với họ. Câu mô tả viết cho người CHƯA BIẾT GÌ, dưới 25 từ,
+    không dùng thuật ngữ.
+
+    Vì sao là fragment chứ không chép ở từng trang: 30 màn hình chép cùng một khối
+    markup thì lần sau muốn đổi cách trình bày phải sửa 30 chỗ, và chắc chắn sót.
+    Chỉ có CHỮ là khác nhau giữa các trang — và chữ thì buộc phải khác.
+
+    Cách dùng khi trang KHÔNG có nút bên phải tiêu đề:
+
+        <div th:replace="~{fragments/trang :: tieuDe(
+                 'bi-people', 'Quản lý khách hàng',
+                 'Tìm và xem khách hàng đang có...')}"></div>
+
+    Cách dùng khi trang CÓ nút bên phải — trang tự giữ khung d-flex của nó:
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+            <div th:replace="~{fragments/trang :: tieuDe('bi-receipt', '...', '...')}"></div>
+            <div class="d-flex gap-2 khong-in"> ...các nút... </div>
+        </div>
+*/-->
+<div th:fragment="tieuDe(bieuTuong, tieuDe, moTa)" class="dau-trang">
+    <h2 class="h4 mb-1">
+        <i class="bi me-2" th:classappend="${bieuTuong}"></i><span th:text="${tieuDe}">Tiêu đề trang</span>
+    </h2>
+    <p class="mo-ta-trang mb-0" th:text="${moTa}">Màn hình này dùng để làm gì.</p>
+</div>
+
+<!--/*
+    Chỉ RIÊNG dòng mô tả, cho những trang có tiêu đề ĐỘNG — tên khách hàng, mã
+    hóa đơn, kèm huy hiệu trạng thái. Các trang đó phải tự dựng thẻ <h2> của
+    mình nên không dùng được fragment tieuDe ở trên, nhưng vẫn dùng chung được
+    dòng mô tả:
+
+        <div class="dau-trang">
+            <h2 class="h4 mb-1"> ...tiêu đề động của trang... </h2>
+            <p th:replace="~{fragments/trang :: moTa('Câu giải thích...')}"></p>
+        </div>
+*/-->
+<p th:fragment="moTa(chu)" class="mo-ta-trang mb-0" th:text="${chu}">Màn hình này dùng để làm gì.</p>
+
+</body>
+</html>

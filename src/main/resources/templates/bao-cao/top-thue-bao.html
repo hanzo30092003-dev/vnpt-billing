@@ -6,7 +6,8 @@
 <div th:fragment="noiDungTrang">
 
     <div th:replace="~{bao-cao/fragments :: thanhCongCu('Top thuê bao cước cao', 'bi-trophy',
-                       @{/bao-cao/top-thue-bao/xuat-excel(kyCuocId=${kyCuocId},soLuong=${soLuong})})}"></div>
+                       @{/bao-cao/top-thue-bao/xuat-excel(kyCuocId=${kyCuocId},soLuong=${soLuong})},
+                       'Những số điện thoại phải trả nhiều tiền nhất trong tháng đã chọn.')}"></div>
     <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO TOP THUÊ BAO CƯỚC CAO',
                        ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
 

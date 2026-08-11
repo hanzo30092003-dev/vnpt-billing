@@ -6,7 +6,8 @@
 <div th:fragment="noiDungTrang">
 
     <div th:replace="~{bao-cao/fragments :: thanhCongCu('Sản lượng dịch vụ', 'bi-activity',
-                       @{/bao-cao/san-luong/xuat-excel(kyCuocId=${kyCuocId})})}"></div>
+                       @{/bao-cao/san-luong/xuat-excel(kyCuocId=${kyCuocId})},
+                       'Khách đã gọi bao nhiêu phút, nhắn bao nhiêu tin, dùng bao nhiêu dung lượng.')}"></div>
     <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO SẢN LƯỢNG DỊCH VỤ',
                        ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
     <div th:replace="~{bao-cao/fragments :: chonKy('/bao-cao/san-luong')}"></div>

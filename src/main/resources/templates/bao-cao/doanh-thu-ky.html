@@ -6,7 +6,8 @@
 <div th:fragment="noiDungTrang">
 
     <div th:replace="~{bao-cao/fragments :: thanhCongCu('Doanh thu theo kỳ', 'bi-graph-up-arrow',
-                       @{/bao-cao/doanh-thu-ky/xuat-excel})}"></div>
+                       @{/bao-cao/doanh-thu-ky/xuat-excel},
+                       'Mỗi tháng thu được bao nhiêu tiền và đã thu được bao nhiêu phần trăm.')}"></div>
     <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO DOANH THU THEO KỲ',
                        'Toàn bộ kỳ cước')}"></div>
 

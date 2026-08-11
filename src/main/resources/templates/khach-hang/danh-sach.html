@@ -5,8 +5,10 @@
 
 <div th:fragment="noiDungTrang">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0"><i class="bi bi-people me-2"></i>Quản lý khách hàng</h2>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-people', 'Quản lý khách hàng',
+                'Tìm và xem khách hàng đang có. Bấm Thêm khách hàng khi có người đến đăng ký mới.')}"></div>
         <a class="btn btn-primary" th:href="@{/khach-hang/them}">
             <i class="bi bi-plus-lg me-1"></i> Thêm khách hàng
         </a>

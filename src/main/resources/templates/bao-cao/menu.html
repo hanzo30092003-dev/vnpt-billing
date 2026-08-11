@@ -5,7 +5,11 @@
 
 <div th:fragment="noiDungTrang">
 
-    <h2 class="h4 mb-3"><i class="bi bi-bar-chart-line me-2"></i>Báo cáo thống kê</h2>
+    <div class="mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-bar-chart-line', 'Báo cáo thống kê',
+                'Bảy báo cáo tổng hợp về doanh thu, thuê bao và công nợ. Báo cáo nào cũng xuất Excel và in được.')}"></div>
+    </div>
 
     <div class="alert alert-warning py-2 small">
         <i class="bi bi-exclamation-triangle me-1"></i>

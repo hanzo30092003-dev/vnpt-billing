@@ -5,8 +5,10 @@
 
 <div th:fragment="noiDungTrang">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0"><i class="bi bi-search me-2"></i>Xem giá đang áp dụng</h2>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-search', 'Xem giá đang áp dụng',
+                'Chọn một ngày để xem đơn giá nào đang có hiệu lực vào đúng ngày đó.')}"></div>
         <a class="btn btn-outline-secondary" th:href="@{/bang-gia}">
             <i class="bi bi-arrow-left me-1"></i> Về bảng giá
         </a>

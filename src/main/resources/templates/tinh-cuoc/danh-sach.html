@@ -5,7 +5,11 @@
 
 <div th:fragment="noiDungTrang">
 
-    <h2 class="h4 mb-3"><i class="bi bi-calculator me-2"></i>Chạy tính cước theo kỳ</h2>
+    <div class="mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-calculator', 'Tính tiền hằng tháng',
+                'Chạy tính tiền cho một tháng: tính tiền từng cuộc, lập hóa đơn, rồi khóa tháng lại.')}"></div>
+    </div>
 
     <!--/* Hộp kết quả nổi bật sau mỗi lần chạy */-->
     <div class="alert alert-success d-flex align-items-start gap-2" th:if="${ketQuaChay}">

@@ -6,7 +6,9 @@
 <div th:fragment="noiDungTrang">
 
     <div class="d-flex justify-content-between align-items-start mb-3 khong-in">
-        <h2 class="h4 mb-0"><i class="bi bi-clipboard-check me-2"></i>Bảng đối soát cước</h2>
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-clipboard-check', 'Bảng đối soát cước',
+                'Giải thích vì sao hóa đơn ra đúng con số đó, lần theo từng cuộc gọi cho tới dòng cuối hóa đơn.')}"></div>
         <div class="d-flex gap-2">
             <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
                 <i class="bi bi-printer"></i> In
@@ -223,8 +225,15 @@
                         <td class="small text-nowrap"
                             th:text="${#temporals.format(c.thoiGian, 'dd/MM HH:mm:ss')}"></td>
                         <td class="small" th:text="${c.soBiGoi != null} ? ${c.soBiGoi} : '—'"></td>
-                        <td th:text="${c.loaiDichVu.nhan}"></td>
-                        <td class="small" th:text="${c.huong.nhan}"></td>
+                        <!--/*
+                            KHONG dung .nhan o day: DongCdr la mot record rieng cua bang doi
+                            soat, hai truong nay kieu String chu khong phai enum. Dung .nhan
+                            lam ca trang do 500 - va bo test giao dien khong bat duoc, vi
+                            trang doi soat duy nhat ma no mo la ky 8 RONG, vong lap khong
+                            chay dong nao.
+                        */-->
+                        <td th:text="${c.loaiDichVu}"></td>
+                        <td class="small" th:text="${c.huong}"></td>
                         <td class="text-center">
                             <span th:if="${c.gioCaoDiem}" class="badge text-bg-warning">CĐ</span>
                             <span th:unless="${c.gioCaoDiem}" class="text-secondary">—</span>

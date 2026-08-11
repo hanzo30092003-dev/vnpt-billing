@@ -5,8 +5,10 @@
 
 <div th:fragment="noiDungTrang">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0"><i class="bi bi-dash-circle me-2"></i>Khoản giảm trừ</h2>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-dash-circle', 'Khoản giảm trừ',
+                'Các khoản trừ bớt cho khách trước khi tính thuế, ví dụ khuyến mại hoặc đền bù sự cố.')}"></div>
         <a class="btn btn-primary" th:href="@{/giam-tru/moi}">
             <i class="bi bi-plus-lg me-1"></i> Thêm giảm trừ
         </a>

@@ -6,7 +6,8 @@
 <div th:fragment="noiDungTrang">
 
     <div th:replace="~{bao-cao/fragments :: thanhCongCu('Công nợ tổng hợp', 'bi-wallet2',
-                       @{/bao-cao/cong-no/xuat-excel})}"></div>
+                       @{/bao-cao/cong-no/xuat-excel},
+                       'Ai đang nợ, nợ bao lâu rồi và ai nợ nhiều nhất — gộp chung cả hệ thống.')}"></div>
     <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO CÔNG NỢ TỔNG HỢP',
                        'Toàn bộ hệ thống')}"></div>
 

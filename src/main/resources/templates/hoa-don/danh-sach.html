@@ -5,8 +5,10 @@
 
 <div th:fragment="noiDungTrang">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0"><i class="bi bi-receipt me-2"></i>Danh sách hóa đơn</h2>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-receipt', 'Danh sách hóa đơn',
+                'Xem tiền cước từng tháng của khách hàng, in hóa đơn và ghi nhận khi khách trả tiền.')}"></div>
         <a class="btn btn-outline-success" th:href="@{'/hoa-don/xuat-excel?' + ${chuoiLoc}}">
             <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
         </a>

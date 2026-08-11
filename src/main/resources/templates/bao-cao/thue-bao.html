@@ -6,7 +6,8 @@
 <div th:fragment="noiDungTrang">
 
     <div th:replace="~{bao-cao/fragments :: thanhCongCu('Thống kê thuê bao', 'bi-sim',
-                       @{/bao-cao/thue-bao/xuat-excel})}"></div>
+                       @{/bao-cao/thue-bao/xuat-excel},
+                       'Đang có bao nhiêu thuê bao, đang hoạt động hay tạm ngưng, mỗi tháng thêm bớt bao nhiêu.')}"></div>
     <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO THỐNG KÊ THUÊ BAO',
                        'Toàn bộ hệ thống')}"></div>
 

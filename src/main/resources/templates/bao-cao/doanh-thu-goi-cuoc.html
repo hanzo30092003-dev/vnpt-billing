@@ -6,7 +6,8 @@
 <div th:fragment="noiDungTrang">
 
     <div th:replace="~{bao-cao/fragments :: thanhCongCu('Doanh thu theo gói cước', 'bi-box-seam',
-                       @{/bao-cao/doanh-thu-goi-cuoc/xuat-excel(kyCuocId=${kyCuocId})})}"></div>
+                       @{/bao-cao/doanh-thu-goi-cuoc/xuat-excel(kyCuocId=${kyCuocId})},
+                       'Gói cước nào mang lại nhiều tiền nhất trong tháng đã chọn.')}"></div>
     <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO DOANH THU THEO GÓI CƯỚC',
                        ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
     <div th:replace="~{bao-cao/fragments :: chonKy('/bao-cao/doanh-thu-goi-cuoc')}"></div>

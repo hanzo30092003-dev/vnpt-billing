@@ -204,6 +204,23 @@ body {
     color: #6c757d;
 }
 
+/* ---------- Dong mo ta duoi tieu de moi trang ----------
+   Mau xam nhat hon tieu de nhung van dat chuan tuong phan cua WCAG AA tren nen
+   trang (#5c6670 tren #fff = 5.9:1). Khong dung .text-secondary cua Bootstrap vi
+   mau do nhat hon va cau nay la cau NGUOI MOI DOC DAU TIEN - no phai doc duoc. */
+.mo-ta-trang {
+    color: #5c6670;
+    font-size: .95rem;
+    max-width: 70ch;
+}
+
+/* Ban in khong can cau huong dan thao tac */
+@media print {
+    .mo-ta-trang {
+        display: none;
+    }
+}
+
 /* ---------- Tien ich ---------- */
 .bang-du-lieu td,
 .bang-du-lieu th {

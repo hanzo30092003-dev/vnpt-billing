@@ -11,12 +11,10 @@
 */-->
 
 <!--/* Thanh tiêu đề + hai nút thao tác */-->
-<div th:fragment="thanhCongCu(tieuDe, bieuTuong, duongDanExcel)"
-     class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="h4 mb-0">
-        <i class="bi me-2" th:classappend="${bieuTuong}"></i><span th:text="${tieuDe}">Báo cáo</span>
-    </h2>
-    <div class="khong-in">
+<div th:fragment="thanhCongCu(tieuDe, bieuTuong, duongDanExcel, moTa)"
+     class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+    <div th:replace="~{fragments/trang :: tieuDe(${bieuTuong}, ${tieuDe}, ${moTa})}"></div>
+    <div class="khong-in d-flex gap-2">
         <a class="btn btn-outline-success btn-sm" th:href="${duongDanExcel}">
             <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
         </a>

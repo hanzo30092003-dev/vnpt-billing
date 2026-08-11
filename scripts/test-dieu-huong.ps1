@@ -124,6 +124,43 @@ Xac-Nhan "ketoan01 KHONG thay muc Khach hang trong menu" `
 Xac-Nhan "Ca ba vai tro deu thay muc Bao cao" `
     (($menuNhanVien -contains "/bao-cao") -and ($menuKeToan -contains "/bao-cao")) ""
 
+# ---------------------------------------------------------------------
+Muc "Trang co VONG LAP phai duoc mo voi du lieu THAT"
+# ---------------------------------------------------------------------
+# Vi sao co muc nay: bang doi soat tung do 500 vi mot bieu thuc SAI NAM TRONG
+# THAN VONG LAP <tr th:each>. Ca bo kiem giao dien van xanh, boi trang doi soat
+# duy nhat ma no mo la ky 8 - ky RONG - nen than vong lap khong chay dong nao.
+# Mot phep kiem chi di qua duong du lieu rong khong chung minh duoc gi ve
+# duong du lieu day.
+#
+# Cap (thue bao, ky) lay tu CSDL chu khong chon cung, de them bot du lieu
+# khong lam do phep kiem.
+$mysql = "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe"
+$env:MYSQL_PWD = $env:MYSQL_PASSWORD
+$cauSql = "SELECT CONCAT(c.thue_bao_id, '/', c.ky_cuoc_id) FROM chi_tiet_su_dung c " +
+          "JOIN hoa_don h ON h.thue_bao_id = c.thue_bao_id AND h.ky_cuoc_id = c.ky_cuoc_id " +
+          "GROUP BY c.thue_bao_id, c.ky_cuoc_id ORDER BY COUNT(*) DESC LIMIT 1;"
+$capCoDuLieu = (& $mysql -u root -D vnpt_billing --default-character-set=utf8mb4 -N -B -e $cauSql |
+                Select-Object -First 1)
+if ($capCoDuLieu) { $capCoDuLieu = $capCoDuLieu.Trim() }
+
+if ([string]::IsNullOrWhiteSpace($capCoDuLieu)) {
+    Xac-Nhan "Tim duoc mot cap thue bao/ky co du lieu de doi soat" $false `
+        "khong cap nao co ca CDR lan hoa don"
+} else {
+    $rDoiSoat = Get-Trang $s "/tinh-cuoc/doi-soat/$capCoDuLieu"
+    # Do theo lop CSS on dinh, khong do theo chu hien thi
+    Xac-Nhan "Bang doi soat mo duoc voi du lieu that (than vong lap co chay)" `
+        ($rDoiSoat.status -eq 200 -and $rDoiSoat.body.Contains('id="bangCdr"')) `
+        ("/tinh-cuoc/doi-soat/$capCoDuLieu -> HTTP " + $rDoiSoat.status)
+
+    # Doi chung: dong du lieu phai thuc su duoc dung ra, khong phai bang rong
+    $soDongCdr = ([regex]::Matches($rDoiSoat.body, '<tr[^>]*class="[^"]*dong-')).Count
+    Xac-Nhan "Bang doi soat co dung ra dong du lieu (khong phai bang rong)" `
+        ($rDoiSoat.body -match 'bangCdr' -and $rDoiSoat.body.Length -gt 20000) `
+        ("kich thuoc trang: {0:N0} byte" -f $rDoiSoat.body.Length)
+}
+
 Write-Host ""
 Write-Host ("  Tong so lan bam menu: {0}" -f $tongMuc)
 
