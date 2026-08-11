@@ -25,7 +25,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ThanhToanForm {
 
-    @NotNull(message = "Thiếu hóa đơn cần thanh toán")
+    @NotNull(message = "Chưa biết ghi nhận cho hóa đơn nào. Hãy mở lại hóa đơn rồi bấm Ghi nhận thanh toán.")
     private Long hoaDonId;
 
     @NotNull(message = "Vui lòng nhập số tiền")

@@ -110,15 +110,17 @@ public class ThanhToanServiceImpl implements ThanhToanService {
     private void kiemTra(ThanhToanForm form, HoaDon hoaDon) {
         if (hoaDon.getTrangThai() == TrangThaiHoaDon.DA_TT) {
             throw new NghiepVuException("Hóa đơn " + hoaDon.getMaHoaDon()
-                    + " đã thanh toán đủ, không ghi nhận thêm được.");
+                    + " đã thu đủ, không ghi nhận thêm được. "
+                    + "Nếu khách trả cho hóa đơn khác, hãy mở đúng hóa đơn đó rồi ghi nhận.");
         }
         if (form.getNgayThanhToan().isAfter(LocalDate.now())) {
-            throw new NghiepVuException("Ngày thanh toán không được ở tương lai.");
+            throw new NghiepVuException("Ngày thanh toán không được ở tương lai. Hãy chọn đúng ngày khách đưa tiền, hôm nay hoặc trước đó.");
         }
         if (form.getSoTien().compareTo(hoaDon.getConNo()) > 0) {
             throw new NghiepVuException("Số tiền thanh toán (" + form.getSoTien()
-                    + " đ) vượt quá số còn nợ của hóa đơn " + hoaDon.getMaHoaDon()
-                    + " (" + hoaDon.getConNo() + " đ).");
+                    + " đ) nhiều hơn số khách còn nợ ở hóa đơn " + hoaDon.getMaHoaDon()
+                    + " (" + hoaDon.getConNo() + " đ). "
+                    + "Hãy sửa lại đúng số còn nợ; phần dư thu cho hóa đơn khác thì ghi nhận riêng ở hóa đơn đó.");
         }
     }
 

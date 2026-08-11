@@ -53,7 +53,7 @@ public class KhachHangForm {
     private String diaChi;
 
     @Pattern(regexp = "^$|^0\\d{9,10}$",
-            message = "Số điện thoại phải bắt đầu bằng 0 và gồm 10 hoặc 11 chữ số")
+            message = "Số điện thoại phải bắt đầu bằng 0 và gồm 10 hoặc 11 chữ số — ví dụ 0912345678")
     private String dienThoaiLh;
 
     @Email(message = "Email không đúng định dạng")

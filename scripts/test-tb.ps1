@@ -32,13 +32,29 @@ $t = Get-Trang $s $formDangKy
 Kiem-Tra -Ten "Mo form dang ky thue bao" -KetQua $t -StatusMongDoi 200 `
     -CanCo @('id="soThueBao"', 'data-loai', 'o-tra-sau') | Out-Null
 
+# ---------------------------------------------------------------------
+# Hai phep kiem duoi day khong con do theo nguyen van cau thong bao.
+# Ly do va cach thay the: xem ghi chu dai o test-kh.ps1 muc 8.
+# Tom tat: cau chu duoc phep doi, con "thao tac bi chan" thi khong.
+# ---------------------------------------------------------------------
+$mysqlTb = "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe"
+$env:MYSQL_PWD = $env:MYSQL_PASSWORD
+function Sql-MotO($cau) {
+    return (& $mysqlTb -u root -D vnpt_billing --default-character-set=utf8mb4 -N -B -e $cau |
+            Select-Object -First 1)
+}
+
 Muc "4. Validation khi dang ky"
+$tbTruoc = [int](Sql-MotO "SELECT COUNT(*) FROM thue_bao;")
 $kq = Post-Form $s $formDangKy $postLuu @{
     khachHangId = "1"; soThueBao = "0901234501"; loaiThueBao = "TRA_SAU"; goiCuocId = "1"
     ngayKichHoat = "2026-07-31"; hanMucTinDung = "500000"
 }
+$tbSau = [int](Sql-MotO "SELECT COUNT(*) FROM thue_bao;")
 Kiem-Tra -Ten "So thue bao trung bi chan" -KetQua $kq -StatusMongDoi 200 `
-    -CanCo @('đã tồn tại trong hệ thống') | Out-Null
+    -CanCo @('alert-danger') | Out-Null
+Xac-Nhan "Khong tao ra thue bao nao khi so trung" ($tbTruoc -eq $tbSau) `
+    ("thue_bao: {0} -> {1}" -f $tbTruoc, $tbSau)
 
 $kq = Post-Form $s $formDangKy $postLuu @{
     khachHangId = "1"; soThueBao = "0123456789"; loaiThueBao = "TRA_SAU"; goiCuocId = "1"
@@ -85,11 +101,16 @@ if ($t.status -eq 200 -and $soBuoc -eq 2) { Write-Output "  [DAT ] Thue bao 8 co
 else { Write-Output "  [SAI ] Thue bao 8: HTTP $($t.status), $soBuoc dong (mong doi 2)"; $Global:SoSai++ }
 
 Muc "7. Chan khoi phuc thue bao da thanh ly"
+$ttTruoc15 = (Sql-MotO "SELECT trang_thai FROM thue_bao WHERE id=15;").Trim()
 $kq = Post-Form $s "/thue-bao/15" "/thue-bao/15/chuyen-trang-thai" @{
     trangThaiMoi = "HOAT_DONG"; lyDo = "Thử khôi phục thuê bao đã thanh lý"
 }
+$ttSau15 = (Sql-MotO "SELECT trang_thai FROM thue_bao WHERE id=15;").Trim()
 Kiem-Tra -Ten "DA_THANH_LY -> HOAT_DONG bi chan" -KetQua $kq -StatusMongDoi 200 `
-    -CanCo @('đã thanh lý, không thể chuyển sang trạng thái khác') | Out-Null
+    -CanCo @('alert-danger') | Out-Null
+Xac-Nhan "Thue bao 15 VAN o DA_THANH_LY sau khi bi chan" `
+    ($ttTruoc15 -eq 'DA_THANH_LY' -and $ttSau15 -eq 'DA_THANH_LY') `
+    ("trang_thai: {0} -> {1}" -f $ttTruoc15, $ttSau15)
 
 Muc "8. Nap tien"
 $kq = Post-Form $s "/thue-bao/21" "/thue-bao/21/nap-tien" @{ soTien = "50000"; hinhThuc = "THE_CAO" }

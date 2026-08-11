@@ -49,8 +49,9 @@ public class KyCuocServiceImpl implements KyCuocService {
         // (DataIntegrityViolationException) thay vì thông báo tiếng Việt rõ nghĩa.
         kyCuocRepository.findByThangAndNam(form.getThang(), form.getNam())
                 .ifPresent(daCo -> {
-                    throw new NghiepVuException("Kỳ cước tháng " + form.getThang() + "/"
-                            + form.getNam() + " đã tồn tại, không thể tạo trùng");
+                    throw new NghiepVuException("Tháng tính tiền " + form.getThang() + "/"
+                            + form.getNam() + " đã có trong danh sách bên phải, không tạo lại được. "
+                            + "Hãy chọn tháng khác, hoặc dùng luôn tháng đã có.");
                 });
 
         // Ngày đầu và ngày cuối tháng tính bằng YearMonth để tự xử lý tháng 28/29/30/31 ngày
@@ -92,8 +93,8 @@ public class KyCuocServiceImpl implements KyCuocService {
         KyCuoc ky = layTheoId(id);
 
         if (ky.getTrangThai() == TrangThaiKyCuoc.DA_CHOT) {
-            throw new NghiepVuException("Kỳ cước tháng " + ky.getThang() + "/" + ky.getNam()
-                    + " đã được chốt trước đó rồi");
+            throw new NghiepVuException("Tháng tính tiền " + ky.getThang() + "/" + ky.getNam()
+                    + " đã khóa trước đó rồi, không cần khóa lại.");
         }
         if (ky.getTrangThai() == TrangThaiKyCuoc.DANG_TINH) {
             throw new NghiepVuException("Kỳ cước tháng " + ky.getThang() + "/" + ky.getNam()

@@ -49,7 +49,7 @@ public class GiamTruForm {
      * <p>Không khai gì thì khoản giảm trừ bằng 0, tức một bản ghi không có tác dụng gì
      * ngoài việc làm rối bảng.</p>
      */
-    @AssertTrue(message = "Phải nhập ĐÚNG MỘT trong hai: số tiền giảm trừ hoặc tỷ lệ phần trăm")
+    @AssertTrue(message = "Chỉ điền MỘT trong hai ô: số tiền giảm trừ, hoặc tỷ lệ phần trăm. Xoá trống ô còn lại.")
     public boolean isChiMotCachKhai() {
         boolean coSoTien = soTien != null && soTien.signum() > 0;
         boolean coTyLe = tyLePhanTram != null && tyLePhanTram.signum() > 0;

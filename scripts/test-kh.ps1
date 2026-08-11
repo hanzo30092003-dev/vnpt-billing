@@ -60,13 +60,39 @@ $kq = Post-Form $s $formThem $postLuu @{
 Kiem-Tra -Ten "Bo trong ten / giay to / dia chi deu bi bao loi" -KetQua $kq -StatusMongDoi 200 `
     -CanCo @('Vui lòng nhập tên khách hàng', 'Vui lòng nhập số giấy tờ', 'Vui lòng nhập địa chỉ') | Out-Null
 
+# ---------------------------------------------------------------------
+# Tu dot lam lai giao dien: KHONG do theo nguyen van cau thong bao nua.
+#
+# Cau chu la thu ĐƯỢC PHÉP đổi - viec 3 cua dot nay viet lai gan het thong
+# bao loi cho de hieu, va bon phep kiem o day do het chi vi chu doi, trong
+# khi nghiep vu khong he sai. Mot phep kiem do vi ly do sai cung nguy hiem
+# nhu phep kiem khong do khi co loi that.
+#
+# Nay do ba thu ON DINH hon va manh hon:
+#   1. ma trang thai HTTP
+#   2. khoi bao loi co hien ra khong  -> lop CSS "alert-danger", markup
+#   3. THAO TAC CO BI CHAN THAT KHONG -> dem lai ban ghi trong CSDL
+# Diem 3 moi la thu can kiem: truoc day script chi chung minh "co chu do
+# tren man hinh", chu khong chung minh la khach hang KHONG bi tao ra.
+# ---------------------------------------------------------------------
+$mysqlKh = "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe"
+$env:MYSQL_PWD = $env:MYSQL_PASSWORD
+function Dem-KhachHang {
+    return [int](& $mysqlKh -u root -D vnpt_billing -N -B -e "SELECT COUNT(*) FROM khach_hang;" |
+                 Select-Object -First 1)
+}
+
 Muc "8. Validation - trung so giay to"
+$truoc = Dem-KhachHang
 $kq = Post-Form $s $formThem $postLuu @{
     loaiKh = "CA_NHAN"; tenKh = "Trung giay to"; soGiayTo = "092301004517"
     diaChi = "Dia chi test"; ngayDangKy = "2026-07-31"
 }
+$sau = Dem-KhachHang
 Kiem-Tra -Ten "So giay to trung khach khac bi chan" -KetQua $kq -StatusMongDoi 200 `
-    -CanCo @('đã được dùng cho một khách hàng khác') | Out-Null
+    -CanCo @('alert-danger') | Out-Null
+Xac-Nhan "Khong tao ra khach hang nao khi so giay to trung" ($truoc -eq $sau) `
+    ("khach_hang: {0} -> {1}" -f $truoc, $sau)
 
 Muc "9. Chi tiet khach hang doanh nghiep"
 $t = Get-Trang $s "/khach-hang/36"
@@ -74,8 +100,15 @@ Kiem-Tra -Ten "Chi tiet hien bang thue bao va nut dang ky moi" -KetQua $t -Statu
     -CanCo @('Thuê bao đang sở hữu', 'Đăng ký thuê bao mới', 'Doanh nghiệp 500') | Out-Null
 
 Muc "10. Ngung giao dich bi chan khi con thue bao hoat dong"
+$ttTruoc = (& $mysqlKh -u root -D vnpt_billing -N -B `
+            -e "SELECT trang_thai FROM khach_hang WHERE id=36;" | Select-Object -First 1).Trim()
 $kq = Post-Form $s "/khach-hang/36" "/khach-hang/36/ngung-giao-dich" @{ }
-Kiem-Tra -Ten "Chan ngung giao dich va bao ro so thue bao dang chay" -KetQua $kq -StatusMongDoi 200 `
-    -CanCo @('thuê bao đang hoạt động, không thể ngừng giao dịch') | Out-Null
+$ttSau = (& $mysqlKh -u root -D vnpt_billing -N -B `
+          -e "SELECT trang_thai FROM khach_hang WHERE id=36;" | Select-Object -First 1).Trim()
+Kiem-Tra -Ten "Chan ngung giao dich khi con thue bao hoat dong" -KetQua $kq -StatusMongDoi 200 `
+    -CanCo @('alert-danger') | Out-Null
+Xac-Nhan "Trang thai khach hang 36 KHONG doi sau khi bi chan" `
+    ($ttTruoc -eq 'HOAT_DONG' -and $ttSau -eq 'HOAT_DONG') `
+    ("trang_thai: {0} -> {1}" -f $ttTruoc, $ttSau)
 
 Ket-Thuc

@@ -138,7 +138,8 @@ public class CongNoServiceImpl implements CongNoService {
 
         if (hoaDon.getConNo().signum() <= 0) {
             throw new NghiepVuException("Hóa đơn " + hoaDon.getMaHoaDon()
-                    + " đã thanh toán đủ, không có căn cứ tạm ngừng thuê bao.");
+                    + " đã thu đủ nên không có căn cứ tạm ngừng thuê bao. "
+                    + "Nếu khách còn nợ hóa đơn khác, hãy mở hóa đơn đó rồi thao tác từ đó.");
         }
         long soNgay = soNgayQuaHan(hoaDon, LocalDate.now());
         if (soNgay <= ThamSoTinhCuoc.SO_NGAY_QUA_HAN_DE_XUAT_TAM_NGUNG) {

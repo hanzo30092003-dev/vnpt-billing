@@ -62,7 +62,9 @@ public class KhachHangServiceImpl implements KhachHangService {
                 : khachHangRepository.existsBySoGiayToAndIdNot(form.getSoGiayTo(), form.getId());
         if (trungGiayTo) {
             throw new NghiepVuException(
-                    "Số giấy tờ " + form.getSoGiayTo() + " đã được dùng cho một khách hàng khác");
+                    "Số giấy tờ " + form.getSoGiayTo() + " đã đăng ký cho một khách hàng khác. "
+                            + "Hãy gõ số này vào ô tìm kiếm ở màn hình Khách hàng để xem đó là ai, "
+                            + "hoặc kiểm tra lại số vừa nhập.");
         }
 
         KhachHang khachHang = themMoi ? new KhachHang() : layTheoId(form.getId());
@@ -111,7 +113,7 @@ public class KhachHangServiceImpl implements KhachHangService {
         KhachHang khachHang = layTheoId(id);
 
         if (khachHang.getTrangThai() == TrangThaiKhachHang.NGUNG_GIAO_DICH) {
-            throw new NghiepVuException("Khách hàng " + khachHang.getMaKh() + " đã ngừng giao dịch từ trước");
+            throw new NghiepVuException("Khách hàng " + khachHang.getMaKh() + " đã ngừng giao dịch từ trước, không cần làm lại thao tác này.");
         }
 
         // Không cho ngừng giao dịch khi khách còn thuê bao đang chạy: cước vẫn phát sinh
@@ -121,7 +123,9 @@ public class KhachHangServiceImpl implements KhachHangService {
                 id, TrangThaiThueBao.HOAT_DONG);
         if (soThueBaoHoatDong > 0) {
             throw new NghiepVuException("Khách hàng còn " + soThueBaoHoatDong
-                    + " thuê bao đang hoạt động, không thể ngừng giao dịch");
+                    + " thuê bao đang hoạt động nên chưa ngừng giao dịch được. "
+                    + "Hãy mở từng thuê bao trong danh sách bên dưới và chuyển sang "
+                    + "Đã thanh lý trước, rồi quay lại thao tác này.");
         }
 
         khachHang.setTrangThai(TrangThaiKhachHang.NGUNG_GIAO_DICH);

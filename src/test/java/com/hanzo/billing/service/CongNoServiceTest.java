@@ -235,7 +235,7 @@ class CongNoServiceTest {
 
             assertThatThrownBy(() -> service.tamNgungViNoCuoc(h.getId()))
                     .isInstanceOf(NghiepVuException.class)
-                    .hasMessageContaining("đã thanh toán đủ");
+                    .hasMessageContaining("đã thu đủ");
 
             verify(thueBaoService, never()).chuyenTrangThai(anyLong(), any(), anyString());
         }

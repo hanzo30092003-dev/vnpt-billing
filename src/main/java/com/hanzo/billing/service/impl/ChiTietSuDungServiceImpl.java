@@ -181,7 +181,8 @@ public class ChiTietSuDungServiceImpl implements ChiTietSuDungService {
             return out.toByteArray();
 
         } catch (IOException e) {
-            throw new NghiepVuException("Không tạo được file Excel: " + e.getMessage());
+            throw new NghiepVuException("Không tạo được file Excel. Hãy thử lại; nếu vẫn lỗi thì báo quản trị viên "
+                    + "kèm nội dung sau: " + e.getMessage());
         }
     }
 

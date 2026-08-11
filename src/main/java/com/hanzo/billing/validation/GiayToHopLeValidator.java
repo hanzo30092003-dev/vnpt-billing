@@ -34,10 +34,10 @@ public class GiayToHopLeValidator implements ConstraintValidator<GiayToHopLe, Kh
         String thongDiep;
         if (form.getLoaiKh() == LoaiKhachHang.CA_NHAN) {
             hopLe = soGiayTo.matches(CCCD);
-            thongDiep = "Số CCCD phải gồm đúng 12 chữ số";
+            thongDiep = "Số CCCD phải gồm đúng 12 chữ số, không có dấu cách — ví dụ 079203001234";
         } else {
             hopLe = soGiayTo.matches(MST);
-            thongDiep = "Mã số thuế phải gồm 10 hoặc 13 chữ số";
+            thongDiep = "Mã số thuế phải gồm 10 hoặc 13 chữ số — ví dụ 0301234567";
         }
 
         if (!hopLe) {

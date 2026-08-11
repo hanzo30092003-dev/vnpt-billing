@@ -71,7 +71,7 @@ public class GoiCuocServiceImpl implements GoiCuocService {
                 ? goiCuocRepository.existsByMaGoi(maGoi)
                 : goiCuocRepository.existsByMaGoiAndIdNot(maGoi, form.getId());
         if (trungMa) {
-            throw new NghiepVuException("Mã gói " + maGoi + " đã tồn tại");
+            throw new NghiepVuException("Mã gói " + maGoi + " đã có rồi. Hãy đặt một mã khác, ví dụ thêm số thứ tự ở cuối.");
         }
 
         GoiCuoc goiCuoc = themMoi ? new GoiCuoc() : layTheoId(form.getId());
@@ -81,8 +81,9 @@ public class GoiCuocServiceImpl implements GoiCuocService {
         if (!themMoi && goiCuoc.getLoaiThueBao() != form.getLoaiThueBao()) {
             long soThueBao = thueBaoRepository.countByGoiCuocId(form.getId());
             if (soThueBao > 0) {
-                throw new NghiepVuException("Gói cước đang được " + soThueBao
-                        + " thuê bao sử dụng, không thể đổi loại thuê bao của gói");
+                throw new NghiepVuException("Gói cước đang có " + soThueBao
+                        + " thuê bao dùng nên không đổi loại thuê bao của gói được. "
+                        + "Hãy tạo một gói mới cho loại thuê bao kia thay vì sửa gói này.");
             }
         }
 
@@ -118,8 +119,9 @@ public class GoiCuocServiceImpl implements GoiCuocService {
         // ngày hết hiệu lực hoặc tắt trạng thái, không xoá bản ghi.
         long soThueBao = thueBaoRepository.countByGoiCuocId(id);
         if (soThueBao > 0) {
-            throw new NghiepVuException("Gói cước đang được " + soThueBao
-                    + " thuê bao sử dụng, không thể xoá. Hãy đặt ngày hết hiệu lực để ngừng bán gói này.");
+            throw new NghiepVuException("Gói cước đang có " + soThueBao
+                    + " thuê bao dùng nên không xoá được — xoá đi thì các thuê bao đó mất căn cứ tính tiền. "
+                    + "Muốn ngừng bán gói này thì mở gói ra và đặt Ngày hết hiệu lực.");
         }
 
         goiCuocRepository.delete(goiCuoc);

@@ -24,7 +24,7 @@ public class GoiCuocForm implements CoKhoangHieuLuc {
 
     @NotBlank(message = "Vui lòng nhập mã gói")
     @Size(max = 20, message = "Mã gói tối đa 20 ký tự")
-    @Pattern(regexp = "^[A-Z0-9_]+$", message = "Mã gói chỉ gồm chữ IN HOA, chữ số và dấu gạch dưới")
+    @Pattern(regexp = "^[A-Z0-9_]+$", message = "Mã gói chỉ gồm chữ IN HOA, chữ số và dấu gạch dưới — ví dụ MAX150 hoặc DN_500")
     private String maGoi;
 
     @NotBlank(message = "Vui lòng nhập tên gói")

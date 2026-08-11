@@ -169,7 +169,7 @@ class ThanhToanServiceTest {
 
             assertThatThrownBy(() -> service.ghiNhan(form("100001")))
                     .isInstanceOf(NghiepVuException.class)
-                    .hasMessageContaining("vượt quá số còn nợ");
+                    .hasMessageContaining("nhiều hơn số khách còn nợ");
 
             verify(thanhToanRepository, never()).save(any());
             assertThat(h.getDaThanhToan()).isEqualByComparingTo("400000");
@@ -183,7 +183,7 @@ class ThanhToanServiceTest {
 
             assertThatThrownBy(() -> service.ghiNhan(form("1000")))
                     .isInstanceOf(NghiepVuException.class)
-                    .hasMessageContaining("đã thanh toán đủ");
+                    .hasMessageContaining("đã thu đủ");
 
             verify(thanhToanRepository, never()).save(any());
         }

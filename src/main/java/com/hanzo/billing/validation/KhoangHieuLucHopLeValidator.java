@@ -17,7 +17,7 @@ public class KhoangHieuLucHopLeValidator
         }
         // Gắn lỗi vào ô ngày hết hiệu lực để giao diện tô đỏ đúng chỗ
         context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate("Ngày hết hiệu lực phải sau ngày hiệu lực")
+        context.buildConstraintViolationWithTemplate("Ngày hết hiệu lực phải sau ngày hiệu lực. Để trống ô này nếu dòng giá áp dụng vô thời hạn.")
                 .addPropertyNode("ngayHetHieuLuc")
                 .addConstraintViolation();
         return false;

@@ -134,6 +134,29 @@ function Kiem-Tra {
     return $true
 }
 
+# ---------------------------------------------------------------------
+# Khang dinh mot dieu kien BOOLEAN bat ky, khong gan voi mot lan goi HTTP.
+#
+# Dung cho cac phep kiem doi chieu voi CSDL: "thao tac co that su bi chan
+# khong", "so ban ghi co doi khong". Do la thu dang kiem - kiem "co chu do
+# tren man hinh" chi chung minh giao dien in ra dung chu, khong chung minh
+# nghiep vu da chan.
+#
+# test-dieu-huong.ps1 va test-ky-rong.ps1 tung tu dinh nghia rieng ham nay;
+# dua len day de bon script dung chung mot cach dem.
+# ---------------------------------------------------------------------
+function Xac-Nhan($ten, $dieuKien, $chiTiet) {
+    if ($dieuKien) {
+        Write-Host ("  [DAT ] {0}" -f $ten)
+        $Global:SoDat++
+    } else {
+        Write-Host ("  [SAI ] {0}" -f $ten)
+        $Global:SoSai++
+    }
+    if ($chiTiet) { Write-Host ("         {0}" -f $chiTiet) }
+    return [bool]$dieuKien
+}
+
 function Bat-Dau($tieuDe) {
     $Global:SoDat = 0
     $Global:SoSai = 0

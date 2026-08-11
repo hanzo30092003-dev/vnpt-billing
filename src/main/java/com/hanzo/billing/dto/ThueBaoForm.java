@@ -25,7 +25,7 @@ public class ThueBaoForm {
      */
     @NotBlank(message = "Vui lòng nhập số thuê bao")
     @Pattern(regexp = "^0[35789]\\d{8}$",
-            message = "Số thuê bao phải gồm 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09")
+            message = "Số thuê bao phải gồm đúng 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09 — ví dụ 0912345678")
     private String soThueBao;
 
     @NotNull(message = "Vui lòng chọn loại thuê bao")

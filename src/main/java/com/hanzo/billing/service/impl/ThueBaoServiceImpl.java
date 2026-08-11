@@ -88,17 +88,19 @@ public class ThueBaoServiceImpl implements ThueBaoService {
     public ThueBao dangKyMoi(ThueBaoForm form) {
 
         if (thueBaoRepository.existsBySoThueBao(form.getSoThueBao())) {
-            throw new NghiepVuException("Số thuê bao " + form.getSoThueBao() + " đã tồn tại trong hệ thống");
+            throw new NghiepVuException("Số thuê bao " + form.getSoThueBao() + " đã có trong hệ thống. "
+                    + "Hãy tra số này ở màn hình Thuê bao để xem ai đang dùng, hoặc nhập một số khác.");
         }
         if (form.getNgayKichHoat().isAfter(LocalDate.now())) {
-            throw new NghiepVuException("Ngày kích hoạt không được ở tương lai");
+            throw new NghiepVuException("Ngày kích hoạt không được ở tương lai. Hãy chọn hôm nay hoặc một ngày đã qua.");
         }
 
         KhachHang khachHang = khachHangRepository.findById(form.getKhachHangId())
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy khách hàng đã chọn"));
         if (khachHang.getTrangThai() == TrangThaiKhachHang.NGUNG_GIAO_DICH) {
             throw new NghiepVuException("Khách hàng " + khachHang.getMaKh()
-                    + " đã ngừng giao dịch, không thể đăng ký thuê bao mới");
+                    + " đã ngừng giao dịch nên không đăng ký thuê bao mới được. "
+                    + "Hãy mở lại giao dịch cho khách này trước, hoặc chọn khách hàng khác.");
         }
 
         GoiCuoc goiCuoc = goiCuocRepository.findById(form.getGoiCuocId())
@@ -107,7 +109,8 @@ public class ThueBaoServiceImpl implements ThueBaoService {
         // Gói trả trước và gói trả sau có cách tính cước khác hẳn nhau, không dùng lẫn được
         if (goiCuoc.getLoaiThueBao() != form.getLoaiThueBao()) {
             throw new NghiepVuException("Gói cước " + goiCuoc.getMaGoi() + " chỉ áp dụng cho thuê bao "
-                    + goiCuoc.getLoaiThueBao().getNhan().toLowerCase());
+                    + goiCuoc.getLoaiThueBao().getNhan().toLowerCase()
+                    + ". Hãy chọn lại loại thuê bao cho khớp, hoặc chọn một gói khác trong danh sách.");
         }
 
         ThueBao thueBao = new ThueBao();
@@ -148,7 +151,7 @@ public class ThueBaoServiceImpl implements ThueBaoService {
     @Transactional
     public void chuyenTrangThai(Long id, TrangThaiThueBao trangThaiMoi, String lyDo) {
         if (lyDo == null || lyDo.isBlank()) {
-            throw new NghiepVuException("Vui lòng nhập lý do chuyển trạng thái");
+            throw new NghiepVuException("Chưa có lý do chuyển trạng thái. Hãy ghi ngắn gọn vì sao chuyển, ví dụ \"khách yêu cầu tạm ngưng\".");
         }
 
         ThueBao thueBao = layTheoId(id);
@@ -156,7 +159,8 @@ public class ThueBaoServiceImpl implements ThueBaoService {
 
         if (trangThaiCu == trangThaiMoi) {
             throw new NghiepVuException("Thuê bao đang ở trạng thái "
-                    + trangThaiCu.getNhan() + " rồi, không cần chuyển");
+                    + trangThaiCu.getNhan() + " rồi nên không cần chuyển nữa. "
+                    + "Nếu muốn sang trạng thái khác, hãy chọn đúng trạng thái đích.");
         }
 
         // Tra ma trận: chuyển không nằm trong danh sách hợp lệ thì từ chối
@@ -164,10 +168,13 @@ public class ThueBaoServiceImpl implements ThueBaoService {
         if (!duocPhep.contains(trangThaiMoi)) {
             if (trangThaiCu == TrangThaiThueBao.DA_THANH_LY) {
                 throw new NghiepVuException("Thuê bao " + thueBao.getSoThueBao()
-                        + " đã thanh lý, không thể chuyển sang trạng thái khác");
+                        + " đã thanh lý. Đây là trạng thái cuối, không mở lại được "
+                        + "vì số điện thoại đã thu hồi và có thể đã cấp cho khách khác. "
+                        + "Muốn phục vụ khách này thì đăng ký một thuê bao mới.");
             }
-            throw new NghiepVuException("Không thể chuyển thuê bao từ trạng thái "
-                    + trangThaiCu.getNhan() + " sang " + trangThaiMoi.getNhan());
+            throw new NghiepVuException("Không chuyển thẳng thuê bao từ trạng thái "
+                    + trangThaiCu.getNhan() + " sang " + trangThaiMoi.getNhan() + " được. "
+                    + "Hãy chuyển về Hoạt động trước, rồi sang trạng thái mong muốn.");
         }
 
         thueBao.setTrangThai(trangThaiMoi);
@@ -193,18 +200,19 @@ public class ThueBaoServiceImpl implements ThueBaoService {
         ThueBao thueBao = layTheoId(id);
 
         if (thueBao.getTrangThai() == TrangThaiThueBao.DA_THANH_LY) {
-            throw new NghiepVuException("Thuê bao đã thanh lý, không thể đổi gói cước");
+            throw new NghiepVuException("Thuê bao đã thanh lý nên không đổi gói cước được. Hãy đăng ký một thuê bao mới cho khách.");
         }
 
         GoiCuoc goiMoi = goiCuocRepository.findById(goiCuocMoiId)
                 .orElseThrow(() -> new NghiepVuException("Không tìm thấy gói cước đã chọn"));
 
         if (goiMoi.getId().equals(thueBao.getGoiCuoc().getId())) {
-            throw new NghiepVuException("Thuê bao đang dùng gói " + goiMoi.getTenGoi() + " rồi");
+            throw new NghiepVuException("Thuê bao đang dùng gói " + goiMoi.getTenGoi() + " rồi. Hãy chọn một gói khác trong danh sách.");
         }
         if (goiMoi.getLoaiThueBao() != thueBao.getLoaiThueBao()) {
-            throw new NghiepVuException("Chỉ được đổi sang gói cùng loại "
-                    + thueBao.getLoaiThueBao().getNhan().toLowerCase());
+            throw new NghiepVuException("Chỉ đổi được sang gói cùng loại "
+                    + thueBao.getLoaiThueBao().getNhan().toLowerCase()
+                    + ". Danh sách gói bên dưới đã lọc sẵn theo loại này — hãy chọn một gói trong đó.");
         }
 
         // Quy tắc viễn thông: gói cước tính theo chu kỳ tháng, đổi giữa chừng sẽ
@@ -248,7 +256,7 @@ public class ThueBaoServiceImpl implements ThueBaoService {
     @Transactional
     public void napTien(Long id, BigDecimal soTien, HinhThucNapTien hinhThuc) {
         if (soTien == null || soTien.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new NghiepVuException("Số tiền nạp phải lớn hơn 0");
+            throw new NghiepVuException("Số tiền nạp phải lớn hơn 0. Hãy nhập số tiền khách vừa đưa.");
         }
 
         ThueBao thueBao = layTheoId(id);
@@ -256,10 +264,10 @@ public class ThueBaoServiceImpl implements ThueBaoService {
         // Thuê bao trả sau dùng hạn mức tín dụng và trả cước qua hóa đơn hằng tháng,
         // không có khái niệm số dư tài khoản để nạp vào.
         if (thueBao.getLoaiThueBao() != LoaiThueBao.TRA_TRUOC) {
-            throw new NghiepVuException("Chỉ nạp tiền được cho thuê bao trả trước");
+            throw new NghiepVuException("Chỉ nạp tiền được cho thuê bao trả trước. Thuê bao trả sau trả tiền bằng cách thanh toán hóa đơn hằng tháng.");
         }
         if (thueBao.getTrangThai() == TrangThaiThueBao.DA_THANH_LY) {
-            throw new NghiepVuException("Thuê bao đã thanh lý, không thể nạp tiền");
+            throw new NghiepVuException("Thuê bao đã thanh lý nên không nạp tiền được.");
         }
 
         BigDecimal soDuTruoc = thueBao.getSoDu() == null ? BigDecimal.ZERO : thueBao.getSoDu();

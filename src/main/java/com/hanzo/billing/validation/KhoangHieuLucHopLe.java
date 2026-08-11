@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface KhoangHieuLucHopLe {
 
-    String message() default "Ngày hết hiệu lực phải sau ngày hiệu lực";
+    String message() default "Ngày hết hiệu lực phải sau ngày hiệu lực. Để trống ô này nếu dòng giá áp dụng vô thời hạn.";
 
     Class<?>[] groups() default {};
 

@@ -198,7 +198,7 @@ class ThueBaoServiceTest {
         @Test
         @DisplayName("Tạm ngưng 2 chiều → Tạm ngưng 1 chiều: BỊ CHẶN, đã khoá 2 chiều thì không hạ xuống 1 chiều")
         void sangTamNgung1C_thiBiChan() {
-            khangDinhBiChan(chuanBiThueBao(TAM_NGUNG_2C), TAM_NGUNG_1C, "Không thể chuyển thuê bao");
+            khangDinhBiChan(chuanBiThueBao(TAM_NGUNG_2C), TAM_NGUNG_1C, "Không chuyển thẳng thuê bao");
         }
 
         @Test
@@ -248,7 +248,7 @@ class ThueBaoServiceTest {
     void khongNhapLyDo_thiBiChan() {
         assertThatThrownBy(() -> thueBaoService.chuyenTrangThai(ID_THUE_BAO, TAM_NGUNG_1C, "  "))
                 .isInstanceOf(NghiepVuException.class)
-                .hasMessageContaining("Vui lòng nhập lý do");
+                .hasMessageContaining("lý do chuyển trạng thái");
 
         verify(thueBaoRepository, never()).save(any(ThueBao.class));
     }
