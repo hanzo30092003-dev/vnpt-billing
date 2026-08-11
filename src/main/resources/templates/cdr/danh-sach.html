@@ -128,9 +128,17 @@
                             <i class="bi bi-check-lg text-warning" th:if="${c.gioCaoDiem}"></i>
                             <span class="text-secondary" th:unless="${c.gioCaoDiem}">—</span>
                         </td>
-                        <!--/* Để trống khi tháng chứa bản ghi này chưa chạy tính tiền */-->
-                        <td class="text-end" th:text="${c.cuocPhi != null}
-                            ? ${#numbers.formatDecimal(c.cuocPhi, 0, 'POINT', 0, 'COMMA')} : ''"></td>
+                        <!--/* Ba tinh huong KHAC NHAU, truoc day deu hien ra so 0 hoac o trong:
+                               - mien_phi = 1  -> badge Mien phi, dung mau va chu voi bang doi soat
+                               - da tinh tien  -> so tien that (co the la 0 neu don gia bang 0)
+                               - chua tinh     -> dau gach, vi "0 dong" va "chua tinh" la hai chuyen khac nhau */-->
+                        <td class="text-end">
+                            <span th:if="${c.mienPhi}" class="badge text-bg-success">Miễn phí</span>
+                            <span th:unless="${c.mienPhi}"
+                                  th:text="${c.cuocPhi != null}
+                                           ? ${#numbers.formatDecimal(c.cuocPhi, 0, 'POINT', 0, 'COMMA')}
+                                           : '—'"></span>
+                        </td>
                         <td>
                             <span class="badge" th:classappend="${c.trangThaiTinhCuoc.lopBadge}"
                                   th:text="${c.trangThaiTinhCuoc.nhan}"></span>

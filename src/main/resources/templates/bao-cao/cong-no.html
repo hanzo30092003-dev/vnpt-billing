@@ -33,7 +33,7 @@
                         <tbody>
                         <tr th:each="o : ${bangTuoiNo}">
                             <td>
-                                <span class="badge" th:classappend="${o.nhom.lopBadge}"
+                                <span class="badge" th:style="${o.nhom.styleBadge}"
                                       th:text="${o.nhom.nhan}">Nhóm</span>
                             </td>
                             <td class="text-end" th:text="${@soLieu.so(o.soHoaDon)}">0</td>
@@ -96,6 +96,9 @@
         /*<![CDATA[*/
         const nhanTuoiNo = /*[[${nhanTuoiNo}]]*/ [];
         const tienTuoiNo = /*[[${tienTuoiNo}]]*/ [];
+        // Mau lay tu chinh enum NhomTuoiNo, KHONG khai lai o day - badge va bieu do
+        // phai cung mot bang mau (xem javadoc cua NhomTuoiNo)
+        const mauTuoiNo = /*[[${bangTuoiNo.![nhom.mauNen]}]]*/ [];
         /*]]>*/
         document.addEventListener('DOMContentLoaded', function () {
             const khung = document.getElementById('bieuDoTuoiNo');
@@ -107,7 +110,7 @@
                     datasets: [{
                         label: 'Còn nợ (đ)',
                         data: tienTuoiNo,
-                        backgroundColor: ['#6c757d', '#ffc107', '#fd7e14', '#dc3545', '#8b0000']
+                        backgroundColor: mauTuoiNo
                     }]
                 },
                 options: {

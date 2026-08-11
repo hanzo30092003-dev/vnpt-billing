@@ -269,3 +269,103 @@ không?"** — và cách trả lời chắc chắn duy nhất là **làm nó h�
 | `/cdr` không lọc được theo tháng | Là chức năng còn thiếu, không phải lỗi — không làm ở đợt này |
 | Kiểm tự động cho cỡ chữ và vùng bấm | Hiện đo tay bằng trình duyệt; muốn tự động phải thêm công cụ, mà đặc tả cấm thêm thư viện |
 | Ảnh chụp màn hình | Toàn bộ ảnh cũ phải chụp lại — xem `danh-sach-anh-chup.md` |
+
+---
+
+## 11. Đợt bổ sung — một lỗi 500 và bốn điểm giao diện
+
+Phát hiện khi rà lại **ảnh chụp màn hình**, không phải do test bắt được. Đó là điểm đáng ghi
+nhất của đợt này.
+
+### 11.1. 🔴 Lỗi 500 khi in phiếu thu — và vì sao 6 test vẫn xanh
+
+`/thanh-toan/{id}/phieu-thu` trả về trang *500 — Lỗi hệ thống*.
+
+| | |
+|---|---|
+| **Phát hiện** | Nhìn ảnh chụp màn hình, không phải từ test |
+| **Nguyên nhân** | `ThanhToanServiceImpl.layTheoId` dùng `findById`, mà `ThanhToan` khai `hoaDon` và `nguoiThu` là `LAZY`. `@Transactional` kết thúc ngay khi hàm trả về; bản in được dựng **sau đó**, và nó truy cập `hoaDon.khachHang.tenKh` |
+| **Thông báo thật** | `LazyInitializationException: Could not initialize proxy [HoaDon#308] - no session` |
+| **Cách sửa** | Thêm `ThanhToanRepository.timKemQuanHe(id)` với `JOIN FETCH`. Màn hình hóa đơn không dính lỗi này chính vì `HoaDonRepository` đã `JOIN FETCH` sẵn |
+
+**Vì sao `PhieuThuPdfServiceTest` xanh trong khi chức năng hỏng hoàn toàn.** Lớp test đó dựng
+`ThanhToan` bằng `new` rồi gán quan hệ bằng tay. Mọi quan hệ vì thế là **đối tượng thật, đã nạp
+sẵn** — nó *không bao giờ chạm vào một proxy nào*. Sáu phép kiểm nội dung PDF đều đúng và đều vô
+dụng đối với lỗi này.
+
+> **Fixture dựng bằng tay không đi qua tầng nạp dữ liệu, nên không nói được gì về tầng đó.**
+> Nó kiểm *hàm sinh PDF*, không kiểm *đường đi tới hàm ấy*.
+
+Đây là **lần thứ chín** dự án gặp bài học 43.5, ở một tầng mới. Mục B của Phase 5 đã chạm đúng
+họ lỗi này một lần — *kiểm "file có tồn tại" không chứng minh được font Unicode đúng* — nhưng đó
+là ở **tầng sinh file**; lần này là ở **tầng nạp dữ liệu**, và bộ test cũ không có gì chặn.
+
+Đã thêm `PhieuThuPdfTaiLieuThatTest`: đọc giao dịch **thật từ CSDL** qua đúng service mà
+controller gọi, rồi in PDF **ngoài transaction** — tức đi đúng con đường sản phẩm thật đi. Đã
+chứng minh nó biết kêu: tạm trả `layTheoId` về `findById` → test **ĐỎ** đúng
+`LazyInitializationException`; khôi phục → **XANH**.
+
+Kiểm chứng trên app thật: `/thanh-toan/48/phieu-thu` → HTTP 200, `application/pdf`, 21.397
+bytes, chữ ký `%PDF-`. Quét 22 đường dẫn chính: tất cả 200, không còn 500 nào.
+
+### 11.2. Thang màu tuổi nợ — mâu thuẫn thông tin, không phải thẩm mỹ
+
+Badge đọc `lopBadge` (chỉ 3 màu Bootstrap dùng được) còn biểu đồ khai riêng 5 mã màu trong
+template. Hậu quả: *Quá hạn 1–30* và *31–60* cùng vàng ở badge nhưng **vàng và cam** ở biểu đồ —
+cùng một nhóm hiện hai màu ở hai khối nằm cạnh nhau, buộc người đọc đoán cột cam ứng với dòng nào.
+
+Nay `NhomTuoiNo` giữ thẳng **mã màu** (`mauNen` + `mauChu`); badge tô bằng `style` nội tuyến,
+biểu đồ đọc cùng danh sách ấy qua phép chiếu Thymeleaf. Không còn bảng màu thứ hai để lệch —
+cùng cách `LoaiBienDongSoDu` giữ quy tắc dấu ở đúng một chỗ.
+
+### 11.3. Ba điểm còn lại
+
+| # | Việc | Cách làm |
+|---|---|---|
+| ② | Cột số căn phải dính sát cột chữ căn trái | Một quy tắc `padding` ngang trong `app.css` cho mọi ô `.bang-du-lieu`, không sửa từng template — vấn đề nằm ở **mọi cặp cột**, không riêng ba chỗ đã thấy |
+| ③ | Hai biểu đồ tròn trang chủ phình gần hết màn hình | Khung `.khung-bieu-do-tron` cao 280px + `maintainAspectRatio: false`. Không khoá thì Chart.js giữ tỷ lệ 2:1 theo **bề rộng cột** |
+| ④ | Cột Cước phí không phân biệt *miễn phí* với *chưa tính* | Ba tình huống, ba cách hiện: `mien_phi = 1` → badge **Miễn phí** (cùng màu và chữ với bảng đối soát 4E); đã tính → số thật; chưa tính → dấu **—**, vì *0 đồng* và *chưa tính* là hai chuyện khác nhau |
+
+### 11.4. Hai phép kiểm sai bắt được trong chính đợt này
+
+Cả hai đều do chạy **đối chứng âm** trước khi tin số 0 — không cái nào lộ ra nếu chỉ nhìn kết quả.
+
+**Một phép kiểm không bao giờ kêu được.** Phép kiểm *"không còn lớp badge Bootstrap ở nhóm tuổi
+nợ"* ĐẠT ở **cả bản trước lẫn bản sau khi sửa** — biểu thức chính quy viết sai nên chẳng khớp gì.
+Một phép kiểm luôn xanh là một dòng nhiễu, không phải một lớp bảo vệ. Đã **bỏ hẳn** thay vì sửa:
+phép kiểm *"badge đủ 5 mã màu từ enum"* đã phủ đúng yêu cầu đó và đã chứng minh biết kêu.
+
+**Một phép kiểm kêu nhầm vì lỗi bảng mã.** Phép kiểm dấu **—** báo SAI trong khi trang hiển thị
+hoàn toàn đúng. Nguyên nhân: file `.ps1` bị ghi lại **thiếu BOM UTF-8**, PowerShell đọc ký tự
+em-dash trong mã nguồn thành ký tự khác nên so sánh không bao giờ khớp. Đúng cái bẫy môi trường
+đã ghi trong `CLAUDE.md`. Sửa bằng cách neo vào **codepoint** `[char]0x2014` — nguồn thuần ASCII
+thì không phụ thuộc bảng mã nữa.
+
+### 11.5. Kiểm chứng
+
+| Phép kiểm | Trước khi sửa | Sau khi sửa |
+|---|---|---|
+| 19 phép kiểm bốn điểm giao diện | **12 SAI** | **19 ĐẠT, 0 SAI** |
+| `mvnw test` | — | **277 ĐẠT**, 0 lỗi |
+| 8 script giao diện | — | **183 ĐẠT**, 0 SAI |
+
+Điểm ④ được kiểm trên **kỳ có dữ liệu thật**: nhánh *miễn phí* chạy trên 12.320 bản ghi
+`mien_phi = 1`; nhánh *chưa tính* lúc đầu **bị bỏ qua vì CSDL không có bản ghi `CHUA_TINH` nào**,
+nên đã sinh tạm 30 bản ghi để thân vòng lặp chạy thật, rồi xoá sạch — số CDR trở lại đúng
+**18.723**.
+
+Ba bất biến sau khi xong đều sạch: thanh toán **0 lệch**, sổ cái số dư **0 lệch**, CDR `DA_TINH`
+thiếu `bang_gia_cuoc_id` **0 dòng**. Kỳ 8/2026 rỗng và `MO`; kỳ 6 và 7 giữ **0 thanh toán**.
+
+### 11.6. Một việc KHÔNG làm được trong phạm vi đã giao
+
+Yêu cầu ④ có ba gạch đầu dòng; **gạch thứ ba chưa làm**: *"dòng tổng cuối bảng thêm cột tổng
+cước phí theo bộ lọc hiện tại"*.
+
+`TongHopCdr` chỉ mang số bản ghi, tổng thời lượng và tổng dung lượng — **không có cước phí**, và
+nó được dựng từ một truy vấn gộp trong repository. Thêm cột tổng đòi hỏi sửa `dto/`,
+`repository/` và `service/impl/`, mà phạm vi đợt này ghi rõ **không sửa** `service/**` và
+`repository/**`. Cộng tổng ngay trên template thì chỉ ra tổng của **trang đang xem**, không phải
+của bộ lọc — sai đúng thứ mà dòng tổng sinh ra để nói.
+
+Nêu ra thay vì lặng lẽ làm sai phạm vi hoặc lặng lẽ bỏ qua.

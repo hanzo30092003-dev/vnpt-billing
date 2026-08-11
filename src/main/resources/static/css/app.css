@@ -561,3 +561,33 @@ label.form-label {
         -webkit-overflow-scrolling: touch;
     }
 }
+
+/* ---------- Khoang cach ngang giua cac cot trong bang du lieu ----------
+   Bootstrap .table-sm chi dat padding .25rem, qua hep khi mot cot so can
+   PHAI dung sat mot cot chu can TRAI: "562.254 Chuyen khoan" doc ra nhu mot
+   cum. Gap o ba cho: So tien|Hinh thuc (thanh toan), Con no|Trang thai
+   (hoa don), Muc giam|Ly do (giam tru).
+   Sua o day thay vi them lop vao tung template: van de nam o khoang cach
+   giua MOI cap cot, khong rieng ba cho da thay. */
+.bang-du-lieu > :not(caption) > * > * {
+    padding-left: .7rem;
+    padding-right: .7rem;
+}
+
+/* Cot dau va cot cuoi giu le sat mep the de bang khong bi thut vao */
+.bang-du-lieu > :not(caption) > * > *:first-child {
+    padding-left: .35rem;
+}
+
+.bang-du-lieu > :not(caption) > * > *:last-child {
+    padding-right: .35rem;
+}
+
+/* ---------- Bieu do tron tren trang chu ----------
+   Chieu cao co dinh + tat maintainAspectRatio: khong khoa lai thi Chart.js
+   giu ti le 2:1 theo BE RONG cot, nen tren man hinh rong hai bieu do phinh
+   ra gan het mot man va day phan bang ben duoi xuong duoi nep gap. */
+.khung-bieu-do-tron {
+    position: relative;
+    height: 280px;
+}

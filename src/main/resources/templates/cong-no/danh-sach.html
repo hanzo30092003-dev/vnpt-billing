@@ -38,7 +38,7 @@
                         <tbody>
                         <tr th:each="o : ${bangTuoiNo}">
                             <td>
-                                <span class="badge" th:classappend="${o.nhom.lopBadge}"
+                                <span class="badge" th:style="${o.nhom.styleBadge}"
                                       th:text="${o.nhom.nhan}"></span>
                             </td>
                             <td class="text-end" th:text="${o.soHoaDon}"></td>
@@ -183,7 +183,7 @@
                             th:classappend="${d.nhomTuoiNo.quaHan} ? 'text-danger fw-semibold' : ''"
                             th:text="${d.soNgayQuaHan > 0} ? (${d.soNgayQuaHan} + ' ngày') : '—'"></td>
                         <td>
-                            <span class="badge" th:classappend="${d.nhomTuoiNo.lopBadge}"
+                            <span class="badge" th:style="${d.nhomTuoiNo.styleBadge}"
                                   th:text="${d.nhomTuoiNo.nhan}"></span>
                         </td>
                         <td class="text-end fw-semibold text-danger"
@@ -208,6 +208,9 @@
         /*<![CDATA[*/
         const nhanTuoiNo = /*[[${nhanTuoiNo}]]*/ [];
         const tienTuoiNo = /*[[${tienTuoiNo}]]*/ [];
+        // Mau lay tu chinh enum NhomTuoiNo, KHONG khai lai o day - badge va bieu do
+        // phai cung mot bang mau, neu khong cung mot nhom se hien hai mau o hai khoi
+        const mauTuoiNo = /*[[${bangTuoiNo.![nhom.mauNen]}]]*/ [];
         /*]]>*/
         document.addEventListener('DOMContentLoaded', function () {
             new Chart(document.getElementById('bieuDoTuoiNo'), {
@@ -217,7 +220,7 @@
                     datasets: [{
                         label: 'Còn nợ (đ)',
                         data: tienTuoiNo,
-                        backgroundColor: ['#6c757d', '#ffc107', '#fd7e14', '#dc3545', '#8b0000']
+                        backgroundColor: mauTuoiNo
                     }]
                 },
                 options: {

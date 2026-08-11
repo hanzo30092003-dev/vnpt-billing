@@ -171,7 +171,9 @@
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white fw-semibold">Cơ cấu thuê bao theo gói cước</div>
                 <div class="card-body">
-                    <canvas id="bieuDoGoi" height="200"></canvas>
+                    <div class="khung-bieu-do-tron">
+                        <canvas id="bieuDoGoi"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -179,7 +181,9 @@
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white fw-semibold">Cơ cấu thuê bao theo trạng thái</div>
                 <div class="card-body">
-                    <canvas id="bieuDoTrangThai" height="200"></canvas>
+                    <div class="khung-bieu-do-tron">
+                        <canvas id="bieuDoTrangThai"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -287,7 +291,10 @@
                     datasets: [{ data: soGoi,
                         backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1'] }]
                 },
-                options: { plugins: { legend: { position: 'bottom' } } }
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
             });
             new Chart(document.getElementById('bieuDoTrangThai'), {
                 type: 'doughnut',
@@ -296,7 +303,10 @@
                     datasets: [{ data: soTrangThai,
                         backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#6c757d'] }]
                 },
-                options: { plugins: { legend: { position: 'bottom' } } }
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
             });
         });
     </script>
