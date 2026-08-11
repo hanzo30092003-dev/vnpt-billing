@@ -69,8 +69,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${ketQua.isEmpty()}">
-                        <td colspan="9" class="text-center text-secondary py-4">
-                            Không có giao dịch nào khớp bộ lọc.
+                        <td colspan="9">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-cash-stack',
+                                    'Chưa có lần thu tiền nào khớp bộ lọc đang đặt. Muốn ghi nhận khách vừa trả tiền thì mở hóa đơn của khách rồi bấm Ghi nhận thanh toán.',
+                                    'Xem danh sách hóa đơn', @{/hoa-don})}"></div>
                         </td>
                     </tr>
                     <tr th:each="t : ${ketQua.content}">

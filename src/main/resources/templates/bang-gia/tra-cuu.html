@@ -61,8 +61,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${#lists.isEmpty(danhSach)}">
-                        <td colspan="8" class="text-center text-secondary py-4">
-                            Không có đơn giá nào có hiệu lực tại ngày này.
+                        <td colspan="8">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-search',
+                                    'Không có đơn giá nào áp dụng vào ngày đã chọn. Hãy chọn ngày khác, hoặc khai thêm dòng giá cho khoảng ngày này.',
+                                    'Xem toàn bộ bảng giá', @{/bang-gia})}"></div>
                         </td>
                     </tr>
                     <tr th:each="bg : ${danhSach}">

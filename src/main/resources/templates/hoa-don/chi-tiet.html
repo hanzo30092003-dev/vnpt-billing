@@ -194,8 +194,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${#lists.isEmpty(lichSuThanhToan)}">
-                        <td colspan="7" class="text-center text-secondary py-4">
-                            Hóa đơn này chưa có giao dịch thanh toán nào.
+                        <td colspan="7">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-cash-coin',
+                                    'Khách chưa trả đồng nào cho hóa đơn này. Khi khách đưa tiền, bấm Ghi nhận thanh toán ở phía trên.',
+                                    null, null)}"></div>
                         </td>
                     </tr>
                     <tr th:each="tt : ${lichSuThanhToan}">

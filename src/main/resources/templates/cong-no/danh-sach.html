@@ -163,8 +163,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${#lists.isEmpty(danhSach)}">
-                        <td colspan="8" class="text-center text-secondary py-4">
-                            Không có hóa đơn nào còn nợ khớp bộ lọc.
+                        <td colspan="8">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-emoji-smile',
+                                    'Không có khoản nợ nào khớp bộ lọc đang đặt. Nếu vừa lọc theo một nhóm tuổi nợ thì thử bỏ lọc để xem toàn bộ.',
+                                    'Xoá bộ lọc', @{/cong-no})}"></div>
                         </td>
                     </tr>
                     <tr th:each="d : ${danhSach}">

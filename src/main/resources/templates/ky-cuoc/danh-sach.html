@@ -84,7 +84,12 @@
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(danhSach)}">
-                                <td colspan="6" class="text-center text-secondary py-4">Chưa có kỳ cước nào.</td>
+                                <td colspan="6">
+                                    <div th:replace="~{fragments/trang :: bangRong(
+                                            'bi-calendar3',
+                                            'Chưa có tháng tính tiền nào. Dùng ô Tạo kỳ cước mới ở bên trái để tạo tháng đầu tiên — mọi việc tính tiền đều bắt đầu từ đó.',
+                                            null, null)}"></div>
+                                </td>
                             </tr>
                             <tr th:each="k : ${danhSach}">
                                 <td class="fw-semibold" th:text="'Tháng ' + ${k.thang} + '/' + ${k.nam}"></td>
@@ -106,9 +111,9 @@
 
                     <p class="small text-secondary mt-3 mb-0">
                         <i class="bi bi-info-circle me-1"></i>
-                        Ba cột cuối đang bằng 0 vì chưa chạy tính cước. CSDL đã có ràng buộc
-                        <code>UNIQUE(thang, nam)</code>, nhưng hệ thống vẫn chặn trùng ở tầng nghiệp vụ
-                        trước để báo lỗi bằng tiếng Việt thay vì lỗi kỹ thuật của CSDL.
+                        Ba cột cuối chỉ có số sau khi tháng đó đã chạy tính tiền và lập hóa đơn
+                        ở màn hình <strong>Tính tiền hằng tháng</strong>.
+                        Mỗi tháng chỉ tạo được một lần — tạo trùng sẽ bị chặn kèm thông báo.
                     </p>
                 </div>
             </div>

@@ -79,8 +79,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${ketQua.empty}">
-                        <td colspan="8" class="text-center text-secondary py-4">
-                            Không có khách hàng nào khớp điều kiện tìm kiếm.
+                        <td colspan="8">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-people',
+                                    'Không tìm thấy khách hàng nào khớp ô tìm kiếm và bộ lọc đang đặt. Hãy thử từ khoá ngắn hơn, hoặc xoá bộ lọc để xem toàn bộ.',
+                                    'Xoá bộ lọc', @{/khach-hang})}"></div>
                         </td>
                     </tr>
                     <tr th:each="kh : ${ketQua.content}">

@@ -41,28 +41,28 @@
                     <label class="form-label small mb-1">Dịch vụ</label>
                     <select class="form-select" th:field="*{loaiDichVu}">
                         <option value="">-- Tất cả --</option>
-                        <option th:each="l : ${danhSachLoaiDichVu}" th:value="${l}" th:text="${l}"></option>
+                        <option th:each="l : ${danhSachLoaiDichVu}" th:value="${l}" th:text="${l.nhan}"></option>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label small mb-1">Hướng</label>
                     <select class="form-select" th:field="*{huong}">
                         <option value="">-- Tất cả --</option>
-                        <option th:each="h : ${danhSachHuong}" th:value="${h}" th:text="${h}"></option>
+                        <option th:each="h : ${danhSachHuong}" th:value="${h}" th:text="${h.nhan}"></option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small mb-1">Trạng thái tính cước</label>
+                    <label class="form-label small mb-1">Tình trạng tính tiền</label>
                     <select class="form-select" th:field="*{trangThaiTinhCuoc}">
                         <option value="">-- Tất cả --</option>
-                        <option th:each="t : ${danhSachTrangThaiTinhCuoc}" th:value="${t}" th:text="${t}"></option>
+                        <option th:each="t : ${danhSachTrangThaiTinhCuoc}" th:value="${t}" th:text="${t.nhan}"></option>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label small mb-1">Nguồn</label>
                     <select class="form-select" th:field="*{nguon}">
                         <option value="">-- Tất cả --</option>
-                        <option th:each="n : ${danhSachNguon}" th:value="${n}" th:text="${n}"></option>
+                        <option th:each="n : ${danhSachNguon}" th:value="${n}" th:text="${n.nhan}"></option>
                     </select>
                 </div>
                 <div class="col-md-3 d-flex gap-2">
@@ -105,8 +105,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${ketQua.empty}">
-                        <td colspan="11" class="text-center text-secondary py-4">
-                            Không có bản ghi nào khớp điều kiện lọc.
+                        <td colspan="11">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-file-earmark-text',
+                                    'Không có cuộc gọi hay tin nhắn nào khớp bộ lọc đang đặt. Hãy nới bộ lọc, hoặc tạo dữ liệu thử nếu đây là tháng mới chưa có gì.',
+                                    'Xoá bộ lọc', @{/cdr})}"></div>
                         </td>
                     </tr>
                     <tr th:each="c : ${ketQua.content}">
@@ -125,7 +128,7 @@
                             <i class="bi bi-check-lg text-warning" th:if="${c.gioCaoDiem}"></i>
                             <span class="text-secondary" th:unless="${c.gioCaoDiem}">—</span>
                         </td>
-                        <!--/* Phase 3 chưa tính cước nên cột này để trống */-->
+                        <!--/* Để trống khi tháng chứa bản ghi này chưa chạy tính tiền */-->
                         <td class="text-end" th:text="${c.cuocPhi != null}
                             ? ${#numbers.formatDecimal(c.cuocPhi, 0, 'POINT', 0, 'COMMA')} : ''"></td>
                         <td>

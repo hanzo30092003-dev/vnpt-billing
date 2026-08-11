@@ -217,7 +217,7 @@
                     <tbody>
                     <tr th:if="${#lists.isEmpty(bang.dongCdr)}">
                         <td colspan="10" class="text-center text-secondary py-4">
-                            Thuê bao không phát sinh bản ghi nào trong kỳ này.
+                            Thuê bao này không gọi, không nhắn tin và không dùng mạng trong tháng đã chọn — nên bảng chi tiết bên dưới trống. Khách vẫn phải trả cước thuê bao tháng.
                         </td>
                     </tr>
                     <tr th:each="c, tt : ${bang.dongCdr}"

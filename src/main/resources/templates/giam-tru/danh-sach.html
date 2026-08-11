@@ -65,8 +65,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${#lists.isEmpty(danhSach)}">
-                        <td colspan="8" class="text-center text-secondary py-4">
-                            Chưa có khoản giảm trừ nào.
+                        <td colspan="8">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-dash-circle',
+                                    'Chưa khai khoản trừ bớt nào. Khoản giảm trừ dùng khi cần bớt tiền cho khách trước khi tính thuế, ví dụ khuyến mại hoặc đền bù sự cố.',
+                                    'Thêm khoản giảm trừ', @{/giam-tru/moi})}"></div>
                         </td>
                     </tr>
                     <tr th:each="khoan : ${danhSach}">

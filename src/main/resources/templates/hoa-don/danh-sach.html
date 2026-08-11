@@ -84,8 +84,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${ketQua.isEmpty()}">
-                        <td colspan="10" class="text-center text-secondary py-4">
-                            Không có hóa đơn nào khớp bộ lọc.
+                        <td colspan="10">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-receipt',
+                                    'Không có hóa đơn nào khớp bộ lọc đang đặt. Hãy nới bộ lọc, hoặc kiểm tra xem tháng đã chọn đã lập hóa đơn chưa.',
+                                    'Xoá bộ lọc', @{/hoa-don})}"></div>
                         </td>
                     </tr>
                     <tr th:each="h : ${ketQua.content}">

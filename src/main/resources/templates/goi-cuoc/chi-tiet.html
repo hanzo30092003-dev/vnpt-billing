@@ -136,8 +136,11 @@
                             </thead>
                             <tbody>
                             <tr th:if="${trangThueBao.empty}">
-                                <td colspan="3" class="text-center text-secondary py-3">
-                                    Chưa có thuê bao nào dùng gói này.
+                                <td colspan="3">
+                                    <div th:replace="~{fragments/trang :: bangRong(
+                                            'bi-sim',
+                                            'Chưa có thuê bao nào dùng gói này. Gói được chọn lúc đăng ký thuê bao mới, hoặc lúc đổi gói cho một thuê bao đang có.',
+                                            null, null)}"></div>
                                 </td>
                             </tr>
                             <tr th:each="tb : ${trangThueBao.content}">

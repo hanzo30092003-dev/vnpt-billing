@@ -47,5 +47,28 @@
 */-->
 <p th:fragment="moTa(chu)" class="mo-ta-trang mb-0" th:text="${chu}">Màn hình này dùng để làm gì.</p>
 
+<!--/*
+    Bảng rỗng. Thay cho một dòng "Không có dữ liệu" cụt lủn.
+
+    Một bảng trống làm người mới dùng đứng lại: họ không biết là mình lọc hụt,
+    hay hệ thống chưa có gì, hay mình làm sai bước nào. Nên khối này luôn nói
+    HAI điều: vì sao đang trống, và bấm đi đâu tiếp.
+
+    Nút để btn-outline-primary chứ KHÔNG phải btn-primary: trang vẫn còn nút
+    chính của nó ở góc trên, hai nút xanh đặc cùng lúc là phá đúng cái luật
+    "mỗi màn hình một nút nổi bật" vừa dựng ở việc 4.
+
+    Truyền duongDan = null nếu chỗ đó thật sự không có việc gì để làm tiếp
+    (ví dụ tab lịch sử của một thuê bao mới tạo) — khi đó chỉ hiện lời giải
+    thích, không hiện nút.
+*/-->
+<div th:fragment="bangRong(bieuTuong, loiNhan, nhanNut, duongDan)"
+     class="text-center text-secondary py-4">
+    <i class="bi d-block fs-2 mb-2 opacity-50" th:classappend="${bieuTuong}"></i>
+    <p class="mb-2" th:text="${loiNhan}">Chưa có dữ liệu.</p>
+    <a th:if="${duongDan != null}" class="btn btn-sm btn-outline-primary"
+       th:href="${duongDan}" th:text="${nhanNut}">Việc cần làm</a>
+</div>
+
 </body>
 </html>

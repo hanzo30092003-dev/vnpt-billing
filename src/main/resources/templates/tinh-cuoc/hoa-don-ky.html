@@ -42,8 +42,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${#lists.isEmpty(danhSachHoaDon)}">
-                        <td colspan="9" class="text-center text-secondary py-4">
-                            Kỳ này chưa có hóa đơn nào.
+                        <td colspan="9">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-receipt',
+                                    'Tháng này chưa lập hóa đơn. Về màn hình Tính tiền hằng tháng, chạy tính tiền rồi bấm Lập hóa đơn cho tháng này.',
+                                    'Về màn hình tính tiền', @{/tinh-cuoc})}"></div>
                         </td>
                     </tr>
                     <tr th:each="h : ${danhSachHoaDon}">

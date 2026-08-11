@@ -48,7 +48,8 @@
                     th:selected="${ky != null and k.id == ky.id}">Kỳ</option>
         </select>
         <span class="small text-secondary" th:if="${ky == null}">
-            Chưa có kỳ cước nào có hóa đơn.
+            Chưa tháng nào có hóa đơn — hãy lập hóa đơn ở màn hình
+            <a th:href="@{/tinh-cuoc}">Tính tiền hằng tháng</a> trước.
         </span>
     </div>
 </form>
@@ -56,8 +57,20 @@
 <!--/* Khối "không có dữ liệu" dùng chung — tiêu chí nghiệm thu số 7 */-->
 <div th:fragment="khongCoDuLieu(loiNhan)" class="card shadow-sm">
     <div class="card-body text-center text-secondary py-5">
-        <i class="bi bi-inbox display-4"></i>
-        <p class="mt-3 mb-0" th:text="${loiNhan}">Không có dữ liệu.</p>
+        <i class="bi bi-inbox display-4 opacity-50"></i>
+        <p class="mt-3 mb-2" th:text="${loiNhan}">Không có dữ liệu.</p>
+        <!--/*
+            Bao cao rong gan nhu luon co dung mot nguyen nhan: thang duoc chon
+            chua chay tinh tien hoac chua lap hoa don. Noi thang ra va dua nguoi
+            dung sang dung cho, thay vi de ho tu doan.
+        */-->
+        <p class="small mb-3">
+            Báo cáo lấy số từ hóa đơn. Tháng nào chưa lập hóa đơn thì báo cáo của
+            tháng đó trống.
+        </p>
+        <a class="btn btn-sm btn-outline-primary" th:href="@{/tinh-cuoc}">
+            <i class="bi bi-calculator me-1"></i> Sang màn hình tính tiền hằng tháng
+        </a>
     </div>
 </div>
 

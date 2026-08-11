@@ -82,8 +82,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${ketQua.empty}">
-                        <td colspan="7" class="text-center text-secondary py-4">
-                            Không có thuê bao nào khớp điều kiện tìm kiếm.
+                        <td colspan="7">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-sim',
+                                    'Không tìm thấy số điện thoại nào khớp ô tìm kiếm và bộ lọc đang đặt. Hãy thử từ khoá ngắn hơn, hoặc xoá bộ lọc để xem toàn bộ.',
+                                    'Xoá bộ lọc', @{/thue-bao})}"></div>
                         </td>
                     </tr>
                     <tr th:each="tb : ${ketQua.content}">

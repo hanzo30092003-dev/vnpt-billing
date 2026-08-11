@@ -115,8 +115,11 @@
                             </thead>
                             <tbody>
                             <tr th:if="${#lists.isEmpty(danhSachThueBao)}">
-                                <td colspan="5" class="text-center text-secondary py-4">
-                                    Khách hàng chưa có thuê bao nào.
+                                <td colspan="5">
+                                    <div th:replace="~{fragments/trang :: bangRong(
+                                            'bi-sim',
+                                            'Khách hàng này chưa có số điện thoại nào. Bấm nút bên dưới để cấp số đầu tiên cho họ.',
+                                            'Đăng ký thuê bao mới', @{'/thue-bao/dang-ky?khachHangId=' + ${khachHang.id}})}"></div>
                                 </td>
                             </tr>
                             <tr th:each="tb : ${danhSachThueBao}">

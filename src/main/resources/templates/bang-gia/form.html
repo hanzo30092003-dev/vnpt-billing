@@ -45,7 +45,7 @@
                         <label class="form-label" for="loaiDichVu">Loại dịch vụ <span class="text-danger">*</span></label>
                         <select class="form-select" id="loaiDichVu" th:field="*{loaiDichVu}"
                                 th:classappend="${#fields.hasErrors('loaiDichVu')} ? 'is-invalid'">
-                            <option th:each="l : ${danhSachLoaiDichVu}" th:value="${l}" th:text="${l}"></option>
+                            <option th:each="l : ${danhSachLoaiDichVu}" th:value="${l}" th:text="${l.nhan}"></option>
                         </select>
                         <div class="invalid-feedback" th:errors="*{loaiDichVu}"></div>
                     </div>
@@ -53,7 +53,7 @@
                         <label class="form-label" for="huong">Hướng <span class="text-danger">*</span></label>
                         <select class="form-select" id="huong" th:field="*{huong}"
                                 th:classappend="${#fields.hasErrors('huong')} ? 'is-invalid'">
-                            <option th:each="h : ${danhSachHuong}" th:value="${h}" th:text="${h}"></option>
+                            <option th:each="h : ${danhSachHuong}" th:value="${h}" th:text="${h.nhan}"></option>
                         </select>
                         <div class="invalid-feedback" th:errors="*{huong}"></div>
                     </div>

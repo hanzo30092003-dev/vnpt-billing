@@ -131,8 +131,11 @@
                         <td class="text-end text-danger" th:text="${@soLieu.tien(d.conNo)}">0</td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(doanhThuCacKy)}">
-                        <td colspan="6" class="text-center text-secondary py-4">
-                            Chưa có kỳ cước nào.
+                        <td colspan="6">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-calendar3',
+                                    'Chưa có tháng tính tiền nào nên chưa có gì để thống kê. Tạo tháng đầu tiên trước.',
+                                    'Tạo tháng tính tiền', @{/ky-cuoc})}"></div>
                         </td>
                     </tr>
                     </tbody>

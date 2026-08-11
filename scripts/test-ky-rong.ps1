@@ -80,7 +80,12 @@ $manHinh = @(
     @{ Ten = "Bao cao top thue bao";        D = "/bao-cao/top-thue-bao?kyCuocId=$kyId" },
     @{ Ten = "Bao cao san luong dich vu";   D = "/bao-cao/san-luong?kyCuocId=$kyId" },
     @{ Ten = "Danh sach hoa don loc ky 8";  D = "/hoa-don?kyCuocId=$kyId" },
-    @{ Ten = "Danh sach CDR loc ky 8";      D = "/cdr?kyCuocId=$kyId" },
+    # /cdr KHONG co bo loc theo ky cuoc - form loc chi co so thue bao, khoang
+    # ngay, dich vu, huong, tinh trang, nguon. Ban cu truyen ?kyCuocId=8 roi
+    # khang dinh HTTP 200: tham so do bi bo qua, man hinh tra ve ca 18.723 ban
+    # ghi, va phep kiem xanh du KHONG he kiem duoc gi ve duong du lieu rong.
+    # Doi sang mot bo loc man hinh THUC SU hieu va chac chan khong khop gi.
+    @{ Ten = "Danh sach CDR voi bo loc khong khop gi"; D = "/cdr?soThueBao=0000000000" },
     @{ Ten = "Hoa don cua ky 8";            D = "/tinh-cuoc/ky/$kyId" },
     @{ Ten = "BANG DOI SOAT ky 8";          D = "/tinh-cuoc/doi-soat/$thueBaoId/$kyId" },
     @{ Ten = "Giam tru loc ky 8";           D = "/giam-tru?kyCuocId=$kyId" }

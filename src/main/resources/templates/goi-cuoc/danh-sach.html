@@ -33,7 +33,12 @@
                     </thead>
                     <tbody>
                     <tr th:if="${#lists.isEmpty(danhSach)}">
-                        <td colspan="9" class="text-center text-secondary py-4">Chưa có gói cước nào.</td>
+                        <td colspan="9">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-box-seam',
+                                    'Chưa có gói cước nào trong danh mục. Phải có ít nhất một gói thì mới đăng ký được thuê bao.',
+                                    'Thêm gói cước', @{/goi-cuoc/them})}"></div>
+                        </td>
                     </tr>
                     <tr th:each="d : ${danhSach}">
                         <td><code th:text="${d.goiCuoc.maGoi}"></code></td>

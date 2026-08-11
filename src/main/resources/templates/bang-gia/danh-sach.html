@@ -93,8 +93,11 @@
                     </thead>
                     <tbody>
                     <tr th:if="${#lists.isEmpty(danhSach)}">
-                        <td colspan="8" class="text-center text-secondary py-4">
-                            Không có dòng bảng giá nào khớp điều kiện lọc.
+                        <td colspan="8">
+                            <div th:replace="~{fragments/trang :: bangRong(
+                                    'bi-tags',
+                                    'Không có dòng giá nào khớp bộ lọc đang đặt. Bỏ bộ lọc để xem toàn bộ bảng giá.',
+                                    'Xoá bộ lọc', @{/bang-gia})}"></div>
                         </td>
                     </tr>
                     <tr th:each="bg : ${danhSach}">
