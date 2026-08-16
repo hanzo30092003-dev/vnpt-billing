@@ -191,8 +191,8 @@ ngay trong số, giờ cao điểm có biểu tượng.
 
 | # | Tiêu chí | Yêu cầu | Kết quả |
 |---|---|---|---|
-| 1 | `mvnw test` | ≥ 275, 0 lỗi | ✅ **275**, 0 lỗi |
-| 2 | 8 script giao diện | 177/177 | ✅ **183/183** (thêm 6 phép kiểm mới) |
+| 1 | `mvnw test` | ≥ 275, 0 lỗi | ✅ **277**, 0 lỗi |
+| 2 | 8 script giao diện | 177/177 | ✅ **185/185** (thêm 8 phép kiểm mới) |
 | 3 | Không còn từ kỹ thuật trong chữ hiển thị | 0 | ✅ 0 / 43 file |
 | 4 | Mọi trang có dòng giải thích | đủ | ✅ 42/42 |
 | 5 | Bảng rỗng có giải thích + nút dẫn đường | đủ | ✅ kiểm trên kỳ 8/2026 |
@@ -259,25 +259,82 @@ Bản đầu của `kiem-tu-ngu.py` quét cả `th:href="@{/cdr}"` (đường d�
 kiểm*. Cách phòng vẫn là câu hỏi cũ: **"nếu thứ tôi đang kiểm hỏng thật, phép kiểm này có kêu
 không?"** — và cách trả lời chắc chắn duy nhất là **làm nó hỏng thử một lần** rồi xem.
 
+### 9.4. Tôi tự phá một tiêu chí vừa nghiệm thu xong
+
+Ở đợt hoàn thiện thị giác, tôi cho tiêu đề cột bảng `font-size: .78rem` — kiểu chữ nhỏ, hoa,
+giãn chữ vẫn thường thấy ở phần mềm nghiệp vụ. Đo lại trên trình duyệt: **12,48px**, dưới
+ngưỡng ≥ 14px của việc 8 mà chính tôi đã nghiệm thu vài giờ trước.
+
+Đáng chú ý là **không phép kiểm tự động nào bắt được** — cỡ chữ chỉ tính ra được khi trình
+duyệt dựng trang, mà cả `kiem-tu-ngu.py` lẫn `kiem-giao-dien.py` đều đọc tĩnh từ template.
+Nó lộ ra vì tôi mở trình duyệt đo lại thay vì tin vào việc "đã nghiệm thu rồi". Đã nâng về
+`.875rem` = 14px; chữ hoa cộng giãn chữ cộng nền xám vẫn đủ tách tiêu đề khỏi dữ liệu mà
+không cần thu nhỏ.
+
 ---
 
-## 10. Còn thiếu
+## 10. Dọn chữ khiến phần mềm trông như bài tập
 
-| Hạng mục | Ghi chú |
+Rà lại toàn bộ chữ mang giọng "đồ án" thay vì giọng sản phẩm:
+
+| Chỗ | Trước | Sau |
+|---|---|---|
+| Trang đăng nhập | Câu mô tả + "Đồ án Thực tập nghề nghiệp" + cảnh báo "Hệ thống demo học tập" + **bảng ba tài khoản kèm mật khẩu** | Chỉ còn tên hệ thống, hai ô nhập, một nút |
+| Chân trang | "Đồ án Thực tập nghề nghiệp — dữ liệu mẫu phục vụ học tập" | "Hệ thống quản lý thuê bao & tính cước — phiên bản 1.0" |
+| Trang chủ | Băng vàng "Dữ liệu … là dữ liệu mẫu tự sinh phục vụ học tập" | Bỏ |
+| Trang chủ, thẻ công nợ | "đọc từ cột `con_no`" | "Tổng tiền khách còn nợ" |
+| Menu báo cáo | Băng vàng "Toàn bộ số liệu dựng trên dữ liệu mẫu tự sinh" | Bỏ |
+| Đầu trang bản in báo cáo | "Dữ liệu mẫu phục vụ mục đích học tập — Đồ án…" | "Ngày in: dd/MM/yyyy HH:mm" |
+| `/tinh-cuoc` | "Giao diện chỉ ẩn bớt nút cho gọn mắt. Chốt chặn thật nằm ở **tầng nghiệp vụ**…" | "Nút nào không dùng được thì hệ thống ẩn đi. Tháng đã khóa … không chạy lại được." |
+| Bảng đối soát | "Đây là bằng chứng của **bất biến cộng dồn**…" | "…số trên hóa đơn đúng bằng tổng tiền của từng cuộc gọi, tin nhắn … cộng lại." |
+
+**Bảng tài khoản in sẵn trên màn hình đăng nhập là chỗ đáng bỏ nhất.** Không phần mềm thật nào
+công khai tên đăng nhập và mật khẩu ngay trên trang đăng nhập. Ba tài khoản demo vẫn ghi đầy đủ
+trong `README.md` và `docs/kich-ban-demo.md` — đó mới là chỗ của chúng.
+
+> **Câu miễn trừ dữ liệu mẫu vẫn còn**, chỉ là không nằm trong giao diện nữa: `README.md` mở đầu
+> bằng một khối cảnh báo, `docs/huong-dan-su-dung.md` và `CLAUDE.md` cũng có. Yêu cầu học thuật
+> vẫn được đáp ứng ở nơi người chấm đọc, không phải ở nơi người dùng thao tác.
+
+### 10.1. Hoàn thiện thị giác
+
+| Chi tiết | Vì sao |
 |---|---|
-| Nêu đích danh khách hàng giữ số giấy tờ trùng | Cần một lệnh gọi repository — là đổi logic, xem mục 4.1 |
-| `/cdr` không lọc được theo tháng | Là chức năng còn thiếu, không phải lỗi — không làm ở đợt này |
-| Kiểm tự động cho cỡ chữ và vùng bấm | Hiện đo tay bằng trình duyệt; muốn tự động phải thêm công cụ, mà đặc tả cấm thêm thư viện |
-| Ảnh chụp màn hình | Toàn bộ ảnh cũ phải chụp lại — xem `danh-sach-anh-chup.md` |
+| Số trong bảng dùng `tabular-nums` | Font mặc định cho mỗi chữ số một bề ngang khác nhau, nên cột tiền so le và mắt khó so — dở trong một phần mềm tính tiền |
+| Tiêu đề cột: hoa, giãn chữ, nền xám nhạt, **vẫn 14px** | Tách tiêu đề khỏi dữ liệu mà không phạm ngưỡng cỡ chữ |
+| Mục menu đang mở: thanh xanh bên trái + nền mờ | Tô xanh đặc cả dòng làm mục *đang xem* trông như một nút *đang chờ bấm* |
+| Thanh trên bỏ CHỮ HOA TOÀN BỘ | Một dòng chữ hoa hết đọc mệt và không mang thêm thông tin gì |
+| Thẻ: viền một nét `#e3e8ee`, bóng rất nhẹ | Bóng mặc định của Bootstrap làm mọi thẻ nổi lên như nhau |
+| Huy hiệu nhẹ đi, chân trang mờ đi | Chúng là thông tin phụ, không nên tranh chỗ với dữ liệu |
 
 ---
 
-## 11. Đợt bổ sung — một lỗi 500 và bốn điểm giao diện
+## 11. ⚠️ Bảng tuổi nợ đã qua mốc 13/08/2026
+
+Hôm nay là **16/08/2026**. Hạn thanh toán muộn nhất trong dữ liệu mẫu là 15/08/2026, nên nhóm
+**Trong hạn** nay rỗng và bảng tuổi nợ chỉ còn **4/5 nhóm** có nội dung. Đây đúng là điều đã
+cảnh báo ở `PHASE-6-REPORT.md` mục 1.2 — tính chất của *ngày xem*, không phải của dữ liệu.
+
+Hệ quả thực tế:
+
+1. `test-bao-cao.ps1` có phép kiểm *"cả 5 nhóm tuổi nợ đều có nội dung"* — nó **đã hỏng vĩnh
+   viễn** từ hôm nay, và hỏng vì lịch chứ không vì phần mềm. Đã thay bằng hai khẳng định
+   **không phụ thuộc ngày**: mọi nhóm *có dữ liệu* phải khớp số tính độc lập bằng SQL, và tổng
+   năm nhóm phải bằng tổng công nợ. Đó mới là thứ cần kiểm — bảng aging có cộng đúng số không —
+   chứ không phải "hôm nay tình cờ đủ năm nhóm".
+2. **Ảnh chụp bảng aging đủ 5 nhóm không chụp được nữa.** Ba ảnh 🔴 trong
+   `danh-sach-anh-chup.md` cần xử lý: hoặc chấp nhận 4 nhóm, hoặc dịch `han_thanh_toan` của
+   một ít hóa đơn về tương lai trước khi chụp — nhưng làm vậy là **sửa dữ liệu vận hành**, phải
+   dump lại `data-van-hanh.sql` và chạy lại toàn bộ nghiệm thu.
+
+---
+
+## 12. Đợt bổ sung — một lỗi 500 và bốn điểm giao diện
 
 Phát hiện khi rà lại **ảnh chụp màn hình**, không phải do test bắt được. Đó là điểm đáng ghi
 nhất của đợt này.
 
-### 11.1. 🔴 Lỗi 500 khi in phiếu thu — và vì sao 6 test vẫn xanh
+### 12.1. 🔴 Lỗi 500 khi in phiếu thu — và vì sao 6 test vẫn xanh
 
 `/thanh-toan/{id}/phieu-thu` trả về trang *500 — Lỗi hệ thống*.
 
@@ -308,7 +365,7 @@ chứng minh nó biết kêu: tạm trả `layTheoId` về `findById` → test *
 Kiểm chứng trên app thật: `/thanh-toan/48/phieu-thu` → HTTP 200, `application/pdf`, 21.397
 bytes, chữ ký `%PDF-`. Quét 22 đường dẫn chính: tất cả 200, không còn 500 nào.
 
-### 11.2. Thang màu tuổi nợ — mâu thuẫn thông tin, không phải thẩm mỹ
+### 12.2. Thang màu tuổi nợ — mâu thuẫn thông tin, không phải thẩm mỹ
 
 Badge đọc `lopBadge` (chỉ 3 màu Bootstrap dùng được) còn biểu đồ khai riêng 5 mã màu trong
 template. Hậu quả: *Quá hạn 1–30* và *31–60* cùng vàng ở badge nhưng **vàng và cam** ở biểu đồ —
@@ -318,7 +375,7 @@ Nay `NhomTuoiNo` giữ thẳng **mã màu** (`mauNen` + `mauChu`); badge tô b�
 biểu đồ đọc cùng danh sách ấy qua phép chiếu Thymeleaf. Không còn bảng màu thứ hai để lệch —
 cùng cách `LoaiBienDongSoDu` giữ quy tắc dấu ở đúng một chỗ.
 
-### 11.3. Ba điểm còn lại
+### 12.3. Ba điểm còn lại
 
 | # | Việc | Cách làm |
 |---|---|---|
@@ -326,7 +383,7 @@ cùng cách `LoaiBienDongSoDu` giữ quy tắc dấu ở đúng một chỗ.
 | ③ | Hai biểu đồ tròn trang chủ phình gần hết màn hình | Khung `.khung-bieu-do-tron` cao 280px + `maintainAspectRatio: false`. Không khoá thì Chart.js giữ tỷ lệ 2:1 theo **bề rộng cột** |
 | ④ | Cột Cước phí không phân biệt *miễn phí* với *chưa tính* | Ba tình huống, ba cách hiện: `mien_phi = 1` → badge **Miễn phí** (cùng màu và chữ với bảng đối soát 4E); đã tính → số thật; chưa tính → dấu **—**, vì *0 đồng* và *chưa tính* là hai chuyện khác nhau |
 
-### 11.4. Hai phép kiểm sai bắt được trong chính đợt này
+### 12.4. Hai phép kiểm sai bắt được trong chính đợt này
 
 Cả hai đều do chạy **đối chứng âm** trước khi tin số 0 — không cái nào lộ ra nếu chỉ nhìn kết quả.
 
@@ -341,7 +398,7 @@ em-dash trong mã nguồn thành ký tự khác nên so sánh không bao giờ k
 đã ghi trong `CLAUDE.md`. Sửa bằng cách neo vào **codepoint** `[char]0x2014` — nguồn thuần ASCII
 thì không phụ thuộc bảng mã nữa.
 
-### 11.5. Kiểm chứng
+### 12.5. Kiểm chứng
 
 | Phép kiểm | Trước khi sửa | Sau khi sửa |
 |---|---|---|
@@ -357,7 +414,7 @@ nên đã sinh tạm 30 bản ghi để thân vòng lặp chạy thật, rồi x
 Ba bất biến sau khi xong đều sạch: thanh toán **0 lệch**, sổ cái số dư **0 lệch**, CDR `DA_TINH`
 thiếu `bang_gia_cuoc_id` **0 dòng**. Kỳ 8/2026 rỗng và `MO`; kỳ 6 và 7 giữ **0 thanh toán**.
 
-### 11.6. Một việc KHÔNG làm được trong phạm vi đã giao
+### 12.6. Một việc KHÔNG làm được trong phạm vi đã giao
 
 Yêu cầu ④ có ba gạch đầu dòng; **gạch thứ ba chưa làm**: *"dòng tổng cuối bảng thêm cột tổng
 cước phí theo bộ lọc hiện tại"*.
@@ -369,3 +426,14 @@ nó được dựng từ một truy vấn gộp trong repository. Thêm cột t�
 của bộ lọc — sai đúng thứ mà dòng tổng sinh ra để nói.
 
 Nêu ra thay vì lặng lẽ làm sai phạm vi hoặc lặng lẽ bỏ qua.
+
+---
+
+## 13. Còn thiếu
+
+| Hạng mục | Ghi chú |
+|---|---|
+| Nêu đích danh khách hàng giữ số giấy tờ trùng | Cần một lệnh gọi repository — là đổi logic, xem mục 4.1 |
+| `/cdr` không lọc được theo tháng | Là chức năng còn thiếu, không phải lỗi — không làm ở đợt này |
+| Kiểm tự động cho cỡ chữ và vùng bấm | Hiện đo tay bằng trình duyệt; muốn tự động phải thêm công cụ, mà đặc tả cấm thêm thư viện |
+| Ảnh chụp màn hình | Toàn bộ ảnh cũ phải chụp lại — xem `danh-sach-anh-chup.md` |

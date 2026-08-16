@@ -12,9 +12,19 @@ Muc "1. Trang dang nhap cong khai"
 $khach = $null
 Invoke-WebRequest -Uri "$Global:BaseUrl/dang-nhap" -SessionVariable khach -UseBasicParsing -TimeoutSec 10 | Out-Null
 $t = Get-Trang $khach "/dang-nhap"
+# Ba chuoi 'nhanvien01', 'ketoan01', 'demo' da BO khoi phep kiem: bang tai
+# khoan dung thu tung in san tren trang dang nhap nay da go di - mot man hinh
+# dang nhap cong khai ten dang nhap va mat khau la thu khong ton tai trong
+# phan mem that. Nay do cai dang co that o do: form dang nhap, o mat khau, va
+# KHONG duoc lo sidebar (tuc chua dang nhap thi khong thay gi ben trong).
 Kiem-Tra -Ten "Mo /dang-nhap khi chua dang nhap" -KetQua $t -StatusMongDoi 200 `
-    -CanCo @('name="_csrf"', 'nhanvien01', 'ketoan01', 'demo') `
+    -CanCo @('name="_csrf"', 'name="tenDangNhap"', 'name="matKhau"') `
     -KhongDuocCo @('sidebar-brand') | Out-Null
+
+# Doi chung cho viec bo bang tai khoan: trang dang nhap KHONG duoc lo ten
+# tai khoan hay mat khau nao nua.
+Kiem-Tra -Ten "Trang dang nhap khong con lo tai khoan/mat khau" -KetQua $t -StatusMongDoi 200 `
+    -KhongDuocCo @('nhanvien01', 'ketoan01', '123456') | Out-Null
 
 Muc "2. Chua dang nhap thi khong vao duoc trang chu"
 $t = Get-Trang $khach "/"

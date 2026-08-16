@@ -156,21 +156,46 @@ $r = Get-Trang $s "/bao-cao/cong-no"
 Kiem-Tra -Ten "Trang mo duoc, co bieu do tuoi no" -KetQua $r -CanCo @("bieuDoTuoiNo") | Out-Null
 Kiem-Tra -Ten "[Kiem cheo 13] Tong cong no = $congNo d" -KetQua $r -CanCo @($congNo) | Out-Null
 
-# Ca NAM nhom tuoi no phai co noi dung - tieu chi nghiem thu so 2
+# ---------------------------------------------------------------------
+# Bang tuoi no.
+#
+# Ban cu khang dinh "ca NAM nhom deu co noi dung". Phep kiem do PHU THUOC
+# NGAY XEM chu khong phu thuoc du lieu, va no da het han: du lieu mau co han
+# thanh toan muon nhat la 15/08/2026, nen tu 16/08/2026 tro di nhom "Trong
+# han" rong vinh vien va phep kiem do mai mai. Xem PHASE-6-REPORT.md muc 1.2.
+#
+# Thay bang mot khang dinh KHONG phu thuoc ngay: voi MOI nhom co du lieu, so
+# tien tren man hinh phai khop so tinh doc lap bang SQL; va tong nam nhom phai
+# bang tong cong no. Do moi la thu can kiem - bang aging co cong dung so
+# khong - chu khong phai "hom nay tinh co du nam nhom".
+# ---------------------------------------------------------------------
 $nhom = @(@{Ma="Trong han"; Tu=-99999; Den=0}, @{Ma="1-30"; Tu=1; Den=30},
           @{Ma="31-60"; Tu=31; Den=60}, @{Ma="61-90"; Tu=61; Den=90},
           @{Ma="tren 90"; Tu=91; Den=99999})
-$duNhom = $true
+$nhomCoDuLieu = 0
+$nhomLech     = @()
+$tongTuNhom   = 0
 foreach ($n in $nhom) {
     $dk = "con_no > 0 AND DATEDIFF(CURDATE(), han_thanh_toan) BETWEEN $($n.Tu) AND $($n.Den)"
     $so   = [int](Sql-Value "SELECT COUNT(*) FROM hoa_don WHERE $dk;")
     $tien = Tien "SELECT FORMAT(SUM(con_no),0) FROM hoa_don WHERE $dk;"
-    if ($so -eq 0) { $duNhom = $false }
-    $co = $r.body.Contains($tien)
+    if ($so -gt 0) {
+        $nhomCoDuLieu++
+        $tongTuNhom += [long](Sql-Value "SELECT COALESCE(SUM(con_no),0) FROM hoa_don WHERE $dk;")
+        if (-not $r.body.Contains($tien)) { $nhomLech += $n.Ma }
+    }
     Write-Host ("         Nhom {0,-10} : {1,3} hoa don / {2,14} d  {3}" -f `
-        $n.Ma, $so, $tien, $(if ($co) { "hien tren man hinh" } else { "KHONG THAY" }))
+        $n.Ma, $so, $(if ($so -gt 0) { $tien } else { "-" }),
+        $(if ($so -eq 0) { "rong hom nay" }
+          elseif ($r.body.Contains($tien)) { "khop man hinh" } else { "KHONG THAY" }))
 }
-Xac-Nhan "[Tieu chi 2] Ca 5 nhom tuoi no deu co noi dung" $duNhom ""
+Xac-Nhan "Moi nhom tuoi no co du lieu deu khop so tinh doc lap" ($nhomLech.Count -eq 0) `
+    ("$nhomCoDuLieu/5 nhom co du lieu hom nay" +
+     $(if ($nhomLech.Count) { "; lech: " + ($nhomLech -join ', ') } else { "" }))
+
+$tongConNo = [long](Sql-Value "SELECT COALESCE(SUM(con_no),0) FROM hoa_don WHERE con_no > 0;")
+Xac-Nhan "Tong nam nhom tuoi no bang tong cong no" ($tongTuNhom -eq $tongConNo) `
+    ("cong tu nhom {0:N0} d / tong {1:N0} d" -f $tongTuNhom, $tongConNo)
 
 $topKhach = Sql-Value "SELECT kh.ten_kh FROM hoa_don hd JOIN khach_hang kh ON kh.id=hd.khach_hang_id WHERE hd.con_no>0 GROUP BY kh.id, kh.ten_kh ORDER BY SUM(hd.con_no) DESC LIMIT 1;"
 Write-Host ("         Khach no nhieu nhat theo SQL: {0}" -f $topKhach)

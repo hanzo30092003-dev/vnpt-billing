@@ -65,9 +65,13 @@ body {
     color: #fff;
 }
 
+/* Muc dang mo: thanh mau ben trai + nen mo, thay vi to xanh dac ca dong.
+   To dac ca dong lam muc dang xem trong nhu mot cai nut dang cho bam. */
 .sidebar-nav .nav-item.active {
-    background-color: var(--sidebar-active);
+    background-color: rgba(30, 136, 229, .18);
     color: #fff;
+    box-shadow: inset 3px 0 0 var(--sidebar-active);
+    font-weight: 500;
 }
 
 /* ---------- Vung ben phai ---------- */
@@ -363,6 +367,93 @@ label.form-label {
     .sidebar-nav .nav-item {
         min-height: 0;
     }
+}
+
+/* =====================================================================
+   HOAN THIEN THI GIAC
+   =====================================================================
+   Nhung chi tiet nho lam giao dien doc ra "phan mem nghiep vu" thay vi
+   "trang web dung Bootstrap mac dinh".
+   ===================================================================== */
+
+/* Chu SO trong bang phai thang cot. Font mac dinh cho moi chu so mot be
+   ngang khac nhau, nen cot tien so le nhau tung pixel va mat rat kho ro
+   con so nao lon hon - dung trong mot phan mem tinh tien. */
+.bang-du-lieu td,
+.bang-du-lieu th,
+.the-so-lieu {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+/* Tieu de cot: hoa, gian chu, nen xam - tach han khoi phan du lieu ben duoi.
+   KHONG ha co chu xuong duoi 14px du kieu nay thuong di kem chu nho: nguong
+   ">= 14px cho moi chu trong bang" la tieu chi da nghiem thu o viec 8, va
+   chinh dong nay tung lam no tut xuong 12,48px. Chu hoa + gian chu + nen xam
+   da du de tach tieu de khoi du lieu ma khong can thu nho. */
+.bang-du-lieu thead th {
+    font-size: .875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #5c6670;
+    background-color: #f7f9fb;
+    border-bottom-width: 1px;
+    white-space: nowrap;
+}
+
+/* The va vien: bo shadow xanh cua Bootstrap, dung vien mo mot net */
+.card {
+    border: 1px solid #e3e8ee;
+    border-radius: .5rem;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #e9edf2;
+    font-size: .95rem;
+    padding-top: .7rem;
+    padding-bottom: .7rem;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .05) !important;
+}
+
+/* Thanh tren: bo chu HOA TOAN BO - mot dong chu het co hoa doc met, va
+   khong mang them thong tin gi so voi chu thuong dam. */
+.topbar-title {
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* Duong dan vet: nho va nhat, no la thu de tham chieu chu khong phai de doc */
+.breadcrumb {
+    font-size: .82rem;
+    margin-bottom: .35rem;
+}
+
+/* Chan trang: mo han di, khong tranh cho voi noi dung */
+.app-footer {
+    font-size: .78rem;
+    color: #8a939c;
+}
+
+/* Trang dang nhap: the gon hon sau khi bo bang tai khoan dung thu */
+.dang-nhap-card {
+    max-width: 400px;
+    border: none;
+    border-radius: .65rem;
+    box-shadow: 0 10px 30px rgba(16, 24, 40, .18) !important;
+}
+
+/* Huy hieu trang thai: khong to nhu nut bam */
+.badge {
+    font-weight: 500;
+    letter-spacing: .01em;
+    padding: .34em .6em;
 }
 
 /* ---------- Tien ich ---------- */

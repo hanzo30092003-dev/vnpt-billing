@@ -31,9 +31,8 @@
 <div th:fragment="tieuDeBanIn(tieuDe, phamVi)" class="chi-in d-none mb-3">
     <div class="fw-bold" style="font-size: 14pt;" th:text="${tieuDe}">Báo cáo</div>
     <div class="small" th:text="'Phạm vi: ' + ${phamVi}">Phạm vi</div>
-    <div class="small text-secondary">
-        Dữ liệu mẫu phục vụ mục đích học tập — Đồ án Thực tập nghề nghiệp
-    </div>
+    <div class="small text-secondary"
+         th:text="'Ngày in: ' + ${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}">Ngày in</div>
 </div>
 
 <!--/* Ô chọn kỳ cước, tự gửi form khi đổi lựa chọn */-->

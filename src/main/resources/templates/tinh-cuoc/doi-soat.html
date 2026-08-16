@@ -309,9 +309,10 @@
                  th:classappend="${bang.coChenhLech} ? 'alert-danger' : 'alert-success'">
                 <span th:if="${!bang.coChenhLech}">
                     <i class="bi bi-check-circle-fill me-1"></i>
-                    <strong>Khớp tuyệt đối.</strong> Mọi khoản mục đều chênh lệch 0 đồng. Đây là bằng
-                    chứng của bất biến cộng dồn: cước được làm tròn ở <strong>đúng một tầng</strong> —
-                    tầng từng bản ghi sử dụng — còn các mức trên chỉ cộng dồn, không làm tròn lại.
+                    <strong>Khớp tuyệt đối.</strong> Mọi khoản mục đều chênh lệch 0 đồng — số trên
+                    hóa đơn đúng bằng tổng tiền của từng cuộc gọi, tin nhắn và lần truy cập mạng
+                    cộng lại. Tiền chỉ được làm tròn <strong>một lần duy nhất</strong>, ở từng bản
+                    ghi; các mức trên chỉ cộng dồn nên không sinh sai số.
                 </span>
                 <span th:if="${bang.coChenhLech}">
                     <i class="bi bi-exclamation-triangle-fill me-1"></i>
