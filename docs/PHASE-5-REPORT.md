@@ -3,11 +3,11 @@
 > Phase 5 đã xong toàn bộ mục A0, A–F và G. Kế hoạch và ba ràng buộc bắt buộc:
 > [`PHASE-5-PLAN.md`](PHASE-5-PLAN.md).
 >
-> ⚠️ **Nợ tài liệu:** báo cáo này chưa có phần viết cho **mục A, B, C, D** — bốn mục đã làm và
-> đã commit nhưng Phần IV mở đầu thẳng ở mục E. Xem [mục 35](#35-nợ-tài-liệu-của-phase-5).
+> ⚠️ **Nợ tài liệu:** báo cáo này chưa có phần viết cho **mục B, C, D**.
+> Mục A đã viết ở Phần IV-A. Xem [mục 35](#35-nợ-tài-liệu-của-phase-5).
 >
-> **Bố cục:** mục 1 (A0) · Phần I–III (mục G) · Phần IV (mục E) · Phần V (mục F) ·
-> Phần VI (tổng kết Phase 5, bàn giao Phase 6).
+> **Bố cục:** mục 1 (A0) · Phần I–III (mục G) · **Phần IV-A (mục A)** · Phần IV (mục E) ·
+> Phần V (mục F) · Phần VI (tổng kết Phase 5, bàn giao Phase 6).
 
 ---
 
@@ -407,6 +407,139 @@ Không `UPDATE` tay để lấp hai cột: **hủy trừ cước rồi chạy l�
 Thuê bao 4 giờ đọc được trọn câu chuyện trên **một dòng**: trừ 204.780 đ qua **69** bản ghi,
 số dư 205.000 → 220 đ, **10.446 đ** không thu được. Trước khi có hai cột này thì ba con số sau
 phải đi tra lại CDR mới biết.
+
+---
+
+# PHẦN IV-A — MỤC A: MÀN HÌNH HÓA ĐƠN
+
+> Mục A là mục đầu tiên của Phase 5 làm ra thứ người dùng nhìn thấy: hai màn hình
+> (`/hoa-don` và `/hoa-don/{id}`), một bản in PDF, một bản xuất Excel.
+>
+> Nó cũng là mục **đặt ra ràng buộc ② cho cả phase** — *một nguồn sự thật cho "còn nợ"* — vì
+> đây là chỗ đầu tiên có nhiều màn hình cùng muốn hiển thị một con số tiền.
+
+## A.1. Phạm vi
+
+| Làm | Không làm ở mục này |
+|---|---|
+| Danh sách hóa đơn: lọc, phân trang, dòng tổng, xuất Excel | Ghi nhận thanh toán *(mục B)* |
+| Chi tiết hóa đơn: bốn khối thông tin | Bảng tuổi nợ, đề xuất tạm ngừng *(mục C)* |
+| Bốn trạng thái hóa đơn và cách chuyển giữa chúng | Khoản giảm trừ *(mục D)* |
+| Xuất hóa đơn ra PDF có dấu tiếng Việt | Sửa engine tính cước *(đã xong ở Phase 4)* |
+
+Hóa đơn **không được tạo ở mục này**. Chúng do `BillingService` của Phase 4 lập; mục A chỉ
+đọc và trình bày. Đó là lý do màn hình hóa đơn không có nút "Thêm hóa đơn" nào — một hóa đơn
+không có căn cứ từ bản ghi sử dụng thì không nên tồn tại.
+
+## A.2. Màn hình danh sách
+
+**Sáu tiêu chí lọc**, gom trong `BoLocHoaDon`: kỳ cước · trạng thái · khách hàng (tên hoặc mã)
+· số thuê bao · khoảng tiền từ – đến.
+
+Ba quyết định trình bày, mỗi cái có lý do:
+
+**1. Dòng tổng tính trên TOÀN BỘ kết quả lọc, không phải trang đang xem.**
+`TongHopHoaDon` là một truy vấn gộp nhóm riêng chứ không cộng từ `Page.content`. Cộng từ trang
+đang xem thì người dùng lọc ra 148 hóa đơn quá hạn, thấy dòng tổng ghi số của 15 dòng đầu, và
+tin đó là tổng nợ thật. Con số sai kiểu này không có gì báo động — nó chỉ *nhỏ hơn sự thật*.
+
+**2. Cột "Còn nợ" ĐỌC THẲNG `hoa_don.con_no`.**
+Không màn hình nào tự tính `tong_thanh_toan − SUM(thanh_toan)`. Đây chính là **ràng buộc ②**
+của Phase 5, và mục A là nơi nó được đặt ra: khi có hai màn hình cùng hiển thị số còn nợ, thì
+hoặc chúng đọc chung một cột, hoặc sớm muộn cũng lệch nhau. Cám dỗ tự tính rất lớn vì câu SQL
+đó dễ viết và "không ai sửa gì" — nhưng đó đúng là cách sinh ra nguồn sự thật thứ hai.
+
+**3. Bộ lọc được giữ nguyên khi chuyển trang.** Liên kết phân trang mang theo `chuoiLoc`. Mất
+bộ lọc khi sang trang 2 là lỗi kinh điển của màn hình danh sách, và nó âm thầm: người dùng
+tưởng mình vẫn đang xem tập đã lọc.
+
+## A.3. Màn hình chi tiết — bốn khối
+
+| Khối | Trả lời câu hỏi |
+|---|---|
+| Thông tin hóa đơn và thuê bao | Hóa đơn của ai, kỳ nào, hạn bao giờ |
+| Bảng khoản mục | Tiền đến từ đâu — từng dòng cước, và dòng giảm trừ mang **thành tiền âm** |
+| Khối tổng tiền | Cộng trước thuế → VAT → tổng → đã thu → còn nợ |
+| Lịch sử thanh toán | Khách đã trả mấy lần, mỗi lần bao nhiêu, ai thu |
+
+**Liên kết chéo sang bảng đối soát cước** của Phase 4 là chi tiết đáng giá nhất của màn hình
+này: từ một con số trên hóa đơn, người dùng lần ngược được tới từng cuộc gọi tạo ra nó. Không
+có liên kết đó thì bảng đối soát chỉ tới được bằng cách gõ tay đường dẫn — và một màn hình
+không ai tới được thì coi như không có.
+
+## A.4. Bốn trạng thái — và một luật dễ viết sai
+
+| Trạng thái | Nghĩa |
+|---|---|
+| `CHUA_TT` | Chưa thu đồng nào, còn trong hạn |
+| `TT_MOT_PHAN` | Đã thu được một phần |
+| `DA_TT` | Còn nợ bằng 0 |
+| `QUA_HAN` | Quá hạn thanh toán **và chưa thu đồng nào** |
+
+Ba trạng thái đầu là tình trạng của **tiền**; `QUA_HAN` là tình trạng của **thời gian**. Trộn
+hai trục đó vào một cột là nguồn gốc của luật dễ viết sai nhất Phase 5:
+
+> **Quét quá hạn chỉ được chạm hóa đơn CHƯA THU ĐỒNG NÀO.**
+> `timCanChuyenQuaHan` có thêm điều kiện `da_thanh_toan IS NULL OR da_thanh_toan = 0`.
+
+Bỏ điều kiện đó thì mọi hóa đơn `TT_MOT_PHAN` quá hạn sẽ bị quét thành `QUA_HAN`, và
+`TT_MOT_PHAN` trở thành **trạng thái không thể tồn tại sau ngày hết hạn** — thông tin "khách
+này đã trả được một phần" biến mất khỏi hệ thống. Chi tiết ở [mục 33](#33--năm-điểm-sai-lệch-đặc-tả-phát-hiện-ở-phase-5).
+
+Việc quét chạy hai đường: theo lịch 00:05 hằng ngày (`LichChayNenConfig`) và một lần nữa khi
+ai đó mở màn hình. Lịch lo trường hợp không ai mở màn hình suốt ngày; lần gọi lúc mở màn hình
+lo trường hợp ứng dụng vừa khởi động lại và đã lỡ giờ hẹn. Hàm chỉ đổi trạng thái hóa đơn
+**thực sự** quá hạn nên chạy nhiều lần không sinh tác dụng phụ.
+
+## A.5. Xuất PDF — lỗi không làm hỏng file
+
+Hóa đơn in ra PDF bằng OpenPDF, font **Liberation Sans** (SIL OFL 1.1) **nhúng** vào file kèm
+bảng mã `IDENTITY_H`.
+
+Đây là chỗ đáng ghi nhất của mục A, vì kiểu lỗi ở đây rất khó thấy:
+
+> Dùng font Base14 có sẵn của chuẩn PDF thì mọi ký tự có dấu ra ô vuông hoặc mất dấu — nhưng
+> **file vẫn mở được, vẫn in được, không ngoại lệ nào ném ra, không cảnh báo nào**. Chỉ có chữ
+> là sai.
+
+Nên `HoaDonPdfServiceTest` không kiểm "file có tồn tại" hay "kích thước lớn hơn 0" — nó **đọc
+lại nội dung PDF** và so khớp chuỗi **có dấu**. Kiểm sự tồn tại của file thì xanh cả khi mọi
+chữ tiếng Việt đã thành ô vuông.
+
+`PdfFont` nạp font một lần lúc khởi tạo và ném `IllegalStateException` ngay nếu thiếu file —
+thà chết lúc khởi động còn hơn in ra hàng trăm hóa đơn sai chữ rồi mới biết.
+
+## A.6. Nghiệm thu mục A
+
+Số liệu đo trên dữ liệu hiện hành (280 hóa đơn thuộc 5 kỳ, 620 dòng khoản mục):
+
+| Trạng thái | Số hóa đơn | Tổng thanh toán | Còn nợ |
+|---|---:|---:|---:|
+| Thanh toán một phần | 17 | 6.650.718 đ | 3.572.184 đ |
+| Đã thanh toán | 115 | 46.112.153 đ | 0 đ |
+| Quá hạn | 148 | 58.750.141 đ | 58.750.141 đ |
+| **Chưa thanh toán** | **0** | — | — |
+
+| Phép kiểm | Kết quả |
+|---|---|
+| `HoaDonServiceTest` | 8 test |
+| `HoaDonPdfServiceTest` — đọc lại nội dung PDF, so chuỗi có dấu | 8 test |
+| Script `test-muc-F.ps1` — lọc theo kỳ và trạng thái, đối chiếu SQL độc lập | 17 phép kiểm |
+| Bất biến `con_no = tong_thanh_toan − da_thanh_toan` trên **mọi** hóa đơn | 0 dòng lệch |
+
+> ⚠️ **Nhóm `CHUA_TT` bằng 0 là do NGÀY XEM, không phải do thiếu dữ liệu.** Hạn thanh toán
+> muộn nhất của dữ liệu mẫu là 15/08/2026; từ 16/08/2026 trở đi mọi hóa đơn chưa thu đều đã bị
+> quét sang `QUA_HAN`. Muốn ảnh chụp có đủ bốn trạng thái thì phải chụp trước ngày đó — cùng
+> họ vấn đề với bảng tuổi nợ 5 nhóm ở [mục 33](#33--năm-điểm-sai-lệch-đặc-tả-phát-hiện-ở-phase-5).
+
+## A.7. Màn hình cần chụp cho mục A
+
+Ảnh của mục A **đã nằm trong** [mục 32](#32-danh-sách-màn-hình-chụp-ảnh-cho-toàn-phase-5) —
+số 2, 3, 4 và 5 — và trong [`danh-sach-anh-chup.md`](danh-sach-anh-chup.md) của toàn dự án.
+
+*Cố ý không liệt kê lại ở đây.* Ba danh sách ảnh cho cùng một màn hình là ba nguồn sự thật, và
+chỉ cần đổi một màn hình là chúng bắt đầu lệch nhau — đúng cái lỗi mà chính báo cáo này cảnh
+báo ở ràng buộc ②.
 
 ---
 
@@ -1021,7 +1154,8 @@ năng tái lập, và biểu hiện ra ngoài thành một thói quen né tránh
 
 | # | Nợ | Ghi chú |
 |---|---|---|
-| 1 | **Chưa viết phần báo cáo cho mục A, B, C, D** | Bốn mục đã làm và đã commit (`e0ba98d`, `acc8486`, `d98366c`, `d231088`) nhưng Phần IV mở đầu thẳng ở mục E |
+| 1 | ~~Chưa viết phần báo cáo cho mục A~~ | ✅ **Đã trả** — xem [Phần IV-A](#phần-iv-a--mục-a-màn-hình-hóa-đơn) |
+| 1b | **Chưa viết phần báo cáo cho mục B, C, D** | Ba mục đã làm và đã commit (`acc8486`, `d98366c`, `d231088`) nhưng chưa có phần viết |
 | 2 | Biểu đồ aging chỉ có 2/5 nhóm có nội dung | Cần thêm một kỳ cước cũ hơn — xem 29.1 |
 | 3 | `CdrGeneratorService` chưa có hạt giống cố định | Không còn chặn `reset` nữa vì đã có `data-van-hanh.sql`, nhưng sinh CDR mới vẫn không tái lập được |
 | 4 | `DIEU_CHINH` chỉ cộng, không trừ | Từ mục 17, chưa đổi |
