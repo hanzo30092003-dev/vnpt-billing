@@ -250,6 +250,55 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 
 ---
 
+## 7bis. ⭐ TIẾN ĐỘ — đọc mục này trước khi làm tiếp
+
+> Cập nhật sau mỗi việc. Đây là **nguồn sự thật duy nhất** về việc nào đã xong; đừng suy ra
+> từ lịch sử chat, vì chat sẽ bị tóm tắt và mất chi tiết.
+
+| Việc | Trạng thái | Commit |
+|---|---|---|
+| **V1** khoá lạc quan cho hóa đơn | ✅ xong | `f10ffde`, `388a67a` |
+| **V2** cột `hanMucTinDung` hết là cột chết | ✅ xong | `bf3c423` |
+| **V3d** phiên + security headers | ✅ xong | `fa8945a` |
+| **V3c** khoá tài khoản sau 5 lần sai | ✅ xong | `fa8945a` |
+| **V3a** màn hình quản lý người dùng | ⬜ **việc tiếp theo** | — |
+| **V3b** đổi mật khẩu | ⬜ chưa làm | — |
+| **V4** Flyway + CI | ⬜ chưa làm | — |
+| **V5** đo hiệu năng + VAT ra cấu hình | ⬜ chưa làm | — |
+| **V6** kiểm bàn phím | ⬜ chưa làm | — |
+| **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
+| **N1** báo cáo mục B, C, D | ⬜ chưa làm | — |
+| **N2** 65 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
+| **N3** quyết cách xử lý bảng tuổi nợ | ⬜ chưa quyết | — |
+
+### Việc phát sinh ngoài kế hoạch, đã làm
+
+Hai lỗ hổng do bản quét bảo mật tìm ra, cả hai đều **tự dựng lại được** trước khi vá:
+
+| Lỗ hổng | Đã làm gì |
+|---|---|
+| `X-Forwarded-For` do client tự đặt, ghi vào cột 45 ký tự trong cùng giao dịch với nghiệp vụ → một header 48 ký tự phá được **mọi** đường ghi | Bỏ hẳn nhánh header, chỉ dùng `getRemoteAddr()` (`fa8945a`) |
+| `/bao-cao/**` mở cả cụm → `nhanvien01` bị 403 ở `/cong-no` nhưng xem được `/bao-cao/cong-no` kèm tên khách và số tiền nợ | Phân quyền theo nội dung + bọc menu `sec:authorize` (`8a256a6`) |
+
+### ⚠️ Nợ kỹ thuật của chính đợt này — làm trước khi đóng băng
+
+`schema.sql` đã đổi **hai lần**: thêm `hoa_don.phien_ban`, rồi `nguoi_dung.so_lan_sai` +
+`khoa_den_luc`. Cả hai mới chỉ `ALTER TABLE` vào CSDL đang chạy.
+
+**Chưa chạy lại `reset` hai lần để đối chiếu từng dòng** — mà đó là tiêu chí nghiệm thu số 7.
+Phải làm trước khi chụp ảnh, và nếu `data-mau.sql` / `data-van-hanh.sql` cần dump lại thì làm
+luôn ở bước đó.
+
+### Số liệu hiện tại
+
+| | Trước đợt | Bây giờ |
+|---|---:|---:|
+| `mvnw test` | 277 | **282** |
+| Phép kiểm giao diện | 177 | **189** |
+| Lớp test cần MySQL | 8 | 11 |
+
+---
+
 ## 8. Sau kế hoạch này thì được bao nhiêu
 
 | Thang | Trước | Sau |

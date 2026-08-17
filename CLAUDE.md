@@ -34,7 +34,7 @@ Nạp lại dữ liệu mẫu — **XOÁ SẠCH CSDL** (`schema.sql` mở đầu
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-Chạy test (275 test, cần MySQL đang chạy):
+Chạy test (282 test, cần MySQL đang chạy):
 
 ```bash
 mvnw test
@@ -118,7 +118,9 @@ Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định 
 
 ## Tiến độ
 
-Phase 0–8 ✅ — **dự án đã hoàn tất**.
+Phase 0–8 ✅. **Đang chạy đợt hoàn thiện** theo
+[`docs/KE-HOACH-HOAN-THIEN.md`](docs/KE-HOACH-HOAN-THIEN.md) — xem mục *Tiến độ* ở cuối file
+đó để biết việc nào xong, việc nào tiếp theo.
 
 | Phase | Nội dung | Báo cáo |
 |---|---|---|
@@ -167,5 +169,17 @@ dump** `data-van-hanh.sql`.
   dẫn, tên lớp CSS thì giữ nguyên — hai phép kiểm đó đã biết bỏ qua chúng.
 * **Mỗi màn hình đúng MỘT nút nổi bật.** Muốn phá luật thì khai `NUT-NOI-BAT-CO-Y:` kèm lý do
   ngay trong template, đừng sửa file kiểm thử.
+* **`HoaDon.phienBan` (`@Version`) không được bỏ.** Thiếu nó, hai người cùng thu tiền một hóa
+  đơn làm mất một lần cộng — đã dựng lại được bằng
+  `KiemTraDongThoiThanhToanTest.epDocDocGhiGhi_benGhiSauBiTuChoi`. Lưu ý phép kiểm 12 luồng
+  trong cùng lớp đó **không** dựng lại được lỗi; chỉ phép ép thứ tự đọc–đọc–ghi–ghi mới bắt.
+* **`NhatKyServiceImpl` không được tin `X-Forwarded-For` lại.** Hệ thống chạy không proxy nên
+  header đó do người gửi tự khai; nó từng phá được **mọi** đường ghi (cột 45 ký tự + ghi nhật
+  ký chung giao dịch với nghiệp vụ). Xem javadoc của `layDiaChiIp`.
+* **Báo cáo phân quyền theo NỘI DUNG, không theo tiền tố đường dẫn.** Báo cáo có số tiền của
+  khách → `KE_TOAN` + `ADMIN`, cùng luật với `/hoa-don` và `/cong-no`. Nới lại thành cả cụm
+  `/bao-cao/**` là mở lại đúng lỗ hổng cũ. `test-auth.ps1` mục 8 canh việc này.
+* **`han_muc_tin_dung` đã hết là cột chết** — `HoaDonRepository.timThueBaoVuotHanMuc()` dùng nó.
+  Hạn mức `0` nghĩa là **chưa đặt**, không phải "không cho nợ đồng nào".
 * **Bảng aging đủ 5 nhóm chỉ đúng tới 13/08/2026** — đó là tính chất của ngày xem chứ không phải
   của dữ liệu. Xem `PHASE-6-REPORT.md` mục 1.2 trước khi tưởng có gì hỏng.
