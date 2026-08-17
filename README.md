@@ -131,7 +131,7 @@ Mật khẩu đều là `123456`.
 | Tài khoản | Vai trò | Phạm vi |
 |---|---|---|
 | `admin` | `ADMIN` | Toàn bộ hệ thống, kể cả `/tinh-cuoc` và `/ky-cuoc` |
-| `nhanvien01` | `NHANVIEN` | Khách hàng, thuê bao, gói cước, CDR, báo cáo |
+| `nhanvien01` | `NHANVIEN` | Khách hàng, thuê bao, và hai báo cáo không chứa số tiền của khách (thống kê thuê bao, sản lượng) |
 | `ketoan01` | `KETOAN` | Hóa đơn, thanh toán, công nợ, giảm trừ, báo cáo |
 
 Phân quyền kiểm **ở máy chủ**, không chỉ ẩn menu — gõ thẳng đường dẫn không có quyền vẫn ra
@@ -190,8 +190,9 @@ số khác và mọi con số trong báo cáo mất khả năng tái lập.
 mvnw test
 ```
 
-**275 test.** Trong đó 237 test chạy độc lập không cần CSDL; 38 test ở 8 lớp cần MySQL đang
-chạy vì chúng kiểm bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng sẵn.
+**282 test.** Phần lớn chạy độc lập không cần CSDL; 11 lớp cần MySQL đang chạy vì chúng kiểm
+bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng sẵn — kể cả bất biến thanh toán
+**dưới tải đồng thời**.
 
 > ⚠️ **Dừng ứng dụng trước khi chạy `mvnw test`** — bộ test chạy trên CSDL thật.
 
@@ -200,16 +201,16 @@ chạy vì chúng kiểm bất biến trên **dữ liệu thật** chứ không 
 
 ### 7.2. Script kiểm thử giao diện
 
-**8 script** trong `scripts/`, tổng **177 phép kiểm**, chạy khi ứng dụng đang bật:
+**8 script** trong `scripts/`, tổng **189 phép kiểm**, chạy khi ứng dụng đang bật:
 
 | Script | Kiểm | Nội dung |
 |---|---:|---|
-| `test-auth.ps1` | 11 | Đăng nhập, CSRF, phân quyền 3 vai trò |
-| `test-kh.ps1` | 12 | Khách hàng: tạo, sửa, validation, trùng giấy tờ |
-| `test-tb.ps1` | 16 | Thuê bao: đăng ký, chuyển trạng thái, đổi gói |
+| `test-auth.ps1` | 16 | Đăng nhập, CSRF, phân quyền 3 vai trò, phạm vi báo cáo theo nội dung |
+| `test-kh.ps1` | 14 | Khách hàng: tạo, sửa, validation, trùng giấy tờ |
+| `test-tb.ps1` | 18 | Thuê bao: đăng ký, chuyển trạng thái, đổi gói |
 | `test-muc-F.ps1` | 17 | Bất biến thanh toán và công nợ |
-| `test-bao-cao.ps1` | 38 | 7 báo cáo + dashboard + xuất Excel |
-| `test-dieu-huong.ps1` | 13 | **Đi theo link thật** trên trang, không gõ URL |
+| `test-bao-cao.ps1` | 39 | 7 báo cáo + dashboard + xuất Excel |
+| `test-dieu-huong.ps1` | 15 | **Đi theo link thật** trên trang, không gõ URL |
 | `test-ky-rong.ps1` | 28 | Kỳ 8/2026 rỗng: 17 màn hình + 4 Excel + 3 thao tác |
 | `test-bien.ps1` | 42 | Tham số biên, dữ liệu xấu, 12 × 403 |
 

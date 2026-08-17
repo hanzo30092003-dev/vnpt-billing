@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{fragments/layout :: layout('Báo cáo thống kê', ~{::noiDungTrang})}">
 <body>
 
@@ -8,11 +9,14 @@
     <div class="mb-3">
         <div th:replace="~{fragments/trang :: tieuDe(
                 'bi-bar-chart-line', 'Báo cáo thống kê',
-                'Bảy báo cáo tổng hợp về doanh thu, thuê bao và công nợ. Báo cáo nào cũng xuất Excel và in được.')}"></div>
+                'Các báo cáo tổng hợp về doanh thu, thuê bao và công nợ. Báo cáo nào cũng xuất Excel và in được.')}"></div>
     </div>
 
     <div class="row g-3">
-        <div class="col-md-6 col-xl-4">
+        <!--/* Bao cao CO SO TIEN cua khach: chi ke toan va quan tri xem duoc,
+       cung luat voi /hoa-don va /cong-no. An khoi menu de khong dan
+       nguoi dung toi mot trang 403. */-->
+        <div class="col-md-6 col-xl-4" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
             <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/doanh-thu-ky}">
                 <div class="card-body">
                     <div class="fw-semibold mb-2">
@@ -24,7 +28,10 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-6 col-xl-4">
+        <!--/* Bao cao CO SO TIEN cua khach: chi ke toan va quan tri xem duoc,
+       cung luat voi /hoa-don va /cong-no. An khoi menu de khong dan
+       nguoi dung toi mot trang 403. */-->
+        <div class="col-md-6 col-xl-4" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
             <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/doanh-thu-goi-cuoc}">
                 <div class="card-body">
                     <div class="fw-semibold mb-2">
@@ -36,7 +43,10 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-6 col-xl-4">
+        <!--/* Bao cao CO SO TIEN cua khach: chi ke toan va quan tri xem duoc,
+       cung luat voi /hoa-don va /cong-no. An khoi menu de khong dan
+       nguoi dung toi mot trang 403. */-->
+        <div class="col-md-6 col-xl-4" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
             <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/doanh-thu-dich-vu}">
                 <div class="card-body">
                     <div class="fw-semibold mb-2">
@@ -60,7 +70,10 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-6 col-xl-4">
+        <!--/* Bao cao CO SO TIEN cua khach: chi ke toan va quan tri xem duoc,
+       cung luat voi /hoa-don va /cong-no. An khoi menu de khong dan
+       nguoi dung toi mot trang 403. */-->
+        <div class="col-md-6 col-xl-4" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
             <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/top-thue-bao}">
                 <div class="card-body">
                     <div class="fw-semibold mb-2">
@@ -84,7 +97,10 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-6 col-xl-4">
+        <!--/* Bao cao CO SO TIEN cua khach: chi ke toan va quan tri xem duoc,
+       cung luat voi /hoa-don va /cong-no. An khoi menu de khong dan
+       nguoi dung toi mot trang 403. */-->
+        <div class="col-md-6 col-xl-4" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
             <a class="card shadow-sm h-100 text-decoration-none text-body" th:href="@{/bao-cao/cong-no}">
                 <div class="card-body">
                     <div class="fw-semibold mb-2">

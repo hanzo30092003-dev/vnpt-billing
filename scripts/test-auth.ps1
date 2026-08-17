@@ -91,4 +91,44 @@ $t = Get-Trang $phien["admin"] "/"
 Kiem-Tra -Ten "Sau dang xuat thi quay ve form dang nhap" -KetQua $t -StatusMongDoi 200 `
     -CanCo @('name="matKhau"') | Out-Null
 
+# ---------------------------------------------------------------------
+Muc "8. Bao cao chia theo NOI DUNG, khong mo ca cum"
+# ---------------------------------------------------------------------
+# Truoc dot bao mat, ca cum /bao-cao/** o muc authenticated(). He qua khong ai
+# luong: nhanvien01 bi 403 o /cong-no va /hoa-don, nhung mo /bao-cao/cong-no
+# thi thay du ten khach hang va so tien no, lai con tai duoc file Excel cong no.
+# He thong khoa mot cua va de mo cua ngay ben canh.
+#
+# Nay luat di theo DU LIEU: bao cao nao co so tien cua khach thi cung luat voi
+# /hoa-don va /cong-no. Hai bao cao khong co so tien nao - thong ke thue bao va
+# san luong - van mo cho moi vai tro.
+$nvBc = Connect-App "nhanvien01" "123456"
+$ktBc = Connect-App "ketoan01" "123456"
+
+$coTien = @("/bao-cao/cong-no", "/bao-cao/top-thue-bao", "/bao-cao/doanh-thu-ky",
+            "/bao-cao/doanh-thu-goi-cuoc", "/bao-cao/doanh-thu-dich-vu",
+            "/bao-cao/cong-no/xuat-excel")
+$khongTien = @("/bao-cao", "/bao-cao/thue-bao", "/bao-cao/san-luong")
+
+$loT = @($coTien | Where-Object { (Get-Trang $nvBc $_).status -ne 403 })
+Xac-Nhan "nhanvien01 KHONG mo duoc bao cao co so tien cua khach" ($loT.Count -eq 0) `
+    $(if ($loT) { "van mo duoc: " + ($loT -join ', ') } else { "$($coTien.Count)/$($coTien.Count) duong deu tra 403" })
+
+$chan = @($khongTien | Where-Object { (Get-Trang $nvBc $_).status -ne 200 })
+Xac-Nhan "nhanvien01 VAN mo duoc bao cao khong co so tien" ($chan.Count -eq 0) `
+    $(if ($chan) { "bi chan nham: " + ($chan -join ', ') } else { "thong ke thue bao va san luong deu 200" })
+
+# Doi chung: neu ke toan cung bi chan thi phep kiem tren xanh vi ly do sai
+$ktHong = @(($coTien + $khongTien) | Where-Object { (Get-Trang $ktBc $_).status -ne 200 })
+Xac-Nhan "Doi chung: ketoan01 mo duoc TAT CA bao cao" ($ktHong.Count -eq 0) `
+    $(if ($ktHong) { "bi chan nham: " + ($ktHong -join ', ') } else { "$(($coTien + $khongTien).Count)/$(($coTien + $khongTien).Count) duong deu 200" })
+
+# Menu khong duoc dan nguoi dung toi mot trang ho khong mo duoc (bai hoc Phase 7)
+$menuNv = Get-Trang $nvBc "/bao-cao"
+$theHong = @([regex]::Matches($menuNv.body, 'href="(/bao-cao/[^"?]+)"') |
+             ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique |
+             Where-Object { (Get-Trang $nvBc $_).status -ne 200 })
+Xac-Nhan "Menu bao cao cua nhanvien01 khong co the nao dan toi 403" ($theHong.Count -eq 0) `
+    $(if ($theHong) { "the hong: " + ($theHong -join ', ') } else { "moi the tren menu deu mo duoc" })
+
 Ket-Thuc

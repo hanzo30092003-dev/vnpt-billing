@@ -61,7 +61,27 @@ public class SecurityConfig {
                                 "/tinh-cuoc/**", "/cdr/**", "/ky-cuoc/**")
                         .hasRole("ADMIN")
 
-                        // Báo cáo: mọi vai trò đã đăng nhập đều xem được
+                        // =========================================================
+                        // Báo cáo — chia theo NỘI DUNG, không mở cả cụm
+                        // =========================================================
+                        // Bản trước để nguyên cụm `/bao-cao/**` ở mức `authenticated()`
+                        // với lý do "báo cáo thì ai cũng xem được". Hệ quả không ai
+                        // lường: NHAN_VIEN bị 403 ở /cong-no và /hoa-don, nhưng mở
+                        // /bao-cao/cong-no thì thấy đủ tên khách hàng và số tiền nợ,
+                        // lại còn tải được cả file Excel công nợ. Hệ thống khoá một
+                        // cửa và để mở cửa ngay bên cạnh.
+                        //
+                        // Nay luật đi theo DỮ LIỆU chứ không theo tiền tố đường dẫn:
+                        // báo cáo nào có số tiền của khách thì cùng luật với /hoa-don
+                        // và /cong-no.
+                        .requestMatchers("/bao-cao/cong-no/**", "/bao-cao/top-thue-bao/**",
+                                "/bao-cao/doanh-thu-ky/**", "/bao-cao/doanh-thu-goi-cuoc/**",
+                                "/bao-cao/doanh-thu-dich-vu/**")
+                        .hasAnyRole("KE_TOAN", "ADMIN")
+
+                        // Hai báo cáo còn lại không chứa số tiền của khách hàng nào —
+                        // thống kê thuê bao và sản lượng dịch vụ — nên mọi vai trò
+                        // đã đăng nhập đều xem được. Đây là thứ nhân viên quầy dùng thật.
                         .requestMatchers("/bao-cao/**").authenticated()
 
                         // Còn lại (trang chủ, trang 403 ...) chỉ cần đã đăng nhập

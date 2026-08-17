@@ -14,7 +14,7 @@ Mở <http://localhost:8080>. Ba tài khoản, mật khẩu đều là `123456`:
 | Tài khoản | Vai trò | Làm được gì |
 |---|---|---|
 | `admin` | Quản trị | Toàn bộ hệ thống |
-| `nhanvien01` | Nhân viên | Khách hàng, thuê bao, báo cáo |
+| `nhanvien01` | Nhân viên | Khách hàng, thuê bao, báo cáo **không chứa số tiền của khách** |
 | `ketoan01` | Kế toán | Hóa đơn, thanh toán, công nợ, giảm trừ, báo cáo |
 
 Menu bên trái **chỉ hiện những mục vai trò đó được dùng**. Gõ thẳng đường dẫn của chức năng
