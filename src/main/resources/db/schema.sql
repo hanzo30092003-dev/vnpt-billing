@@ -241,6 +241,12 @@ CREATE TABLE hoa_don (
     da_thanh_toan     DECIMAL(15,2) DEFAULT 0,
     con_no            DECIMAL(15,2) NOT NULL,
     trang_thai        ENUM('CHUA_TT','TT_MOT_PHAN','DA_TT','QUA_HAN') NOT NULL,
+    -- Khoa lac quan. Hibernate them WHERE phien_ban = ? vao cau UPDATE, nen hai
+    -- nguoi cung thu tien tren mot hoa don thi nguoi ghi sau bi tu choi thay vi
+    -- de ghi lai len nguoi truoc. Xem javadoc cua HoaDon.phienBan.
+    -- DEFAULT 0 de cac cau INSERT cu trong data-mau.sql / data-van-hanh.sql
+    -- (khong liet ke cot nay) van chay duoc.
+    phien_ban         BIGINT        NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
     UNIQUE KEY uq_hoa_don_ma (ma_hoa_don),
     UNIQUE KEY uq_hoa_don_thue_bao_ky (thue_bao_id, ky_cuoc_id),

@@ -3,6 +3,7 @@ package com.hanzo.billing.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -36,6 +37,37 @@ public class GlobalExceptionHandler {
                                   RedirectAttributes redirectAttributes) {
         log.warn("Vi phạm quy tắc nghiệp vụ: {}", ex.getMessage());
         redirectAttributes.addFlashAttribute("thongBaoLoi", ex.getMessage());
+        return "redirect:" + duongDanQuayLai(request);
+    }
+
+    /**
+     * Hai người cùng sửa một hóa đơn — khoá lạc quan từ chối người ghi sau.
+     *
+     * <p>Xảy ra khi hai thu ngân cùng mở một hóa đơn rồi cùng bấm ghi nhận thanh toán. Người
+     * ghi sau mang theo số phiên bản đã cũ, câu UPDATE khớp 0 dòng, Hibernate ném
+     * {@code ObjectOptimisticLockingFailureException}. Xem javadoc của
+     * {@code HoaDon.phienBan} để biết vì sao thiếu nó thì mất tiền của khách.</p>
+     *
+     * <p><b>Vì sao xử như vi phạm nghiệp vụ chứ không như lỗi hệ thống.</b> Đây không phải
+     * hỏng hóc — đây là hệ thống làm <i>đúng</i> việc của nó: chặn một lần ghi đè. Người dùng
+     * chỉ cần mở lại hóa đơn và làm lại, nên đưa họ về đúng màn hình vừa thao tác kèm lời
+     * nhắn, giống mọi vi phạm nghiệp vụ khác — thay vì quăng ra trang 500 kèm mã sự cố làm
+     * họ tưởng phần mềm hỏng.</p>
+     *
+     * <p>Ghi log mức {@code warn} chứ không phải {@code error}: nó đáng để lại vết (đụng độ
+     * xảy ra nhiều bất thường là dấu hiệu quy trình thu tiền có vấn đề), nhưng không phải
+     * chuyện cần ai đó thức dậy giữa đêm.</p>
+     */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public String xuLyDungDoCapNhat(ObjectOptimisticLockingFailureException ex,
+                                    HttpServletRequest request,
+                                    RedirectAttributes redirectAttributes) {
+        log.warn("Đụng độ cập nhật đồng thời tại {} {}: {}",
+                request.getMethod(), request.getRequestURI(), ex.getMessage());
+        redirectAttributes.addFlashAttribute("thongBaoLoi",
+                "Hóa đơn này vừa được người khác cập nhật trong lúc bạn đang thao tác, "
+                        + "nên lần ghi vừa rồi chưa được lưu. "
+                        + "Hãy mở lại hóa đơn để xem số còn nợ mới nhất rồi ghi nhận lại.");
         return "redirect:" + duongDanQuayLai(request);
     }
 

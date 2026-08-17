@@ -94,6 +94,51 @@ public class HoaDon {
     private TrangThaiHoaDon trangThai;
 
     /**
+     * Số phiên bản dòng, dùng cho khoá lạc quan.
+     *
+     * <p><b>Vì sao phải có.</b> {@code ThanhToanService.ghiNhan} là một chuỗi
+     * <i>đọc → tính → ghi</i>: đọc {@code con_no}, kiểm số tiền không vượt quá nó, rồi ghi
+     * {@code da_thanh_toan = da_thanh_toan_cũ + số vừa thu}. Không có gì khoá dòng giữa bước
+     * đọc và bước ghi, nên hai thu ngân cùng thu trên một hóa đơn sẽ cùng đọc một giá trị cũ
+     * và cùng ghi đè lên nhau:</p>
+     *
+     * <pre>
+     *   Hóa đơn còn nợ 100.000, hai người mỗi người thu 50.000
+     *     A đọc con_no = 100.000        B đọc con_no = 100.000
+     *     A qua kiểm (50.000 ≤ 100.000) B qua kiểm (50.000 ≤ 100.000)
+     *     A ghi da_thanh_toan = 50.000  B ghi da_thanh_toan = 50.000   ← đè lên A
+     *   Kết quả: 2 dòng thanh toán tổng 100.000, nhưng da_thanh_toan chỉ 50.000
+     * </pre>
+     *
+     * <p>Nếu xảy ra thì hỏng đúng <b>bất biến trung tâm</b> của cả dự án:
+     * {@code da_thanh_toan = SUM(thanh_toan.so_tien)}. Và
+     * {@code KiemTraBatBienThanhToanTest} không bao giờ bắt được, vì nó chạy <i>sau</i>, trên
+     * dữ liệu đã đứng yên — lúc đó tiền đã mất rồi.</p>
+     *
+     * <p><b>⚠️ Trung thực về bằng chứng.</b> Kịch bản trên là suy ra từ <i>đọc mã</i>. Khi
+     * {@code KiemTraDongThoiThanhToanTest} thử dựng lại nó bằng 12 luồng cùng thu trên một hóa
+     * đơn — <b>với annotation này đã gỡ ra</b> — thì bất biến <b>vẫn đúng</b>, không quan sát
+     * được lần mất nào. Nhiều khả năng khoá dòng của InnoDB cộng với việc mỗi giao dịch chỉ đọc
+     * khi tới lượt đã xếp các lần đọc ra sau các lần ghi trước đó. Nghĩa là hệ thống hiện
+     * <i>có vẻ</i> an toàn, nhưng an toàn <b>do tình cờ</b> — nhờ cách InnoDB xếp hàng, chứ
+     * không nhờ điều gì trong mã bảo đảm.</p>
+     *
+     * <p>Vẫn giữ {@code @Version} vì nó biến một tính chất <b>tình cờ</b> thành một bảo đảm
+     * <b>tường minh</b>: Hibernate thêm {@code WHERE phien_ban = ?} vào câu UPDATE, người ghi
+     * sau thấy 0 dòng bị ảnh hưởng và nhận {@code ObjectOptimisticLockingFailureException};
+     * {@code GlobalExceptionHandler} đổi nó thành lời nhắn tiếng Việt bảo mở lại hóa đơn. Giá
+     * phải trả gần bằng không, còn thứ nhận lại là bất biến không còn phụ thuộc vào chi tiết
+     * cài đặt của một hệ quản trị CSDL cụ thể.</p>
+     *
+     * <p>Chọn khoá <b>lạc quan</b> chứ không phải bi quan vì đụng độ ở đây rất hiếm — hai người
+     * thu cùng một hóa đơn trong cùng vài giây — nên trả giá bằng một lần làm lại hiếm hoi rẻ
+     * hơn là khoá dòng ở mọi lần thu tiền.</p>
+     */
+    @Version
+    @Column(name = "phien_ban", nullable = false)
+    private Long phienBan;
+
+    /**
      * Các dòng khoản mục của hóa đơn. Đây là quan hệ @OneToMany duy nhất trong
      * dự án vì chi tiết hóa đơn không tồn tại độc lập — xoá hóa đơn thì xoá theo,
      * đúng với ràng buộc ON DELETE CASCADE ở CSDL.

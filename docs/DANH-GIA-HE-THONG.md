@@ -100,7 +100,26 @@ nguy hiểm ngang thiếu phép kiểm*. Đó là mức độ nghiêm túc về 
 
 Xếp theo mức nguy hiểm. Cả bốn đều tự xác minh trong mã, không suy đoán.
 
-### 5.1. 🔴 Hai người cùng thu tiền một hóa đơn thì mất tiền
+> ### ⚠️ ĐÍNH CHÍNH mục 5.1 — bản đầu của báo cáo này nói quá
+>
+> Bản đầu khẳng định *"hai người cùng thu tiền một hóa đơn thì mất tiền"* như một sự thật đã
+> xác lập, kèm ví dụ số cụ thể. Khẳng định đó **suy ra từ đọc mã, không phải từ quan sát**.
+>
+> Khi dựng `KiemTraDongThoiThanhToanTest` để chứng minh — 12 luồng cùng thu trên một hóa đơn,
+> **với `@Version` đã gỡ ra** — thì **bất biến vẫn đúng**: 2/12 luồng ghi được,
+> `da_thanh_toan` = 10.338 đ = đúng tổng hai dòng thanh toán. **Không quan sát được lần mất
+> nào.** Nhiều khả năng khoá dòng của InnoDB, cộng với việc mỗi giao dịch chỉ chạy câu SELECT
+> khi tới lượt, đã xếp các lần đọc ra sau các lần ghi trước đó.
+>
+> Nội dung mục 5.1 dưới đây **giữ nguyên** vì phân tích mã vẫn đúng và vẫn đáng đọc — nhưng
+> phải đọc nó như **rủi ro chưa chứng minh**, không phải lỗi đã quan sát. Đánh giá đã hạ từ
+> 🔴 xuống 🟠.
+>
+> Điều đúng còn lại, và vẫn đáng sửa: **cái đang bảo vệ hệ thống là cách một hệ quản trị CSDL
+> cụ thể xếp hàng, không phải điều gì trong mã.** `@Version` đã được thêm để biến tính chất
+> **tình cờ** đó thành bảo đảm **tường minh**.
+
+### 5.1. 🟠 Hai người cùng thu tiền một hóa đơn — rủi ro mất tiền *(chưa tái hiện được)*
 
 `ThanhToanServiceImpl.ghiNhan` chỉ có `@Transactional` trần và `findById`. **Không `@Version`,
 không `LockModeType`, không `SELECT … FOR UPDATE`** ở bất kỳ đâu trong `repository/`.
@@ -117,8 +136,8 @@ Kết quả: **2 dòng thanh toán tổng 100.000 đ, nhưng `da_thanh_toan` ch�
 (`da_thanh_toan = SUM(thanh_toan.so_tien)`). `KiemTraBatBienThanhToanTest` không bao giờ bắt
 được, vì nó chạy *sau*, trên dữ liệu đã đứng yên.
 
-> **Bất biến của dự án hiện chỉ đúng khi có một người dùng tại một thời điểm** — điều chưa
-> tài liệu nào nói ra.
+> **Bất biến của dự án chưa từng được kiểm dưới tranh chấp** — điều chưa tài liệu nào nói ra.
+> (Nay đã có `KiemTraDongThoiThanhToanTest` kiểm nó với 12 luồng đồng thời.)
 
 **Cách vá:** thêm `@Version` vào `HoaDon`, hoặc `@Lock(PESSIMISTIC_WRITE)` cho truy vấn nạp
 hóa đơn trong luồng thanh toán. Công sức: **nửa ngày**, kèm một test hai luồng chạy song song.
