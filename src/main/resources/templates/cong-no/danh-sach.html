@@ -60,6 +60,75 @@
         </div>
     </div>
 
+    <!--/*
+        ---------- Vuot han muc tin dung ----------
+        Can cu tam ngung THU HAI, doc lap voi khoi ben duoi:
+          khoi nay  - cong TOAN BO no cua mot thue bao roi so voi han muc cua no
+          khoi duoi - xet TUNG hoa don qua han bao nhieu ngay
+        Mot khach co bon hoa don moi qua han vai ngay nhung cong lai da vuot han
+        muc se KHONG lot vao khoi duoi - ma dung la truong hop dang chan nhat.
+        Nen de khoi nay len TREN.
+    */-->
+    <div class="card shadow-sm mb-3" th:if="${!#lists.isEmpty(vuotHanMuc)}">
+        <div class="card-header d-flex align-items-center flex-wrap gap-2">
+            <i class="bi bi-exclamation-octagon text-danger me-2"></i>
+            <strong>Nợ vượt hạn mức tín dụng</strong>
+            <span class="badge text-bg-danger ms-2" th:text="${#lists.size(vuotHanMuc)}">0</span>
+            <span class="ms-auto small text-secondary">
+                Chỉ tính thuê bao trả sau đang hoạt động
+            </span>
+        </div>
+        <div class="card-body">
+            <p class="small text-secondary mb-3">
+                Những khách hàng dưới đây đang nợ nhiều hơn mức hệ thống cho phép họ nợ. Mức đó
+                khai khi đăng ký thuê bao, xem ở màn hình chi tiết thuê bao.
+            </p>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover bang-du-lieu align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Số thuê bao</th>
+                        <th>Khách hàng</th>
+                        <th class="text-end">Hạn mức</th>
+                        <th class="text-end">Đang nợ</th>
+                        <th class="text-end">Vượt</th>
+                        <th class="text-end">Tỷ lệ</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="v : ${vuotHanMuc}">
+                        <td><code th:text="${v.soThueBao}">09xxxxxxxx</code></td>
+                        <td>
+                            <a th:href="@{/khach-hang/{id}(id=${v.khachHangId})}"
+                               th:text="${v.tenKhachHang}">Tên khách hàng</a>
+                        </td>
+                        <td class="text-end" th:text="${@soLieu.tien(v.hanMuc)}">0</td>
+                        <td class="text-end fw-semibold" th:text="${@soLieu.tien(v.tongNo)}">0</td>
+                        <td class="text-end text-danger fw-semibold"
+                            th:text="${@soLieu.tien(v.vuot())}">0</td>
+                        <td class="text-end">
+                            <span class="badge text-bg-danger"
+                                  th:text="${v.tyLePhanTram() != null}
+                                           ? ${v.tyLePhanTram()} + '%' : '—'">0%</span>
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:href="@{/thue-bao/{id}(id=${v.thueBaoId})}">Xem thuê bao</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="small text-secondary mt-3 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Đây là <strong>đề xuất</strong>, hệ thống không tự cắt dịch vụ của ai. Muốn tạm
+                ngừng thì mở thuê bao rồi bấm <strong>Chuyển trạng thái</strong> — dữ liệu công
+                nợ có thể chưa cập nhật, khách vừa nộp tiền ở quầy khác.
+            </p>
+        </div>
+    </div>
+
     <!--/* ---------- De xuat tam ngung ---------- */-->
     <div class="card shadow-sm mb-3" th:if="${!#lists.isEmpty(deXuatTamNgung)}">
         <div class="card-header d-flex align-items-center">

@@ -1,6 +1,7 @@
 package com.hanzo.billing.service;
 
 import com.hanzo.billing.dto.DongCongNo;
+import com.hanzo.billing.dto.ThueBaoVuotHanMuc;
 import com.hanzo.billing.dto.OTuoiNo;
 import com.hanzo.billing.enums.NhomTuoiNo;
 
@@ -32,6 +33,16 @@ public interface CongNoService {
      * thái và việc ghi {@code lich_su_thue_bao} vẫn đi qua đúng một đường.</p>
      */
     void tamNgungViNoCuoc(Long hoaDonId);
+
+    /**
+     * Thuê bao trả sau đang nợ vượt hạn mức tín dụng của chính nó.
+     *
+     * <p>Căn cứ tạm ngừng thứ hai, <b>độc lập</b> với {@link #deXuatTamNgung()}: cái kia xét
+     * từng hóa đơn quá hạn bao nhiêu ngày, cái này cộng <b>toàn bộ</b> nợ của thuê bao rồi so
+     * với hạn mức. Một khách có nhiều hóa đơn mới quá hạn vài ngày nhưng cộng lại đã vượt hạn
+     * mức sẽ không lọt vào danh sách kia — mà đúng là trường hợp đáng chặn nhất.</p>
+     */
+    List<ThueBaoVuotHanMuc> thueBaoVuotHanMuc();
 
     byte[] xuatExcel(String khachHang, NhomTuoiNo nhomTuoiNo);
 }

@@ -1,5 +1,6 @@
 package com.hanzo.billing.repository;
 
+import com.hanzo.billing.dto.ThueBaoVuotHanMuc;
 import com.hanzo.billing.dto.baocao.CoCauCuoc;
 import com.hanzo.billing.dto.baocao.DongDoanhThuGoi;
 import com.hanzo.billing.dto.baocao.DongDoanhThuKy;
@@ -252,4 +253,38 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Long> {
             ORDER BY h.hanThanhToan ASC, h.maHoaDon ASC
             """)
     List<HoaDon> timConNo(@Param("khachHang") String khachHang);
+
+    /**
+     * Thuê bao trả sau đang nợ <b>vượt hạn mức tín dụng</b> của chính nó.
+     *
+     * <p>Cộng nhóm trong CSDL bằng {@code SELECT new} + {@code GROUP BY} + {@code HAVING}, đúng
+     * quy ước của dự án — không nạp hóa đơn ra rồi cộng trong Java.</p>
+     *
+     * <p>Bốn điều kiện lọc, mỗi cái có lý do riêng:</p>
+     * <ul>
+     *   <li>{@code h.conNo > 0} — chỉ tính phần khách còn nợ thật</li>
+     *   <li>{@code TRA_SAU} — trả trước tiêu tiền đã nạp, không có khái niệm cho nợ</li>
+     *   <li>{@code HOAT_DONG} — thuê bao đã tạm ngừng hoặc thanh lý thì đề xuất tạm ngừng nữa
+     *       là vô nghĩa, và ma trận chuyển trạng thái sẽ từ chối</li>
+     *   <li>{@code hanMucTinDung > 0} — hạn mức 0 hoặc chưa khai nghĩa là <i>chưa đặt</i>, không
+     *       phải <i>không cho nợ đồng nào</i>. Hiểu nhầm chỗ này sẽ lôi nguyên cả danh sách
+     *       thuê bao vào diện đề xuất cắt dịch vụ</li>
+     * </ul>
+     *
+     * <p>Sắp theo số tiền vượt giảm dần: người vượt nhiều nhất là người đáng xử lý trước.</p>
+     */
+    @Query("""
+            SELECT new com.hanzo.billing.dto.ThueBaoVuotHanMuc(
+                       tb.id, tb.soThueBao, kh.id, kh.tenKh,
+                       tb.hanMucTinDung, SUM(h.conNo))
+              FROM HoaDon h JOIN h.thueBao tb JOIN h.khachHang kh
+             WHERE h.conNo > 0
+               AND tb.loaiThueBao = com.hanzo.billing.enums.LoaiThueBao.TRA_SAU
+               AND tb.trangThai = com.hanzo.billing.enums.TrangThaiThueBao.HOAT_DONG
+               AND tb.hanMucTinDung > 0
+             GROUP BY tb.id, tb.soThueBao, kh.id, kh.tenKh, tb.hanMucTinDung
+            HAVING SUM(h.conNo) > tb.hanMucTinDung
+             ORDER BY SUM(h.conNo) - tb.hanMucTinDung DESC
+            """)
+    List<ThueBaoVuotHanMuc> timThueBaoVuotHanMuc();
 }

@@ -202,7 +202,16 @@ Bị chặn khi: số tiền **vượt số còn nợ**, số tiền ≤ 0, **ng
 1. **Bảng tuổi nợ** — chia theo số ngày quá hạn: *Trong hạn* · *1–30* · *31–60* · *61–90* ·
    *trên 90 ngày*. Kèm biểu đồ.
 2. **Danh sách hóa đơn còn nợ** — sắp theo số ngày quá hạn giảm dần, nợ lâu nhất lên đầu.
-3. **Đề xuất tạm ngừng** — thuê bao có hóa đơn quá hạn trên 15 ngày.
+3. **Nợ vượt hạn mức tín dụng** — thuê bao trả sau đang nợ nhiều hơn mức cho phép.
+4. **Đề xuất tạm ngừng** — thuê bao có hóa đơn quá hạn trên 15 ngày.
+
+> **Hai khối 3 và 4 trả lời hai câu hỏi khác nhau, đừng lẫn.**
+> Khối 3 hỏi *"khách này nợ có quá nhiều không"* — cộng **toàn bộ** hóa đơn chưa trả rồi so
+> với hạn mức khai lúc đăng ký thuê bao. Khối 4 hỏi *"khoản nợ này có để quá lâu không"* —
+> xét **từng** hóa đơn.
+>
+> Một khách có bốn hóa đơn, mỗi cái mới quá hạn vài ngày nhưng cộng lại đã vượt hạn mức, sẽ
+> **chỉ xuất hiện ở khối 3**. Đó thường lại là trường hợp đáng xử lý trước.
 
 > Đây là **đề xuất**, không phải hành động tự động. Hệ thống liệt kê ra, người dùng quyết định
 > và bấm nút. Cắt dịch vụ của khách là việc có hậu quả thật, và dữ liệu công nợ có thể chưa cập

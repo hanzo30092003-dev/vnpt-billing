@@ -48,6 +48,7 @@ public class CongNoController {
         model.addAttribute("tienTuoiNo", bangTuoiNo.stream().map(OTuoiNo::tongTien).toList());
         model.addAttribute("tongConNo", congNoService.tongConNo(khachHang));
         model.addAttribute("deXuatTamNgung", congNoService.deXuatTamNgung());
+        model.addAttribute("vuotHanMuc", congNoService.thueBaoVuotHanMuc());
         model.addAttribute("danhSachNhom", NhomTuoiNo.values());
         model.addAttribute("khachHang", khachHang);
         model.addAttribute("nhomTuoiNo", nhomTuoiNo);

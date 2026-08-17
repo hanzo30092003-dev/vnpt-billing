@@ -140,11 +140,30 @@ erDiagram
 | `ngay_huy` | DATE | | Ngày thanh lý, NULL nếu chưa thanh lý |
 | `trang_thai` | ENUM | NOT NULL | `HOAT_DONG` / `TAM_NGUNG_1C` / `TAM_NGUNG_2C` / `DA_THANH_LY` |
 | `so_du` | DECIMAL(15,2) | DEFAULT 0 | Số dư tài khoản, **chỉ có ý nghĩa với trả trước** |
-| `han_muc_tin_dung` | DECIMAL(15,2) | DEFAULT 0 | Hạn mức nợ cước, **chỉ có ý nghĩa với trả sau** |
+| `han_muc_tin_dung` | DECIMAL(15,2) | DEFAULT 0 | Hạn mức nợ cước, **chỉ có ý nghĩa với trả sau**. Nợ vượt mức này thì thuê bao vào danh sách đề xuất tạm ngừng ở `/cong-no` — xem ghi chú dưới |
 | `ngay_tao` | DATETIME | | Thời điểm tạo bản ghi |
 
 > `TAM_NGUNG_1C` = tạm ngưng một chiều (chỉ nhận, không gọi đi).
 > `TAM_NGUNG_2C` = tạm ngưng hai chiều (khóa cả hai chiều).
+
+> ### ⚠️ `han_muc_tin_dung` từng là một cột chết
+>
+> Cột này có từ Phase 1: có trong bảng, có trên form đăng ký, có hiển thị ở màn hình chi tiết
+> thuê bao — nhưng suốt **tám phase không một dòng mã nào đọc nó để chặn việc gì**. Người dùng
+> nhập số vào đó và tin rằng hệ thống đang canh giúp mình, trong khi không.
+>
+> Nay `HoaDonRepository.timThueBaoVuotHanMuc()` dùng nó thật: cộng **toàn bộ** nợ chưa trả của
+> một thuê bao rồi so với hạn mức, ai vượt thì hiện ở khối *Nợ vượt hạn mức tín dụng* trên
+> màn hình `/cong-no`.
+>
+> **`0` nghĩa là CHƯA ĐẶT, không phải "không cho nợ đồng nào".** Truy vấn loại hẳn thuê bao có
+> hạn mức 0 ra. Hiểu nhầm chỗ này sẽ lôi nguyên cả danh sách thuê bao vào diện đề xuất cắt
+> dịch vụ — trong đó có cả 20 thuê bao trả trước, vốn có hạn mức 0 vì trả trước không có khái
+> niệm cho nợ.
+>
+> Đây là **căn cứ tạm ngừng thứ hai, độc lập** với căn cứ "hóa đơn quá hạn quá 15 ngày": một
+> khách có bốn hóa đơn mới quá hạn vài ngày nhưng cộng lại đã vượt hạn mức sẽ *không* lọt vào
+> danh sách kia — mà đúng là trường hợp đáng chặn nhất.
 
 ### 2.6. `lich_su_thue_bao` — Nhật ký đổi trạng thái thuê bao
 

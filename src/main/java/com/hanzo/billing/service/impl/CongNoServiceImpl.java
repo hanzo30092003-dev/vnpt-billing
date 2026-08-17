@@ -2,6 +2,7 @@ package com.hanzo.billing.service.impl;
 
 import com.hanzo.billing.dto.DongCongNo;
 import com.hanzo.billing.dto.OTuoiNo;
+import com.hanzo.billing.dto.ThueBaoVuotHanMuc;
 import com.hanzo.billing.entity.HoaDon;
 import com.hanzo.billing.enums.NhomTuoiNo;
 import com.hanzo.billing.enums.TrangThaiThueBao;
@@ -128,6 +129,19 @@ public class CongNoServiceImpl implements CongNoService {
                 // thì thao tác này vô nghĩa, và ma trận chuyển trạng thái sẽ từ chối.
                 .filter(d -> d.hoaDon().getThueBao().getTrangThai() == TrangThaiThueBao.HOAT_DONG)
                 .toList();
+    }
+
+    /**
+     * Đọc thẳng kết quả gộp nhóm từ CSDL — không nạp hóa đơn ra rồi cộng trong Java.
+     *
+     * <p>Toàn bộ luật lọc nằm trong câu truy vấn ({@code HoaDonRepository.timThueBaoVuotHanMuc}),
+     * kể cả điều kiện dễ hiểu nhầm nhất: <b>hạn mức bằng 0 nghĩa là chưa đặt, không phải không
+     * cho nợ đồng nào</b>.</p>
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<ThueBaoVuotHanMuc> thueBaoVuotHanMuc() {
+        return hoaDonRepository.timThueBaoVuotHanMuc();
     }
 
     @Override
