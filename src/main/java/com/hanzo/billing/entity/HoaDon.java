@@ -115,20 +115,20 @@ public class HoaDon {
      * {@code KiemTraBatBienThanhToanTest} không bao giờ bắt được, vì nó chạy <i>sau</i>, trên
      * dữ liệu đã đứng yên — lúc đó tiền đã mất rồi.</p>
      *
-     * <p><b>⚠️ Trung thực về bằng chứng.</b> Kịch bản trên là suy ra từ <i>đọc mã</i>. Khi
-     * {@code KiemTraDongThoiThanhToanTest} thử dựng lại nó bằng 12 luồng cùng thu trên một hóa
-     * đơn — <b>với annotation này đã gỡ ra</b> — thì bất biến <b>vẫn đúng</b>, không quan sát
-     * được lần mất nào. Nhiều khả năng khoá dòng của InnoDB cộng với việc mỗi giao dịch chỉ đọc
-     * khi tới lượt đã xếp các lần đọc ra sau các lần ghi trước đó. Nghĩa là hệ thống hiện
-     * <i>có vẻ</i> an toàn, nhưng an toàn <b>do tình cờ</b> — nhờ cách InnoDB xếp hàng, chứ
-     * không nhờ điều gì trong mã bảo đảm.</p>
+     * <p><b>Đã dựng lại được, không phải suy đoán.</b> Gỡ annotation này ra rồi chạy
+     * {@code KiemTraDongThoiThanhToanTest.epDocDocGhiGhi_benGhiSauBiTuChoi}: cả hai bên cùng
+     * ghi thành công nhưng số tiền chỉ tăng <b>1.000 thay vì 2.000</b> — mất đúng một lần cộng.
+     * Gắn lại: đúng một bên thành công.</p>
      *
-     * <p>Vẫn giữ {@code @Version} vì nó biến một tính chất <b>tình cờ</b> thành một bảo đảm
-     * <b>tường minh</b>: Hibernate thêm {@code WHERE phien_ban = ?} vào câu UPDATE, người ghi
-     * sau thấy 0 dòng bị ảnh hưởng và nhận {@code ObjectOptimisticLockingFailureException};
-     * {@code GlobalExceptionHandler} đổi nó thành lời nhắn tiếng Việt bảo mở lại hóa đơn. Giá
-     * phải trả gần bằng không, còn thứ nhận lại là bất biến không còn phụ thuộc vào chi tiết
-     * cài đặt của một hệ quản trị CSDL cụ thể.</p>
+     * <p>⚠️ Cách dựng lại <b>đầu tiên</b> — thả 12 luồng cùng gọi {@code ghiNhan} rồi mong
+     * chúng giao nhau — <b>không</b> dựng lại được, vì thả cùng lúc không bảo đảm hai bên cùng
+     * <i>đọc xong</i> trước khi bên nào <i>kịp ghi</i>. Phải ép thứ tự bằng chốt chặn thì lỗi
+     * mới lộ. Một phép kiểm không đỏ chưa chứng minh được là không có lỗi.</p>
+     *
+     * <p>Với {@code @Version}, Hibernate thêm {@code WHERE phien_ban = ?} vào câu UPDATE; người
+     * ghi sau thấy 0 dòng bị ảnh hưởng và nhận {@code ObjectOptimisticLockingFailureException},
+     * còn {@code GlobalExceptionHandler} đổi nó thành lời nhắn tiếng Việt bảo mở lại hóa đơn.
+     * Thà bắt người dùng làm lại một lần còn hơn im lặng nuốt mất tiền của khách.</p>
      *
      * <p>Chọn khoá <b>lạc quan</b> chứ không phải bi quan vì đụng độ ở đây rất hiếm — hai người
      * thu cùng một hóa đơn trong cùng vài giây — nên trả giá bằng một lần làm lại hiếm hoi rẻ

@@ -100,26 +100,28 @@ nguy hiểm ngang thiếu phép kiểm*. Đó là mức độ nghiêm túc về 
 
 Xếp theo mức nguy hiểm. Cả bốn đều tự xác minh trong mã, không suy đoán.
 
-> ### ⚠️ ĐÍNH CHÍNH mục 5.1 — bản đầu của báo cáo này nói quá
+> ### ✅ ĐÃ SỬA và ĐÃ DỰNG LẠI ĐƯỢC — mục 5.1
 >
-> Bản đầu khẳng định *"hai người cùng thu tiền một hóa đơn thì mất tiền"* như một sự thật đã
-> xác lập, kèm ví dụ số cụ thể. Khẳng định đó **suy ra từ đọc mã, không phải từ quan sát**.
+> Bản đầu của báo cáo này khẳng định lỗi mất tiền từ **đọc mã**, chưa có quan sát. Việc dựng
+> lại nó đi qua hai bước, và bước đầu **thất bại**:
 >
-> Khi dựng `KiemTraDongThoiThanhToanTest` để chứng minh — 12 luồng cùng thu trên một hóa đơn,
-> **với `@Version` đã gỡ ra** — thì **bất biến vẫn đúng**: 2/12 luồng ghi được,
-> `da_thanh_toan` = 10.338 đ = đúng tổng hai dòng thanh toán. **Không quan sát được lần mất
-> nào.** Nhiều khả năng khoá dòng của InnoDB, cộng với việc mỗi giao dịch chỉ chạy câu SELECT
-> khi tới lượt, đã xếp các lần đọc ra sau các lần ghi trước đó.
+> | Cách dựng lại | Kết quả khi đã gỡ `@Version` |
+> |---|---|
+> | 12 luồng cùng gọi `ghiNhan`, thả cùng lúc | ❌ Bất biến **vẫn đúng** — không dựng lại được |
+> | **Ép đọc–đọc–ghi–ghi** bằng hai giao dịch điều khiển tay | ✅ **2/2 bên thành công nhưng tiền chỉ tăng 1.000 thay vì 2.000** |
 >
-> Nội dung mục 5.1 dưới đây **giữ nguyên** vì phân tích mã vẫn đúng và vẫn đáng đọc — nhưng
-> phải đọc nó như **rủi ro chưa chứng minh**, không phải lỗi đã quan sát. Đánh giá đã hạ từ
-> 🔴 xuống 🟠.
+> **Lỗi là có thật.** Chỉ là cách đầu không đủ sức dựng nó: thả 12 luồng cùng lúc không bảo đảm
+> hai bên cùng *đọc xong* trước khi bên nào *kịp ghi* — mà đó mới là điều kiện duy nhất làm mất
+> bản ghi. Ép thứ tự bằng hai chốt chặn thì nó xảy ra ngay và ổn định.
 >
-> Điều đúng còn lại, và vẫn đáng sửa: **cái đang bảo vệ hệ thống là cách một hệ quản trị CSDL
-> cụ thể xếp hàng, không phải điều gì trong mã.** `@Version` đã được thêm để biến tính chất
-> **tình cờ** đó thành bảo đảm **tường minh**.
+> Bài học: **một phép kiểm không đỏ chưa chứng minh được là không có lỗi** — nó có thể chỉ
+> đang không chạm tới điều kiện gây lỗi. Suýt nữa tôi rút lại một khẳng định đúng.
+>
+> **Đã sửa:** `HoaDon.phienBan` (`@Version`) + nhánh xử lý
+> `ObjectOptimisticLockingFailureException`, và `KiemTraDongThoiThanhToanTest` với hai phép
+> kiểm, phép thứ hai **đã được chứng minh là biết đỏ**.
 
-### 5.1. 🟠 Hai người cùng thu tiền một hóa đơn — rủi ro mất tiền *(chưa tái hiện được)*
+### 5.1. ✅ Hai người cùng thu tiền một hóa đơn thì mất tiền — *đã dựng lại được và đã sửa*
 
 `ThanhToanServiceImpl.ghiNhan` chỉ có `@Transactional` trần và `findById`. **Không `@Version`,
 không `LockModeType`, không `SELECT … FOR UPDATE`** ở bất kỳ đâu trong `repository/`.
@@ -137,7 +139,8 @@ Kết quả: **2 dòng thanh toán tổng 100.000 đ, nhưng `da_thanh_toan` ch�
 được, vì nó chạy *sau*, trên dữ liệu đã đứng yên.
 
 > **Bất biến của dự án chưa từng được kiểm dưới tranh chấp** — điều chưa tài liệu nào nói ra.
-> (Nay đã có `KiemTraDongThoiThanhToanTest` kiểm nó với 12 luồng đồng thời.)
+> Nay `KiemTraDongThoiThanhToanTest` kiểm nó ở cả hai mức: 12 luồng đua tự nhiên, và một phép
+> ép đúng thứ tự đọc–đọc–ghi–ghi đã được chứng minh là biết đỏ khi gỡ khoá ra.
 
 **Cách vá:** thêm `@Version` vào `HoaDon`, hoặc `@Lock(PESSIMISTIC_WRITE)` cho truy vấn nạp
 hóa đơn trong luồng thanh toán. Công sức: **nửa ngày**, kèm một test hai luồng chạy song song.

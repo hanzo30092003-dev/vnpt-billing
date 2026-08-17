@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -48,29 +50,29 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>{@code HoaDon.phienBan} ({@code @Version}) chặn việc đó: người ghi sau mang số phiên bản
  * cũ, câu UPDATE khớp 0 dòng, và nhận {@code ObjectOptimisticLockingFailureException}.</p>
  *
- * <h2>⚠️ Đối chứng đã chạy — và KHÔNG cho kết quả như dự đoán</h2>
+ * <h2>Hai phép kiểm, và vì sao cần cả hai</h2>
  *
- * <p>Gỡ {@code @Version} khỏi {@code HoaDon} rồi chạy lại lớp này, <b>bất biến vẫn đúng</b>:
- * 2/12 luồng ghi được, {@code da_thanh_toan} = 10.338 = đúng tổng hai dòng thanh toán. Không
- * quan sát được lần mất nào.</p>
+ * <table border="1">
+ *   <tr><th>Phép kiểm</th><th>Dựng lại lỗi khi gỡ {@code @Version}?</th></tr>
+ *   <tr><td>12 luồng cùng gọi {@code ghiNhan}, thả cùng lúc</td>
+ *       <td><b>KHÔNG</b> — bất biến vẫn đúng</td></tr>
+ *   <tr><td>Ép đọc–đọc–ghi–ghi bằng hai giao dịch điều khiển tay</td>
+ *       <td><b>CÓ</b> — 2/2 bên thành công, tiền chỉ tăng 1.000 thay vì 2.000</td></tr>
+ * </table>
  *
- * <p>Nghĩa là kịch bản mất tiền ở trên <b>chưa được chứng minh là xảy ra thật</b> — nó suy ra
- * từ đọc mã. Nhiều khả năng khoá dòng của InnoDB, cộng với việc mỗi giao dịch chỉ chạy câu
- * SELECT khi tới lượt mình, đã xếp các lần đọc ra sau các lần ghi trước đó.</p>
+ * <p>Thả 12 luồng cùng lúc <b>không</b> bảo đảm hai bên cùng <i>đọc xong</i> trước khi bên nào
+ * <i>kịp ghi</i> — mà đó là điều kiện duy nhất làm mất bản ghi. Mỗi luồng còn phải xin kết nối
+ * từ bể, mở giao dịch, rồi mới chạy câu SELECT; dưới tranh chấp, các lần đọc thường bị xếp ra
+ * sau các lần ghi trước đó.</p>
  *
- * <p><b>Nhưng một lần không tái hiện được cũng không chứng minh là an toàn.</b> Cái đang bảo
- * vệ hệ thống là cách một hệ quản trị CSDL cụ thể xếp hàng, không phải điều gì trong mã. Giữ
- * {@code @Version} để biến tính chất <b>tình cờ</b> đó thành bảo đảm <b>tường minh</b>.</p>
+ * <p><b>Vì sao vẫn giữ phép kiểm 12 luồng.</b> Nó không chứng minh được khoá lạc quan, nhưng
+ * nó canh bất biến trung tâm dưới một kiểu tải khác — đua tự nhiên thay vì đua dàn dựng — và
+ * đó là kiểu tải giống thực tế hơn.</p>
  *
- * <p><b>Vậy lớp này còn kiểm gì?</b> Nó kiểm bất biến trung tâm <b>dưới tranh chấp</b> — điều
- * mà suốt tám phase chưa phép kiểm nào chạm tới, vì
- * {@code KiemTraBatBienThanhToanTest} chỉ chạy trên dữ liệu đã đứng yên. Nó không còn được
- * quảng cáo là "bằng chứng có lỗi", vì nó không phải.</p>
- *
- * <p><b>Hai lần phép kiểm này từng xanh rỗng trước khi dùng được:</b> bản đầu dùng 2 luồng —
- * hai luồng thả cùng lúc vẫn chạy nối đuôi nên không có tranh chấp nào để bắt; và lần kiểm
- * "còn {@code @Version} không" bằng {@code -match '@Version'} lại khớp cả chữ trong javadoc
- * nên báo là còn trong khi đã gỡ. Bài học 43.5, lần thứ mười và mười một.</p>
+ * <p><b>Bài học 43.5, lần thứ mười.</b> Bản đầu của lớp này dùng 2 luồng và xanh cả khi đã gỡ
+ * {@code @Version}. Suýt nữa tôi kết luận rằng lỗi không có thật và <b>rút lại một khẳng định
+ * đúng</b>. Một phép kiểm không đỏ chưa chứng minh được là không có lỗi — nó có thể chỉ đang
+ * không chạm tới điều kiện gây lỗi.</p>
  *
  * <p><b>Điều kiện chạy:</b> cần MySQL đang chạy tại {@code localhost:3306}.</p>
  *
@@ -96,6 +98,9 @@ class KiemTraDongThoiThanhToanTest {
 
     @Autowired
     private ThanhToanRepository thanhToanRepository;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     /**
      * Số thu ngân cùng bấm một lúc.
@@ -165,6 +170,114 @@ class KiemTraDongThoiThanhToanTest {
                     .as("Phải có ít nhất một luồng ghi được, nếu không phép kiểm này "
                             + "xanh một cách rỗng")
                     .isGreaterThanOrEqualTo(1);
+        } finally {
+            donDep(id, daThuBanDau, conNoBanDau, trangThaiBanDau);
+        }
+    }
+
+    /**
+     * ⭐ ÉP ĐÚNG THỨ TỰ ĐỌC–ĐỌC–GHI–GHI.
+     *
+     * <p>Phép kiểm ở trên thả 12 luồng rồi <i>mong</i> chúng giao nhau. Mong là không đủ: nó đã
+     * xanh cả khi gỡ {@code @Version}, nên tự nó không chứng minh được gì về khoá lạc quan.</p>
+     *
+     * <p>Lớp mất bản ghi chỉ xảy ra khi <b>cả hai bên cùng ĐỌC xong trước khi bên nào kịp
+     * GHI</b>. Ở đây thứ tự đó được ép bằng hai chốt chặn, không để cho may rủi:</p>
+     *
+     * <pre>
+     *   T1: mở giao dịch, đọc hóa đơn ──┐
+     *   T2: mở giao dịch, đọc hóa đơn ──┤ (cả hai đọc xong mới thả tiếp)
+     *   T1: ghi +1000, commit         ←─┘
+     *   T2: ghi +1000, commit
+     * </pre>
+     *
+     * <p>Cả hai bên đều tính {@code daThanhToan = giá_trị_đọc_được + 1000} từ <b>cùng một</b>
+     * giá trị đọc. Nên:</p>
+     *
+     * <ul>
+     *   <li><b>Có {@code @Version}:</b> bên commit sau mang số phiên bản cũ, UPDATE khớp 0 dòng
+     *       → {@code ObjectOptimisticLockingFailureException}. Đúng <b>một</b> bên thành công.</li>
+     *   <li><b>Không có {@code @Version}:</b> cả hai cùng thành công, cùng ghi
+     *       {@code gốc + 1000}, lần ghi sau đè lần trước — <b>mất một lần cộng</b>.</li>
+     * </ul>
+     *
+     * <p><b>Đối chứng đã chạy và ĐÃ ĐỎ:</b> gỡ {@code @Version} → {@code soThanhCong = 2} trong
+     * khi số tiền chỉ tăng đúng 1000, tức mất một lần cộng — phép kiểm đỏ ngay ở khẳng định
+     * đầu tiên. Gắn lại → xanh. <b>Đây mới là bằng chứng</b> cho điều mà báo cáo đánh giá ban
+     * đầu chỉ suy ra từ đọc mã.</p>
+     *
+     * <p>Phép kiểm này đi thẳng vào {@code HoaDonRepository} chứ không qua
+     * {@code ThanhToanService}, vì cần điều khiển thời điểm mở/đóng giao dịch — thứ mà gọi một
+     * hàm {@code @Transactional} từ bên ngoài không làm được. Nó kiểm đúng một điều:
+     * <b>mẫu đọc–sửa–ghi trên {@code HoaDon} có được bảo vệ không.</b></p>
+     */
+    @Test
+    @DisplayName("Ép đọc–đọc–ghi–ghi: khoá lạc quan phải từ chối bên ghi sau")
+    void epDocDocGhiGhi_benGhiSauBiTuChoi() throws Exception {
+        HoaDon hoaDon = chonHoaDonConNo();
+        Long id = hoaDon.getId();
+
+        BigDecimal daThuBanDau = khongNull(hoaDon.getDaThanhToan());
+        BigDecimal conNoBanDau = hoaDon.getConNo();
+        TrangThaiHoaDon trangThaiBanDau = hoaDon.getTrangThai();
+        BigDecimal buoc = BigDecimal.valueOf(1000);
+
+        CountDownLatch daDocXong = new CountDownLatch(2);
+        CountDownLatch choGhi = new CountDownLatch(1);
+        ExecutorService may = Executors.newFixedThreadPool(2);
+
+        Callable<Boolean> motBen = () -> {
+            TransactionTemplate mau = new TransactionTemplate(transactionManager);
+            try {
+                mau.execute(tt -> {
+                    HoaDon hd = hoaDonRepository.findById(id).orElseThrow();
+                    BigDecimal doiDuoc = khongNull(hd.getDaThanhToan());
+
+                    daDocXong.countDown();
+                    try {
+                        // Chỉ ghi khi CẢ HAI bên đã đọc xong
+                        choGhi.await(30, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+
+                    hd.setDaThanhToan(doiDuoc.add(buoc));
+                    hoaDonRepository.saveAndFlush(hd);
+                    return null;
+                });
+                return true;
+            } catch (Exception ex) {
+                return false;
+            }
+        };
+
+        Future<Boolean> a = may.submit(motBen);
+        Future<Boolean> b = may.submit(motBen);
+
+        daDocXong.await(30, TimeUnit.SECONDS);
+        choGhi.countDown();
+
+        int soThanhCong = (a.get(60, TimeUnit.SECONDS) ? 1 : 0)
+                + (b.get(60, TimeUnit.SECONDS) ? 1 : 0);
+        may.shutdown();
+        may.awaitTermination(10, TimeUnit.SECONDS);
+
+        try {
+            HoaDon sau = hoaDonRepository.findById(id).orElseThrow();
+            BigDecimal tangThem = khongNull(sau.getDaThanhToan()).subtract(daThuBanDau);
+
+            System.out.printf("[DO] ep doc-doc-ghi-ghi: %d/2 ben thanh cong | tang them %s "
+                    + "(moi ben cong %s)%n", soThanhCong, tangThem, buoc);
+
+            assertThat(soThanhCong)
+                    .as("Hai bên cùng đọc một giá trị rồi cùng ghi thì chỉ MỘT bên được nhận. "
+                            + "Nếu cả hai cùng thành công mà số tiền chỉ tăng %s thì một lần "
+                            + "cộng đã bị nuốt mất", buoc)
+                    .isEqualTo(1);
+
+            assertThat(tangThem)
+                    .as("Đúng một bên thành công nên số tiền phải tăng đúng một bước")
+                    .isEqualByComparingTo(buoc);
         } finally {
             donDep(id, daThuBanDau, conNoBanDau, trangThaiBanDau);
         }
