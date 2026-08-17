@@ -1,6 +1,30 @@
 server:
   port: 8080
 
+  servlet:
+    session:
+      # Phien tu het han sau 30 phut khong thao tac. Truoc day khong khai gi nen
+      # dung mac dinh 30 phut cua Tomcat - dung con so nhung la TINH CO, khong
+      # phai mot quyet dinh. Khai ra de no thanh quyet dinh co the doi va co the
+      # doc duoc.
+      timeout: 30m
+      cookie:
+        # Chan JavaScript doc cookie phien: co lo hong XSS thi ke tan cong cung
+        # khong lay duoc phien cua nguoi dang dang nhap.
+        http-only: true
+        # Chan gui cookie khi request den tu trang khac - mot lop chong CSRF nua
+        # ben canh token cua Spring Security.
+        same-site: strict
+        # ⚠️ CO Y de false: he thong chay HTTP tren localhost cho do an. Dua ra
+        # moi truong that phai bat len, neu khong cookie phien di tren mang dang ro.
+        secure: false
+
+  error:
+    # Khong lo duong dan noi bo va thong diep ngoai le ra trang loi cho nguoi dung.
+    include-message: never
+    include-stacktrace: never
+    include-exception: false
+
 spring:
   application:
     name: vnpt-billing

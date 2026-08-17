@@ -45,18 +45,43 @@ public class NhatKyServiceImpl implements NhatKyService {
     }
 
     /**
-     * Lấy IP người gọi. Ưu tiên header {@code X-Forwarded-For} để vẫn đúng khi hệ
-     * thống chạy sau proxy hoặc bộ cân bằng tải; nếu không có thì lấy IP kết nối trực tiếp.
+     * Lấy IP người gọi — <b>chỉ</b> từ kết nối thật, không tin header nào.
+     *
+     * <h2>Vì sao bỏ {@code X-Forwarded-For}</h2>
+     *
+     * <p>Bản trước ưu tiên header {@code X-Forwarded-For} "để vẫn đúng khi chạy sau proxy".
+     * Nhưng hệ thống này chạy trực tiếp, <b>không có proxy nào ở trước</b> — nên header đó
+     * không do hạ tầng đặt, mà do <b>chính người gửi request tự khai</b>. Hai hậu quả, cả hai
+     * đều đã dựng lại được:</p>
+     *
+     * <p><b>1. Phá được mọi đường ghi của hệ thống.</b> Cột {@code dia_chi_ip} chỉ dài 45 ký
+     * tự, và {@code ghiNhatKy} chạy <b>chung giao dịch</b> với nghiệp vụ. Gửi một header dài
+     * 48 ký tự kèm bất kỳ thao tác nào là MySQL từ chối câu INSERT nhật ký, cả giao dịch bị
+     * cuộn lại, và <b>việc nghiệp vụ không được lưu</b>. Đã thử: thêm khách hàng kèm
+     * {@code X-Forwarded-For: AAAA…(48)} → HTTP 500, số khách hàng giữ nguyên 50. Lặp lại được
+     * vô hạn, trên cả 26 chỗ gọi {@code ghiNhatKy}.</p>
+     *
+     * <p><b>2. Giả mạo được chính sổ nhật ký.</b> Người thao tác tự chọn được IP mà nhật ký ghi
+     * lại cho mình — kể cả đặt thành IP của người khác. Một cột ghi vết mà đối tượng bị ghi vết
+     * tự khai thì không dùng để truy trách nhiệm được.</p>
+     *
+     * <p>Muốn dùng lại header này khi thật sự đặt sau proxy thì phải: chỉ tin khi
+     * {@code getRemoteAddr()} nằm trong danh sách proxy tin cậy, kiểm định dạng IP, rồi mới cắt
+     * độ dài. Chưa có proxy thì chưa cần, và cái chưa cần mà vẫn để thì chỉ còn là lỗ hổng.</p>
      */
     private String layDiaChiIp() {
         if (!(RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attrs)) {
             return null;
         }
-        HttpServletRequest request = attrs.getRequest();
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
+        String ip = attrs.getRequest().getRemoteAddr();
+        // Cắt phòng xa: IPv6 dạng dài nhất vẫn dưới 45 ký tự, nhưng một cột ghi vết
+        // không bao giờ được phép làm hỏng nghiệp vụ mà nó chỉ đi kèm.
+        if (ip != null && ip.length() > DO_DAI_IP_TOI_DA) {
+            ip = ip.substring(0, DO_DAI_IP_TOI_DA);
         }
-        return request.getRemoteAddr();
+        return ip;
     }
+
+    /** Bằng đúng {@code dia_chi_ip VARCHAR(45)} trong {@code schema.sql}. */
+    private static final int DO_DAI_IP_TOI_DA = 45;
 }

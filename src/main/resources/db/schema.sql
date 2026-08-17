@@ -46,6 +46,10 @@ CREATE TABLE nguoi_dung (
     vai_tro         ENUM('ADMIN','NHAN_VIEN','KE_TOAN') NOT NULL,
     trang_thai      TINYINT      DEFAULT 1,
     ngay_tao        DATETIME,
+    -- Chong do mat khau: dem so lan nhap sai lien tiep, du nguong thi khoa tam
+    -- tai khoan toi khoa_den_luc. Dang nhap dung mot lan la ca hai ve 0/NULL.
+    so_lan_sai      INT          NOT NULL DEFAULT 0,
+    khoa_den_luc    DATETIME     NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uq_nguoi_dung_ten_dang_nhap (ten_dang_nhap)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

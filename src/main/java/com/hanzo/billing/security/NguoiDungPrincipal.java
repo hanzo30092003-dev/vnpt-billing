@@ -55,9 +55,16 @@ public class NguoiDungPrincipal implements UserDetails {
         return true;
     }
 
+    /**
+     * Tài khoản đang bị khoá tạm vì nhập sai mật khẩu quá nhiều lần thì không cho vào.
+     *
+     * <p>Trả về {@code false} ở đây khiến Spring Security ném {@code LockedException} <b>trước
+     * khi</b> so mật khẩu, nên kẻ dò không phân biệt được "sai mật khẩu" với "đang bị khoá" qua
+     * thời gian phản hồi.</p>
+     */
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !nguoiDung.dangBiKhoa();
     }
 
     @Override

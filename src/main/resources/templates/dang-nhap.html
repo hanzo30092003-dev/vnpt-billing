@@ -34,6 +34,32 @@
                 <span>Bạn đã đăng xuất khỏi hệ thống.</span>
             </div>
 
+            <!--/*
+                Tai khoan bi khoa tam. CO Y noi ro va cho biet con bao nhieu phut:
+                nguoi bi khoa gan nhu luon la nguoi dung that dang boi roi, giau di
+                chi khien ho thu lai lien tuc.
+                Nguoc lai, truong hop "sai mat khau" o tren KHONG noi tai khoan co
+                ton tai hay khong - noi ra la tang ke do mot cong cu liet ke tai
+                khoan co that.
+            */-->
+            <div class="alert alert-warning d-flex align-items-start py-2" th:if="${param.khoa != null}">
+                <i class="bi bi-lock-fill me-2 mt-1"></i>
+                <div>
+                    <strong>Tài khoản đang tạm khoá.</strong>
+                    Nhập sai mật khẩu quá nhiều lần nên hệ thống khoá tạm
+                    <strong th:text="${param.khoa[0]}">15</strong> phút.
+                    Hãy đợi rồi thử lại, hoặc liên hệ quản trị viên để mở khoá ngay.
+                </div>
+            </div>
+
+            <div class="alert alert-secondary d-flex align-items-start py-2" th:if="${param.hethan != null}">
+                <i class="bi bi-clock-history me-2 mt-1"></i>
+                <div>
+                    Phiên làm việc đã kết thúc vì tài khoản này vừa được đăng nhập ở nơi khác,
+                    hoặc để quá lâu không thao tác. Hãy đăng nhập lại.
+                </div>
+            </div>
+
             <!--/* Thymeleaf tự chèn input ẩn chứa CSRF token vào form này */-->
             <form th:action="@{/dang-nhap}" method="post">
                 <div class="mb-3">

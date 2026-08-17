@@ -1,5 +1,6 @@
 package com.hanzo.billing.config;
 
+import com.hanzo.billing.security.XuLyDangNhap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,6 +26,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final XuLyDangNhap xuLyDangNhap;
+
+    public SecurityConfig(XuLyDangNhap xuLyDangNhap) {
+        this.xuLyDangNhap = xuLyDangNhap;
+    }
 
     /** Thuật toán băm mật khẩu; khớp với hash BCrypt trong bảng {@code nguoi_dung}. */
     @Bean
@@ -65,9 +72,11 @@ public class SecurityConfig {
                         .loginProcessingUrl("/dang-nhap")
                         .usernameParameter("tenDangNhap")
                         .passwordParameter("matKhau")
-                        // true = luôn về trang chủ, không nhảy tới URL người dùng gõ dở
-                        .defaultSuccessUrl("/", true)
-                        .failureUrl("/dang-nhap?loi")
+                        // Hai handler này thay cho defaultSuccessUrl/failureUrl: chúng
+                        // vẫn luôn đưa về trang chủ y hệt, nhưng còn đếm số lần nhập
+                        // sai và khoá tạm tài khoản. Xem XuLyDangNhap.
+                        .successHandler(xuLyDangNhap)
+                        .failureHandler(xuLyDangNhap)
                         .permitAll())
 
                 .logout(logout -> logout
@@ -76,6 +85,63 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll())
+
+                // =========================================================
+                // Tiêu đề bảo mật HTTP
+                // =========================================================
+                // Trước đây không khai gì nên chỉ có mặc định tối thiểu của
+                // Spring Security. Bốn tiêu đề dưới đây đều rẻ và đều chặn được
+                // một lớp tấn công cụ thể.
+                .headers(h -> h
+                        // Chặn nhúng trang này vào <iframe> của site khác —
+                        // chống clickjacking: kẻ tấn công phủ một trang trong
+                        // suốt lên nút "Chốt kỳ" rồi dụ người dùng bấm.
+                        .frameOptions(f -> f.deny())
+
+                        // Không gửi kèm đường dẫn đầy đủ khi người dùng bấm sang
+                        // site khác. Đường dẫn ở đây có id khách hàng, id hóa đơn.
+                        .referrerPolicy(r -> r.policy(
+                                org.springframework.security.web.header.writers
+                                        .ReferrerPolicyHeaderWriter.ReferrerPolicy
+                                        .STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+
+                        // Trình duyệt không được tự đoán kiểu nội dung. Thiếu nó,
+                        // một file tải lên có thể bị đoán thành HTML rồi chạy.
+                        .contentTypeOptions(c -> {})
+
+                        // ⚠️ CSP có 'unsafe-inline'. Đó là NHƯỢNG BỘ CÓ THẬT, không
+                        // phải sơ suất: nhiều template có <script> và style="..."
+                        // viết thẳng trong trang, siết hẳn sẽ làm vỡ biểu đồ và
+                        // phần đổi form động. Dù vậy vẫn hơn không có CSP — nó
+                        // chặn được script nạp từ tên miền lạ, tức chặn đúng
+                        // đường mà một lỗ XSS thường dùng để lấy dữ liệu ra ngoài.
+                        // Muốn bỏ 'unsafe-inline' thì phải chuyển hết script nội
+                        // tuyến ra file riêng hoặc gắn nonce — việc của đợt sau.
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; "
+                                        + "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+                                        + "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+                                        + "font-src 'self' https://cdn.jsdelivr.net data:; "
+                                        + "img-src 'self' data:; "
+                                        + "form-action 'self'; "
+                                        + "frame-ancestors 'none'; "
+                                        + "base-uri 'self'")))
+
+                // =========================================================
+                // Quản lý phiên
+                // =========================================================
+                .sessionManagement(sm -> sm
+                        // Cấp id phiên MỚI sau khi đăng nhập thành công. Không có
+                        // dòng này thì id phiên trước lúc đăng nhập vẫn dùng tiếp,
+                        // và ai biết được id đó sẽ dùng ké phiên đã đăng nhập
+                        // (session fixation).
+                        .sessionFixation(sf -> sf.newSession())
+                        // Một tài khoản chỉ giữ MỘT phiên. Người đăng nhập sau đẩy
+                        // người trước ra. Với phần mềm quầy giao dịch đây là điều
+                        // đúng: hai người dùng chung một tài khoản thì không còn
+                        // truy được ai đã làm gì trong sổ nhật ký.
+                        .maximumSessions(1)
+                        .expiredUrl("/dang-nhap?hethan"))
 
                 // Đã đăng nhập nhưng không đủ quyền -> trang 403 thân thiện
                 .exceptionHandling(ex -> ex.accessDeniedPage("/403"));
