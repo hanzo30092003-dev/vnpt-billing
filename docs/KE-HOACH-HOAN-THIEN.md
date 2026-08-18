@@ -261,7 +261,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V2** cột `hanMucTinDung` hết là cột chết | ✅ xong | `bf3c423` |
 | **V3d** phiên + security headers | ✅ xong | `fa8945a` |
 | **V3c** khoá tài khoản sau 5 lần sai | ✅ xong | `fa8945a` |
-| **V3a** màn hình quản lý người dùng | ✅ xong | `<commit-V3a>` |
+| **V3a** màn hình quản lý người dùng | ✅ xong | `d71eee5` |
 | **V3b** đổi mật khẩu | ⬜ **việc tiếp theo** | — |
 | **V4** Flyway + CI | ⬜ chưa làm | — |
 | **V5** đo hiệu năng + VAT ra cấu hình | ⬜ chưa làm | — |
