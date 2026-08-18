@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Người dùng', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-person-badge', 'Quản lý người dùng',
+                'Tạo tài khoản cho nhân viên mới, đổi quyền sử dụng, khoá tài khoản khi có người nghỉ việc.')}"></div>
+        <a class="btn btn-primary" th:href="@{/quan-tri/nguoi-dung/them}">
+            <i class="bi bi-person-plus me-1"></i> Thêm người dùng
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <p class="text-secondary small mb-2">
+                Hệ thống đang có <strong th:text="${#lists.size(danhSach)}">0</strong> tài khoản.
+            </p>
+
+            <!--/*
+                Không có nhánh "danh sách rỗng": muốn mở được màn hình này thì phải đang đăng
+                nhập bằng một tài khoản, nên bảng luôn có ít nhất một dòng. Viết một khối
+                giải thích cho tình huống không xảy ra được là viết mã chết.
+            */-->
+            <div class="table-responsive">
+                <table class="table table-hover bang-du-lieu align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Tên đăng nhập</th>
+                        <th>Họ và tên</th>
+                        <th>Email</th>
+                        <th>Quyền sử dụng</th>
+                        <th>Tình trạng</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="nd : ${danhSach}">
+                        <td>
+                            <code th:text="${nd.tenDangNhap}"></code>
+                            <span class="badge text-bg-light border ms-1"
+                                  th:if="${idDangDangNhap != null and idDangDangNhap == nd.id}">chính bạn</span>
+                        </td>
+                        <td th:text="${nd.hoTen}"></td>
+                        <td th:text="${nd.email}"></td>
+                        <td th:text="${nd.vaiTro.nhan}"></td>
+
+                        <!--/*
+                            Ba tình trạng, KHÔNG phải hai. Hai loại khoá khác hẳn nhau về
+                            cách gỡ, nên phải nhìn ra được từ bảng:
+                              - Đang dùng
+                              - Đã khoá        : quản trị viên khoá tay, chỉ quản trị viên mở
+                              - Tạm khoá       : nhập sai mật khẩu 5 lần, tự mở sau 15 phút
+                        */-->
+                        <td>
+                            <span class="badge text-bg-secondary" th:unless="${nd.dangHoatDong()}">Đã khoá</span>
+                            <span class="badge text-bg-warning"
+                                  th:if="${nd.dangHoatDong() and nd.dangBiKhoa()}"
+                                  th:text="'Tạm khoá tới ' + ${#temporals.format(nd.khoaDenLuc, 'HH:mm')}"></span>
+                            <span class="badge text-bg-success"
+                                  th:if="${nd.dangHoatDong() and !nd.dangBiKhoa()}">Đang dùng</span>
+                        </td>
+
+                        <td th:text="${nd.ngayTao != null} ? ${#temporals.format(nd.ngayTao, 'dd/MM/yyyy')} : ''"></td>
+
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary"
+                               th:href="@{/quan-tri/nguoi-dung/{id}/sua(id=${nd.id})}" title="Sửa">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <!--/*
+                                Nút khoá KHÔNG hiện trên dòng của chính người đang đăng nhập.
+                                Đây chỉ là phép lịch sự với mắt nhìn — chốt chặn thật nằm
+                                trong NguoiDungServiceImpl, nên gửi thẳng request vẫn bị từ chối.
+                            */-->
+                            <form method="post" class="d-inline form-thao-tac"
+                                  th:if="${nd.dangHoatDong() and (idDangDangNhap == null or idDangDangNhap != nd.id)}"
+                                  th:action="@{/quan-tri/nguoi-dung/{id}/khoa(id=${nd.id})}">
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        th:data-xac-nhan="'Khoá tài khoản ' + ${nd.tenDangNhap}
+                                            + ' của ' + ${nd.hoTen}
+                                            + '? Người này sẽ không đăng nhập được nữa, và nếu đang mở phần mềm thì bị thoát ra ngay.'"
+                                        data-xac-nhan-tieu-de="Khoá tài khoản"
+                                        title="Khoá tài khoản">
+                                    <i class="bi bi-lock"></i>
+                                </button>
+                            </form>
+
+                            <form method="post" class="d-inline form-thao-tac"
+                                  th:if="${!nd.dangHoatDong() or nd.dangBiKhoa()}"
+                                  th:action="@{/quan-tri/nguoi-dung/{id}/mo-khoa(id=${nd.id})}">
+                                <button type="button" class="btn btn-sm btn-outline-success"
+                                        th:data-xac-nhan="'Mở khoá tài khoản ' + ${nd.tenDangNhap}
+                                            + '? Người này đăng nhập lại được ngay bằng mật khẩu cũ.'"
+                                        data-xac-nhan-tieu-de="Mở khoá tài khoản"
+                                        title="Mở khoá tài khoản">
+                                    <i class="bi bi-unlock"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="small text-secondary mt-2 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Tài khoản không xoá được, chỉ khoá lại. Tên người thao tác đã ký trong sổ nhật ký,
+                trong phiếu thu tiền và trong lịch sử thuê bao — xoá tài khoản là xoá luôn dấu vết
+                ai đã làm việc gì.
+            </p>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

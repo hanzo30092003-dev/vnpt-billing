@@ -5,9 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 /**
  * Cấu hình bảo mật thật của hệ thống (thay cấu hình tạm {@code permitAll} ở Phase 0).
@@ -39,8 +42,36 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Sổ ghi các phiên đang mở, tra được theo người dùng.
+     *
+     * <p><b>Vì sao phải khai tường minh.</b> {@code maximumSessions(1)} vẫn chạy được với một
+     * sổ nội bộ mà Spring tự dựng, nhưng sổ đó không ai lấy ra được. Màn hình quản lý người
+     * dùng cần lấy ra: khoá một tài khoản mà <b>không đá phiên đang mở của họ</b> thì nút
+     * "Khoá" chỉ có tác dụng từ lần đăng nhập sau — người đang mở máy vẫn thao tác bình
+     * thường, có thể tới hết ca. Đó là khoá trên giấy.</p>
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    /**
+     * Chuyển sự kiện tạo/huỷ phiên của Tomcat sang Spring Security.
+     *
+     * <p>Thiếu bean này thì {@link SessionRegistry} chỉ có đường ghi vào mà không có đường xoá
+     * ra: phiên đã đăng xuất hoặc đã hết hạn vẫn nằm lại trong sổ mãi mãi, vừa phình bộ nhớ
+     * vừa làm việc tra "tài khoản này đang mở phiên nào" trả về cả những phiên đã chết.</p>
+     */
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   SessionRegistry sessionRegistry)
+            throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         // Tài nguyên tĩnh và trang đăng nhập: công khai
@@ -161,6 +192,9 @@ public class SecurityConfig {
                         // đúng: hai người dùng chung một tài khoản thì không còn
                         // truy được ai đã làm gì trong sổ nhật ký.
                         .maximumSessions(1)
+                        // Dùng sổ phiên khai ở trên thay cho sổ nội bộ, để màn hình
+                        // quản lý người dùng đá được phiên của tài khoản vừa bị khoá.
+                        .sessionRegistry(sessionRegistry)
                         .expiredUrl("/dang-nhap?hethan"))
 
                 // Đã đăng nhập nhưng không đủ quyền -> trang 403 thân thiện

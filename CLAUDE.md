@@ -34,7 +34,7 @@ Nạp lại dữ liệu mẫu — **XOÁ SẠCH CSDL** (`schema.sql` mở đầu
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-Chạy test (282 test, cần MySQL đang chạy):
+Chạy test (298 test, cần MySQL đang chạy):
 
 ```bash
 mvnw test
@@ -176,6 +176,16 @@ dump** `data-van-hanh.sql`.
 * **`NhatKyServiceImpl` không được tin `X-Forwarded-For` lại.** Hệ thống chạy không proxy nên
   header đó do người gửi tự khai; nó từng phá được **mọi** đường ghi (cột 45 ký tự + ghi nhật
   ký chung giao dịch với nghiệp vụ). Xem javadoc của `layDiaChiIp`.
+* **Phân hệ quản trị luôn phải còn ít nhất MỘT quản trị viên đang hoạt động.** Đây là bất
+  biến duy nhất mà vi phạm thì không sửa được bằng chính phần mềm — khoá hoặc hạ quyền quản
+  trị viên cuối cùng là mất luôn màn hình dùng để sửa. Cùng nhóm: không tự khoá và không tự
+  đổi quyền của chính mình. `NguoiDungServiceTest` kiểm cả ba, kèm đối chứng.
+* **Khoá tài khoản phải đá được phiên đang mở**, không chỉ chặn lần đăng nhập sau. Cần
+  `SessionRegistry` khai tường minh trong `SecurityConfig` (sổ nội bộ của `maximumSessions(1)`
+  không lấy ra được). Bỏ `.sessionRegistry(...)` là nút Khoá thành khoá trên giấy mà mọi test
+  Mockito vẫn xanh — chỉ `test-auth.ps1` mục 9.5 bắt được.
+* **Tên đăng nhập không sửa được sau khi tạo** — nó đã ký trong sổ nhật ký. Mật khẩu để trống
+  lúc sửa nghĩa là giữ nguyên, không phải xoá.
 * **Báo cáo phân quyền theo NỘI DUNG, không theo tiền tố đường dẫn.** Báo cáo có số tiền của
   khách → `KE_TOAN` + `ADMIN`, cùng luật với `/hoa-don` và `/cong-no`. Nới lại thành cả cụm
   `/bao-cao/**` là mở lại đúng lỗ hổng cũ. `test-auth.ps1` mục 8 canh việc này.

@@ -145,10 +145,10 @@ tức gần một nửa nghiệp vụ của hệ thống.
 Gạch đầu dòng đã soạn sẵn ở [`PHASE-7-REPORT.md` mục 10](PHASE-7-REPORT.md) — bạn viết theo đó.
 **Ước 1–2 ngày.** Đây là việc của bạn, không phải của tôi.
 
-### 📸 N2. 65 ảnh màn hình chưa chụp
+### 📸 N2. 68 ảnh màn hình chưa chụp
 
-[`danh-sach-anh-chup.md`](danh-sach-anh-chup.md) liệt kê 62 ảnh + 3 ảnh mới của đợt làm lại
-giao diện. **Toàn bộ ảnh cũ (nếu có) đã hết dùng được** vì giao diện vừa đổi hết.
+[`danh-sach-anh-chup.md`](danh-sach-anh-chup.md) liệt kê 62 ảnh + 3 ảnh của đợt làm lại giao
+diện + 3 ảnh của màn hình quản lý người dùng. **Toàn bộ ảnh cũ (nếu có) đã hết dùng được** vì giao diện vừa đổi hết.
 
 ⚠️ **Chỉ chụp SAU khi đóng băng mã.** Chụp trước rồi còn sửa giao diện là chụp lại từ đầu.
 Ước **1 ngày**.
@@ -221,8 +221,8 @@ nói rõ **biết là thiếu** và **thiếu vì sao**. Biết mình thiếu g�
 
 | # | Tiêu chí | Ngưỡng |
 |---|---|---|
-| 1 | `mvnw test` | ≥ 280, 0 lỗi *(277 hiện tại + test đồng thời + test hạn mức)* |
-| 2 | 8 script giao diện | ≥ 190, 0 sai |
+| 1 | `mvnw test` | ≥ 298, 0 lỗi *(277 lúc lập kế hoạch + đồng thời + hạn mức + quản lý người dùng)* |
+| 2 | 8 script giao diện | ≥ 200, 0 sai |
 | 3 | `python scripts/kiem-tu-ngu.py` | 0 |
 | 4 | `python scripts/kiem-giao-dien.py` | 0 |
 | 5 | Ba bất biến (sổ cái · thanh toán · điều hướng) | 0 lệch |
@@ -230,7 +230,7 @@ nói rõ **biết là thiếu** và **thiếu vì sao**. Biết mình thiếu g�
 | 7 | `reset` chạy hai lần | giống hệt từng dòng |
 | 8 | Clone kho về thư mục mới, làm theo README | chạy được |
 | 9 | Kỳ 8/2026 rỗng · kỳ 6, 7 giữ 0 thanh toán | ✓ |
-| 10 | 65 ảnh chụp trên bản mã đã đóng băng | đủ |
+| 10 | 68 ảnh chụp trên bản mã đã đóng băng | đủ |
 
 Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm nay, bất biến trung tâm của đồ
 án mới chỉ được chứng minh **khi có một người dùng tại một thời điểm**.
@@ -261,15 +261,43 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V2** cột `hanMucTinDung` hết là cột chết | ✅ xong | `bf3c423` |
 | **V3d** phiên + security headers | ✅ xong | `fa8945a` |
 | **V3c** khoá tài khoản sau 5 lần sai | ✅ xong | `fa8945a` |
-| **V3a** màn hình quản lý người dùng | ⬜ **việc tiếp theo** | — |
-| **V3b** đổi mật khẩu | ⬜ chưa làm | — |
+| **V3a** màn hình quản lý người dùng | ✅ xong | `<commit-V3a>` |
+| **V3b** đổi mật khẩu | ⬜ **việc tiếp theo** | — |
 | **V4** Flyway + CI | ⬜ chưa làm | — |
 | **V5** đo hiệu năng + VAT ra cấu hình | ⬜ chưa làm | — |
 | **V6** kiểm bàn phím | ⬜ chưa làm | — |
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
 | **N1** báo cáo mục B, C, D | ⬜ chưa làm | — |
-| **N2** 65 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
+| **N2** 68 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
 | **N3** quyết cách xử lý bảng tuổi nợ | ⬜ chưa quyết | — |
+
+### Ghi chú của V3a — hai thứ kế hoạch không nói tới
+
+**1. Khoá tài khoản phải đá được phiên đang mở.** Kế hoạch chỉ viết *"thêm/sửa/khoá tài
+khoản"*. Nhưng một nút Khoá chỉ đặt `trang_thai = 0` thì **chỉ có tác dụng từ lần đăng nhập
+sau** — người vừa bị khoá vẫn ngồi thao tác tiếp tới hết ca. Đó là khoá trên giấy, và nó phá
+đúng lý do người ta bấm nút đó: có người vừa nghỉ việc.
+
+Cách xử lý: khai tường minh `SessionRegistry` + `HttpSessionEventPublisher` trong
+`SecurityConfig` (trước đây `maximumSessions(1)` dùng một sổ nội bộ **không ai lấy ra được**),
+rồi `NguoiDungServiceImpl` đánh dấu hết hạn mọi phiên của người bị khoá. Dựng lại được bằng
+`test-auth.ps1` mục 9.5: một phiên thật đang mở, khoá từ phiên khác, phiên kia bị đưa về trang
+đăng nhập ngay yêu cầu kế tiếp.
+
+**2. Bất biến "luôn còn ít nhất một quản trị viên đang hoạt động".** Đây là bất biến duy nhất
+của phân hệ này mà vi phạm thì **không sửa được bằng chính phần mềm**: khoá nốt quản trị viên
+cuối cùng, hoặc hạ quyền người đó, là không còn ai mở được màn hình quản lý người dùng — kể cả
+người vừa gây ra. Đường ra duy nhất khi đó là mở CSDL lên gõ SQL tay, tức đúng thứ việc V3a
+sinh ra để không phải làm nữa. Cùng nhóm với nó: không tự khoá và không tự đổi quyền của chính
+mình.
+
+**Đối chứng đã chạy** (bài học 43.5, lần thứ mười một): phá ba chốt chặn — bỏ `expireNow()`,
+đổi `conLai <= 1` thành `<= 0`, vô hiệu hoá phép kiểm tự khoá — thì **đúng 4 phép kiểm dự đoán
+trước** chuyển đỏ và không phép kiểm nào khác. Khôi phục thì 16/16 xanh lại.
+
+**Nợ để lại:** `test-auth.ps1` mục 9 tạo tài khoản `kiemthu01` và để nó ở trạng thái **đã
+khoá** (chạy lại nhiều lần vẫn ra đúng trạng thái đó). Sau `reset` thì tài khoản này biến mất,
+nên **chạy script trước, chụp ảnh sau** nếu muốn ảnh #66 có đủ ba huy hiệu tình trạng.
 
 ### Việc phát sinh ngoài kế hoạch, đã làm
 
@@ -293,9 +321,10 @@ luôn ở bước đó.
 
 | | Trước đợt | Bây giờ |
 |---|---:|---:|
-| `mvnw test` | 277 | **282** |
-| Phép kiểm giao diện | 177 | **189** |
+| `mvnw test` | 277 | **298** |
+| Phép kiểm giao diện | 177 | **200** |
 | Lớp test cần MySQL | 8 | 11 |
+| Ảnh cần chụp | 65 | **68** |
 
 ---
 

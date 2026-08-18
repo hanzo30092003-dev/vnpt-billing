@@ -14,4 +14,10 @@ public interface NguoiDungRepository extends JpaRepository<NguoiDung, Long> {
     boolean existsByTenDangNhap(String tenDangNhap);
 
     List<NguoiDung> findByVaiTro(VaiTro vaiTro);
+
+    /**
+     * Đếm tài khoản theo vai trò và trạng thái — dùng để canh bất biến "luôn còn ít nhất
+     * một quản trị viên đang hoạt động" trước khi khoá hoặc hạ quyền ai đó.
+     */
+    long countByVaiTroAndTrangThai(VaiTro vaiTro, Boolean trangThai);
 }

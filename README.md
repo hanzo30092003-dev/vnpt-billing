@@ -24,7 +24,7 @@ dõi công nợ và báo cáo doanh thu.
 | **Công nợ** | `/cong-no` | Bảng tuổi nợ 5 nhóm, danh sách nợ, đề xuất tạm ngừng |
 | **Báo cáo thống kê** | `/bao-cao` | 7 báo cáo, mỗi báo cáo xuất Excel và in được |
 
-Danh sách đầy đủ 62 màn hình cần chụp cho báo cáo: [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md).
+Danh sách đầy đủ 68 màn hình cần chụp cho báo cáo: [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md).
 
 ---
 
@@ -137,6 +137,10 @@ Mật khẩu đều là `123456`.
 Phân quyền kiểm **ở máy chủ**, không chỉ ẩn menu — gõ thẳng đường dẫn không có quyền vẫn ra
 trang 403.
 
+Thêm tài khoản mới, đổi quyền, đặt lại mật khẩu hay khoá tài khoản đều làm **trên giao diện**
+tại `admin` › *Quản trị › Người dùng* — không phải gõ SQL tay như trước. Khoá một tài khoản
+là người đó bị thoát ra **ngay lúc đó**, không đợi tới lần đăng nhập sau.
+
 ---
 
 ## 6. Dữ liệu mẫu kèm theo
@@ -190,7 +194,7 @@ số khác và mọi con số trong báo cáo mất khả năng tái lập.
 mvnw test
 ```
 
-**282 test.** Phần lớn chạy độc lập không cần CSDL; 11 lớp cần MySQL đang chạy vì chúng kiểm
+**298 test.** Phần lớn chạy độc lập không cần CSDL; 11 lớp cần MySQL đang chạy vì chúng kiểm
 bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng sẵn — kể cả bất biến thanh toán
 **dưới tải đồng thời**.
 
@@ -201,11 +205,11 @@ bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng 
 
 ### 7.2. Script kiểm thử giao diện
 
-**8 script** trong `scripts/`, tổng **189 phép kiểm**, chạy khi ứng dụng đang bật:
+**8 script** trong `scripts/`, tổng **200 phép kiểm**, chạy khi ứng dụng đang bật:
 
 | Script | Kiểm | Nội dung |
 |---|---:|---|
-| `test-auth.ps1` | 16 | Đăng nhập, CSRF, phân quyền 3 vai trò, phạm vi báo cáo theo nội dung |
+| `test-auth.ps1` | 27 | Đăng nhập, CSRF, phân quyền 3 vai trò, phạm vi báo cáo theo nội dung, quản lý người dùng |
 | `test-kh.ps1` | 14 | Khách hàng: tạo, sửa, validation, trùng giấy tờ |
 | `test-tb.ps1` | 18 | Thuê bao: đăng ký, chuyển trạng thái, đổi gói |
 | `test-muc-F.ps1` | 17 | Bất biến thanh toán và công nợ |
@@ -260,7 +264,7 @@ vnpt-billing/
     │           ├── fragments/layout.html
     │           ├── error/{400,403,404,500}.html
     │           └── <phân-hệ>/*.html
-    └── test/java/com/hanzo/billing/     # 275 test
+    └── test/java/com/hanzo/billing/     # 298 test
 ```
 
 ---
@@ -273,7 +277,7 @@ vnpt-billing/
 | [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) | Mô tả 15 bảng + 2 view (mục 6: cảnh báo quy đổi đơn vị DATA) |
 | [`docs/kich-ban-kiem-thu.md`](docs/kich-ban-kiem-thu.md) | 70 ca kiểm thủ công + tổng hợp test tự động |
 | [`docs/kich-ban-demo.md`](docs/kich-ban-demo.md) | 12 bước demo 18 phút, kèm câu hỏi hội đồng |
-| [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md) | 62 ảnh màn hình cần chụp cho báo cáo |
+| [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md) | 68 ảnh màn hình cần chụp cho báo cáo |
 | [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) | Số đo ghi hàng loạt CDR và chỉ mục |
 | [`docs/mau-cdr.csv`](docs/mau-cdr.csv) | File CSV mẫu cho chức năng nhập CDR |
 | [`scripts/README.md`](scripts/README.md) | Script kiểm thử giao diện |

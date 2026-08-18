@@ -31,6 +31,7 @@ Năm nhóm, xếp theo thứ tự bạn hay dùng trong ngày:
 | **Tính tiền hằng tháng** | Tháng tính tiền · Cuộc gọi & tin nhắn · Chạy tính tiền | Một lần vào đầu mỗi tháng |
 | **Báo cáo** | Báo cáo thống kê | Khi cần xem số liệu |
 | **Danh mục** | Gói cước · Bảng giá | Hiếm — khai một lần rồi để yên |
+| **Quản trị** | Người dùng | Khi có người mới vào làm hoặc nghỉ việc — chỉ quản trị viên thấy nhóm này |
 
 ### Trang chủ có sẵn lối tắt
 
@@ -42,6 +43,39 @@ Ngay dưới các thẻ số liệu là khối **Việc thường làm** với 6
 
 Ngay dưới tiêu đề của **mọi** màn hình đều có một câu nói màn hình đó dùng để làm gì.
 Bảng nào trống cũng nói rõ **vì sao** trống và **bấm đi đâu** tiếp.
+
+### Thêm và khoá tài khoản — chỉ quản trị viên
+
+Menu **Quản trị › Người dùng** (`/quan-tri/nguoi-dung`).
+
+**Có người mới vào làm.** Bấm *Thêm người dùng*, điền tên đăng nhập, họ tên, chọn quyền sử
+dụng và đặt mật khẩu đầu tiên. Báo mật khẩu đó cho người dùng và nhắc họ đổi.
+
+* Tên đăng nhập viết chữ thường không dấu, ví dụ `nhanvien02`. **Đặt xong không đổi được** —
+  vì tên này đã ký trong sổ nhật ký các thao tác.
+* Quyền sử dụng quyết định người đó mở được những màn hình nào; xem lại bảng ở đầu mục 1.
+
+**Có người quên mật khẩu.** Mở tài khoản của họ, gõ mật khẩu mới vào ô *Mật khẩu* rồi Lưu.
+Bỏ trống ô đó nghĩa là giữ nguyên mật khẩu cũ — nên sửa họ tên hay đổi quyền không làm ai
+mất mật khẩu.
+
+**Có người nghỉ việc.** Bấm nút ổ khoá đỏ. Người đó không đăng nhập được nữa, và **nếu đang
+mở phần mềm thì bị thoát ra ngay** chứ không đợi tới lần đăng nhập sau.
+
+**Có người bị khoá mà không hiểu vì sao.** Nhập sai mật khẩu 5 lần liên tiếp là tài khoản bị
+khoá tạm 15 phút — cột *Tình trạng* hiện *Tạm khoá tới HH:mm*. Đợi hết 15 phút là vào lại
+được; không đợi được thì quản trị viên bấm nút ổ khoá xanh để mở ngay.
+
+**Ba việc hệ thống từ chối, và lý do:**
+
+| Việc | Vì sao bị chặn |
+|---|---|
+| Tự khoá tài khoản mình đang dùng | Khoá xong là mất luôn màn hình vừa dùng để khoá |
+| Tự đổi quyền của chính mình | Ngay thao tác kế tiếp đã báo *không đủ quyền*, dễ tưởng phần mềm hỏng |
+| Khoá hoặc hạ quyền **quản trị viên cuối cùng** | Không còn ai vào được màn hình này nữa; đường ra duy nhất là sửa thẳng trong CSDL |
+
+> **Tài khoản không xoá được, chỉ khoá lại.** Tên người thao tác đã ký trong sổ nhật ký, trong
+> phiếu thu tiền và trong lịch sử thuê bao — xoá tài khoản là xoá luôn dấu vết ai đã làm việc gì.
 
 ---
 

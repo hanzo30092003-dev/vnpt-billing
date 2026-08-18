@@ -42,6 +42,7 @@ public class LayoutAdvice {
         TEN_PHAN_HE.put("cong-no", "Công nợ");
         TEN_PHAN_HE.put("giam-tru", "Giảm trừ");
         TEN_PHAN_HE.put("bao-cao", "Báo cáo");
+        TEN_PHAN_HE.put("quan-tri", "Quản trị");
     }
 
     /** Tên hiển thị của các trang con hay gặp. */
@@ -62,6 +63,7 @@ public class LayoutAdvice {
         TEN_TRANG_CON.put("doanh-thu-dich-vu", "Doanh thu theo loại dịch vụ");
         TEN_TRANG_CON.put("top-thue-bao", "Top thuê bao cước cao");
         TEN_TRANG_CON.put("san-luong", "Sản lượng dịch vụ");
+        TEN_TRANG_CON.put("nguoi-dung", "Người dùng");
     }
 
     @ModelAttribute("duongDanHienTai")

@@ -72,4 +72,16 @@ public class NguoiDung {
     public boolean dangBiKhoa() {
         return khoaDenLuc != null && khoaDenLuc.isAfter(LocalDateTime.now());
     }
+
+    /**
+     * Tài khoản chưa bị quản trị viên khoá tay.
+     *
+     * <p>Trả về {@code boolean} nguyên thuỷ chứ không phải {@code Boolean}: cột cho phép
+     * {@code NULL}, mà biểu thức {@code ${!nd.trangThai}} trên template gặp {@code null} là
+     * ném lỗi và làm trắng cả trang. Quy null về "đã khoá" ngay tại đây thì mọi nơi đọc đều
+     * an toàn, và không nơi nào phải nhớ tự phòng.</p>
+     */
+    public boolean dangHoatDong() {
+        return Boolean.TRUE.equals(trangThai);
+    }
 }

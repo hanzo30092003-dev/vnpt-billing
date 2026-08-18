@@ -71,8 +71,22 @@ erDiagram
 | `ho_ten` | VARCHAR(100) | NOT NULL | Họ tên đầy đủ |
 | `email` | VARCHAR(100) | | Thư điện tử liên hệ |
 | `vai_tro` | ENUM | NOT NULL | `ADMIN` / `NHAN_VIEN` / `KE_TOAN` |
-| `trang_thai` | TINYINT | DEFAULT 1 | 1 = đang hoạt động, 0 = đã khóa |
+| `trang_thai` | TINYINT | DEFAULT 1 | 1 = đang hoạt động, 0 = **quản trị viên khoá tay** |
 | `ngay_tao` | DATETIME | | Thời điểm tạo tài khoản |
+| `so_lan_sai` | INT | NOT NULL, DEFAULT 0 | Số lần nhập sai mật khẩu **liên tiếp**; đăng nhập đúng một lần là về 0 |
+| `khoa_den_luc` | DATETIME | | **Khoá tạm** tới thời điểm này do nhập sai 5 lần; `NULL` = không bị khoá |
+
+> **Hai loại khoá, khác nhau về cách gỡ.** `trang_thai = 0` là quản trị viên khoá tay ở màn
+> hình `/quan-tri/nguoi-dung`, chỉ quản trị viên mở lại được. `khoa_den_luc` là khoá tạm 15
+> phút do nhập sai mật khẩu 5 lần liên tiếp, **tự hết** khi qua mốc thời gian.
+>
+> Chọn khoá tạm chứ không khoá vĩnh viễn sau 5 lần sai là có lý do: khoá vĩnh viễn biến chính
+> cơ chế bảo vệ thành một cách *từ chối dịch vụ* — kẻ xấu chỉ cần cố tình nhập sai 5 lần vào
+> tài khoản người khác là khoá được họ vô thời hạn.
+>
+> Cả hai cột đọc ở `NguoiDungPrincipal`: `trang_thai` qua `isEnabled()`, `khoa_den_luc` qua
+> `isAccountNonLocked()` — nên Spring Security từ chối **trước khi** so mật khẩu, và kẻ dò
+> không phân biệt được "sai mật khẩu" với "đang bị khoá" qua thời gian phản hồi.
 
 ### 2.2. `khach_hang` — Khách hàng cá nhân và doanh nghiệp
 
@@ -273,6 +287,14 @@ erDiagram
 | `da_thanh_toan` | DECIMAL(15,2) | DEFAULT 0 | Số tiền đã thu |
 | `con_no` | DECIMAL(15,2) | NOT NULL | Số tiền còn nợ |
 | `trang_thai` | ENUM | NOT NULL | `CHUA_TT` / `TT_MOT_PHAN` / `DA_TT` / `QUA_HAN` |
+| `phien_ban` | BIGINT | DEFAULT 0 | Số phiên bản cho **khoá lạc quan**; mỗi lần ghi tăng 1 |
+
+> **Vì sao có cột `phien_ban`.** Hai thu ngân cùng mở một hóa đơn rồi cùng bấm ghi nhận thanh
+> toán: cả hai đọc `da_thanh_toan` cũ, cả hai cộng thêm phần của mình rồi ghi đè lên nhau —
+> **mất một lần cộng**, tức mất tiền của khách. Với cột này, câu UPDATE của người ghi sau mang
+> theo số phiên bản đã cũ nên khớp 0 dòng, Hibernate ném ngoại lệ và giao dịch bị từ chối
+> thay vì âm thầm ghi đè. Dựng lại được bằng
+> `KiemTraDongThoiThanhToanTest.epDocDocGhiGhi_benGhiSauBiTuChoi`.
 
 > **Ràng buộc quan trọng nhất của CSDL:** `UNIQUE(thue_bao_id, ky_cuoc_id)`.
 > Một thuê bao chỉ được lập đúng một hóa đơn cho mỗi kỳ. Nếu engine tính cước

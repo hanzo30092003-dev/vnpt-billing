@@ -134,14 +134,23 @@
             </div>
 
             <!--/*
-                Mục "Quản trị" đã BỎ ở Phase 7. Nó để href="#" từ Phase 0 và không hề có
-                controller nào phục vụ /quan-tri — tức một nút bấm không phản hồi, nằm suốt
-                bảy phase. Bỏ hẳn thay vì để đó: một mục menu không dẫn đi đâu làm người dùng
-                tưởng chức năng hỏng, còn tệ hơn là không có mục đó.
+                6. Quan tri - it dung nhat nen xep cuoi cung.
 
-                Luật chặn /quan-tri/** trong SecurityConfig CỐ Ý giữ lại: nó vô hại, và nó ghi
-                lại ý định phân quyền cho phân hệ quản trị nếu về sau có người làm tiếp.
+                Muc nay tung bi BO han o Phase 7: tu Phase 0 no de href="#" va khong he co
+                controller nao phuc vu /quan-tri, tuc mot nut bam khong phan hoi nam suot bay
+                phase. Luc do bo hang la dung - mot muc menu khong dan di dau lam nguoi dung
+                tuong chuc nang hong, con te hon la khong co muc do.
+
+                Nay dat lai vi da co chuc nang that dang sau: man hinh quan ly nguoi dung.
+                Luat chan /quan-tri/** trong SecurityConfig giu tu Phase 2 vua khop san.
             */-->
+            <div sec:authorize="hasRole('ADMIN')">
+                <div class="nav-group"><i class="bi bi-shield-lock me-1"></i> Quản trị</div>
+                <a class="nav-item" th:href="@{/quan-tri/nguoi-dung}"
+                   th:classappend="${duongDanHienTai != null and #strings.startsWith(duongDanHienTai, '/quan-tri')} ? 'active'">
+                    <i class="bi bi-person-badge"></i> Người dùng
+                </a>
+            </div>
         </nav>
     </aside>
 

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(${laThemMoi} ? 'Thêm người dùng' : 'Sửa người dùng', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div class="dau-trang">
+            <h2 class="h4 mb-1">
+                <i class="bi bi-person-plus me-2"></i>
+                <span th:text="${laThemMoi} ? 'Thêm người dùng mới' : 'Sửa thông tin người dùng'"></span>
+            </h2>
+            <p th:replace="~{fragments/trang :: moTa(
+                    'Đặt tên đăng nhập, mật khẩu và quyền sử dụng. Quyền quyết định người này mở được những màn hình nào.')}"></p>
+        </div>
+        <a class="btn btn-outline-secondary" th:href="@{/quan-tri/nguoi-dung}">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form th:action="@{/quan-tri/nguoi-dung/luu}" th:object="${nguoiDungForm}"
+                  method="post" novalidate autocomplete="off">
+                <input type="hidden" th:field="*{id}">
+
+                <!--/*
+                    Lỗi nghiệp vụ (trùng tên đăng nhập, tự hạ quyền chính mình, khoá quản trị
+                    viên cuối cùng) hiển thị ở đầu form. Khối này BẮT BUỘC nằm trong thẻ
+                    <form th:object=...>, vì #fields chỉ hoạt động trong phạm vi một đối
+                    tượng đang bind.
+                */-->
+                <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span th:each="loi : ${#fields.globalErrors()}" th:text="${loi}"></span>
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="tenDangNhap">
+                            Tên đăng nhập <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="tenDangNhap"
+                               th:field="*{tenDangNhap}" th:readonly="${!laThemMoi}"
+                               th:classappend="${#fields.hasErrors('tenDangNhap')} ? 'is-invalid'">
+                        <div class="form-text" th:if="${laThemMoi}">
+                            Chữ thường không dấu, có thể kèm chữ số — ví dụ nhanvien02.
+                            Đặt xong không đổi được.
+                        </div>
+                        <div class="form-text" th:unless="${laThemMoi}">
+                            Tên đăng nhập không sửa được, vì nó đã ký trong sổ nhật ký các thao tác.
+                        </div>
+                        <div class="invalid-feedback" th:errors="*{tenDangNhap}"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="vaiTro">
+                            Quyền sử dụng <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="vaiTro" th:field="*{vaiTro}"
+                                th:classappend="${#fields.hasErrors('vaiTro')} ? 'is-invalid'">
+                            <option th:each="v : ${danhSachVaiTro}"
+                                    th:value="${v}" th:text="${v.nhan}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{vaiTro}"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="hoTen">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="hoTen" th:field="*{hoTen}"
+                               th:classappend="${#fields.hasErrors('hoTen')} ? 'is-invalid'">
+                        <div class="form-text">Tên này hiện ở góc trên màn hình và trong sổ nhật ký.</div>
+                        <div class="invalid-feedback" th:errors="*{hoTen}"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="text" class="form-control" id="email" th:field="*{email}"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{email}"></div>
+                    </div>
+
+                    <!--/*
+                        Ô mật khẩu KHÔNG bao giờ đổ giá trị cũ ra: thứ lưu trong CSDL là chuỗi
+                        băm, không phải mật khẩu, nên không có gì để đổ ra cả. Khi sửa, để
+                        trống nghĩa là giữ nguyên mật khẩu đang dùng.
+                    */-->
+                    <div class="col-md-6">
+                        <label class="form-label" for="matKhau">
+                            Mật khẩu <span class="text-danger" th:if="${laThemMoi}">*</span>
+                        </label>
+                        <input type="password" class="form-control" id="matKhau"
+                               th:field="*{matKhau}" autocomplete="new-password"
+                               th:classappend="${#fields.hasErrors('matKhau')} ? 'is-invalid'">
+                        <div class="form-text" th:if="${laThemMoi}">
+                            Ít nhất 6 ký tự. Báo lại cho người dùng và nhắc họ đổi khi đăng nhập lần đầu.
+                        </div>
+                        <div class="form-text" th:unless="${laThemMoi}">
+                            Để trống nếu không đổi mật khẩu. Gõ vào đây là đặt lại mật khẩu mới
+                            cho người này — dùng khi họ quên mật khẩu.
+                        </div>
+                        <div class="invalid-feedback" th:errors="*{matKhau}"></div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Lưu
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/quan-tri/nguoi-dung}">Huỷ</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

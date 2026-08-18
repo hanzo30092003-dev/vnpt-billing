@@ -46,4 +46,21 @@ public class HomeController {
                 dashboard.coCauTrangThai().stream().map(MucBieuDo::soLuong).toList());
         return "index";
     }
+
+    /**
+     * {@code /quan-tri} chưa phải một trang, nhưng phải dẫn đi đâu đó.
+     *
+     * <p>Vệt bánh mì (breadcrumb) suy tự động từ đường dẫn nên ở màn hình
+     * {@code /quan-tri/nguoi-dung} nó sinh ra một mắt xích "Quản trị" trỏ về
+     * {@code /quan-tri}. Không có mapping này thì đó là một liên kết dẫn tới 404 — đúng loại
+     * lỗi mà bất biến điều hướng của Phase 6 dựng ra để chặn, chỉ khác là lần này nó đến từ
+     * một liên kết <b>sinh lúc chạy</b> nên phép kiểm tĩnh không nhìn thấy.</p>
+     *
+     * <p>Chuyển hướng thay vì dựng một trang mục lục cho đúng một mục con: một trang chỉ có
+     * một liên kết là một cú bấm thừa.</p>
+     */
+    @GetMapping("/quan-tri")
+    public String quanTri() {
+        return "redirect:/quan-tri/nguoi-dung";
+    }
 }
