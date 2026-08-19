@@ -241,3 +241,79 @@ Bảng `hoa_don` **không có index trên `con_no`**, nên truy vấn công nợ
 3. **Phần I và Phần II cho hai kết luận trái ngược nhau, và cả hai đều đúng.** Phần I tìm ra
    một tối ưu đáng giá 4,5 lần; Phần II kết luận không cần tối ưu gì. Cái chung là **cách làm**:
    đo, so sánh có chủ đích, rồi mới quyết.
+
+---
+
+# PHẦN III — TRẦN QUY MÔ CỦA VIỆC NẠP CẢ KỲ VÀO BỘ NHỚ (V5)
+
+## 11. Vì sao đo
+
+Báo cáo đánh giá viết về `RatingService`: *"18.723 bản ghi thì không sao. Một triệu bản ghi bắt
+đầu nguy hiểm; vài chục triệu là hết bộ nhớ."*
+
+Đó là **phỏng đoán**. Cả đồ án được chấm cao chính vì thói quen *"đo trên dữ liệu thật, không
+suy luận suông"* — để lại một câu chưa đo trong báo cáo là tự phá chuẩn của mình. Nên phần này
+đi đo đúng câu đó.
+
+## 12. Cách đo
+
+| Hạng mục | Giá trị |
+|---|---|
+| Máy | Windows 11, RAM 15,6 GB, MySQL 8.4 chạy cùng máy |
+| JVM | Temurin JDK 25, **ghim `-Xmx2g`** để số đo lặp lại được |
+| Dữ liệu | Kỳ 9/2026 dựng riêng, sinh **200.000 bản ghi**, hạt giống `20260900` |
+| So với hiện tại | 200.000 / 18.723 = **10,7 lần** toàn bộ dữ liệu mẫu |
+| Thời gian | `Measure-Command` quanh mỗi lần gửi biểu mẫu (gồm cả chi phí HTTP) |
+| Bộ nhớ | `jcmd <pid> GC.heap_info` lấy mẫu mỗi 300 ms, ghi lại **giá trị đỉnh** |
+| Heap lúc nghỉ | 79 MB (mốc nền để trừ ra) |
+
+Ghim `-Xmx2g` là có chủ ý: heap mặc định của máy này là 1/4 RAM ≈ 3,9 GB, mà một con số đo phụ
+thuộc vào RAM của người chạy thì không đối chiếu lại được.
+
+## 13. Số đo
+
+| Bước | Thời gian | Heap đỉnh | Ghi chú |
+|---|---:|---:|---|
+| Sinh 200.000 bản ghi | **11,4 giây** | 147 MB | Đã chia lô 500 từ Phần I |
+| Tính cước 200.000 bản ghi | **70,4 giây** | **412 MB** | Chỗ nạp cả kỳ vào `List` |
+| Lập hóa đơn → 58 hóa đơn | **85,6 giây** | **490 MB** | Doanh thu kỳ thử: 296.243.192 đ |
+| **Trọn vòng** | **2 phút 47** | **490 MB / 2 GB** | |
+
+Tính cước xử lý đúng 200.000 bản ghi — `ky_cuoc.so_cdr_xu_ly = 200000`, toàn bộ ở trạng thái
+`DA_TINH`, không bản ghi nào lỗi.
+
+## 14. Đọc được gì từ số đo
+
+**Trần quy mô có thật, nhưng xa hơn nhiều so với câu chữ trong báo cáo đánh giá.** Ở mức 200.000
+bản ghi — gấp gần 11 lần dữ liệu hiện tại — hệ thống dùng hết **một phần tư** của 2 GB heap và
+chạy xong trọn vòng trong chưa tới 3 phút.
+
+Trừ mốc nền 79 MB, 200.000 bản ghi tốn khoảng **411 MB**, tức **~2,1 KB mỗi bản ghi** giữ trong
+bộ nhớ. Ngoại suy tuyến tính: 2 GB heap chịu được khoảng **800.000 bản ghi một kỳ**.
+
+> ⚠️ **Con số 800.000 là NGOẠI SUY, không phải số đo.** Nó giả định mức tiêu thụ tuyến tính và
+> bỏ qua việc GC phải làm việc vất vả hơn khi heap gần đầy. Ghi rõ ra đây để không ai trích lại
+> nó như thể đã đo. Muốn biết chắc thì đo tiếp ở 400.000 và 800.000 — biểu mẫu hiện giới hạn
+> 200.000 mỗi lần nên phải sinh nhiều lượt.
+
+**Thời gian tăng nhanh hơn bộ nhớ.** Tính cước 200.000 bản ghi mất 70 giây, còn cả kỳ 7 hiện
+tại (4.000 bản ghi) chạy gần như tức thì. Với quy mô một tỉnh vài chục nghìn thuê bao, việc
+tính cước cuối tháng mất vài phút là **chấp nhận được** — nó chạy một lần mỗi tháng, không phải
+một thao tác người dùng ngồi đợi.
+
+**Kết luận về việc "đổi sang con trỏ cuộn":** vẫn đáng làm cho một hệ thống thật, nhưng nay nó
+là việc **hoãn được có căn cứ**, chứ không phải việc gấp vì một câu phỏng đoán.
+
+## 15. Cách tự chạy lại
+
+1. Chạy ứng dụng với heap ghim: `mvnw spring-boot:run "-Dspring-boot.run.jvmArguments=-Xmx2g"`
+2. Tạo một kỳ cước mới (ví dụ 9/2026) ở màn hình *Tháng tính tiền*
+3. Màn hình *Cuộc gọi & tin nhắn* → *Sinh dữ liệu*: 200.000 bản ghi, hạt giống `20260900`,
+   khoảng ngày 01/09–30/09/2026
+4. Màn hình *Chạy tính tiền*: bấm **Tính tiền từng cuộc**, rồi **Lập hóa đơn**
+5. Lấy heap đỉnh: chạy song song `jcmd <pid> GC.heap_info` và giữ giá trị `used` lớn nhất
+
+> ⚠️ **Đo xong phải chạy `reset`.** Đợt đo này để lại 200.000 bản ghi và một kỳ 9/2026 trong
+> CSDL — cả hai đều không thuộc bộ dữ liệu mà báo cáo mô tả. Sau khi `reset`, đã đối chiếu bản
+> dump với bản trước lúc đo: **0 dòng lệch trên 20.519 dòng**.
+

@@ -23,7 +23,9 @@ import com.hanzo.billing.repository.ThueBaoRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import com.hanzo.billing.config.ThamSoNghiepVu;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -50,6 +52,21 @@ class DoiSoatCuocServiceTest {
     private static final Long TB_ID = 100L;
     private static final Long KY_ID = 1L;
 
+    /** Thuế suất dùng cho phép kiểm này. Bản thật đọc từ {@code billing.thue-suat-vat}. */
+    private static final BigDecimal THUE_SUAT = new BigDecimal("0.10");
+
+    /**
+     * Tham số nghiệp vụ THẬT chứ không giả lập: thứ đang kiểm ở đây là bảng đối soát tính
+     * đúng hay không, mà một {@code @Mock} thì trả về đúng cái mình dạy nó trả về.
+     */
+    @Spy private ThamSoNghiepVu thamSo = thamSoVoiThueSuat(THUE_SUAT);
+
+    private static ThamSoNghiepVu thamSoVoiThueSuat(BigDecimal thueSuat) {
+        ThamSoNghiepVu t = new ThamSoNghiepVu();
+        t.setThueSuatVat(thueSuat);
+        return t;
+    }
+
     @Mock private ThueBaoRepository thueBaoRepository;
     @Mock private KyCuocRepository kyCuocRepository;
     @Mock private HoaDonRepository hoaDonRepository;
@@ -58,6 +75,28 @@ class DoiSoatCuocServiceTest {
 
     @InjectMocks
     private DoiSoatCuocService service;
+
+    /**
+     * ⭐ ĐỐI CHỨNG cho việc V5: nhãn dòng thuế phải đi theo cấu hình.
+     *
+     * <p>Bảng đối soát là màn hình dùng để <b>giải thích cho khách</b> vì sao hóa đơn ra con số
+     * đó. Một dòng ghi "Thuế VAT 10%" trong khi hệ thống tính 8% biến chính màn hình giải thích
+     * thành nguồn hiểu nhầm.</p>
+     */
+    @Test
+    @DisplayName("0. ⭐ Nhãn dòng thuế trên bảng đối soát đi theo cấu hình")
+    void nhanDongThueDiTheoCauHinh() {
+        thamSo.setThueSuatVat(new BigDecimal("0.08"));
+        // Khối đối chiếu chỉ dựng khi có hóa đơn để so — không có hóa đơn thì không có dòng nào
+        chuanBi(List.of(cdrThoai(1L, 60, bangGia(1L, 6, 15), "150", false)),
+                hoaDon("150000", "150", "0", "0"));
+
+        BangDoiSoat bang = service.dungBang(TB_ID, KY_ID);
+
+        assertThat(bang.doiChieu()).extracting(BangDoiSoat.DongDoiChieu::khoanMuc)
+                .contains("Thuế VAT 8%")
+                .doesNotContain("Thuế VAT 10%");
+    }
 
     @Test
     @DisplayName("1. ⭐ Đơn giá hiển thị lấy từ ẢNH CHỤP của từng bản ghi, không tra lại bảng giá")
@@ -287,8 +326,7 @@ class DoiSoatCuocServiceTest {
 
         BigDecimal truocThue = hd.getCuocThueBao().add(hd.getCuocThoai())
                 .add(hd.getCuocSms()).add(hd.getCuocData());
-        BigDecimal vat = ThamSoTinhCuoc.lamTronTien(
-                truocThue.multiply(ThamSoTinhCuoc.THUE_SUAT_VAT));
+        BigDecimal vat = ThamSoTinhCuoc.lamTronTien(truocThue.multiply(THUE_SUAT));
         hd.setTongTruocThue(truocThue);
         hd.setThueVat(vat);
         hd.setTongThanhToan(truocThue.add(vat));

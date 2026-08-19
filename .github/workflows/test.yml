@@ -21,7 +21,7 @@ on:
 
 jobs:
   kiem-thu:
-    name: mvnw test (307 test)
+    name: mvnw test (315 test)
     runs-on: ubuntu-latest
 
     # -----------------------------------------------------------------

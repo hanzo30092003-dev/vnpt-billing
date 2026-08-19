@@ -40,6 +40,7 @@ public class HoaDonPdfService {
 
     public static final String CHAN_TRANG = "Hóa đơn mẫu phục vụ mục đích học tập";
 
+    private final com.hanzo.billing.config.ThamSoNghiepVu thamSo;
     private final PdfFont font;
 
     /** Tên file tải về, theo đúng quy ước {@code HoaDon_{maHoaDon}.pdf}. */
@@ -191,7 +192,7 @@ public class HoaDonPdfService {
             dongTong(trong, "Giảm trừ", "−" + tien(hoaDon.getGiamTru()), false);
         }
         dongTong(trong, "Cộng tiền dịch vụ (trước thuế)", tien(hoaDon.getTongTruocThue()), false);
-        dongTong(trong, "Thuế GTGT (10%)", tien(hoaDon.getThueVat()), false);
+        dongTong(trong, "Thuế GTGT (" + thamSo.nhanThueSuat() + ")", tien(hoaDon.getThueVat()), false);
         dongTong(trong, "TỔNG THANH TOÁN", tien(hoaDon.getTongThanhToan()), true);
         dongTong(trong, "Đã thanh toán", tien(hoaDon.getDaThanhToan()), false);
         dongTong(trong, "Còn nợ", tien(hoaDon.getConNo()), true);

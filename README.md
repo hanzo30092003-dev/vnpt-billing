@@ -204,7 +204,7 @@ số khác và mọi con số trong báo cáo mất khả năng tái lập.
 mvnw test
 ```
 
-**307 test.** Phần lớn chạy độc lập không cần CSDL; 11 lớp cần MySQL đang chạy vì chúng kiểm
+**315 test.** Phần lớn chạy độc lập không cần CSDL; 11 lớp cần MySQL đang chạy vì chúng kiểm
 bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng sẵn — kể cả bất biến thanh toán
 **dưới tải đồng thời**.
 
@@ -274,7 +274,7 @@ vnpt-billing/
     │           ├── fragments/layout.html
     │           ├── error/{400,403,404,500}.html
     │           └── <phân-hệ>/*.html
-    └── test/java/com/hanzo/billing/     # 307 test
+    └── test/java/com/hanzo/billing/     # 315 test
 ```
 
 ---
@@ -288,7 +288,7 @@ vnpt-billing/
 | [`docs/kich-ban-kiem-thu.md`](docs/kich-ban-kiem-thu.md) | 70 ca kiểm thủ công + tổng hợp test tự động |
 | [`docs/kich-ban-demo.md`](docs/kich-ban-demo.md) | 12 bước demo 18 phút, kèm câu hỏi hội đồng |
 | [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md) | 69 ảnh màn hình cần chụp cho báo cáo |
-| [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) | Số đo ghi hàng loạt CDR và chỉ mục |
+| [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) | Số đo ghi hàng loạt CDR, chỉ mục, và **trần quy mô đo trên 200.000 bản ghi** |
 | [`docs/mau-cdr.csv`](docs/mau-cdr.csv) | File CSV mẫu cho chức năng nhập CDR |
 | [`scripts/README.md`](scripts/README.md) | Script kiểm thử giao diện |
 

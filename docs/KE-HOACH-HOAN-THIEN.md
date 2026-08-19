@@ -221,7 +221,7 @@ nói rõ **biết là thiếu** và **thiếu vì sao**. Biết mình thiếu g�
 
 | # | Tiêu chí | Ngưỡng |
 |---|---|---|
-| 1 | `mvnw test` | ≥ 307, 0 lỗi *(277 lúc lập kế hoạch + đồng thời + hạn mức + quản lý người dùng + đổi mật khẩu)* |
+| 1 | `mvnw test` | ≥ 315, 0 lỗi *(277 lúc lập kế hoạch + đồng thời + hạn mức + quản lý người dùng + đổi mật khẩu)* |
 | 2 | 8 script giao diện | ≥ 215, 0 sai |
 | 3 | `python scripts/kiem-tu-ngu.py` | 0 |
 | 4 | `python scripts/kiem-giao-dien.py` | 0 |
@@ -264,8 +264,8 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V3a** màn hình quản lý người dùng | ✅ xong | `d71eee5` |
 | **V3b** đổi mật khẩu | ✅ xong | `8f41400` |
 | **V4** Flyway + CI | ✅ xong (CI chưa chạy được tới khi đẩy mã) | `73fab44` |
-| **V5** đo hiệu năng + VAT ra cấu hình | ⬜ **việc tiếp theo** | — |
-| **V6** kiểm bàn phím | ⬜ chưa làm | — |
+| **V5** đo hiệu năng + VAT ra cấu hình | ✅ xong | `<commit-V5>` |
+| **V6** kiểm bàn phím | ⬜ **việc tiếp theo** | — |
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
 | **N1** báo cáo mục B, C, D | ⬜ chưa làm | — |
 | **N2** 69 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
@@ -371,6 +371,41 @@ liệu bằng đúng đường `reset` mà người dùng thật đi, rồi ch�
 đẩy mã lên GitHub**. Huy hiệu trên README xám cho tới lần đẩy đầu tiên. Nếu CI đỏ, đường lui đã
 ghi trong kế hoạch: cho chạy trước bộ test không cần CSDL.
 
+### Ghi chú của V5
+
+**Phần VAT hoá ra rộng hơn "đưa một hằng số ra cấu hình".** Thuế suất được dùng ở **hai** chỗ
+tính (lập hóa đơn, bảng đối soát) nhưng chuỗi `10%` còn được gõ cứng ở **ba** chỗ hiển thị:
+màn hình chi tiết hóa đơn, bản PDF, và nhãn dòng thuế của bảng đối soát. Đưa con số ra cấu hình
+mà để tờ hóa đơn khách cầm vẫn in "Thuế GTGT (10%)" trong khi hệ thống tính 8% thì **tệ hơn là
+không làm** — nên cả năm chỗ nay đi qua `ThamSoNghiepVu.nhanThueSuat()`.
+
+**Đối chứng đã lộ ra hai lỗ hổng trong chính bộ phép kiểm mới viết.** Gõ cứng lại thuế suất ở cả
+ba chỗ rồi chạy: **chỉ một** phép kiểm đỏ (nhãn trên bản PDF). Lý do là bộ dữ liệu mẫu vốn dùng
+đúng 10%, nên con số cấu hình và con số gõ cứng trùng nhau — không phép kiểm nào phân biệt được.
+Đã bổ sung hai phép kiểm đặt thuế suất **8%** để phân biệt: một cho engine lập hóa đơn, một cho
+nhãn bảng đối soát. Chạy lại đối chứng: cả ba đều đỏ.
+
+Đây đúng là bài học 43.5 của dự án — *một phép kiểm sai nguy hiểm ngang thiếu phép kiểm* — nhưng
+ở dạng ít gặp hơn: phép kiểm **đúng** mà **không phân biệt được** hai trường hợp cần phân biệt.
+
+**Phần đo hiệu năng trả lời đúng câu chưa đo trong báo cáo đánh giá.** Sinh 200.000 bản ghi
+(gấp 10,7 lần dữ liệu hiện tại), JVM ghim `-Xmx2g`, lấy mẫu heap mỗi 300 ms:
+
+| Bước | Thời gian | Heap đỉnh |
+|---|---:|---:|
+| Sinh 200.000 bản ghi | 11,4 giây | 147 MB |
+| Tính cước 200.000 bản ghi | 70,4 giây | **412 MB** |
+| Lập hóa đơn (58 hóa đơn) | 85,6 giây | **490 MB** |
+| **Trọn vòng** | **2 phút 47** | **490 MB / 2 GB** |
+
+Trần quy mô **có thật nhưng xa hơn nhiều** so với câu *"một triệu bản ghi bắt đầu nguy hiểm"*:
+ngoại suy tuyến tính cho khoảng 800.000 bản ghi một kỳ ở 2 GB heap. Con số ngoại suy đó đã được
+ghi rõ là **ngoại suy chứ không phải số đo** — trong `toi-uu-hieu-nang.md` phần III và trong
+`DANH-GIA-HE-THONG.md` mục 5.4.
+
+**Đã khôi phục:** `reset` sau khi đo, rồi đối chiếu bản dump với bản trước lúc đo — **0 dòng
+lệch trên 20.519 dòng**. 200.000 bản ghi thử và kỳ 9/2026 không còn dấu vết.
+
 ### Việc phát sinh ngoài kế hoạch, đã làm
 
 Hai lỗ hổng do bản quét bảo mật tìm ra, cả hai đều **tự dựng lại được** trước khi vá:
@@ -407,7 +442,7 @@ liệu mà báo cáo mô tả.
 
 | | Trước đợt | Bây giờ |
 |---|---:|---:|
-| `mvnw test` | 277 | **307** |
+| `mvnw test` | 277 | **315** |
 | Phép kiểm giao diện | 177 | **215** |
 | Lớp test cần MySQL | 8 | 11 |
 | Ảnh cần chụp | 65 | **69** |

@@ -46,6 +46,7 @@ public class DoiSoatCuocService {
     private static final Set<HuongCuocGoi> HUONG_TRONG_NUOC =
             EnumSet.of(HuongCuocGoi.NOI_MANG, HuongCuocGoi.NGOAI_MANG);
 
+    private final com.hanzo.billing.config.ThamSoNghiepVu thamSo;
     private final ThueBaoRepository thueBaoRepository;
     private final KyCuocRepository kyCuocRepository;
     private final HoaDonRepository hoaDonRepository;
@@ -262,7 +263,7 @@ public class DoiSoatCuocService {
         BigDecimal truocThue = hoaDon.getCuocThueBao().add(thoai).add(sms).add(data)
                 .add(hoaDon.getCuocKhac()).subtract(hoaDon.getGiamTru());
         BigDecimal vat = ThamSoTinhCuoc.lamTronTien(
-                truocThue.multiply(ThamSoTinhCuoc.THUE_SUAT_VAT));
+                truocThue.multiply(thamSo.getThueSuatVat()));
 
         return List.of(
                 new BangDoiSoat.DongDoiChieu("Cước thuê bao tháng",
@@ -272,7 +273,7 @@ public class DoiSoatCuocService {
                 new BangDoiSoat.DongDoiChieu("Cước dữ liệu", data, hoaDon.getCuocData()),
                 new BangDoiSoat.DongDoiChieu("Tổng trước thuế", truocThue,
                         hoaDon.getTongTruocThue()),
-                new BangDoiSoat.DongDoiChieu("Thuế VAT 10%", vat, hoaDon.getThueVat()),
+                new BangDoiSoat.DongDoiChieu("Thuế VAT " + thamSo.nhanThueSuat(), vat, hoaDon.getThueVat()),
                 new BangDoiSoat.DongDoiChieu("Tổng thanh toán", truocThue.add(vat),
                         hoaDon.getTongThanhToan()));
     }

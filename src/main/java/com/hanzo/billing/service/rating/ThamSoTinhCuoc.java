@@ -12,8 +12,10 @@ import java.math.RoundingMode;
  */
 public final class ThamSoTinhCuoc {
 
-    /** Thuế suất giá trị gia tăng, 10%. */
-    public static final BigDecimal THUE_SUAT_VAT = new BigDecimal("0.10");
+    // Thuế suất VAT đã chuyển sang cấu hình (billing.thue-suat-vat), xem
+    // com.hanzo.billing.config.ThamSoNghiepVu. Nó là chính sách nhà nước chứ không phải
+    // quy tắc của phần mềm này, và nó đã đổi thật (8% các năm 2022-2024) - chôn cứng nghĩa
+    // là mỗi lần đổi thuế là một lần sửa mã và triển khai lại.
 
     /**
      * Ngày trong tháng kế tiếp là hạn thanh toán hóa đơn.

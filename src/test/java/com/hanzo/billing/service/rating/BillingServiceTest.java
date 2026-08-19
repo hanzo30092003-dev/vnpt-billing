@@ -35,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -92,8 +93,45 @@ class BillingServiceTest {
     @Mock private SinhMaService sinhMaService;
     @Mock private NhatKyService nhatKyService;
 
+    /**
+     * Tham số nghiệp vụ THẬT chứ không giả lập — thuế suất mặc định 10% như cấu hình chạy thật.
+     * Test nào cần thuế suất khác thì tự đặt lại, JUnit dựng lại đối tượng cho mỗi phép kiểm.
+     */
+    @Spy private com.hanzo.billing.config.ThamSoNghiepVu thamSo = thamSoVoi("0.10");
+
+    private static com.hanzo.billing.config.ThamSoNghiepVu thamSoVoi(String thueSuat) {
+        com.hanzo.billing.config.ThamSoNghiepVu t = new com.hanzo.billing.config.ThamSoNghiepVu();
+        t.setThueSuatVat(new BigDecimal(thueSuat));
+        return t;
+    }
+
     @InjectMocks
     private BillingService service;
+
+    /**
+     * ⭐ ĐỐI CHỨNG cho việc V5 — thuế trên hóa đơn phải đi theo cấu hình.
+     *
+     * <p>Không có phép kiểm này thì gõ cứng {@code new BigDecimal("0.10")} trở lại vào engine
+     * vẫn <b>xanh toàn bộ</b>, vì bộ dữ liệu mẫu vốn dùng đúng 10% — con số cấu hình và con số
+     * gõ cứng trùng nhau nên không phép kiểm nào phân biệt được. Đã thử: gõ cứng lại rồi chạy,
+     * chỉ mỗi phép kiểm nhãn trên bản PDF đỏ.</p>
+     */
+    @Test
+    @DisplayName("⭐ Thuế trên hóa đơn tính theo thuế suất trong cấu hình, không phải hằng số")
+    void thueTinhTheoCauHinh() {
+        thamSo.setThueSuatVat(new BigDecimal("0.08"));
+        ThueBao tb = thueBao(TrangThaiThueBao.HOAT_DONG, "2025-01-01", null);
+        chuanBiNguon(List.of(dangKyTronVen(tb, 150_000)), List.of());
+        chuanBiLuu();
+
+        HoaDon hoaDon = service.tinhCuocThueBao(tb, ky(TrangThaiKyCuoc.MO));
+
+        assertThat(hoaDon.getTongTruocThue()).isEqualByComparingTo("150000");
+        assertThat(hoaDon.getThueVat())
+                .as("150.000 × 8%% = 12.000. Ra 15.000 nghĩa là engine vẫn dùng 10%% gõ cứng")
+                .isEqualByComparingTo("12000");
+        assertThat(hoaDon.getTongThanhToan()).isEqualByComparingTo("162000");
+    }
 
     // =================================================================
     // NHÓM 1 — PRORATE CƯỚC THUÊ BAO

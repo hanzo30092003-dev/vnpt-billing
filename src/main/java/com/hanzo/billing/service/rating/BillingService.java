@@ -79,6 +79,7 @@ public class BillingService {
             UPDATE chi_tiet_su_dung SET mien_phi = ?, cuoc_phi = ? WHERE id = ?
             """;
 
+    private final com.hanzo.billing.config.ThamSoNghiepVu thamSo;
     private final JdbcTemplate jdbcTemplate;
     private final BangGiaLookup bangGiaLookup;
     private final HoaDonRepository hoaDonRepository;
@@ -160,7 +161,7 @@ public class BillingService {
             tongTruocThue = BigDecimal.ZERO;
         }
         BigDecimal thueVat = ThamSoTinhCuoc.lamTronTien(
-                tongTruocThue.multiply(ThamSoTinhCuoc.THUE_SUAT_VAT));
+                tongTruocThue.multiply(thamSo.getThueSuatVat()));
         BigDecimal tongThanhToan = tongTruocThue.add(thueVat);
 
         // BƯỚC 5 — sinh hóa đơn

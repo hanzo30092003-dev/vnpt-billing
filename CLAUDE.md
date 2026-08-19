@@ -35,7 +35,7 @@ xem `FlywayResetConfig`):
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-Chạy test (307 test, cần MySQL đang chạy):
+Chạy test (315 test, cần MySQL đang chạy):
 
 ```bash
 mvnw test
@@ -194,6 +194,15 @@ dump** `data-van-hanh.sql`.
   đổi thì phiên dựng trên thông tin cũ không còn giá trị. `test-auth.ps1` mục 10 canh việc này.
 * **`/doi-mat-khau` KHÔNG được đặt dưới `/quan-tri/**`** — nhân viên quầy và kế toán cũng phải
   đổi được mật khẩu khởi tạo của họ.
+* **Thuế suất VAT đọc từ `billing.thue-suat-vat`, không gõ cứng.** Ba chỗ *hiển thị* (màn hình
+  chi tiết hóa đơn, bản PDF, bảng đối soát) phải đi theo qua `thamSo.nhanThueSuat()` — tính 8%
+  mà tờ hóa đơn khách cầm ghi 10% thì tệ hơn là không làm. Gõ cứng lại chỉ có **ba** phép kiểm
+  bắt được: `BillingServiceTest.thueTinhTheoCauHinh`,
+  `DoiSoatCuocServiceTest.nhanDongThueDiTheoCauHinh`,
+  `HoaDonPdfServiceTest.nhanThueDiTheoCauHinh` — cả ba đều đặt thuế suất 8% để phân biệt được
+  với hằng số 0.10 trùng với dữ liệu mẫu.
+* **Đổi thuế suất KHÔNG tính lại hóa đơn cũ** (hóa đơn là chứng từ). Hệ quả: bảng đối soát của
+  hóa đơn cũ sẽ hiện lệch sau khi đổi thuế suất — xem javadoc `ThamSoNghiepVu`.
 * **Báo cáo phân quyền theo NỘI DUNG, không theo tiền tố đường dẫn.** Báo cáo có số tiền của
   khách → `KE_TOAN` + `ADMIN`, cùng luật với `/hoa-don` và `/cong-no`. Nới lại thành cả cụm
   `/bao-cao/**` là mở lại đúng lỗ hổng cũ. `test-auth.ps1` mục 8 canh việc này.

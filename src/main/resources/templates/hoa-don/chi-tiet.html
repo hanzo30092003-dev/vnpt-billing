@@ -140,7 +140,8 @@
                                 th:text="${#numbers.formatDecimal(hoaDon.tongTruocThue, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
                         </tr>
                         <tr>
-                            <td class="text-secondary">Thuế GTGT (10%)</td>
+                            <td class="text-secondary"
+                                th:text="'Thuế GTGT (' + ${@thamSo.nhanThueSuat()} + ')'">Thuế GTGT (10%)</td>
                             <td class="text-end"
                                 th:text="${#numbers.formatDecimal(hoaDon.thueVat, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
                         </tr>

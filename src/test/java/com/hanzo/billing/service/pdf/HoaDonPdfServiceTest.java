@@ -40,9 +40,34 @@ class HoaDonPdfServiceTest {
 
     @BeforeAll
     static void dungPdfMotLan() throws IOException {
-        service = new HoaDonPdfService(new PdfFont());
+        service = new HoaDonPdfService(thamSoVoiThueSuat("0.10"), new PdfFont());
         pdf = service.xuat(hoaDonMau(), khoanMucMau());
         vanBan = trichVanBan(pdf);
+    }
+
+    private static com.hanzo.billing.config.ThamSoNghiepVu thamSoVoiThueSuat(String thueSuat) {
+        com.hanzo.billing.config.ThamSoNghiepVu t = new com.hanzo.billing.config.ThamSoNghiepVu();
+        t.setThueSuatVat(new java.math.BigDecimal(thueSuat));
+        return t;
+    }
+
+    /**
+     * ⭐ ĐỐI CHỨNG cho việc đưa thuế suất ra cấu hình.
+     *
+     * <p>Phép kiểm ở trên khẳng định tờ hóa đơn in "Thuế GTGT (10%)". Một mình nó vẫn xanh
+     * khi chuỗi đó bị gõ cứng trong mã — tức đúng tình huống tệ nhất: hệ thống tính theo thuế
+     * suất mới còn <b>tờ giấy khách hàng cầm</b> vẫn ghi 10%.</p>
+     *
+     * <p>Phép kiểm này dựng lại bản PDF với thuế suất 8% và đòi tờ hóa đơn nói đúng 8%.</p>
+     */
+    @Test
+    @DisplayName("⭐ Nhãn thuế trên hóa đơn đi theo cấu hình, không phải chuỗi gõ cứng")
+    void nhanThueDiTheoCauHinh() throws IOException {
+        HoaDonPdfService dichVu8 = new HoaDonPdfService(thamSoVoiThueSuat("0.08"), new PdfFont());
+        String vanBan8 = trichVanBan(dichVu8.xuat(hoaDonMau(), khoanMucMau()));
+
+        assertThat(vanBan8).contains("Thuế GTGT (8%)");
+        assertThat(vanBan8).doesNotContain("Thuế GTGT (10%)");
     }
 
     private static String trichVanBan(byte[] noiDung) throws IOException {

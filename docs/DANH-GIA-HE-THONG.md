@@ -173,16 +173,43 @@ cấp phép và truyền dữ liệu về Tổng cục Thuế (Nghị định 12
 Đây là rào cản **pháp lý**, không phải kỹ thuật — không vá được bằng cách viết thêm mã, mà
 phải tích hợp với một nhà cung cấp hóa đơn điện tử. Công sức: **3–6 tuần** kể cả thủ tục.
 
-Thuế suất VAT còn đang **chôn cứng** `THUE_SUAT_VAT = 0.10` trong `ThamSoTinhCuoc`; thuế suất
-thay đổi thì phải sửa mã và biên dịch lại.
+~~Thuế suất VAT còn đang **chôn cứng** `THUE_SUAT_VAT = 0.10` trong `ThamSoTinhCuoc`.~~
+✅ **ĐÃ SỬA (việc V5).** Thuế suất nay đọc từ `billing.thue-suat-vat` trong `application.yml`.
+Ba chỗ **hiển thị** cũng đi theo — màn hình chi tiết hóa đơn, bản PDF, bảng đối soát: tính 8%
+mà tờ hóa đơn khách cầm vẫn ghi 10% thì tệ hơn là không làm. Khai sai (gõ `10` thay vì `0.10`)
+làm ứng dụng **không khởi động được**, chứ không lặng lẽ lập vài trăm tờ hóa đơn sai.
 
-### 5.4. 🟠 Trần quy mô cứng
+### 5.4. 🟠 Trần quy mô cứng — ĐÃ ĐO, không còn là phỏng đoán
 
 `RatingService:266` nạp **toàn bộ bản ghi cước của một kỳ vào một `List` trong bộ nhớ**;
 `TruCuocTraTruocService:92` cũng vậy. Phía ghi đã chia lô, phía đọc thì chưa.
 
-18.723 bản ghi thì không sao. Một triệu bản ghi bắt đầu nguy hiểm; vài chục triệu là hết bộ
-nhớ. **Cách vá:** đổi sang con trỏ cuộn hoặc phân trang theo lô. Công sức: **2–3 ngày**.
+> **Bản đánh giá gốc viết:** *"18.723 bản ghi thì không sao. Một triệu bản ghi bắt đầu nguy
+> hiểm; vài chục triệu là hết bộ nhớ."* — đó là **phỏng đoán chưa đo**, và để một câu như vậy
+> trong báo cáo là tự phá chuẩn làm việc của chính dự án (*"đo trên dữ liệu thật, không suy
+> luận suông"*).
+
+**Đã đo** (việc V5): sinh 200.000 bản ghi — gấp **10,7 lần** toàn bộ dữ liệu hiện tại — rồi
+chạy trọn vòng trên máy phát triển, JVM ghim `-Xmx2g`:
+
+| Bước | Thời gian | Heap đỉnh |
+|---|---:|---:|
+| Sinh 200.000 bản ghi | 11,4 giây | 147 MB |
+| Tính cước 200.000 bản ghi | 70,4 giây | **412 MB** |
+| Lập hóa đơn (58 hóa đơn) | 85,6 giây | **490 MB** |
+| **Trọn vòng** | **2 phút 47** | **490 MB / 2 GB** |
+
+Số liệu chi tiết và cách tự chạy lại: [`toi-uu-hieu-nang.md`](toi-uu-hieu-nang.md) phần III.
+
+**Kết luận đọc được từ số đo:** ở mức 200.000 bản ghi, hệ thống dùng hết **một phần tư** của
+2 GB heap và chạy xong trong chưa tới 3 phút. Trần quy mô **có thật** nhưng **xa hơn nhiều** so
+với câu chữ ở trên: ngoại suy tuyến tính từ 490 MB cho 200.000 bản ghi, 2 GB heap chịu được
+khoảng **800.000 bản ghi một kỳ**. Với một tỉnh cỡ vài chục nghìn thuê bao thì đó là dư.
+
+⚠️ Ngoại suy tuyến tính là một **giả định**, không phải số đo — đã ghi rõ để không ai trích lại
+con số 800.000 như thể nó được đo. **Cách vá vẫn nguyên giá trị:** đổi sang con trỏ cuộn hoặc
+phân trang theo lô. Công sức: **2–3 ngày**. Nhưng nay nó là việc *có thể hoãn có căn cứ*, chứ
+không phải việc gấp vì một câu phỏng đoán.
 
 ---
 

@@ -88,6 +88,25 @@ spring:
     encoding: UTF-8
 
 # ---------------------------------------------------------------------
+# THAM SO NGHIEP VU  (viec V5 cua dot hoan thien)
+#
+# Thue suat VAT la CHINH SACH NHA NUOC, khong phai quy tac cua phan mem
+# nay - va no da doi that: Viet Nam ha VAT xuong 8% cac nam 2022-2024 roi
+# tra ve 10%. Truoc day no la hang so trong ThamSoTinhCuoc, nghia la moi
+# lan doi thue suat la mot lan sua ma, bien dich lai va trien khai lai.
+#
+# Dang ti le: 0.10 nghia la 10%. Khai sai (am, hoac go 10 thay vi 0.10)
+# thi ung dung KHONG KHOI DONG DUOC kem thong bao noi ro - co y, vi mot
+# thue suat sai lot toi luc lap hoa don thi no da kip sinh ra vai tram to
+# hoa don sai.
+#
+# ⚠️ Doi thue suat KHONG tinh lai hoa don cu - hoa don la chung tu, khong
+# phai mot phep tinh chay lai duoc. Xem javadoc ThamSoNghiepVu.
+# ---------------------------------------------------------------------
+billing:
+  thue-suat-vat: 0.10
+
+# ---------------------------------------------------------------------
 # GHI LOG RA FILE - them o Phase 7 muc C1
 #
 # Khong co muc nay thi stacktrace chi nam trong console, ma dong console lai
