@@ -7,9 +7,9 @@
 -- doanh nghiep, so CCCD, ma so thue, so dien thoai va dia chi deu la
 -- hu cau; su trung hop voi thuc te (neu co) la ngoai y muon.
 -- =====================================================================
--- File nay chay SAU schema.sql, ma schema.sql da DROP toan bo bang nen
--- moi lan khoi dong deu nap lai tu dau. Vi vay ID duoc ghi tuong minh
--- de cac khoa ngoai tham chieu on dinh.
+-- File nay CHI chay trong profile "reset", sau khi Flyway da xoa sach va
+-- dung lai cau truc bang (xem FlywayResetConfig). Vi vay ID duoc ghi tuong
+-- minh de cac khoa ngoai tham chieu on dinh.
 -- =====================================================================
 
 -- ---------------------------------------------------------------------

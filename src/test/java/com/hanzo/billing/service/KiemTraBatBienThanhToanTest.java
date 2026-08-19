@@ -44,8 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest
 @TestPropertySource(properties = {
-        "spring.jpa.hibernate.ddl-auto=none",
-        "spring.sql.init.mode=never"
+        "spring.jpa.hibernate.ddl-auto=none"
 })
 @DisplayName("Bất biến thanh toán")
 class KiemTraBatBienThanhToanTest {

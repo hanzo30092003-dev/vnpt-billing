@@ -20,14 +20,14 @@ import org.springframework.test.context.TestPropertySource;
  * thành {@code Boolean} không kèm {@code @JdbcTypeCode} ở Phase 1.</p>
  *
  * <p><b>Điều kiện chạy:</b> cần MySQL đang chạy tại {@code localhost:3306} và CSDL
- * {@code vnpt_billing} đã có đủ bảng. Đặt {@code spring.sql.init.mode=never} để test
- * không vô tình chạy {@code schema.sql} — file đó mở đầu bằng {@code DROP TABLE},
- * chạy nhầm sẽ xoá sạch dữ liệu đang có.</p>
+ * {@code vnpt_billing} đã có đủ bảng. Từ việc V4, cấu trúc bảng do Flyway dựng từ
+ * {@code db/migration/V*.sql}; test này vì vậy còn kiểm thêm một điều nữa: <b>các file di
+ * trú cộng lại có ra đúng cấu trúc mà 15 Entity mong đợi hay không</b>. Tách một cột sang
+ * file di trú mới mà quên kiểu dữ liệu là test này đỏ ngay.</p>
  */
 @SpringBootTest
 @TestPropertySource(properties = {
-        "spring.jpa.hibernate.ddl-auto=validate",
-        "spring.sql.init.mode=never"
+        "spring.jpa.hibernate.ddl-auto=validate"
 })
 class SchemaValidationTest {
 

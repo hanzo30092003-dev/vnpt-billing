@@ -22,13 +22,14 @@ Chart.js 4.4.2 · Apache POI 5.4.1 · Lombok 1.18.46 · Maven Wrapper.
 
 ## Lệnh hay dùng
 
-Chạy thường (giữ nguyên dữ liệu — `spring.sql.init.mode=never`):
+Chạy thường (Flyway chỉ chạy file di trú **chưa từng chạy**, dữ liệu giữ nguyên):
 
 ```bash
 mvnw spring-boot:run
 ```
 
-Nạp lại dữ liệu mẫu — **XOÁ SẠCH CSDL** (`schema.sql` mở đầu bằng `DROP TABLE`):
+Nạp lại dữ liệu mẫu — **XOÁ SẠCH CSDL** (`flyway clean` → `migrate` → nạp 2 file dữ liệu,
+xem `FlywayResetConfig`):
 
 ```bash
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
@@ -50,7 +51,7 @@ Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định 
 ## ⚠️ Bẫy môi trường đã gặp
 
 * **Dừng app trước khi `mvnw test`.** Biên dịch lại `target/` làm DevTools restart; ở profile
-  `reset` thì mỗi lần restart là `schema.sql` chạy lại → mất sạch dữ liệu. Từ 4B đã chặn hẳn
+  `reset` thì mỗi lần restart là `flyway clean` chạy lại → mất sạch dữ liệu. Từ 4B đã chặn hẳn
   bằng `spring.devtools.restart.enabled: false` trong `application-reset.yml`, nhưng thói quen
   dừng app trước khi test vẫn đúng vì test chạy trên CSDL thật.
 * **Đường dẫn dự án phải thuần ASCII.** Có dấu tiếng Việt thì `spring-boot:run` báo

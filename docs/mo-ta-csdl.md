@@ -510,11 +510,26 @@ thử nghiệm tính cước theo tỷ lệ ngày (prorate) ở Phase 4.
 
 ## 5. Lưu ý vận hành
 
-### 5.1. Script khởi tạo chỉ chạy khi được yêu cầu
+### 5.1. Cấu trúc bảng đi theo file di trú, dữ liệu mẫu đi đường riêng
 
-`application.yml` đặt `spring.sql.init.mode: never` **từ Phase 2**, nên `schema.sql`,
-`data-mau.sql` và `data-van-hanh.sql` **không** chạy lại ở mỗi lần khởi động và dữ liệu nhập
-qua giao diện được giữ nguyên.
+**Cấu trúc** do Flyway giữ, trong `src/main/resources/db/migration/`:
+
+| File | Nội dung |
+|---|---|
+| `V1__khoi_tao.sql` | 15 bảng + 2 view — cấu trúc từ Phase 1 đến Phase 5 |
+| `V2__khoa_lac_quan_va_chong_do_mat_khau.sql` | `hoa_don.phien_ban`, `nguoi_dung.so_lan_sai`, `nguoi_dung.khoa_den_luc` — hai lần đổi cấu trúc của đợt hoàn thiện |
+
+Mỗi lần khởi động, Flyway đối chiếu bảng `flyway_schema_history` và **chỉ chạy file chưa từng
+chạy**. Thêm một cột nay là thêm một file `V3__*.sql`, chạy lên là xong, **dữ liệu giữ nguyên** —
+trước đó thì cách duy nhất là chạy lại `schema.sql`, mà file đó mở đầu bằng `DROP TABLE`.
+
+> ⚠️ **File di trú đã chạy thì không sửa nữa.** Flyway lưu checksum của từng file; sửa một ký tự
+> là mọi CSDL đang chạy báo *"Migration checksum mismatch"* và không khởi động được.
+
+**Dữ liệu mẫu** (`data-mau.sql`, `data-van-hanh.sql`) **cố ý không nằm trong thư mục di trú**:
+`data-van-hanh.sql` là bản dump được sinh lại mỗi khi trạng thái vận hành đổi, mà đưa nó thành
+file di trú thì mỗi lần dump lại là một lần đổi checksum. Hai file này chỉ nạp trong profile
+`reset` — xem `FlywayResetConfig`.
 
 Muốn nạp lại bộ dữ liệu mẫu từ đầu thì chạy với profile `reset`:
 
@@ -522,9 +537,10 @@ Muốn nạp lại bộ dữ liệu mẫu từ đầu thì chạy với profile 
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-> ⚠️ Profile `reset` bật `mode: always`, mà `schema.sql` mở đầu bằng `DROP TABLE IF EXISTS`
-> theo thứ tự ngược phụ thuộc khóa ngoại — **toàn bộ dữ liệu đang có sẽ mất**. Chỉ dùng khi
-> chủ đích làm mới CSDL.
+> ⚠️ Profile `reset` mở khoá `flyway clean` — xoá sạch bảng, view và cả bảng lịch sử di trú —
+> rồi dựng lại từ `db/migration/` và nạp hai file dữ liệu. **Toàn bộ dữ liệu đang có sẽ mất.**
+> Chỉ dùng khi chủ đích làm mới CSDL. Ở cấu hình thường `clean-disabled: true` nên lệnh xoá đó
+> không gọi được.
 >
 > Profile này cũng tắt DevTools (`spring.devtools.restart.enabled: false`). Lý do ghi ở
 > `PHASE-4-REPORT.md` mục 15: DevTools thấy `target/` đổi sẽ tự khởi động lại, và ở profile

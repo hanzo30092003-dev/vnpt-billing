@@ -32,8 +32,8 @@
 -- lieu that cua bat ky nha mang nao.
 -- =====================================================================
 --
--- File nay chay NGAY SAU data-mau.sql - xem spring.sql.init.data-locations
--- trong application.yml. Phan cong giua hai file la phan cong ve NGUON GOC:
+-- File nay chay NGAY SAU data-mau.sql - xem FlywayResetConfig.
+-- Phan cong giua hai file la phan cong ve NGUON GOC:
 --
 --   data-mau.sql       DU LIEU GOC, nguoi viet ra, sua tay duoc
 --   data-van-hanh.sql  KET QUA VAN HANH, may sinh ra, la ban dump

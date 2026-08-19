@@ -1,20 +1,32 @@
 # =====================================================================
-# Profile "reset" - NAP LAI DU LIEU MAU TU DAU
+# Profile "reset" - DUA CSDL VE DUNG BO DU LIEU MAU
 # =====================================================================
 # Cach dung:
 #     .\mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 #
-# CANH BAO: profile nay bat lai spring.sql.init.mode=always, khien
-# schema.sql chay lai. Ma schema.sql mo dau bang DROP TABLE IF EXISTS
-# nen TOAN BO DU LIEU DANG CO SE BI XOA, ke ca du lieu nhap qua giao dien.
-# Chi dung khi co chu dinh dua CSDL ve dung bo du lieu mau ban dau.
+# CANH BAO: profile nay XOA SACH CSDL roi dung lai tu dau, ke ca du lieu
+# nhap qua giao dien. Chi dung khi co chu dinh dua CSDL ve dung bo du lieu
+# mau ma bao cao mo ta.
 #
-# Chay binh thuong (khong kem profile) thi mode=never, du lieu duoc giu nguyen.
+# Chay binh thuong (khong kem profile) thi khong xoa gi: Flyway chi chay
+# nhung file di tru CHUA tung chay, du lieu duoc giu nguyen.
+#
+# BA BUOC cua profile nay nam trong FlywayResetConfig:
+#     1. flyway clean    - xoa sach bang, view va ca bang lich su di tru
+#     2. flyway migrate  - dung lai cau truc tu db/migration/V*.sql
+#     3. nap db/data-mau.sql roi db/data-van-hanh.sql (dung thu tu do)
 # =====================================================================
 spring:
-  sql:
-    init:
-      mode: always
+  # ---------------------------------------------------------------
+  # MO KHOA "flyway clean" - CHI trong profile nay.
+  #
+  # Cau hinh thuong dat clean-disabled: true. Clean la lenh xoa sach toan
+  # bo schema; de no mo san o cau hinh thuong thi mot bien moi truong dat
+  # nham cung du lam bay mat CSDL that. O day mo khoa co chu dinh, va chinh
+  # cai ten profile "reset" da noi ro dieu do.
+  # ---------------------------------------------------------------
+  flyway:
+    clean-disabled: false
 
   # ---------------------------------------------------------------
   # TAT DEVTOOLS TRONG PROFILE NAY - day la mot cai bay that su.
@@ -22,7 +34,7 @@ spring:
   # DevTools tu khoi dong lai ung dung moi khi thay file trong target/
   # doi. Chay ".\mvnw test" trong luc app dang chay se bien dich lai va
   # kich hoat dung dieu do. Ma o profile reset thi moi lan khoi dong lai
-  # la schema.sql chay lai, tuc DROP TABLE - XOA SACH du lieu vua sinh.
+  # la xoa sach va nap lai tu dau - mat toan bo du lieu vua sinh.
   #
   # Phat hien o muc 4A va da phai dung app thu cong truoc khi chay test.
   # Tat han o day thay vi de nguoi dung phai NHO lam dieu do moi lan.

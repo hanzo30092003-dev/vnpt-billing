@@ -145,13 +145,24 @@ Kết quả: **2 dòng thanh toán tổng 100.000 đ, nhưng `da_thanh_toan` ch�
 **Cách vá:** thêm `@Version` vào `HoaDon`, hoặc `@Lock(PESSIMISTIC_WRITE)` cho truy vấn nạp
 hóa đơn trong luồng thanh toán. Công sức: **nửa ngày**, kèm một test hai luồng chạy song song.
 
-### 5.2. 🔴 Không có đường nâng cấp CSDL
+### 5.2. ✅ ~~Không có đường nâng cấp CSDL~~ — ĐÃ SỬA (việc V4)
 
-Không có Flyway/Liquibase. `schema.sql` mở đầu bằng `DROP TABLE`. Nghĩa là **mọi thay đổi cấu
-trúc bảng đều đi kèm xoá sạch dữ liệu**. Với dữ liệu mẫu thì tiện; với dữ liệu thật thì không
-có cách nào thêm một cột mà không mất toàn bộ lịch sử cước.
+> **Đánh giá gốc:** *"Không có Flyway/Liquibase. `schema.sql` mở đầu bằng `DROP TABLE`. Nghĩa là
+> mọi thay đổi cấu trúc bảng đều đi kèm xoá sạch dữ liệu. Cách vá: đưa schema hiện tại thành
+> `V1__khoi_tao.sql` của Flyway. Công sức: 1–2 ngày."*
 
-**Cách vá:** đưa schema hiện tại thành `V1__khoi_tao.sql` của Flyway. Công sức: **1–2 ngày**.
+Đã làm, nhưng **không theo đúng cách vá đề xuất**. Đưa *schema hiện tại* thành `V1` thì hai lần
+đổi cấu trúc của chính đợt hoàn thiện biến mất vào bên trong file đó, và Flyway trở thành thứ
+khai mà không dùng: có thư mục di trú nhưng chưa từng di trú cái gì.
+
+Cách đã làm: `V1__khoi_tao.sql` là cấu trúc **trước** đợt hoàn thiện, còn
+`V2__khoa_lac_quan_va_chong_do_mat_khau.sql` là ba cột thêm trong đợt này
+(`hoa_don.phien_ban`, `nguoi_dung.so_lan_sai`, `nguoi_dung.khoa_den_luc`) — trước đó cả ba đều
+được gõ `ALTER TABLE` bằng tay trên console, không dấu vết.
+
+**Đo được, không phải nói suông:** dựng một CSDL nháp chỉ có `V1`, chèn một dòng dữ liệu, chạy
+`V2` lên — dòng đó còn nguyên và ba cột mới đã có. Và CSDL do Flyway dựng đối chiếu với CSDL do
+cơ chế cũ dựng: **0 dòng lệch trên 20.519 dòng dump**.
 
 ### 5.3. 🔴 Hóa đơn chưa hợp pháp ở Việt Nam
 

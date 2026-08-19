@@ -42,13 +42,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * bao trùm cả hai trục, và bao trùm cả trục chưa ai nghĩ tới.</p>
  *
  * <p><b>Điều kiện chạy:</b> cần MySQL đang chạy tại {@code localhost:3306}, giống
- * {@code SchemaValidationTest}. Đặt {@code spring.sql.init.mode=never} để test không vô tình
- * chạy {@code schema.sql} — file đó mở đầu bằng {@code DROP TABLE}.</p>
+ * {@code SchemaValidationTest}.</p>
  */
 @SpringBootTest
 @TestPropertySource(properties = {
-        "spring.jpa.hibernate.ddl-auto=none",
-        "spring.sql.init.mode=never"
+        "spring.jpa.hibernate.ddl-auto=none"
 })
 @DisplayName("Bất biến độ phủ bảng giá")
 class KiemTraDoPhuBangGiaTest {

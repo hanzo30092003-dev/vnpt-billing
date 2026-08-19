@@ -1,38 +1,21 @@
 -- =====================================================================
--- schema.sql - Cau truc CSDL vnpt_billing
--- He thong quan ly thue bao va tinh cuoc dien thoai
--- Do an Thuc tap nghe nghiep - Phase 1
+-- V1__khoi_tao.sql - Cau truc CSDL vnpt_billing (15 bang + 2 view)
 -- =====================================================================
--- LUU Y VE CACH CHAY:
--- application.yml dang dat spring.sql.init.mode=always nen file nay chay
--- LAI MOI LAN KHOI DONG ung dung. Vi vay phai DROP truoc khi CREATE, neu
--- khong lan khoi dong thu hai se loi "table already exists".
--- He qua: moi lan chay app la CSDL bi dung lai tu dau. Chap nhan duoc o
--- Phase 1 vi toan bo la du lieu mau. Sang Phase 3 (co nhap lieu qua giao
--- dien) phai chuyen sang mode=never hoac dung Flyway.
+-- Day la ban dau cua lich su di tru. Noi dung dung bang schema.sql tu Phase 1
+-- den Phase 5, tuc cau truc TRUOC dot hoan thien - de hai lan doi cau truc
+-- trong dot nay tro thanh mot file di tru THAT o V2, thay vi bien mat vao
+-- trong mot file "schema hien tai" khong con dau vet gi.
+--
+-- KHAC BIET DUY NHAT so voi schema.sql cu: da BO khoi DROP TABLE / DROP VIEW
+-- o dau file. Ly do: mot file di tru chi chay MOT LAN tren mot CSDL; viec xoa
+-- sach de dung lai tu dau la viec cua "flyway clean" (profile reset). Mot file
+-- di tru mo dau bang DROP la mot qua min - ai do chay lai no bang tay la mat
+-- sach du lieu that.
+--
+-- ⚠️ DA AP DUNG THI KHONG SUA FILE NAY NUA. Flyway luu checksum cua tung file;
+-- sua mot ky tu la moi CSDL dang chay bao "Migration checksum mismatch" va
+-- khong khoi dong duoc. Muon doi cau truc thi THEM file V<so tiep theo>__*.sql.
 -- =====================================================================
-
--- ---------------------------------------------------------------------
--- XOA THEO THU TU NGUOC PHU THUOC KHOA NGOAI
--- ---------------------------------------------------------------------
-DROP VIEW IF EXISTS v_doanh_thu_thang;
-DROP VIEW IF EXISTS v_thong_ke_thue_bao;
-
-DROP TABLE IF EXISTS nhat_ky_he_thong;
-DROP TABLE IF EXISTS giam_tru;
-DROP TABLE IF EXISTS bien_dong_so_du;
-DROP TABLE IF EXISTS thanh_toan;
-DROP TABLE IF EXISTS chi_tiet_hoa_don;
-DROP TABLE IF EXISTS hoa_don;
-DROP TABLE IF EXISTS chi_tiet_su_dung;
-DROP TABLE IF EXISTS ky_cuoc;
-DROP TABLE IF EXISTS dang_ky_goi_cuoc;
-DROP TABLE IF EXISTS lich_su_thue_bao;
-DROP TABLE IF EXISTS thue_bao;
-DROP TABLE IF EXISTS bang_gia_cuoc;
-DROP TABLE IF EXISTS goi_cuoc;
-DROP TABLE IF EXISTS khach_hang;
-DROP TABLE IF EXISTS nguoi_dung;
 
 -- ---------------------------------------------------------------------
 -- 1. nguoi_dung - Tai khoan dang nhap he thong
@@ -46,10 +29,6 @@ CREATE TABLE nguoi_dung (
     vai_tro         ENUM('ADMIN','NHAN_VIEN','KE_TOAN') NOT NULL,
     trang_thai      TINYINT      DEFAULT 1,
     ngay_tao        DATETIME,
-    -- Chong do mat khau: dem so lan nhap sai lien tiep, du nguong thi khoa tam
-    -- tai khoan toi khoa_den_luc. Dang nhap dung mot lan la ca hai ve 0/NULL.
-    so_lan_sai      INT          NOT NULL DEFAULT 0,
-    khoa_den_luc    DATETIME     NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uq_nguoi_dung_ten_dang_nhap (ten_dang_nhap)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -245,12 +224,6 @@ CREATE TABLE hoa_don (
     da_thanh_toan     DECIMAL(15,2) DEFAULT 0,
     con_no            DECIMAL(15,2) NOT NULL,
     trang_thai        ENUM('CHUA_TT','TT_MOT_PHAN','DA_TT','QUA_HAN') NOT NULL,
-    -- Khoa lac quan. Hibernate them WHERE phien_ban = ? vao cau UPDATE, nen hai
-    -- nguoi cung thu tien tren mot hoa don thi nguoi ghi sau bi tu choi thay vi
-    -- de ghi lai len nguoi truoc. Xem javadoc cua HoaDon.phienBan.
-    -- DEFAULT 0 de cac cau INSERT cu trong data-mau.sql / data-van-hanh.sql
-    -- (khong liet ke cot nay) van chay duoc.
-    phien_ban         BIGINT        NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
     UNIQUE KEY uq_hoa_don_ma (ma_hoa_don),
     UNIQUE KEY uq_hoa_don_thue_bao_ky (thue_bao_id, ky_cuoc_id),

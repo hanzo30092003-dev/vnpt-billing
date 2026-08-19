@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -58,7 +57,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * principal thật cũng đúng với cách hệ thống chạy thật hơn.</p>
  */
 @SpringBootTest
-@TestPropertySource(properties = "spring.sql.init.mode=never")
 @DisplayName("Màn hình điều khiển tính cước")
 class TinhCuocControllerTest {
 

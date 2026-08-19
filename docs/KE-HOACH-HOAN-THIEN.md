@@ -222,7 +222,7 @@ nói rõ **biết là thiếu** và **thiếu vì sao**. Biết mình thiếu g�
 | # | Tiêu chí | Ngưỡng |
 |---|---|---|
 | 1 | `mvnw test` | ≥ 307, 0 lỗi *(277 lúc lập kế hoạch + đồng thời + hạn mức + quản lý người dùng + đổi mật khẩu)* |
-| 2 | 8 script giao diện | ≥ 214, 0 sai |
+| 2 | 8 script giao diện | ≥ 215, 0 sai |
 | 3 | `python scripts/kiem-tu-ngu.py` | 0 |
 | 4 | `python scripts/kiem-giao-dien.py` | 0 |
 | 5 | Ba bất biến (sổ cái · thanh toán · điều hướng) | 0 lệch |
@@ -263,8 +263,8 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V3c** khoá tài khoản sau 5 lần sai | ✅ xong | `fa8945a` |
 | **V3a** màn hình quản lý người dùng | ✅ xong | `d71eee5` |
 | **V3b** đổi mật khẩu | ✅ xong | `8f41400` |
-| **V4** Flyway + CI | ⬜ **việc tiếp theo** | — |
-| **V5** đo hiệu năng + VAT ra cấu hình | ⬜ chưa làm | — |
+| **V4** Flyway + CI | ✅ xong | `<commit-V4>` |
+| **V5** đo hiệu năng + VAT ra cấu hình | ⬜ **việc tiếp theo** | — |
 | **V6** kiểm bàn phím | ⬜ chưa làm | — |
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
 | **N1** báo cáo mục B, C, D | ⬜ chưa làm | — |
@@ -332,6 +332,45 @@ Kèm một phép kiểm ngược chiều (số 25): **sửa họ tên mà không
 ai** — thiếu nó thì chốt chặn số 3 vẫn xanh ngay cả khi mọi lần sửa tài khoản đều đá văng người
 đang dùng ra ngoài.
 
+### Ghi chú của V4 — chỗ kế hoạch nói một câu mà thực tế cần một quyết định
+
+Kế hoạch viết: *"Chỉ cần đổi `schema.sql` thành `db/migration/V1__khoi_tao.sql`,
+`data-mau.sql` thành `V2__du_lieu_mau.sql`"*. Làm đúng câu đó thì hỏng **hai chỗ**.
+
+**1. Đưa dữ liệu mẫu vào thư mục di trú là tự khoá tay mình.** Flyway lưu checksum từng file đã
+chạy. `data-van-hanh.sql` là **bản dump được sinh lại** mỗi khi trạng thái vận hành đổi (Phase 5
+mục F đã dump lại một lần) — biến nó thành file di trú nghĩa là mỗi lần dump lại, **mọi CSDL
+đang chạy từ chối khởi động** với *"Migration checksum mismatch"*. Đổi lấy một quy trình mà dự
+án đang dựa vào, để lấy về một dòng cấu hình ngắn hơn.
+
+> **Cách đã làm:** Flyway giữ **cấu trúc**; dữ liệu mẫu nạp bằng đường riêng trong
+> `FlywayResetConfig`, chỉ ở profile `reset`. Cũng bỏ luôn `spring.sql.init` — tài liệu Spring
+> Boot khuyến cáo không dùng chung với Flyway và nói rõ sẽ bỏ hỗ trợ.
+
+**2. Lấy schema *hiện tại* làm `V1` thì Flyway thành thứ khai mà không dùng** — có thư mục di
+trú nhưng chưa từng di trú cái gì, đúng loại điểm trừ mà mục 1 của kế hoạch này nói tới.
+
+> **Cách đã làm:** `V1__khoi_tao.sql` là cấu trúc **trước** đợt hoàn thiện; ba cột thêm trong
+> đợt này thành `V2__khoa_lac_quan_va_chong_do_mat_khau.sql`. Lịch sử di trú **chính là** lịch
+> sử dự án, và có một bước di trú thật để chỉ vào.
+
+**Bốn phép kiểm đã chạy, không phép kiểm nào là suy luận:**
+
+| Phép kiểm | Kết quả |
+|---|---|
+| CSDL do Flyway dựng vs CSDL do cơ chế cũ dựng | **0 dòng lệch** / 20.519 dòng |
+| CSDL nháp có `V1` + 1 dòng dữ liệu → chạy `V2` lên | Dòng dữ liệu **còn nguyên**, 3 cột mới đã có |
+| `mvnw test` (gồm `SchemaValidationTest` đối chiếu 15 Entity với cấu trúc do di trú dựng) | 307/307 |
+| Chạy thường sau khi đã di trú | *"Schema is up to date. No migration necessary"* — không đụng dữ liệu |
+
+**Việc dọn kèm theo:** bỏ `spring.sql.init.mode=never` khỏi 11 lớp test — thay đổi này làm nó
+thành cấu hình chết, và cấu hình chết thì lần sau có người đọc sẽ tin là nó đang có tác dụng.
+
+**⚠️ CI chưa xác minh được.** `.github/workflows/test.yml` đã viết (MySQL 8.4 service, nạp dữ
+liệu bằng đúng đường `reset` mà người dùng thật đi, rồi chạy cả 307 test), nhưng **chỉ chạy khi
+đẩy mã lên GitHub**. Huy hiệu trên README xám cho tới lần đẩy đầu tiên. Nếu CI đỏ, đường lui đã
+ghi trong kế hoạch: cho chạy trước bộ test không cần CSDL.
+
 ### Việc phát sinh ngoài kế hoạch, đã làm
 
 Hai lỗ hổng do bản quét bảo mật tìm ra, cả hai đều **tự dựng lại được** trước khi vá:
@@ -341,21 +380,35 @@ Hai lỗ hổng do bản quét bảo mật tìm ra, cả hai đều **tự dựn
 | `X-Forwarded-For` do client tự đặt, ghi vào cột 45 ký tự trong cùng giao dịch với nghiệp vụ → một header 48 ký tự phá được **mọi** đường ghi | Bỏ hẳn nhánh header, chỉ dùng `getRemoteAddr()` (`fa8945a`) |
 | `/bao-cao/**` mở cả cụm → `nhanvien01` bị 403 ở `/cong-no` nhưng xem được `/bao-cao/cong-no` kèm tên khách và số tiền nợ | Phân quyền theo nội dung + bọc menu `sec:authorize` (`8a256a6`) |
 
-### ⚠️ Nợ kỹ thuật của chính đợt này — làm trước khi đóng băng
+### ✅ Nợ kỹ thuật của đợt này — ĐÃ TRẢ
 
-`schema.sql` đã đổi **hai lần**: thêm `hoa_don.phien_ban`, rồi `nguoi_dung.so_lan_sai` +
-`khoa_den_luc`. Cả hai mới chỉ `ALTER TABLE` vào CSDL đang chạy.
+Khoản nợ ghi ở đây là: `schema.sql` đã đổi hai lần (`hoa_don.phien_ban`, rồi
+`nguoi_dung.so_lan_sai` + `khoa_den_luc`) mà cả hai mới chỉ `ALTER TABLE` vào CSDL đang chạy,
+và **chưa chạy `reset` hai lần đối chiếu từng dòng** — tiêu chí nghiệm thu số 7.
 
-**Chưa chạy lại `reset` hai lần để đối chiếu từng dòng** — mà đó là tiêu chí nghiệm thu số 7.
-Phải làm trước khi chụp ảnh, và nếu `data-mau.sql` / `data-van-hanh.sql` cần dump lại thì làm
-luôn ở bước đó.
+Đã chạy, trước khi đụng tới Flyway (cố ý: nếu sau đó có gì vỡ thì biết chắc là do Flyway):
+
+| Phép kiểm | Kết quả |
+|---|---|
+| `reset` chạy hai lần, dump so từng dòng | **0 dòng lệch** trên 20.519 dòng |
+| Số liệu sau `reset` so với con số báo cáo mô tả | **15/15 khớp** — kể cả doanh thu 111.513.012 đ, đã thu 49.190.687 đ, còn nợ 62.322.325 đ |
+| `mvnw test` trên CSDL vừa reset | 307/307 xanh |
+
+Phép kiểm thứ hai là phép kiểm đáng giá: *"hai lần reset giống nhau"* một mình nó vẫn xanh khi
+cả hai lần cùng dựng ra một bộ dữ liệu **sai giống hệt nhau**.
+
+`data-mau.sql` và `data-van-hanh.sql` **không cần dump lại**: hai file đó tái lập đúng bộ dữ
+liệu mà báo cáo mô tả.
+
+> ⚠️ Lưu ý cho ngày chụp ảnh: `reset` xoá tài khoản `kiemthu01` do `test-auth.ps1` tạo. Muốn
+> ảnh #66 có đủ ba huy hiệu tình trạng thì chạy script **trước**, chụp **sau**.
 
 ### Số liệu hiện tại
 
 | | Trước đợt | Bây giờ |
 |---|---:|---:|
 | `mvnw test` | 277 | **307** |
-| Phép kiểm giao diện | 177 | **214** |
+| Phép kiểm giao diện | 177 | **215** |
 | Lớp test cần MySQL | 8 | 11 |
 | Ảnh cần chụp | 65 | **69** |
 

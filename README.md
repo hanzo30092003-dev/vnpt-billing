@@ -1,5 +1,7 @@
 # Xây dựng phần mềm quản lý thuê bao và tính cước điện thoại
 
+[![test](https://github.com/hanzo30092003-dev/vnpt-billing/actions/workflows/test.yml/badge.svg)](https://github.com/hanzo30092003-dev/vnpt-billing/actions/workflows/test.yml)
+
 Đồ án môn **Thực tập nghề nghiệp**.
 
 Hệ thống mô phỏng nghiệp vụ viễn thông: quản lý khách hàng, thuê bao, gói cước, bảng giá,
@@ -119,8 +121,9 @@ mvnw spring-boot:run
 
 Mở <http://localhost:8080>.
 
-> Từ bước 4 trở đi, `spring.sql.init.mode` là `never` nên dữ liệu **được giữ nguyên** qua mọi
-> lần khởi động lại. Chỉ chạy lại profile `reset` khi chủ đích muốn về dữ liệu mẫu gốc.
+> Từ bước 4 trở đi, Flyway chỉ chạy những file di trú **chưa từng chạy** trên CSDL này, nên
+> dữ liệu **được giữ nguyên** qua mọi lần khởi động lại. Chỉ chạy lại profile `reset` khi chủ
+> đích muốn về dữ liệu mẫu gốc.
 
 ---
 
@@ -179,9 +182,12 @@ Sáu kỳ cước sau khi nạp:
 
 ### ⚠️ Cảnh báo về profile `reset`
 
-> **Profile `reset` XOÁ TOÀN BỘ dữ liệu đang có.** Nó bật `spring.sql.init.mode=always`,
-> khiến `schema.sql` chạy lại — và file đó mở đầu bằng `DROP TABLE IF EXISTS` cho cả 15 bảng.
-> Mọi khách hàng, thuê bao, giao dịch nhập qua giao diện đều **mất sạch**.
+> **Profile `reset` XOÁ TOÀN BỘ dữ liệu đang có.** Nó mở khoá `flyway clean` — lệnh xoá sạch
+> cả 15 bảng, 2 view lẫn bảng lịch sử di trú — rồi dựng lại từ `db/migration/` và nạp hai file
+> dữ liệu mẫu. Mọi khách hàng, thuê bao, giao dịch nhập qua giao diện đều **mất sạch**.
+>
+> Ở cấu hình thường, `flyway.clean-disabled: true` nên lệnh đó **không gọi được** — muốn xoá
+> sạch thì phải nêu đích danh profile `reset`.
 
 Bù lại, `reset` **tái lập đúng** bộ dữ liệu mà báo cáo mô tả: chạy lại bao nhiêu lần cũng ra
 đúng 20.102 dòng giống hệt nhau. Trước Phase 5 mục F thì không — `data-mau.sql` không chứa hóa
@@ -209,11 +215,11 @@ bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng 
 
 ### 7.2. Script kiểm thử giao diện
 
-**8 script** trong `scripts/`, tổng **214 phép kiểm**, chạy khi ứng dụng đang bật:
+**8 script** trong `scripts/`, tổng **215 phép kiểm**, chạy khi ứng dụng đang bật:
 
 | Script | Kiểm | Nội dung |
 |---|---:|---|
-| `test-auth.ps1` | 41 | Đăng nhập, CSRF, phân quyền 3 vai trò, phạm vi báo cáo theo nội dung, quản lý người dùng, đổi mật khẩu, khoá tạm |
+| `test-auth.ps1` | 42 | Đăng nhập, CSRF, phân quyền 3 vai trò, phạm vi báo cáo theo nội dung, quản lý người dùng, đổi mật khẩu, khoá tạm |
 | `test-kh.ps1` | 14 | Khách hàng: tạo, sửa, validation, trùng giấy tờ |
 | `test-tb.ps1` | 18 | Thuê bao: đăng ký, chuyển trạng thái, đổi gói |
 | `test-muc-F.ps1` | 17 | Bất biến thanh toán và công nợ |
@@ -260,7 +266,7 @@ vnpt-billing/
     │       ├── application.yml
     │       ├── application-reset.yml
     │       ├── db/
-    │       │   ├── schema.sql           # 15 bảng + 2 view
+    │       │   ├── migration/           # Flyway: V1 khởi tạo, V2 đổi cấu trúc đợt hoàn thiện
     │       │   ├── data-mau.sql         # dữ liệu gốc, viết tay
     │       │   └── data-van-hanh.sql    # kết quả vận hành, bản dump do máy sinh
     │       ├── static/css/app.css

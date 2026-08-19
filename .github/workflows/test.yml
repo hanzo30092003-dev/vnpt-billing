@@ -1,0 +1,86 @@
+# =====================================================================
+# Chay toan bo bo test moi lan day ma len GitHub
+# =====================================================================
+# Vi sao can: bo test chi co gia tri khi no THUC SU CHAY. Chay bang tay
+# tren mot may thi no chi chung minh "xanh tren may cua toi" - va cai may
+# do co MySQL da co san du lieu, co JDK da cai dung, co thu muc target/
+# tu lan build truoc. CI dung lai tu con so khong moi lan, nen no tra loi
+# duoc cau hoi khac han: "clone ve may trang thi co chay duoc khong".
+#
+# ⚠️ MAT KHAU: CSDL o day la mot container dung mot lan roi bo, dung tai
+# khoan root KHONG mat khau (MYSQL_ALLOW_EMPTY_PASSWORD). Khong co bi mat
+# nao trong file nay va cung khong can them secret nao vao kho ma.
+# =====================================================================
+name: test
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  kiem-thu:
+    name: mvnw test (307 test)
+    runs-on: ubuntu-latest
+
+    # -----------------------------------------------------------------
+    # 11 lop test can MySQL that vi chung kiem BAT BIEN TREN DU LIEU THAT
+    # chu khong tren du lieu dung san. Khong co CSDL thi phai bo chung di,
+    # ma do lai la nhung phep kiem dang gia nhat cua du an.
+    # -----------------------------------------------------------------
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: vnpt_billing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Lay ma nguon
+        uses: actions/checkout@v4
+
+      - name: Cai JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      # ---------------------------------------------------------------
+      # Nap CSDL bang DUNG DUONG ma tai lieu huong dan nguoi dung dung:
+      # chay ung dung mot lan voi profile reset. Profile do goi
+      # flyway clean -> flyway migrate -> nap data-mau.sql, data-van-hanh.sql
+      # (xem FlywayResetConfig).
+      #
+      # Co y KHONG nap bang cach do thang file .sql vao mysql: lam vay thi
+      # CI kiem mot duong nap khac voi duong ma nguoi dung that di, va duong
+      # that se khong con ai kiem.
+      # ---------------------------------------------------------------
+      - name: Nap bo du lieu mau (flyway clean + migrate + du lieu)
+        run: |
+          ./mvnw -B -q spring-boot:run -Dspring-boot.run.profiles=reset > reset.log 2>&1 &
+          timeout 300 bash -c 'until grep -q "Started BillingApplication" reset.log; do sleep 2; done'
+          echo "--- Flyway va nap du lieu ---"
+          grep -E "Migrating schema|Successfully applied|Da nap du lieu|Đã nạp dữ liệu" reset.log || true
+          pkill -f "spring-boot:run" || true
+          sleep 5
+
+      - name: Chay toan bo test
+        run: ./mvnw -B test
+
+      # Ket qua test la thu dang xem nhat khi CI do, nen giu lai ke ca khi that bai
+      - name: Giu lai bao cao test
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bao-cao-test
+          path: target/surefire-reports/
+          retention-days: 14

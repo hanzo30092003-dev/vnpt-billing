@@ -167,21 +167,28 @@ Kiem-Tra -Ten "admin mo duoc danh sach nguoi dung" -KetQua $t -StatusMongDoi 200
     -CanCo @('Quản lý người dùng', 'admin', 'nhanvien01', 'ketoan01') | Out-Null
 
 # --- 9.1 Them tai khoan moi (hoac xac nhan ten trung bi chan) ---
-$daCo = $t.body.Contains($TEN_KT)
-$r = Post-Form $adm "/quan-tri/nguoi-dung/them" "/quan-tri/nguoi-dung/luu" @{
+# Hai nhanh duoi day co y cho CUNG MOT SO phep kiem: so phep kiem cua ca bo
+# script khong duoc dao dong theo viec CSDL vua reset hay chua - mot con so
+# nghiem thu doi theo trang thai la con so khong doi chieu duoc.
+$duLieuTao = @{
     tenDangNhap = $TEN_KT
     hoTen       = "Tai khoan kiem thu"
     email       = "kiemthu01@vnptbilling.local"
     vaiTro      = "NHAN_VIEN"
     matKhau     = $MK_KT
 }
-if ($daCo) {
-    Kiem-Tra -Ten "Tao trung ten dang nhap bi chan" -KetQua $r -StatusMongDoi 200 `
-        -CanCo @('Đã có tài khoản') | Out-Null
+if ($t.body.Contains($TEN_KT)) {
+    Xac-Nhan "Tai khoan $TEN_KT con lai tu lan chay truoc" $true "khong tao lai"
 } else {
+    $r = Post-Form $adm "/quan-tri/nguoi-dung/them" "/quan-tri/nguoi-dung/luu" $duLieuTao
     Kiem-Tra -Ten "Tao moi tai khoan $TEN_KT" -KetQua $r -StatusMongDoi 200 `
         -CanCo @($TEN_KT, 'Đã tạo tài khoản') -KhongDuocCo @('Đã có tài khoản') | Out-Null
 }
+
+# Chot chan trung ten dang nhap: kiem O MOI LAN CHAY, khong phu thuoc nhanh tren
+$r = Post-Form $adm "/quan-tri/nguoi-dung/them" "/quan-tri/nguoi-dung/luu" $duLieuTao
+Kiem-Tra -Ten "Tao trung ten dang nhap bi chan" -KetQua $r -StatusMongDoi 200 `
+    -CanCo @('Đã có tài khoản') | Out-Null
 
 # --- 9.2 Doc ma so cua hai tai khoan can dung ---
 $t = Get-Trang $adm "/quan-tri/nguoi-dung"
@@ -198,6 +205,8 @@ if ($dong.Contains("Đã khoá")) {
     $r = Post-Form $adm "/quan-tri/nguoi-dung" "/quan-tri/nguoi-dung/$idKt/mo-khoa" @{ }
     Kiem-Tra -Ten "Mo khoa tai khoan $TEN_KT" -KetQua $r -StatusMongDoi 200 `
         -CanCo @('Đã mở khoá tài khoản') | Out-Null
+} else {
+    Xac-Nhan "Tai khoan $TEN_KT dang mo khoa san" $true "khong can go khoa"
 }
 
 # --- 9.4 Mat khau do admin dat phai dang nhap duoc that ---

@@ -100,6 +100,21 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!--
+            Flyway - di tru cau truc CSDL.
+            flyway-mysql la module rieng, THIEU no thi Flyway bao
+            "Unsupported Database: MySQL 8.4" ngay luc khoi dong.
+            Phien ban do spring-boot-starter-parent quan ly, khong khai o day.
+        -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+
         <!-- DevTools: tu dong restart khi sua code -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
