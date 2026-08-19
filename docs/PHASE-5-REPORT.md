@@ -3,11 +3,9 @@
 > Phase 5 đã xong toàn bộ mục A0, A–F và G. Kế hoạch và ba ràng buộc bắt buộc:
 > [`PHASE-5-PLAN.md`](PHASE-5-PLAN.md).
 >
-> ⚠️ **Nợ tài liệu:** báo cáo này chưa có phần viết cho **mục B, C, D**.
-> Mục A đã viết ở Phần IV-A. Xem [mục 35](#35-nợ-tài-liệu-của-phase-5).
->
-> **Bố cục:** mục 1 (A0) · Phần I–III (mục G) · **Phần IV-A (mục A)** · Phần IV (mục E) ·
-> Phần V (mục F) · Phần VI (tổng kết Phase 5, bàn giao Phase 6).
+> **Bố cục:** mục 1 (A0) · Phần I–III (mục G) · Phần IV-A (mục A) · Phần IV-B (mục B) ·
+> Phần IV-C (mục C) · Phần IV-D (mục D) · Phần IV (mục E) · Phần V (mục F) ·
+> Phần VI (tổng kết Phase 5, bàn giao Phase 6).
 
 ---
 
@@ -540,6 +538,353 @@ số 2, 3, 4 và 5 — và trong [`danh-sach-anh-chup.md`](danh-sach-anh-chup.md
 *Cố ý không liệt kê lại ở đây.* Ba danh sách ảnh cho cùng một màn hình là ba nguồn sự thật, và
 chỉ cần đổi một màn hình là chúng bắt đầu lệch nhau — đúng cái lỗi mà chính báo cáo này cảnh
 báo ở ràng buộc ②.
+
+---
+
+# PHẦN IV-B — MỤC B: GHI NHẬN THANH TOÁN
+
+> Mục A dựng ra màn hình để *nhìn* hóa đơn. Mục B là chỗ tiền thật đi vào hệ thống, và vì vậy
+> nó là mục đầu tiên **ghi** vào con số mà ràng buộc ② canh giữ.
+>
+> Ràng buộc ② được đặt ra ở mục A vì có nhiều màn hình cùng muốn *hiển thị* số còn nợ. Ở mục B
+> nó bị thử theo chiều ngược lại: có đúng một chỗ trong toàn hệ thống được phép *sửa* số đó.
+
+## B.1. Phạm vi
+
+| Làm | Không làm ở mục này |
+|---|---|
+| Form ghi nhận thanh toán, bốn phép chặn | Tính lại cước *(Phase 4)* |
+| Cập nhật `da_thanh_toan`, `con_no`, `trang_thai` của hóa đơn | Bảng tuổi nợ, đề xuất tạm ngừng *(mục C)* |
+| In phiếu thu ra PDF | Khoản giảm trừ *(mục D)* |
+| Danh sách giao dịch, lọc theo bốn tiêu chí | Hoàn tiền, huỷ giao dịch đã ghi |
+
+Không có chức năng **huỷ hay sửa một giao dịch đã ghi**: `ThanhToanService` có đúng năm
+phương thức và không phương thức nào xoá, `ThanhToanController` cũng không có đường dẫn nào làm
+việc đó.
+
+Với chứng từ thì không xoá được là phía an toàn. Một phiếu thu đã in và đưa cho khách mà xoá
+được khỏi hệ thống thì sổ sách và giấy tờ nói hai chuyện khác nhau.
+
+Nhưng nói cho đủ: hệ thống cũng chưa có đường **ghi giao dịch điều chỉnh**, nên thu nhầm một
+lần thì hiện phải sửa thẳng trong CSDL. Hạn chế đó chưa được bịt.
+
+## B.2. Form ghi nhận — mặc định là trọn số còn nợ
+
+Ô số tiền mở ra đã điền sẵn **đúng số khách còn nợ**, và sửa được để thu một phần.
+
+Giá trị mặc định ấy tiết kiệm được thao tác cho trường hợp phổ biến nhất. Nó còn làm một việc
+nữa: nó nói cho thu ngân biết số còn nợ **tại thời điểm mở form**, nên nếu con số đó khác với
+tờ giấy khách cầm thì họ thấy ngay, trước khi thu tiền.
+
+Dữ liệu hiện có cho thấy trường hợp phổ biến đúng là trả trọn: trong 132 hóa đơn có phát sinh
+thanh toán, **103 hóa đơn trả một lần**, 29 hóa đơn trả hai lần. Không hóa đơn nào trả ba lần
+trở lên.
+
+## B.3. Bốn phép chặn — và vì sao ba trong bốn nằm ở tầng service
+
+| Chặn | Ở đâu | Lý do đặt ở đó |
+|---|---|---|
+| Số tiền phải lớn hơn 0 | `ThanhToanForm` (`@DecimalMin("1")`) | Chỉ cần nhìn con số người gõ là biết sai |
+| Hóa đơn đã thu đủ | `ThanhToanServiceImpl` | Phải đọc trạng thái hóa đơn mới biết |
+| Ngày thanh toán ở tương lai | `ThanhToanServiceImpl` | Phải so với ngày hôm nay |
+| Số tiền nhiều hơn số còn nợ | `ThanhToanServiceImpl` | Phải đọc `con_no` mới biết |
+
+Ranh giới ở đây không phải chuyện sắp xếp cho gọn. Ràng buộc bằng chú giải trên form chỉ nhìn
+thấy **những gì người dùng vừa gõ**; ba phép chặn còn lại cần biết trạng thái của hóa đơn tại
+đúng lúc ghi. Đặt chúng lên form thì chúng kiểm một bản sao đã cũ của sự thật.
+
+Thông báo lỗi cố ý nói cả **việc cần làm tiếp**, không chỉ nói sai ở đâu. Khi hóa đơn đã thu
+đủ, câu hiện ra là: *"Hóa đơn HD… đã thu đủ, không ghi nhận thêm được. Nếu khách trả cho hóa
+đơn khác, hãy mở đúng hóa đơn đó rồi ghi nhận."* Người đứng ở quầy với khách trước mặt cần câu
+thứ hai hơn câu thứ nhất.
+
+## B.4. Nơi ghi duy nhất
+
+`ThanhToanServiceImpl` là chỗ duy nhất trong toàn hệ thống gán ba cột `da_thanh_toan`,
+`con_no` và `trang_thai` của hóa đơn. Ba lệnh gán nằm cạnh nhau là có chủ đích: chúng phải đổi
+cùng nhau hoặc không đổi gì cả. Tách `con_no` ra một đường ghi khác là cách chắc chắn để một
+ngày nào đó `con_no` và `da_thanh_toan` nói hai chuyện khác nhau, mà không ai biết cái nào
+đúng.
+
+Trạng thái **suy ra** từ số còn nợ chứ không phải một cột người dùng chọn. Còn nợ bằng 0 thì
+`DA_TT`, còn nợ nhỏ hơn tổng thì `TT_MOT_PHAN`. Cho người dùng tự chọn trạng thái là mở đường
+cho một hóa đơn mang nhãn *Đã thanh toán* mà `con_no` vẫn dương.
+
+Cộng dồn dùng `BigDecimal` chứ không `double`, theo quy ước tiền tệ của cả đồ án.
+
+Nói cho sòng phẳng: số tiền ở đây là số nguyên đồng và đều nhỏ, nên `double` chưa chắc đã cho
+kết quả sai ngay hôm nay. Lý do giữ `BigDecimal` không nằm ở phép cộng cụ thể này. Một quy ước
+về tiền chỉ có giá trị khi nó không có ngoại lệ nào, và chỗ cộng dồn tiền là chỗ cuối cùng nên
+mở ngoại lệ đầu tiên.
+
+## B.5. Phiếu thu PDF
+
+Cùng cách làm với hóa đơn ở mục A: OpenPDF, font Liberation Sans nhúng vào file, bảng mã
+`IDENTITY_H`.
+
+Bài học font ở mục A áp dụng nguyên vẹn, nên phép kiểm cũng vậy. `PhieuThuPdfServiceTest` đọc
+lại nội dung PDF rồi so chuỗi **có dấu**, còn `PhieuThuPdfTaiLieuThatTest` thì dựng phiếu thu
+từ một giao dịch có thật trong CSDL trước khi đọc lại. Hai test bắt hai loại lỗi khác nhau: một
+cái sai ở khâu dựng tài liệu, một cái sai ở khâu lấy dữ liệu.
+
+Tiêu đề *PHIẾU THU TIỀN* từng bị đứt quãng giữa các chữ cái. Nguyên nhân là khoảng cách chữ
+chứ không phải font, và nó chỉ lộ ra khi đọc lại văn bản trong file.
+
+## B.6. Danh sách giao dịch
+
+Lọc theo bốn tiêu chí, gom trong `BoLocThanhToan`: kỳ cước, hình thức, người thu, khoảng ngày.
+
+Cột **người thu** đọc từ `thanh_toan.nguoi_thu_id`, và đó là một trong những lý do tài khoản
+người dùng không xoá được. Một phiếu thu không truy được ai đã thu thì không dùng để đối chiếu
+quỹ.
+
+## B.7. Một chỗ mục B chưa lường tới
+
+Mục B viết xong với giả định **mỗi lúc chỉ có một người thu tiền trên một hóa đơn**. Giả định
+đó không được nói ra ở đâu cả, và nó sai.
+
+Hai thu ngân cùng mở một hóa đơn rồi cùng bấm ghi nhận: cả hai đọc `da_thanh_toan` cũ, cả hai
+cộng thêm phần của mình rồi ghi đè lên nhau. Một lần cộng biến mất, tức tiền của khách biến
+mất khỏi sổ, mà bất biến `con_no = tong_thanh_toan − da_thanh_toan` vẫn đúng nên không phép
+kiểm nào của Phase 5 kêu lên.
+
+Chỗ hở này được bịt ở **đợt hoàn thiện sau Phase 8**, không phải ở Phase 5: thêm
+`@Version private Long phienBan` vào `HoaDon` để Hibernate từ chối người ghi sau. Dựng lại được
+bằng `KiemTraDongThoiThanhToanTest.epDocDocGhiGhi_benGhiSauBiTuChoi`, và bỏ `@Version` ra thì
+test đó đỏ.
+
+Ghi lại ở đây thay vì lặng lẽ sửa, vì bài học nằm ở chỗ khác: bất biến của Phase 5 kiểm **quan
+hệ giữa các con số**, và một lần cộng bị mất không phá quan hệ nào cả. Bất biến đúng vẫn có thể
+không nhìn thấy lỗi.
+
+## B.8. Nghiệm thu mục B
+
+161 giao dịch trên dữ liệu hiện hành, tổng 49.190.687 đ:
+
+| Hình thức | Số giao dịch | Số tiền |
+|---|---:|---:|
+| Tiền mặt | 69 | 21.680.006 đ |
+| Chuyển khoản | 54 | 17.250.352 đ |
+| Ví điện tử | 38 | 10.260.329 đ |
+
+| Phép kiểm | Kết quả |
+|---|---|
+| `ThanhToanServiceTest` | 11 test |
+| `PhieuThuPdfServiceTest` và `PhieuThuPdfTaiLieuThatTest` — đọc lại nội dung PDF | 8 test |
+| `KiemTraBatBienThanhToanTest` — hai bất biến trên **mọi** hóa đơn | 4 test, 0 dòng lệch |
+| `KiemTraDongThoiThanhToanTest` — ép thứ tự đọc–đọc–ghi–ghi | 2 test *(bổ sung sau Phase 8)* |
+| Script `test-muc-F.ps1` | 17 phép kiểm |
+
+Bất biến kiểm sau mục B là hai, không phải một: `con_no = tong_thanh_toan − da_thanh_toan`
+cùng với `da_thanh_toan = SUM(thanh_toan.so_tien)`. Chỉ kiểm vế đầu thì một giao dịch ghi
+thiếu vẫn cho kết quả cân bằng.
+
+## B.9. Màn hình cần chụp cho mục B
+
+Xem [mục 32](#32-danh-sách-màn-hình-chụp-ảnh-cho-toàn-phase-5), cùng lý do đã nói ở A.7.
+
+---
+
+# PHẦN IV-C — MỤC C: CÔNG NỢ
+
+> Mục C không tạo ra dữ liệu mới. Nó nhìn đúng bộ hóa đơn của mục A dưới một trục khác: **thời
+> gian**. Câu hỏi đổi từ *"khách này nợ bao nhiêu"* thành *"khoản nợ này già bao nhiêu"*.
+
+## C.1. Phạm vi
+
+| Làm | Không làm ở mục này |
+|---|---|
+| Bảng tuổi nợ năm nhóm, kèm biểu đồ | Thu tiền *(mục B)* |
+| Danh sách hóa đơn còn nợ, sắp theo số ngày quá hạn giảm dần | Tự động cắt dịch vụ |
+| Đề xuất tạm ngừng thuê bao nợ quá 15 ngày | Nhắc nợ qua tin nhắn hay email |
+| Quét chuyển hóa đơn sang trạng thái Quá hạn | Tính lãi chậm trả |
+
+## C.2. Năm nhóm tuổi nợ
+
+Ranh giới khai trong enum `NhomTuoiNo`: trong hạn, 1–30, 31–60, 61–90, trên 90 ngày.
+
+Năm khoảng phủ kín trục số nguyên, không hở và không chồng. Hàm `cua(long soNgayQuaHan)` vẫn
+giữ một nhánh ném `IllegalStateException` ở cuối dù nhánh đó không bao giờ chạy được: nếu về
+sau có ai sửa ranh giới thành hở, lỗi lộ ra ngay tại chỗ chứ không âm thầm rơi vào nhóm cuối.
+
+Màu nền của từng nhóm đi kèm **màu chữ** trong cùng enum. Nhóm 1–30 nền vàng phải dùng chữ đen
+mới đọc được; để màu chữ ở nơi khác thì sớm muộn một nhóm sẽ có chữ trắng trên nền vàng.
+
+## C.3. Quét quá hạn chỉ chạm hóa đơn chưa thu đồng nào
+
+Luật đã nói ở A.4. Ở mục C nó có hệ quả nhìn thấy được: nếu bỏ điều kiện
+`da_thanh_toan IS NULL OR da_thanh_toan = 0`, thì sau ngày hết hạn mọi hóa đơn trả dở đều mang
+nhãn *Quá hạn*, và màn hình công nợ không còn phân biệt được khách **chưa trả gì** với khách
+**đã trả một phần**. Đó là hai nhóm cần đối xử khác nhau.
+
+## C.4. ⭐ Trạng thái ngay sau `reset` chưa phải trạng thái của hôm nay
+
+Đo ngày 19/08/2026, ngay sau khi chạy `reset` và trước khi mở màn hình nào:
+
+| Kỳ | Hạn thanh toán | Quá hạn | Trạng thái trong CSDL |
+|---|---|---:|---|
+| 6/2026 | 15/07/2026 | 35 ngày | `CHUA_TT` |
+| 7/2026 | 15/08/2026 | 4 ngày | `QUA_HAN` |
+
+Kỳ già hơn lại mang trạng thái nhẹ hơn. Trông như lỗi, và không phải lỗi.
+
+`data-van-hanh.sql` là bản dump, nên nó chép lại trạng thái **tại thời điểm dump**. Việc quét
+quá hạn chạy hai đường: theo lịch 00:05 hằng ngày, và một lần nữa khi ai đó mở `/hoa-don` hoặc
+`/cong-no`. Vừa `reset` xong thì chưa đường nào chạy.
+
+Mở `/hoa-don` một lần, log ghi *"Đã chuyển 58 hóa đơn sang trạng thái Quá hạn (mốc 19/08/2026)"*
+và bảng trở thành `DA_TT` 115, `TT_MOT_PHAN` 17, `QUA_HAN` 148, `CHUA_TT` 0 — khớp đúng con số
+ở A.6.
+
+Hệ quả cần nhớ khi nghiệm thu: **truy vấn thẳng vào CSDL ngay sau `reset` cho con số khác với
+màn hình.** Cột `trang_thai` lúc đó vẫn giữ giá trị của bản dump, chờ lần quét đầu tiên. Muốn
+đối chiếu bằng SQL thì mở màn hình một lần trước đã.
+
+## C.5. Đề xuất tạm ngừng, không tự cắt
+
+Ngưỡng 15 ngày quá hạn, khai trong `ThamSoTinhCuoc.SO_NGAY_QUA_HAN_DE_XUAT_TAM_NGUNG`.
+
+Hệ thống **liệt kê ra và người dùng bấm nút**. Nó không tự chuyển trạng thái thuê bao, dù việc
+đó dễ làm hơn nhiều. Hai lý do, cả hai đều là lý do nghiệp vụ chứ không phải kỹ thuật: cắt
+dịch vụ của khách là quyết định có hậu quả thật, và dữ liệu công nợ có thể chưa cập nhật vì
+khách vừa nộp tiền ở quầy khác cách đó mười phút.
+
+Vì vậy `CongNoServiceImpl` từ chối đề xuất tạm ngừng cho hóa đơn đã thu đủ, và từ chối cả khi
+số ngày quá hạn chưa tới ngưỡng. Thông báo nói rõ đang bao nhiêu ngày và ngưỡng là bao nhiêu.
+
+## C.6. Hạn mức tín dụng — bổ sung sau Phase 5
+
+Cột `thue_bao.han_muc_tin_dung` có từ Phase 1, có trên form đăng ký, có trên màn hình chi tiết,
+và suốt Phase 5 **không dòng mã nào đọc nó để chặn việc gì**. Người dùng nhập số vào đó và tin
+rằng hệ thống đang canh giúp mình, trong khi không.
+
+Việc V2 của đợt hoàn thiện bịt chỗ này: `HoaDonRepository.timThueBaoVuotHanMuc()` liệt kê thuê
+bao trả sau đang hoạt động có tổng nợ vượt hạn mức, và màn hình công nợ hiện danh sách đó. Hạn
+mức `0` nghĩa là **chưa đặt**, không phải "không cho nợ đồng nào".
+
+## C.7. Nghiệm thu mục C
+
+Bảng tuổi nợ đo ngày 19/08/2026, sau khi quét đã chạy. Mỗi kỳ cước rơi đúng một nhóm:
+
+| Nhóm | Kỳ | Số ngày quá hạn | Hóa đơn còn nợ | Còn nợ |
+|---|---|---:|---:|---:|
+| Trong hạn | — | — | 0 | 0 đ |
+| Quá hạn 1–30 | 7/2026 | 4 | 58 | 23.161.085 đ |
+| Quá hạn 31–60 | 6/2026 | 35 | 58 | 23.828.605 đ |
+| Quá hạn 61–90 | 5/2026 | 65 | 22 | 6.171.688 đ |
+| Quá hạn trên 90 | 3 và 4/2026 | 126 và 96 | 27 | 9.160.947 đ |
+
+Tổng 165 hóa đơn, 62.322.325 đ, khớp với số bàn giao ở mục 31.
+
+| Phép kiểm | Kết quả |
+|---|---|
+| `CongNoServiceTest` | 19 test |
+| `KiemTraVuotHanMucTest` — kiểm **cả hai chiều**: đúng và đủ | 3 test *(bổ sung ở đợt hoàn thiện)* |
+| Script `test-muc-F.ps1` — đối chiếu bảng tuổi nợ với SQL độc lập | 17 phép kiểm |
+
+> ⚠️ **Nhóm *Trong hạn* rỗng là tính chất của ngày xem.** Hạn thanh toán muộn nhất của dữ liệu
+> mẫu là 15/08/2026; từ 16/08 trở đi mọi hóa đơn đều đã quá hạn. Từ 15/09/2026 sẽ chỉ còn ba
+> nhóm, vì kỳ 7 rời nhóm *1–30* mà không có kỳ nào thay chỗ. Cách xử lý đã chốt và câu giải
+> thích để dán dưới ảnh nằm ở đầu [`danh-sach-anh-chup.md`](danh-sach-anh-chup.md).
+
+## C.8. Màn hình cần chụp cho mục C
+
+Xem [mục 32](#32-danh-sách-màn-hình-chụp-ảnh-cho-toàn-phase-5).
+
+---
+
+# PHẦN IV-D — MỤC D: GIẢM TRỪ
+
+> Mục D nhỏ nhất trong bốn mục, và là chỗ **ràng buộc ① bị thử trực diện**: khai giảm trừ theo
+> tỷ lệ phần trăm nghĩa là có một phép nhân, mà phép nhân thì kéo theo một lần làm tròn.
+
+## D.1. Phạm vi
+
+| Làm | Không làm ở mục này |
+|---|---|
+| Khai giảm trừ theo số tiền hoặc theo tỷ lệ | Duyệt nhiều cấp trước khi áp dụng |
+| Chặn khai cả hai cách, hoặc bỏ trống cả hai | Giảm trừ áp cho nhiều kỳ liên tiếp |
+| Áp khoản vào hóa đơn lúc lập, thành một dòng thành tiền âm | Giảm trừ theo nhóm khách hàng |
+| Khoá sửa và xoá khi khoản đã áp vào hóa đơn | Tính lãi hay phạt |
+
+## D.2. Hai cách khai, và chặn khai cả hai
+
+`GiamTruForm.isChiMotCachKhai()` là một `@AssertTrue` ở mức toàn đối tượng: điền cả hai ô, hoặc
+bỏ trống cả hai, đều bị chặn với thông báo *"Chỉ điền MỘT trong hai ô: số tiền giảm trừ, hoặc
+tỷ lệ phần trăm. Xoá trống ô còn lại."*
+
+Ràng buộc đặt ở mức đối tượng chứ không ở mức từng ô, vì nó nói về **quan hệ giữa hai ô**. Ràng
+buộc trên từng ô không bao giờ thấy được quan hệ đó.
+
+Tỷ lệ có thêm chặn trên và dưới: lớn hơn 0 và không quá 100%.
+
+## D.3. ⭐ Tỷ lệ quy thành tiền đúng một lần
+
+Đây là điểm cốt lõi của mục D.
+
+Ràng buộc ① của Phase 5 nói: làm tròn ở đúng **một** tầng, và tầng đó là tầng bản ghi CDR. Một
+khoản giảm trừ khai 7,5% mà đem nhân mỗi lần cần dùng là tạo ra tầng làm tròn thứ hai, và tệ
+hơn, kết quả sẽ đổi theo chỗ gọi.
+
+Cách làm: nhân **đúng một lần** lúc lập hóa đơn, ghi số tiền tuyệt đối vào `hoa_don.giam_tru`,
+chụp lại vào `chi_tiet_hoa_don`. Từ đó về sau mọi nơi chỉ cộng trừ, không nhân.
+
+Kiểm lại trên hóa đơn `HD202606-000019`:
+
+| Đại lượng | Giá trị |
+|---|---:|
+| Cộng các khoản cước trước giảm trừ | 690.800 đ |
+| Giảm trừ 7,5% quy ra tiền | 51.810 đ |
+| Tổng trước thuế | 638.990 đ |
+| Thuế VAT | 63.899 đ |
+| Tổng thanh toán | 702.889 đ |
+
+690.800 × 7,5% = 51.810 đúng đến đồng, và 638.990 × 10% = 63.899 cũng vậy. Con số 51.810 nằm
+trong CSDL như một số tiền, không phải như một tỷ lệ chờ được nhân lại.
+
+## D.4. Khoản đã áp dụng thì khoá hẳn — chặt hơn đặc tả
+
+Đặc tả trong `PHASE-5-PLAN.md` viết: sửa `giam_tru` phải tính lại toàn bộ chuỗi
+`tong_truoc_thue → thue_vat → tong_thanh_toan → con_no`.
+
+Bản làm ra chọn đường chặt hơn. Khoản ở trạng thái `DA_AP_DUNG` **không sửa và không xoá được**.
+Muốn sửa thì phải huỷ hóa đơn của kỳ đó, khoản tự quay về `CHUA_AP_DUNG`, sửa xong lập hóa đơn
+lại. Kỳ đã chốt thì chặn luôn từ đầu.
+
+Lý do chọn đường này thay vì viết hàm tính lại chuỗi: **chuỗi bốn cột đó có bốn chỗ để viết
+sai, và cả bốn đều là tiền.** Sửa mỗi `con_no` mà quên `thue_vat` thì hóa đơn vẫn cân bằng
+trong mắt bất biến ②, chỉ có số tiền là sai. Chặn hẳn một tình huống rẻ hơn nhiều so với làm
+đúng tình huống đó, và cái giá phải trả ở đây là một thao tác thừa cho việc hiếm khi xảy ra.
+
+Đây là điểm mục D **lệch khỏi đặc tả**, và lệch theo hướng an toàn hơn. Ghi ra để người đọc
+không đi tìm hàm tính lại chuỗi mà không thấy.
+
+## D.5. Giảm trừ vào hóa đơn dưới dạng dòng âm
+
+Khoản giảm trừ hiện trên bảng khoản mục như mọi dòng khác, chỉ khác là **thành tiền âm**.
+
+Cách khác là để nó thành một ô riêng bên dưới bảng. Cách đó làm bảng khoản mục cộng không ra
+tổng, và người đọc hóa đơn phải biết trước rằng có một số bị trừ ở đâu đó. Dòng âm thì cộng dọc
+từ trên xuống là ra đúng tổng trước thuế.
+
+## D.6. Nghiệm thu mục D
+
+Hai khoản giảm trừ trong dữ liệu mẫu, mỗi khoản một cách khai:
+
+| Loại | Cách khai | Giá trị | Trạng thái | Ra dòng âm |
+|---|---|---|---|---:|
+| Sự cố dịch vụ | số tiền | 50.000 đ | `DA_AP_DUNG` | −50.000 đ |
+| Chiết khấu doanh nghiệp | tỷ lệ | 7,50% | `DA_AP_DUNG` | −51.810 đ |
+
+| Phép kiểm | Kết quả |
+|---|---|
+| `GiamTruServiceTest` | 8 test |
+| Đường giảm trừ đo trên dữ liệu thật, đối chiếu dự đoán công bố trước | mục 19 và mục 20 |
+| Bất biến ② sau khi áp giảm trừ | 0 dòng lệch |
+
+## D.7. Màn hình cần chụp cho mục D
+
+Xem [mục 32](#32-danh-sách-màn-hình-chụp-ảnh-cho-toàn-phase-5).
 
 ---
 
@@ -1155,7 +1500,7 @@ năng tái lập, và biểu hiện ra ngoài thành một thói quen né tránh
 | # | Nợ | Ghi chú |
 |---|---|---|
 | 1 | ~~Chưa viết phần báo cáo cho mục A~~ | ✅ **Đã trả** — xem [Phần IV-A](#phần-iv-a--mục-a-màn-hình-hóa-đơn) |
-| 1b | **Chưa viết phần báo cáo cho mục B, C, D** | Ba mục đã làm và đã commit (`acc8486`, `d98366c`, `d231088`) nhưng chưa có phần viết |
+| 1b | ~~Chưa viết phần báo cáo cho mục B, C, D~~ | ✅ **Đã trả** — xem Phần IV-B, IV-C, IV-D |
 | 2 | Biểu đồ aging chỉ có 2/5 nhóm có nội dung | Cần thêm một kỳ cước cũ hơn — xem 29.1 |
 | 3 | `CdrGeneratorService` chưa có hạt giống cố định | Không còn chặn `reset` nữa vì đã có `data-van-hanh.sql`, nhưng sinh CDR mới vẫn không tái lập được |
 | 4 | `DIEU_CHINH` chỉ cộng, không trừ | Từ mục 17, chưa đổi |
