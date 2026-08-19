@@ -266,7 +266,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V3b** đổi mật khẩu | ✅ xong | `8f41400` |
 | **V4** Flyway + CI | ✅ xong (CI chưa chạy được tới khi đẩy mã) | `73fab44` |
 | **V5** đo hiệu năng + VAT ra cấu hình | ✅ xong | `eb31aa8` |
-| **V6** kiểm bàn phím | ✅ xong | `<commit-V6>` |
+| **V6** kiểm bàn phím | ✅ xong | `9ddbe99` |
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
 | **N1** báo cáo mục B, C, D | ⬜ chưa làm | — |
 | **N2** 70 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
