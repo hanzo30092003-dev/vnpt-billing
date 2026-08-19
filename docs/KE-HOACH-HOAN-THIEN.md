@@ -270,7 +270,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
 | **N1** báo cáo mục B, C, D | ⬜ chưa làm | — |
 | **N2** 70 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
-| **N3** quyết cách xử lý bảng tuổi nợ | ✅ **quyết cách A** — chấp nhận 4 nhóm, giải thích bằng một câu | `<commit-N3>` |
+| **N3** quyết cách xử lý bảng tuổi nợ | ✅ **quyết cách A** — chấp nhận 4 nhóm, giải thích bằng một câu | `71b3520` |
 
 ### Ghi chú của V3a — hai thứ kế hoạch không nói tới
 
