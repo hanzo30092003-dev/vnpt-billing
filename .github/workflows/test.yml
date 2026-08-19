@@ -55,6 +55,29 @@ jobs:
           cache: maven
 
       # ---------------------------------------------------------------
+      # Tai phu thuoc va bien dich TRUOC, thanh mot buoc rieng.
+      #
+      # Lan chay dau tien khong co cache Maven nen phai tai ca Spring Boot,
+      # POI, PDFBox... Gop chung vao buoc nap du lieu thi dong ho cho "ung
+      # dung khoi dong xong" bi tinh ca thoi gian tai thu vien, va khi no het
+      # gio thi khong biet la tai lau hay ung dung hong.
+      # ---------------------------------------------------------------
+      - name: Tai phu thuoc va bien dich
+        run: ./mvnw -B -DskipTests package
+
+      - name: Doi MySQL nhan ket noi
+        run: |
+          for i in $(seq 1 30); do
+            if (echo > /dev/tcp/127.0.0.1/3306) 2>/dev/null; then
+              echo "MySQL nhan ket noi sau $((i*2)) giay"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MySQL khong nhan ket noi sau 60 giay"
+          exit 1
+
+      # ---------------------------------------------------------------
       # Nap CSDL bang DUNG DUONG ma tai lieu huong dan nguoi dung dung:
       # chay ung dung mot lan voi profile reset. Profile do goi
       # flyway clean -> flyway migrate -> nap data-mau.sql, data-van-hanh.sql
@@ -63,13 +86,28 @@ jobs:
       # Co y KHONG nap bang cach do thang file .sql vao mysql: lam vay thi
       # CI kiem mot duong nap khac voi duong ma nguoi dung that di, va duong
       # that se khong con ai kiem.
+      #
+      # ⚠️ VONG LAP NAY PHAI THOAT SOM KHI UNG DUNG HONG. Ban dau no chi cho
+      # dong "Started BillingApplication", nen mot lan khoi dong that bai bien
+      # thanh 300 giay cho vo vong roi bao "exit code 124" - khong mot dong
+      # nao noi vi sao. In reset.log ra khi that bai la phan quan trong nhat
+      # cua buoc nay.
       # ---------------------------------------------------------------
       - name: Nap bo du lieu mau (flyway clean + migrate + du lieu)
         run: |
-          ./mvnw -B -q spring-boot:run -Dspring-boot.run.profiles=reset > reset.log 2>&1 &
-          timeout 300 bash -c 'until grep -q "Started BillingApplication" reset.log; do sleep 2; done'
+          ./mvnw -B spring-boot:run -Dspring-boot.run.profiles=reset > reset.log 2>&1 &
+          for i in $(seq 1 150); do
+            if grep -q "Started BillingApplication" reset.log 2>/dev/null; then break; fi
+            if grep -qE "APPLICATION FAILED TO START|BUILD FAILURE" reset.log 2>/dev/null; then break; fi
+            sleep 2
+          done
           echo "--- Flyway va nap du lieu ---"
-          grep -E "Migrating schema|Successfully applied|Da nap du lieu|Đã nạp dữ liệu" reset.log || true
+          grep -E "Migrating schema|Successfully applied|nap du lieu|nạp dữ liệu" reset.log || true
+          if ! grep -q "Started BillingApplication" reset.log 2>/dev/null; then
+            echo "===== UNG DUNG KHONG KHOI DONG DUOC - 120 dong cuoi cua reset.log ====="
+            tail -120 reset.log
+            exit 1
+          fi
           pkill -f "spring-boot:run" || true
           sleep 5
 
@@ -84,3 +122,6 @@ jobs:
           name: bao-cao-test
           path: target/surefire-reports/
           retention-days: 14
+          # Test khong chay duoc thi thu muc nay khong ton tai - do la truong
+          # hop binh thuong cua mot lan CI do, khong phai loi cua buoc luu tru.
+          if-no-files-found: ignore
