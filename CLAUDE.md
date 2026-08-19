@@ -34,7 +34,7 @@ Nạp lại dữ liệu mẫu — **XOÁ SẠCH CSDL** (`schema.sql` mở đầu
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-Chạy test (298 test, cần MySQL đang chạy):
+Chạy test (307 test, cần MySQL đang chạy):
 
 ```bash
 mvnw test
@@ -186,6 +186,13 @@ dump** `data-van-hanh.sql`.
   Mockito vẫn xanh — chỉ `test-auth.ps1` mục 9.5 bắt được.
 * **Tên đăng nhập không sửa được sau khi tạo** — nó đã ký trong sổ nhật ký. Mật khẩu để trống
   lúc sửa nghĩa là giữ nguyên, không phải xoá.
+* **Đổi mật khẩu phải nhập đúng mật khẩu hiện tại**, dù người dùng đã đăng nhập rồi. Một phiên
+  đang mở không chứng minh người ngồi trước máy là chủ tài khoản.
+* **Mọi đường đổi mật khẩu đều làm phiên đang mở của tài khoản đó hết giá trị** — cả tự đổi
+  (`/doi-mat-khau`) lẫn quản trị viên đặt lại hộ. Cùng luật với nút Khoá: thông tin xác thực
+  đổi thì phiên dựng trên thông tin cũ không còn giá trị. `test-auth.ps1` mục 10 canh việc này.
+* **`/doi-mat-khau` KHÔNG được đặt dưới `/quan-tri/**`** — nhân viên quầy và kế toán cũng phải
+  đổi được mật khẩu khởi tạo của họ.
 * **Báo cáo phân quyền theo NỘI DUNG, không theo tiền tố đường dẫn.** Báo cáo có số tiền của
   khách → `KE_TOAN` + `ADMIN`, cùng luật với `/hoa-don` và `/cong-no`. Nới lại thành cả cụm
   `/bao-cao/**` là mở lại đúng lỗ hổng cũ. `test-auth.ps1` mục 8 canh việc này.

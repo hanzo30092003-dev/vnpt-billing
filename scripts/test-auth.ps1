@@ -231,5 +231,115 @@ $t = Get-Trang $adm "/quan-tri/nguoi-dung"
 Kiem-Tra -Ten "Doi chung: admin van vao duoc man hinh sau khi bi tu choi" -KetQua $t -StatusMongDoi 200 `
     -CanCo @('Quản lý người dùng') | Out-Null
 
+# ---------------------------------------------------------------------
+Muc "10. Tu doi mat khau (V3b)"
+# ---------------------------------------------------------------------
+# NGHIEM THU CUA KE HOACH: "doi mat khau xong dang nhap bang mat khau cu phai truot".
+#
+# Dung tai khoan kiemthu01 cua muc 9 (dang o trang thai da khoa) nen phai mo khoa
+# truoc. Cuoi muc nay mat khau duoc dat lai ve $MK_KT bang duong quan tri, de lan
+# chay sau bat dau lai tu dung diem xuat phat.
+
+$MK_MOI = "matkhaumoi456"
+
+$t = Get-Trang $adm "/quan-tri/nguoi-dung"
+$dong = Lay-Dong-NguoiDung $t.body $TEN_KT
+if ($dong.Contains("Đã khoá")) {
+    Post-Form $adm "/quan-tri/nguoi-dung" "/quan-tri/nguoi-dung/$idKt/mo-khoa" @{ } | Out-Null
+}
+
+$sKt = Connect-App $TEN_KT $MK_KT
+$t = Get-Trang $sKt "/doi-mat-khau"
+Kiem-Tra -Ten "$TEN_KT mo duoc man hinh doi mat khau (vai tro nhan vien)" -KetQua $t -StatusMongDoi 200 `
+    -CanCo @('Đổi mật khẩu', 'name="matKhauCu"', 'name="matKhauMoi"', 'name="xacNhanMatKhauMoi"') | Out-Null
+
+# --- 10.1 Go sai mat khau hien tai thi bi chan ---
+$r = Post-Form $sKt "/doi-mat-khau" "/doi-mat-khau" @{
+    matKhauCu = "doan-bua"; matKhauMoi = $MK_MOI; xacNhanMatKhauMoi = $MK_MOI }
+Kiem-Tra -Ten "⭐ Sai mat khau hien tai thi bi chan" -KetQua $r -StatusMongDoi 200 `
+    -CanCo @('Mật khẩu hiện tại không đúng') | Out-Null
+
+# Doi chung: mat khau CHUA he doi sau lan bi chan o tren
+$sDoiChung = Connect-App $TEN_KT $MK_KT
+$t = Get-Trang $sDoiChung "/"
+Kiem-Tra -Ten "Doi chung: bi chan thi mat khau van nguyen" -KetQua $t -StatusMongDoi 200 `
+    -CanCo @('Đăng xuất') | Out-Null
+
+# --- 10.2 Hai o mat khau moi khong khop thi bi chan ---
+$r = Post-Form $sKt "/doi-mat-khau" "/doi-mat-khau" @{
+    matKhauCu = $MK_KT; matKhauMoi = $MK_MOI; xacNhanMatKhauMoi = "go-nham" }
+Kiem-Tra -Ten "Hai o mat khau moi khong khop thi bi chan" -KetQua $r -StatusMongDoi 200 `
+    -CanCo @('không giống nhau') | Out-Null
+
+# --- 10.3 Doi that: phien hien tai phai ket thuc ---
+$sKt = Connect-App $TEN_KT $MK_KT
+$r = Post-Form $sKt "/doi-mat-khau" "/doi-mat-khau" @{
+    matKhauCu = $MK_KT; matKhauMoi = $MK_MOI; xacNhanMatKhauMoi = $MK_MOI }
+Kiem-Tra -Ten "⭐ Doi xong bi dua ve man hinh dang nhap" -KetQua $r -StatusMongDoi 200 `
+    -CanCo @('Đã đổi mật khẩu', 'name="matKhau"') -KhongDuocCo @('Đăng xuất') | Out-Null
+
+$t = Get-Trang $sKt "/"
+Kiem-Tra -Ten "⭐ Phien cu khong dung tiep duoc sau khi doi mat khau" -KetQua $t -StatusMongDoi 200 `
+    -CanCo @('name="matKhau"') -KhongDuocCo @('Đăng xuất') | Out-Null
+
+# --- 10.4 NGHIEM THU: mat khau cu phai TRUOT, mat khau moi phai VAO DUOC ---
+$sCu = Connect-App $TEN_KT $MK_KT
+$t = Get-Trang $sCu "/"
+Kiem-Tra -Ten "⭐ NGHIEM THU: dang nhap bang mat khau CU bi truot" -KetQua $t -StatusMongDoi 200 `
+    -CanCo @('name="matKhau"') -KhongDuocCo @('Đăng xuất') | Out-Null
+
+$sMoi = Connect-App $TEN_KT $MK_MOI
+$t = Get-Trang $sMoi "/"
+Kiem-Tra -Ten "Doi chung: dang nhap bang mat khau MOI thi vao duoc" -KetQua $t -StatusMongDoi 200 `
+    -CanCo @('Đăng xuất') | Out-Null
+
+# --- 10.5 Quan tri dat lai mat khau thi phien dang mo cua nguoi do bi da ---
+$r = Post-Form $adm "/quan-tri/nguoi-dung/$idKt/sua" "/quan-tri/nguoi-dung/luu" @{
+    id = $idKt; tenDangNhap = $TEN_KT; hoTen = "Tai khoan kiem thu"
+    email = "kiemthu01@vnptbilling.local"; vaiTro = "NHAN_VIEN"; matKhau = $MK_KT }
+Kiem-Tra -Ten "admin dat lai mat khau cho $TEN_KT" -KetQua $r -StatusMongDoi 200 `
+    -CanCo @('Đã cập nhật tài khoản') | Out-Null
+
+$t = Get-Trang $sMoi "/"
+Kiem-Tra -Ten "⭐ Quan tri dat lai mat khau thi phien dang mo cua nguoi do bi thoat" -KetQua $t -StatusMongDoi 200 `
+    -CanCo @('name="matKhau"') -KhongDuocCo @('Đăng xuất') | Out-Null
+
+# ---------------------------------------------------------------------
+Muc "11. Khoa tam sau 5 lan nhap sai (V3c - tra no nghiem thu)"
+# ---------------------------------------------------------------------
+# NGHIEM THU CUA KE HOACH: "sai mat khau 5 lan thi lan 6 bi khoa".
+# V3c da lam tu dot truoc nhung phep kiem nay chua bao gio duoc viet ra.
+#
+# Phep kiem manh nhat o day la buoc doi chung: dang trong thoi gian khoa tam thi
+# MAT KHAU DUNG cung khong vao duoc. Chi kiem "nhap sai bi tu choi" thi khong phan
+# biet duoc voi hanh vi binh thuong cua mot he thong KHONG he co khoa tam.
+
+$sLoc = $null
+Invoke-WebRequest -Uri "$Global:BaseUrl/dang-nhap" -SessionVariable sLoc -UseBasicParsing -TimeoutSec 10 | Out-Null
+
+$ketQuaLanCuoi = $null
+for ($i = 1; $i -le 5; $i++) {
+    $ketQuaLanCuoi = Post-Form $sLoc "/dang-nhap" "/dang-nhap" @{
+        tenDangNhap = $TEN_KT; matKhau = "sai-lan-$i" }
+}
+Kiem-Tra -Ten "⭐ Nhap sai 5 lan lien tiep thi tai khoan bi khoa tam" -KetQua $ketQuaLanCuoi -StatusMongDoi 200 `
+    -CanCo @('Tài khoản đang tạm khoá') | Out-Null
+
+$r = Post-Form $sLoc "/dang-nhap" "/dang-nhap" @{ tenDangNhap = $TEN_KT; matKhau = $MK_KT }
+Kiem-Tra -Ten "⭐ DOI CHUNG: dang bi khoa tam thi mat khau DUNG cung khong vao duoc" -KetQua $r -StatusMongDoi 200 `
+    -CanCo @('name="matKhau"') -KhongDuocCo @('Đăng xuất') | Out-Null
+
+$r = Post-Form $adm "/quan-tri/nguoi-dung" "/quan-tri/nguoi-dung/$idKt/mo-khoa" @{ }
+Kiem-Tra -Ten "Quan tri go duoc khoa tam ngay, khong phai doi 15 phut" -KetQua $r -StatusMongDoi 200 `
+    -CanCo @('Đã mở khoá tài khoản') | Out-Null
+
+$sSauMoKhoa = Connect-App $TEN_KT $MK_KT
+$t = Get-Trang $sSauMoKhoa "/"
+Kiem-Tra -Ten "Mo khoa xong thi dang nhap lai duoc ngay" -KetQua $t -StatusMongDoi 200 `
+    -CanCo @('Đăng xuất') | Out-Null
+
+# Tra trang thai ve dung diem xuat phat: kiemthu01 bi khoa, mat khau la $MK_KT
+Post-Form $adm "/quan-tri/nguoi-dung" "/quan-tri/nguoi-dung/$idKt/khoa" @{ } | Out-Null
+
 
 Ket-Thuc

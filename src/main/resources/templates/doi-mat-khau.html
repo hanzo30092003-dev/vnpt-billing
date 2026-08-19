@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Đổi mật khẩu', ~{::noiDungTrang})}">
+<body>
+
+<div th:fragment="noiDungTrang">
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div th:replace="~{fragments/trang :: tieuDe(
+                'bi-key', 'Đổi mật khẩu',
+                'Đổi mật khẩu của chính bạn. Đổi xong hệ thống sẽ hỏi đăng nhập lại bằng mật khẩu mới.')}"></div>
+        <a class="btn btn-outline-secondary" th:href="@{/}">
+            <i class="bi bi-arrow-left me-1"></i> Về trang chủ
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <form th:action="@{/doi-mat-khau}" th:object="${doiMatKhauForm}"
+                          method="post" novalidate autocomplete="off">
+
+                        <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span th:each="loi : ${#fields.globalErrors()}" th:text="${loi}"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="matKhauCu">
+                                Mật khẩu hiện tại <span class="text-danger">*</span>
+                            </label>
+                            <input type="password" class="form-control" id="matKhauCu"
+                                   th:field="*{matKhauCu}" autocomplete="current-password" autofocus
+                                   th:classappend="${#fields.hasErrors('matKhauCu')} ? 'is-invalid'">
+                            <div class="form-text">
+                                Chính là mật khẩu bạn vừa dùng để đăng nhập.
+                            </div>
+                            <div class="invalid-feedback" th:errors="*{matKhauCu}"></div>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="mb-3">
+                            <label class="form-label" for="matKhauMoi">
+                                Mật khẩu mới <span class="text-danger">*</span>
+                            </label>
+                            <input type="password" class="form-control" id="matKhauMoi"
+                                   th:field="*{matKhauMoi}" autocomplete="new-password"
+                                   th:classappend="${#fields.hasErrors('matKhauMoi')} ? 'is-invalid'">
+                            <div class="form-text">Ít nhất 6 ký tự, và phải khác mật khẩu đang dùng.</div>
+                            <div class="invalid-feedback" th:errors="*{matKhauMoi}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="xacNhanMatKhauMoi">
+                                Gõ lại mật khẩu mới <span class="text-danger">*</span>
+                            </label>
+                            <input type="password" class="form-control" id="xacNhanMatKhauMoi"
+                                   th:field="*{xacNhanMatKhauMoi}" autocomplete="new-password"
+                                   th:classappend="${#fields.hasErrors('xacNhanMatKhauMoi')} ? 'is-invalid'">
+                            <div class="form-text">
+                                Mật khẩu gõ ra dấu chấm nên không đọc lại được — ô này để bắt lỗi gõ nhầm.
+                            </div>
+                            <div class="invalid-feedback" th:errors="*{xacNhanMatKhauMoi}"></div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-key me-1"></i> Đổi mật khẩu
+                            </button>
+                            <a class="btn btn-outline-secondary" th:href="@{/}">Huỷ</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm bg-body-tertiary">
+                <div class="card-body">
+                    <h3 class="h6"><i class="bi bi-info-circle me-1"></i> Cần biết trước khi đổi</h3>
+                    <ul class="small text-secondary mb-0 ps-3">
+                        <li class="mb-2">
+                            Đổi xong bạn <strong>bị đưa về màn hình đăng nhập</strong> và phải đăng nhập
+                            lại bằng mật khẩu mới. Đó là cách chắc chắn nhất để biết mật khẩu mới dùng được.
+                        </li>
+                        <li class="mb-2">
+                            Nếu bạn đang mở hệ thống ở máy khác, máy đó cũng bị thoát ra.
+                        </li>
+                        <li class="mb-2">
+                            Quên mật khẩu hiện tại thì không đổi ở đây được — nhờ quản trị viên đặt lại giúp.
+                        </li>
+                        <li>
+                            Hệ thống chỉ lưu mật khẩu ở dạng đã mã hoá một chiều, nên không ai
+                            <em>đọc</em> lại được mật khẩu cũ của bạn, kể cả quản trị viên.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

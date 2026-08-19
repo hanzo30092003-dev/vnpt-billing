@@ -43,6 +43,7 @@ public class LayoutAdvice {
         TEN_PHAN_HE.put("giam-tru", "Giảm trừ");
         TEN_PHAN_HE.put("bao-cao", "Báo cáo");
         TEN_PHAN_HE.put("quan-tri", "Quản trị");
+        TEN_PHAN_HE.put("doi-mat-khau", "Đổi mật khẩu");
     }
 
     /** Tên hiển thị của các trang con hay gặp. */

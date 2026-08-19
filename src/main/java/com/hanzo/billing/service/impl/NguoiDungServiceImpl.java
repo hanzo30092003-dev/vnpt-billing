@@ -1,5 +1,6 @@
 package com.hanzo.billing.service.impl;
 
+import com.hanzo.billing.dto.DoiMatKhauForm;
 import com.hanzo.billing.dto.NguoiDungForm;
 import com.hanzo.billing.entity.NguoiDung;
 import com.hanzo.billing.enums.VaiTro;
@@ -75,6 +76,11 @@ public class NguoiDungServiceImpl implements NguoiDungService {
 
         NguoiDung daLuu = nguoiDungRepository.save(nguoiDung);
 
+        // Quản trị viên đặt lại mật khẩu cho ai thì phiên đang mở của người đó hết giá trị.
+        // Lý do đặt lại mật khẩu thường là "tài khoản có thể đã lộ" — mà để nguyên phiên cũ
+        // thì kẻ đang chiếm tài khoản vẫn ngồi trong hệ thống, chỉ là không đăng nhập lại được.
+        int soPhien = (doiMatKhau && !themMoi) ? daPhienDangMo(daLuu.getId()) : 0;
+
         nhatKyService.ghiNhatKy(
                 themMoi ? "TAO_NGUOI_DUNG" : "SUA_NGUOI_DUNG",
                 "NGUOI_DUNG",
@@ -82,9 +88,59 @@ public class NguoiDungServiceImpl implements NguoiDungService {
                 (themMoi ? "Tạo tài khoản " : "Cập nhật tài khoản ")
                         + daLuu.getTenDangNhap() + " - " + daLuu.getHoTen()
                         + ", quyền " + daLuu.getVaiTro().getNhan()
-                        + (doiMatKhau && !themMoi ? ", có đặt lại mật khẩu" : ""));
+                        + (doiMatKhau && !themMoi ? ", có đặt lại mật khẩu" : "")
+                        + (soPhien > 0 ? ", buộc thoát " + soPhien + " phiên đang mở" : ""));
 
         return daLuu;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p><b>Thứ tự bốn phép kiểm là cố ý.</b> Mật khẩu hiện tại kiểm <b>trước tiên</b>: chưa
+     * chứng minh được là chủ tài khoản thì mọi lời phàn nàn về độ dài hay về hai ô không khớp
+     * đều là thông tin cho không. Ba phép kiểm sau chỉ là giúp người dùng khỏi tự khoá mình.</p>
+     */
+    @Override
+    @Transactional
+    public void doiMatKhau(DoiMatKhauForm form) {
+        NguoiDung nguoiDung = SecurityUtils.layNguoiDungHienTai()
+                .map(p -> layTheoId(p.getId()))
+                .orElseThrow(() -> new NghiepVuException(
+                        "Phiên làm việc đã kết thúc. Hãy đăng nhập lại rồi đổi mật khẩu."));
+
+        if (!passwordEncoder.matches(khongNull(form.getMatKhauCu()), nguoiDung.getMatKhau())) {
+            throw new NghiepVuException("Mật khẩu hiện tại không đúng. "
+                    + "Hãy gõ lại đúng mật khẩu bạn vừa dùng để đăng nhập.");
+        }
+
+        String matKhauMoi = khongNull(form.getMatKhauMoi()).trim();
+
+        if (!matKhauMoi.equals(khongNull(form.getXacNhanMatKhauMoi()).trim())) {
+            throw new NghiepVuException("Hai ô mật khẩu mới không giống nhau. "
+                    + "Hãy gõ lại cả hai ô cho khớp.");
+        }
+        if (matKhauMoi.length() < DO_DAI_MAT_KHAU_TOI_THIEU) {
+            throw new NghiepVuException("Mật khẩu mới phải dài ít nhất "
+                    + DO_DAI_MAT_KHAU_TOI_THIEU + " ký tự.");
+        }
+        if (passwordEncoder.matches(matKhauMoi, nguoiDung.getMatKhau())) {
+            throw new NghiepVuException("Mật khẩu mới trùng với mật khẩu đang dùng. "
+                    + "Hãy chọn một mật khẩu khác.");
+        }
+
+        nguoiDung.setMatKhau(passwordEncoder.encode(matKhauMoi));
+        nguoiDungRepository.save(nguoiDung);
+
+        daPhienDangMo(nguoiDung.getId());
+
+        nhatKyService.ghiNhatKy("DOI_MAT_KHAU", "NGUOI_DUNG", nguoiDung.getId(),
+                "Tự đổi mật khẩu tài khoản " + nguoiDung.getTenDangNhap()
+                        + " - " + nguoiDung.getHoTen());
+    }
+
+    private static String khongNull(String chuoi) {
+        return chuoi == null ? "" : chuoi;
     }
 
     @Override

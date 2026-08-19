@@ -77,6 +77,42 @@ khoá tạm 15 phút — cột *Tình trạng* hiện *Tạm khoá tới HH:mm*.
 > **Tài khoản không xoá được, chỉ khoá lại.** Tên người thao tác đã ký trong sổ nhật ký, trong
 > phiếu thu tiền và trong lịch sử thuê bao — xoá tài khoản là xoá luôn dấu vết ai đã làm việc gì.
 
+### Đổi mật khẩu của chính bạn — mọi vai trò
+
+Nút **Đổi mật khẩu** ở góc trên bên phải, cạnh tên bạn (`/doi-mat-khau`). Nhân viên quầy và kế
+toán cũng dùng được — đây là chỗ để đổi cái mật khẩu khởi tạo mà quản trị viên đặt cho bạn.
+
+Điền ba ô: mật khẩu hiện tại, mật khẩu mới, và gõ lại mật khẩu mới.
+
+**Vì sao bắt nhập lại mật khẩu hiện tại dù bạn đã đăng nhập rồi.** Một phiên đang mở không
+chứng minh người ngồi trước máy là chủ tài khoản — quầy giao dịch là chỗ máy để không khoá màn
+hình suốt ngày. Không hỏi mật khẩu cũ thì ai đi ngang một máy bỏ trống cũng đổi được mật khẩu và
+chiếm hẳn tài khoản: bạn mất quyền vào hệ thống, còn sổ nhật ký từ đó về sau ghi tên bạn cho
+việc người khác làm.
+
+**Đổi xong bạn bị đưa về màn hình đăng nhập** và phải đăng nhập lại bằng mật khẩu mới. Đó không
+phải phiền hà thừa: người ta đổi mật khẩu *vì* nghi có người biết mật khẩu cũ, mà nếu người đó
+đang mở sẵn một phiên thì giữ nguyên phiên nghĩa là họ vẫn ngồi trong hệ thống. Cùng lý do đó,
+khi quản trị viên đặt lại mật khẩu hộ ai, phiên đang mở của người đó cũng bị thoát.
+
+Phần thưởng kèm theo: đăng nhập lại ngay là **tự chứng minh** mật khẩu mới dùng được, bạn biết
+chắc mình không vừa tự khoá mình ra ngoài.
+
+**Quên mật khẩu hiện tại** thì không đổi ở đây được — nhờ quản trị viên đặt lại giúp (mục trên).
+Không ai *đọc* lại được mật khẩu cũ của bạn, kể cả quản trị viên: hệ thống chỉ lưu bản mã hoá
+một chiều.
+
+### Nhập sai mật khẩu 5 lần thì sao
+
+Tài khoản bị **khoá tạm 15 phút**. Màn hình đăng nhập nói rõ còn bao nhiêu phút. Trong lúc đó,
+gõ **đúng** mật khẩu cũng không vào được — đó là điều hệ thống làm đúng, không phải hỏng.
+
+Đợi hết 15 phút là tự vào lại được. Không đợi được thì nhờ quản trị viên bấm nút mở khoá.
+
+Khoá **tạm** chứ không khoá vĩnh viễn là có lý do: khoá vĩnh viễn biến một lần gõ nhầm thành
+việc phải đi tìm quản trị viên, và biến chính cơ chế bảo vệ thành cách phá hoại — kẻ xấu chỉ
+cần cố tình nhập sai 5 lần vào tài khoản người khác là khoá được họ vô thời hạn.
+
 ---
 
 ## 2. Trình tự nghiệp vụ

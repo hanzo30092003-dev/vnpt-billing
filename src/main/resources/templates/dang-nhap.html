@@ -52,6 +52,18 @@
                 </div>
             </div>
 
+            <!--/*
+                Doi mat khau xong thi phien bi huy, nen loi nhan KHONG di duoc bang flash
+                attribute (flash song trong phien). Nhan qua tham so tren URL, giong ?dathoat.
+            */-->
+            <div class="alert alert-success d-flex align-items-start py-2" th:if="${param.doimatkhau != null}">
+                <i class="bi bi-key-fill me-2 mt-1"></i>
+                <div>
+                    <strong>Đã đổi mật khẩu.</strong>
+                    Hãy đăng nhập lại bằng mật khẩu mới. Mật khẩu cũ không còn dùng được nữa.
+                </div>
+            </div>
+
             <div class="alert alert-secondary d-flex align-items-start py-2" th:if="${param.hethan != null}">
                 <i class="bi bi-clock-history me-2 mt-1"></i>
                 <div>

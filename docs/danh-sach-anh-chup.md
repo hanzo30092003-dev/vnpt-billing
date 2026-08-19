@@ -15,13 +15,14 @@
 > | 64 | Menu bên trái của `admin` | Đủ **6 nhóm**: Khách hàng & thuê bao · Thu tiền & công nợ · Tính tiền hằng tháng · Báo cáo · Danh mục · **Quản trị** |
 > | 65 | `/hoa-don?kyCuocId=8` | Bảng rỗng có câu giải thích **vì sao** trống + nút dẫn đường |
 >
-> **Ba ảnh của đợt hoàn thiện (việc V3a — quản lý người dùng):**
+> **Bốn ảnh của đợt hoàn thiện (việc V3a — quản lý người dùng, và V3b — đổi mật khẩu):**
 >
 > | # | Màn hình | Cần thấy rõ |
 > |---|---|---|
 > | 66 | `/quan-tri/nguoi-dung` | Cột *Tình trạng* có **cả ba** huy hiệu: Đang dùng · Đã khoá · Tạm khoá tới HH:mm. Dòng của chính người đang đăng nhập mang nhãn *chính bạn* và **không có nút khoá** |
 > | 67 | `/quan-tri/nguoi-dung/them` | Ô *Quyền sử dụng* ba lựa chọn; ô mật khẩu kèm câu giải thích |
 > | 68 | ⭐ **Khoá tài khoản đá được phiên đang mở** | **Hai cửa sổ cạnh nhau**: bên trái `admin` vừa bấm Khoá; bên phải là phiên của người vừa bị khoá, bấm F5 thì bị đưa về trang đăng nhập. Đây là ảnh trả lời câu *"khoá tài khoản có tác dụng ngay không"* |
+> | 69 | `/doi-mat-khau` (việc V3b) | Ba ô mật khẩu + khối *Cần biết trước khi đổi* bên phải. Chụp thêm một ảnh trạng thái lỗi: gõ sai mật khẩu hiện tại → khung đỏ *"Mật khẩu hiện tại không đúng"*. Đăng nhập bằng `nhanvien01` để cho thấy **mọi vai trò** đều vào được màn hình này |
 >
 > Ảnh 66 cần **ba** tình trạng cùng lúc, mà bộ dữ liệu mẫu chỉ có 3 tài khoản đều đang dùng.
 > Cách dựng: chạy `.\scripts	est-auth.ps1` một lần — script tạo sẵn tài khoản `kiemthu01` và

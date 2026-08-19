@@ -1,5 +1,6 @@
 package com.hanzo.billing.service;
 
+import com.hanzo.billing.dto.DoiMatKhauForm;
 import com.hanzo.billing.dto.NguoiDungForm;
 import com.hanzo.billing.entity.NguoiDung;
 import com.hanzo.billing.enums.VaiTro;
@@ -103,6 +104,14 @@ class NguoiDungServiceTest {
         form.setHoTen("Tên đã đổi");
         form.setVaiTro(vaiTro);
         form.setMatKhau(matKhau);
+        return form;
+    }
+
+    private DoiMatKhauForm formDoiMatKhau(String cu, String moi, String xacNhan) {
+        DoiMatKhauForm form = new DoiMatKhauForm();
+        form.setMatKhauCu(cu);
+        form.setMatKhauMoi(moi);
+        form.setXacNhanMatKhauMoi(xacNhan);
         return form;
     }
 
@@ -412,6 +421,159 @@ class NguoiDungServiceTest {
                     .hasMessageContaining("không có khoá nào để mở");
 
             verify(nguoiDungRepository, never()).save(any());
+        }
+    }
+
+    // =================================================================
+    @Nested
+    @DisplayName("⭐ Tự đổi mật khẩu")
+    class TuDoiMatKhau {
+
+        /** Dựng sẵn: đã đăng nhập bằng nhanvien01, mật khẩu hiện tại là MAT_KHAU_CU. */
+        private NguoiDung dangNhapSanSang() {
+            NguoiDung nd = taiKhoan(ID_NHAN_VIEN, "nhanvien01", VaiTro.NHAN_VIEN, true);
+            when(nguoiDungRepository.findById(ID_NHAN_VIEN)).thenReturn(Optional.of(nd));
+            dangNhapBang(nd);
+            return nd;
+        }
+
+        @Test
+        @DisplayName("17. ⭐ Đổi đúng thì mật khẩu cũ hết hiệu lực ngay")
+        void doiDungThiMatKhauCuHetHieuLuc() {
+            dangNhapSanSang();
+            when(nguoiDungRepository.save(any(NguoiDung.class))).thenAnswer(i -> i.getArgument(0));
+
+            nguoiDungService.doiMatKhau(formDoiMatKhau(MAT_KHAU_CU, MAT_KHAU_MOI, MAT_KHAU_MOI));
+
+            NguoiDung daLuu = batBanGhiDaLuu();
+            assertThat(passwordEncoder.matches(MAT_KHAU_MOI, daLuu.getMatKhau())).isTrue();
+            assertThat(passwordEncoder.matches(MAT_KHAU_CU, daLuu.getMatKhau()))
+                    .as("Đổi mật khẩu mà mật khẩu cũ vẫn vào được thì việc đổi chẳng bịt được gì")
+                    .isFalse();
+        }
+
+        @Test
+        @DisplayName("18. ⭐ Gõ sai mật khẩu hiện tại thì bị chặn — chốt chặn quan trọng nhất")
+        void saiMatKhauHienTaiThiBiChan() {
+            dangNhapSanSang();
+
+            assertThatThrownBy(() ->
+                    nguoiDungService.doiMatKhau(formDoiMatKhau("doan-bua", MAT_KHAU_MOI, MAT_KHAU_MOI)))
+                    .isInstanceOf(NghiepVuException.class)
+                    .hasMessageContaining("Mật khẩu hiện tại không đúng");
+
+            // Bỏ phép kiểm mật khẩu cũ thì bất kỳ ai đi ngang một máy quên khoá màn hình cũng
+            // chiếm hẳn được tài khoản đang mở — nạn nhân mất quyền vào hệ thống, còn sổ nhật
+            // ký từ đó về sau ghi tên họ cho việc người khác làm.
+            verify(nguoiDungRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("19. Hai ô mật khẩu mới không khớp thì bị chặn")
+        void haiOMoiKhongKhopThiBiChan() {
+            dangNhapSanSang();
+
+            assertThatThrownBy(() ->
+                    nguoiDungService.doiMatKhau(formDoiMatKhau(MAT_KHAU_CU, MAT_KHAU_MOI, "go-nham")))
+                    .isInstanceOf(NghiepVuException.class)
+                    .hasMessageContaining("không giống nhau");
+
+            verify(nguoiDungRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("20. Mật khẩu mới ngắn hơn 6 ký tự thì bị chặn")
+        void matKhauMoiQuaNganThiBiChan() {
+            dangNhapSanSang();
+
+            assertThatThrownBy(() ->
+                    nguoiDungService.doiMatKhau(formDoiMatKhau(MAT_KHAU_CU, "12345", "12345")))
+                    .isInstanceOf(NghiepVuException.class)
+                    .hasMessageContaining("6 ký tự");
+
+            verify(nguoiDungRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("21. Đặt lại đúng mật khẩu đang dùng thì bị chặn")
+        void matKhauMoiTrungMatKhauCuThiBiChan() {
+            dangNhapSanSang();
+
+            assertThatThrownBy(() ->
+                    nguoiDungService.doiMatKhau(formDoiMatKhau(MAT_KHAU_CU, MAT_KHAU_CU, MAT_KHAU_CU)))
+                    .isInstanceOf(NghiepVuException.class)
+                    .hasMessageContaining("trùng với mật khẩu đang dùng");
+
+            verify(nguoiDungRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("22. ⭐ Đổi xong thì phiên đang mở của chính tài khoản đó hết giá trị")
+        void doiXongThiPhienDangMoHetGiaTri() {
+            NguoiDung nd = dangNhapSanSang();
+            when(nguoiDungRepository.save(any(NguoiDung.class))).thenAnswer(i -> i.getArgument(0));
+
+            Object principal = new NguoiDungPrincipal(nd);
+            SessionInformation phien = new SessionInformation(principal, "phien-1", new java.util.Date());
+            when(sessionRegistry.getAllPrincipals()).thenReturn(List.of(principal));
+            when(sessionRegistry.getAllSessions(principal, false)).thenReturn(List.of(phien));
+
+            nguoiDungService.doiMatKhau(formDoiMatKhau(MAT_KHAU_CU, MAT_KHAU_MOI, MAT_KHAU_MOI));
+
+            assertThat(phien.isExpired())
+                    .as("Người ta đổi mật khẩu VÌ nghi có người biết mật khẩu cũ. Giữ nguyên "
+                            + "phiên cũ là để kẻ đó ngồi lại trong hệ thống, chỉ khác là không "
+                            + "đăng nhập lại được")
+                    .isTrue();
+        }
+
+        @Test
+        @DisplayName("23. Chưa đăng nhập thì không đổi được mật khẩu của ai cả")
+        void chuaDangNhapThiKhongDoiDuoc() {
+            assertThatThrownBy(() ->
+                    nguoiDungService.doiMatKhau(formDoiMatKhau(MAT_KHAU_CU, MAT_KHAU_MOI, MAT_KHAU_MOI)))
+                    .isInstanceOf(NghiepVuException.class)
+                    .hasMessageContaining("Phiên làm việc đã kết thúc");
+
+            verify(nguoiDungRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("24. ⭐ Quản trị viên đặt lại mật khẩu cho ai thì phiên người đó cũng bị đá")
+        void quanTriDatLaiMatKhauThiPhienNguoiDoBiDa() {
+            NguoiDung nd = taiKhoan(ID_NHAN_VIEN, "nhanvien01", VaiTro.NHAN_VIEN, true);
+            when(nguoiDungRepository.findById(ID_NHAN_VIEN)).thenReturn(Optional.of(nd));
+            when(nguoiDungRepository.save(any(NguoiDung.class))).thenAnswer(i -> i.getArgument(0));
+            dangNhapBang(taiKhoan(ID_ADMIN, "admin", VaiTro.ADMIN, true));
+
+            Object principal = new NguoiDungPrincipal(nd);
+            SessionInformation phien = new SessionInformation(principal, "phien-2", new java.util.Date());
+            when(sessionRegistry.getAllPrincipals()).thenReturn(List.of(principal));
+            when(sessionRegistry.getAllSessions(principal, false)).thenReturn(List.of(phien));
+
+            nguoiDungService.luu(formSua(ID_NHAN_VIEN, VaiTro.NHAN_VIEN, MAT_KHAU_MOI));
+
+            assertThat(phien.isExpired())
+                    .as("Lý do đặt lại mật khẩu hộ thường là 'tài khoản có thể đã lộ' — để "
+                            + "nguyên phiên cũ thì việc đặt lại không đuổi được ai ra")
+                    .isTrue();
+        }
+
+        @Test
+        @DisplayName("25. ĐỐI CHỨNG — sửa họ tên mà KHÔNG đổi mật khẩu thì không đá phiên ai")
+        void suaMaKhongDoiMatKhauThiKhongDaPhien() {
+            NguoiDung nd = taiKhoan(ID_NHAN_VIEN, "nhanvien01", VaiTro.NHAN_VIEN, true);
+            when(nguoiDungRepository.findById(ID_NHAN_VIEN)).thenReturn(Optional.of(nd));
+            when(nguoiDungRepository.save(any(NguoiDung.class))).thenAnswer(i -> i.getArgument(0));
+            dangNhapBang(taiKhoan(ID_ADMIN, "admin", VaiTro.ADMIN, true));
+
+            nguoiDungService.luu(formSua(ID_NHAN_VIEN, VaiTro.NHAN_VIEN, ""));
+
+            verify(sessionRegistry, never()).getAllPrincipals();
+            assertThat(batBanGhiDaLuu().getHoTen())
+                    .as("Không có phép kiểm này thì phép kiểm 24 vẫn xanh ngay cả khi mọi lần "
+                            + "sửa tài khoản đều đá văng người đang dùng ra ngoài")
+                    .isEqualTo("Tên đã đổi");
         }
     }
 }

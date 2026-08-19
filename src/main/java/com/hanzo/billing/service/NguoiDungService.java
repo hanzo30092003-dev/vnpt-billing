@@ -1,5 +1,6 @@
 package com.hanzo.billing.service;
 
+import com.hanzo.billing.dto.DoiMatKhauForm;
 import com.hanzo.billing.dto.NguoiDungForm;
 import com.hanzo.billing.entity.NguoiDung;
 
@@ -44,4 +45,16 @@ public interface NguoiDungService {
      * họ không phân biệt được hai thứ đó, nên nút mở khoá cũng không bắt họ phân biệt.</p>
      */
     void moKhoaTaiKhoan(Long id);
+
+    /**
+     * Người đang đăng nhập tự đổi mật khẩu của mình.
+     *
+     * <p>Bắt buộc nhập đúng mật khẩu hiện tại — xem javadoc của {@link DoiMatKhauForm} để biết
+     * vì sao một phiên đang mở không thay được cho phép kiểm đó.</p>
+     *
+     * <p>Đổi xong, <b>mọi phiên đang mở của tài khoản này hết giá trị</b>. Việc kết thúc phiên
+     * của chính người vừa thao tác do tầng web làm, vì đó là chuyện của {@code HttpSession}
+     * chứ không phải của nghiệp vụ.</p>
+     */
+    void doiMatKhau(DoiMatKhauForm form);
 }

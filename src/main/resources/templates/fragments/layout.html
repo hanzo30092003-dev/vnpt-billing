@@ -175,6 +175,16 @@
                 <span class="badge text-bg-primary"
                       th:text="${#authentication.principal.vaiTro.nhan}">Vai trò</span>
 
+                <!--/*
+                    Đổi mật khẩu đặt cạnh tên người dùng, không đặt trong sidebar: sidebar gom
+                    theo CÔNG VIỆC nghiệp vụ, còn đây là việc của tài khoản. Mọi vai trò đều
+                    thấy mục này — nhân viên quầy và kế toán cũng phải đổi được mật khẩu khởi
+                    tạo mà quản trị viên đặt cho họ.
+                */-->
+                <a class="btn btn-sm btn-outline-secondary ms-2" th:href="@{/doi-mat-khau}">
+                    <i class="bi bi-key"></i> Đổi mật khẩu
+                </a>
+
                 <!--/* Đăng xuất phải gửi bằng POST vì CSRF đang bật */-->
                 <form th:action="@{/dang-xuat}" method="post" class="d-inline ms-2">
                     <button type="submit" class="btn btn-sm btn-outline-secondary">

@@ -145,10 +145,10 @@ tức gần một nửa nghiệp vụ của hệ thống.
 Gạch đầu dòng đã soạn sẵn ở [`PHASE-7-REPORT.md` mục 10](PHASE-7-REPORT.md) — bạn viết theo đó.
 **Ước 1–2 ngày.** Đây là việc của bạn, không phải của tôi.
 
-### 📸 N2. 68 ảnh màn hình chưa chụp
+### 📸 N2. 69 ảnh màn hình chưa chụp
 
 [`danh-sach-anh-chup.md`](danh-sach-anh-chup.md) liệt kê 62 ảnh + 3 ảnh của đợt làm lại giao
-diện + 3 ảnh của màn hình quản lý người dùng. **Toàn bộ ảnh cũ (nếu có) đã hết dùng được** vì giao diện vừa đổi hết.
+diện + 3 ảnh của màn hình quản lý người dùng + 1 ảnh màn hình đổi mật khẩu. **Toàn bộ ảnh cũ (nếu có) đã hết dùng được** vì giao diện vừa đổi hết.
 
 ⚠️ **Chỉ chụp SAU khi đóng băng mã.** Chụp trước rồi còn sửa giao diện là chụp lại từ đầu.
 Ước **1 ngày**.
@@ -221,8 +221,8 @@ nói rõ **biết là thiếu** và **thiếu vì sao**. Biết mình thiếu g�
 
 | # | Tiêu chí | Ngưỡng |
 |---|---|---|
-| 1 | `mvnw test` | ≥ 298, 0 lỗi *(277 lúc lập kế hoạch + đồng thời + hạn mức + quản lý người dùng)* |
-| 2 | 8 script giao diện | ≥ 200, 0 sai |
+| 1 | `mvnw test` | ≥ 307, 0 lỗi *(277 lúc lập kế hoạch + đồng thời + hạn mức + quản lý người dùng + đổi mật khẩu)* |
+| 2 | 8 script giao diện | ≥ 214, 0 sai |
 | 3 | `python scripts/kiem-tu-ngu.py` | 0 |
 | 4 | `python scripts/kiem-giao-dien.py` | 0 |
 | 5 | Ba bất biến (sổ cái · thanh toán · điều hướng) | 0 lệch |
@@ -230,7 +230,7 @@ nói rõ **biết là thiếu** và **thiếu vì sao**. Biết mình thiếu g�
 | 7 | `reset` chạy hai lần | giống hệt từng dòng |
 | 8 | Clone kho về thư mục mới, làm theo README | chạy được |
 | 9 | Kỳ 8/2026 rỗng · kỳ 6, 7 giữ 0 thanh toán | ✓ |
-| 10 | 68 ảnh chụp trên bản mã đã đóng băng | đủ |
+| 10 | 69 ảnh chụp trên bản mã đã đóng băng | đủ |
 
 Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm nay, bất biến trung tâm của đồ
 án mới chỉ được chứng minh **khi có một người dùng tại một thời điểm**.
@@ -262,13 +262,13 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V3d** phiên + security headers | ✅ xong | `fa8945a` |
 | **V3c** khoá tài khoản sau 5 lần sai | ✅ xong | `fa8945a` |
 | **V3a** màn hình quản lý người dùng | ✅ xong | `d71eee5` |
-| **V3b** đổi mật khẩu | ⬜ **việc tiếp theo** | — |
-| **V4** Flyway + CI | ⬜ chưa làm | — |
+| **V3b** đổi mật khẩu | ✅ xong | `<commit-V3b>` |
+| **V4** Flyway + CI | ⬜ **việc tiếp theo** | — |
 | **V5** đo hiệu năng + VAT ra cấu hình | ⬜ chưa làm | — |
 | **V6** kiểm bàn phím | ⬜ chưa làm | — |
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
 | **N1** báo cáo mục B, C, D | ⬜ chưa làm | — |
-| **N2** 68 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
+| **N2** 69 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
 | **N3** quyết cách xử lý bảng tuổi nợ | ⬜ chưa quyết | — |
 
 ### Ghi chú của V3a — hai thứ kế hoạch không nói tới
@@ -299,6 +299,39 @@ trước** chuyển đỏ và không phép kiểm nào khác. Khôi phục thì 
 khoá** (chạy lại nhiều lần vẫn ra đúng trạng thái đó). Sau `reset` thì tài khoản này biến mất,
 nên **chạy script trước, chụp ảnh sau** nếu muốn ảnh #66 có đủ ba huy hiệu tình trạng.
 
+### Ghi chú của V3b
+
+**Nghiệm thu của mục V3 nay đã đủ cả hai vế.** Câu nghiệm thu trong kế hoạch là *"sai mật khẩu 5
+lần thì lần 6 bị khoá; đổi mật khẩu xong đăng nhập bằng mật khẩu cũ phải trượt"*. Vế đầu thuộc
+V3c — làm từ đợt trước nhưng **phép kiểm chưa bao giờ được viết ra**; nay trả nốt ở
+`test-auth.ps1` mục 11.
+
+Phép kiểm đáng giá nhất của mục 11 là bước **đối chứng**: đang trong thời gian khoá tạm thì
+**mật khẩu ĐÚNG cũng không vào được**. Chỉ kiểm "nhập sai bị từ chối" thì không phân biệt được
+với hành vi bình thường của một hệ thống *không hề có* khoá tạm — đúng loại phép kiểm xanh mà
+chẳng chứng minh gì (bài học 43.5).
+
+**Ba chốt chặn của V3b, xếp theo mức quan trọng:**
+
+1. **Phải nhập đúng mật khẩu hiện tại.** Một phiên đang mở không chứng minh người ngồi trước máy
+   là chủ tài khoản — quầy giao dịch là chỗ máy để không khoá màn hình cả ngày. Thiếu phép kiểm
+   này thì ai đi ngang một máy bỏ trống cũng chiếm hẳn được tài khoản.
+2. **Đổi xong thì phiên hết giá trị.** Cùng một luật với nút Khoá của V3a, chỉ khác đường vào:
+   *thông tin xác thực vừa đổi thì phiên dựng trên thông tin cũ không còn giá trị*. Người ta đổi
+   mật khẩu **vì** nghi có người biết mật khẩu cũ — giữ nguyên phiên là để kẻ đó ngồi lại trong
+   hệ thống.
+3. **Quản trị viên đặt lại mật khẩu hộ ai thì phiên người đó cũng bị đá.** Đây là chỗ V3a còn
+   hở: lý do đặt lại mật khẩu hộ gần như luôn là "tài khoản có thể đã lộ", mà bản V3a chỉ đổi
+   hash chứ không đuổi ai ra.
+
+**Đối chứng đã chạy:** phá cả ba chốt chặn → **đúng 3 phép kiểm dự đoán trước** chuyển đỏ
+(`saiMatKhauHienTaiThiBiChan`, `doiXongThiPhienDangMoHetGiaTri`,
+`quanTriDatLaiMatKhauThiPhienNguoiDoBiDa`), không phép kiểm nào khác. Khôi phục thì 25/25 xanh.
+
+Kèm một phép kiểm ngược chiều (số 25): **sửa họ tên mà không đổi mật khẩu thì không đá phiên
+ai** — thiếu nó thì chốt chặn số 3 vẫn xanh ngay cả khi mọi lần sửa tài khoản đều đá văng người
+đang dùng ra ngoài.
+
 ### Việc phát sinh ngoài kế hoạch, đã làm
 
 Hai lỗ hổng do bản quét bảo mật tìm ra, cả hai đều **tự dựng lại được** trước khi vá:
@@ -321,10 +354,10 @@ luôn ở bước đó.
 
 | | Trước đợt | Bây giờ |
 |---|---:|---:|
-| `mvnw test` | 277 | **298** |
-| Phép kiểm giao diện | 177 | **200** |
+| `mvnw test` | 277 | **307** |
+| Phép kiểm giao diện | 177 | **214** |
 | Lớp test cần MySQL | 8 | 11 |
-| Ảnh cần chụp | 65 | **68** |
+| Ảnh cần chụp | 65 | **69** |
 
 ---
 
