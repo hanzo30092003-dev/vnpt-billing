@@ -61,6 +61,9 @@ Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định 
   Từ JDK 23, javac không tự bật annotation processing khi chỉ thấy processor trên classpath —
   không khai thì Lombok im lặng không sinh gì.
 * **File `.ps1` có tiếng Việt phải lưu kèm BOM UTF-8**, nếu không PowerShell đọc sai bảng mã.
+* **`mvnw` phải giữ bit thực thi trong git** (`git ls-files -s mvnw` → `100755`). Windows không
+  lộ ra vì Git Bash gọi script qua `sh`, nhưng trên Linux `./mvnw` chết ngay với *Permission
+  denied*. Chỉ CI bắt được — phép kiểm clone chạy trên Windows vẫn đạt.
 
 ## Quy ước nghiệp vụ tuyệt đối không được vi phạm
 

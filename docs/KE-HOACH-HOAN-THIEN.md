@@ -264,7 +264,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V3c** khoá tài khoản sau 5 lần sai | ✅ xong | `fa8945a` |
 | **V3a** màn hình quản lý người dùng | ✅ xong | `d71eee5` |
 | **V3b** đổi mật khẩu | ✅ xong | `8f41400` |
-| **V4** Flyway + CI | ✅ xong (CI chưa chạy được tới khi đẩy mã) | `73fab44` |
+| **V4** Flyway + CI | ✅ xong — **CI đã chạy thật, xanh** | `73fab44`, `42818b8`, `558e6d1` |
 | **V5** đo hiệu năng + VAT ra cấu hình | ✅ xong | `eb31aa8` |
 | **V6** kiểm bàn phím | ✅ xong | `9ddbe99` |
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
@@ -367,10 +367,33 @@ trú nhưng chưa từng di trú cái gì, đúng loại điểm trừ mà mục
 **Việc dọn kèm theo:** bỏ `spring.sql.init.mode=never` khỏi 11 lớp test — thay đổi này làm nó
 thành cấu hình chết, và cấu hình chết thì lần sau có người đọc sẽ tin là nó đang có tác dụng.
 
-**⚠️ CI chưa xác minh được.** `.github/workflows/test.yml` đã viết (MySQL 8.4 service, nạp dữ
-liệu bằng đúng đường `reset` mà người dùng thật đi, rồi chạy cả 307 test), nhưng **chỉ chạy khi
-đẩy mã lên GitHub**. Huy hiệu trên README xám cho tới lần đẩy đầu tiên. Nếu CI đỏ, đường lui đã
-ghi trong kế hoạch: cho chạy trước bộ test không cần CSDL.
+**✅ CI đã chạy thật và xanh** — 315 test, 0 lỗi, 2 phút 38 giây trên máy Linux sạch với MySQL
+8.4 mới dựng, nạp dữ liệu bằng đúng đường `reset` mà người dùng thật đi. Không phải dùng tới
+đường lui "chạy trước bộ test không cần CSDL".
+
+Nhưng **phải đỏ hai lần mới xanh**, và cả hai lần đều đáng ghi lại:
+
+**Lần 1 — `exit code 124`, tức lệnh `timeout` giết sau 300 giây.** Vấn đề lớn hơn con số 300:
+bước đó **không in một dòng nào của `reset.log` ra**, nên không chẩn đoán được gì. Tôi đã đoán
+là "lần chạy đầu chưa có cache Maven nên tải thư viện lâu" — **đoán sai**. Một bước CI thất bại
+mà không nói được vì sao thì gần như vô dụng; đã sửa để nó thoát sớm khi thấy
+`APPLICATION FAILED TO START` và in 120 dòng cuối của log trước khi báo lỗi.
+
+**Lần 2 — `exit code 126`: `./mvnw: Permission denied`.** `git` lưu `mvnw` với mode `100644`,
+tức **không có bit thực thi**. Trên Windows điều đó không lộ ra vì Git Bash gọi script qua `sh`;
+trên Linux thì `./mvnw` chết ngay. Đây cũng là nguyên nhân **thật sự** của lần đỏ thứ nhất —
+lúc đó lệnh chạy ở nền (`&`) nên lỗi bị nuốt, và chỉ khi tách bước tải phụ thuộc ra chạy ở tiền
+cảnh thì mã lỗi thật mới hiện.
+
+> **Điều này nói một câu đáng giá về tiêu chí nghiệm thu số 8.** Phép kiểm *"clone kho về thư
+> mục mới rồi làm theo README"* đã chạy **đạt** — trên Windows. Cùng bản clone đó trên Linux thì
+> **không chạy được**. Một phép kiểm chỉ chạy trên một hệ điều hành chỉ đúng trên hệ điều hành
+> đó, và CI là thứ duy nhất bắt được điều này. Đúng chuẩn làm việc 43.7 của dự án: *dữ liệu thử
+> thiết kế theo một chiều chỉ đúng theo chiều đó.*
+
+⚠️ Kho đang để **PRIVATE**, nên huy hiệu trên README chỉ hiện với người có quyền truy cập; người
+ngoài thấy ảnh hỏng. Muốn hội đồng nhìn thấy huy hiệu xanh thì phải chuyển kho sang public —
+quyết định đó là của bạn, không phải việc mã.
 
 ### Ghi chú của V5
 
