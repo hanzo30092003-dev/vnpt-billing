@@ -262,7 +262,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V3d** phiên + security headers | ✅ xong | `fa8945a` |
 | **V3c** khoá tài khoản sau 5 lần sai | ✅ xong | `fa8945a` |
 | **V3a** màn hình quản lý người dùng | ✅ xong | `d71eee5` |
-| **V3b** đổi mật khẩu | ✅ xong | `<commit-V3b>` |
+| **V3b** đổi mật khẩu | ✅ xong | `8f41400` |
 | **V4** Flyway + CI | ⬜ **việc tiếp theo** | — |
 | **V5** đo hiệu năng + VAT ra cấu hình | ⬜ chưa làm | — |
 | **V6** kiểm bàn phím | ⬜ chưa làm | — |
