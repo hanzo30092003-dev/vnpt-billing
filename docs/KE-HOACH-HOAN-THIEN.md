@@ -263,7 +263,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V3c** khoá tài khoản sau 5 lần sai | ✅ xong | `fa8945a` |
 | **V3a** màn hình quản lý người dùng | ✅ xong | `d71eee5` |
 | **V3b** đổi mật khẩu | ✅ xong | `8f41400` |
-| **V4** Flyway + CI | ✅ xong | `<commit-V4>` |
+| **V4** Flyway + CI | ✅ xong (CI chưa chạy được tới khi đẩy mã) | `73fab44` |
 | **V5** đo hiệu năng + VAT ra cấu hình | ⬜ **việc tiếp theo** | — |
 | **V6** kiểm bàn phím | ⬜ chưa làm | — |
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
