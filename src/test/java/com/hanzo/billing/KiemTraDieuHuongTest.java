@@ -60,10 +60,13 @@ class KiemTraDieuHuongTest {
     /**
      * Tiền tố được phép xuất hiện dưới dạng {@code href} tĩnh.
      *
-     * <p>Liên kết ra ngoài và neo trong trang không thuộc phạm vi bảng định tuyến của ứng dụng.</p>
+     * <p>Liên kết ra ngoài và neo trong trang không thuộc phạm vi bảng định tuyến của ứng dụng.
+     * {@code #noi-dung} là đích của đường tắt bỏ qua menu, thêm ở việc V6 — nó là một neo trong
+     * chính trang đang mở, cố ý <b>không</b> viết bằng {@code th:href} vì nó không phải một
+     * đường dẫn của ứng dụng.</p>
      */
     private static final List<String> HREF_TINH_HOP_LE = List.of("http://", "https://", "mailto:",
-            "#tab-", "javascript:");
+            "#tab-", "#noi-dung", "javascript:");
 
     /**
      * Tài nguyên tĩnh — do {@code ResourceHttpRequestHandler} phục vụ, <b>không</b> có trong

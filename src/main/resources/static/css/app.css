@@ -682,3 +682,38 @@ label.form-label {
     position: relative;
     height: 280px;
 }
+
+/* =====================================================================
+   ĐƯỜNG TẮT BỎ QUA MENU  (việc V6)
+   =====================================================================
+   Ẩn khỏi mắt nhưng KHÔNG ẩn khỏi bàn phím và trình đọc màn hình.
+
+   Cố ý không dùng display:none hay visibility:hidden — hai thứ đó gỡ
+   phần tử khỏi cả thứ tự Tab, tức là đường tắt biến mất đúng với người
+   duy nhất cần tới nó. Đẩy ra ngoài khung nhìn thì nó vẫn nhận được
+   tiêu điểm, và nhảy vào chỗ nhìn thấy ngay khi nhận.
+   ===================================================================== */
+.bo-qua-menu {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 2000;
+    padding: .6rem 1rem;
+    background-color: #14304d;
+    color: #fff;
+    border-radius: 0 0 .4rem 0;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.bo-qua-menu:focus {
+    left: 0;
+    color: #fff;
+    outline: 3px solid #e59700;
+}
+
+/* Đích của đường tắt nhận tiêu điểm bằng mã, không cần viền riêng của nó */
+.content:focus {
+    outline: none;
+}
+

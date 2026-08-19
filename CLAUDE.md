@@ -168,6 +168,15 @@ dump** `data-van-hanh.sql`.
 * **Chữ hiển thị đã bỏ hết thuật ngữ** (đợt Phase 8). Trước khi thêm chữ mới vào template,
   chạy `python scripts/kiem-tu-ngu.py` và `python scripts/kiem-giao-dien.py`. Tên biến, đường
   dẫn, tên lớp CSS thì giữ nguyên — hai phép kiểm đó đã biết bỏ qua chúng.
+* **Nút chỉ có biểu tượng phải có `aria-label`** — `title` một mình không đủ: nhiều trình đọc
+  màn hình bỏ qua nó, và người dùng bàn phím không bao giờ thấy nó. Thêm nút mới thì chạy
+  `python scripts/kiem-ban-phim.py`.
+* **Đường tắt "Bỏ qua menu" trong `layout.html` không được bỏ**, và đích `#noi-dung` phải giữ
+  `tabindex="-1"` — thiếu nó thì bấm đường tắt chỉ cuộn màn hình chứ tiêu điểm không nhảy vào.
+  Đo được: không có đường tắt thì phải bấm Tab **20 lần** mới tới ô nhập đầu tiên, ở mọi trang.
+* **Hộp xác nhận phải trả tiêu điểm về nút đã mở nó** (`hidden.bs.modal` trong `app.js`).
+  Bootstrap tự làm việc này khi modal mở bằng `data-bs-toggle`, nhưng ở đây modal mở bằng mã
+  nên nó không biết nút nào gọi.
 * **Mỗi màn hình đúng MỘT nút nổi bật.** Muốn phá luật thì khai `NUT-NOI-BAT-CO-Y:` kèm lý do
   ngay trong template, đừng sửa file kiểm thử.
 * **`HoaDon.phienBan` (`@Version`) không được bỏ.** Thiếu nó, hai người cùng thu tiền một hóa

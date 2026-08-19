@@ -27,9 +27,19 @@ document.addEventListener('DOMContentLoaded', function () {
         var modal = new bootstrap.Modal(modalEl);
         var formDangCho = null;
 
+        // Nut da mo modal - can nho de TRA TIEU DIEM ve dung cho cu luc dong.
+        //
+        // Do o viec V6: bam Esc dong modal thi tieu diem nam lai tren nut "Dong y"
+        // CUA CHINH MODAL VUA AN DI. Lan Tab ke tiep bat dau lai tu dau trang, nen
+        // nguoi dung ban phim mat cho dang dung - giua mot bang 55 dong hoa don thi
+        // do la mat that. Bootstrap tu tra tieu diem khi modal mo bang
+        // data-bs-toggle, nhung o day modal mo bang ma nen no khong biet nut nao goi.
+        var nutDaMo = null;
+
         document.querySelectorAll('[data-xac-nhan]').forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
+                nutDaMo = btn;
                 formDangCho = btn.closest('form');
                 modalEl.querySelector('.modal-title').textContent =
                     btn.getAttribute('data-xac-nhan-tieu-de') || 'Xác nhận thao tác';
@@ -37,6 +47,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     btn.getAttribute('data-xac-nhan');
                 modal.show();
             });
+        });
+
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            if (nutDaMo) {
+                nutDaMo.focus();
+                nutDaMo = null;
+            }
         });
 
         modalEl.querySelector('.nut-dong-y').addEventListener('click', function () {

@@ -26,7 +26,7 @@ dõi công nợ và báo cáo doanh thu.
 | **Công nợ** | `/cong-no` | Bảng tuổi nợ 5 nhóm, danh sách nợ, đề xuất tạm ngừng |
 | **Báo cáo thống kê** | `/bao-cao` | 7 báo cáo, mỗi báo cáo xuất Excel và in được |
 
-Danh sách đầy đủ 69 màn hình cần chụp cho báo cáo: [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md).
+Danh sách đầy đủ 70 màn hình cần chụp cho báo cáo: [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md).
 
 ---
 
@@ -228,6 +228,14 @@ bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng 
 | `test-ky-rong.ps1` | 28 | Kỳ 8/2026 rỗng: 17 màn hình + 4 Excel + 3 thao tác |
 | `test-bien.ps1` | 42 | Tham số biên, dữ liệu xấu, 12 × 403 |
 
+Ba phép kiểm tĩnh đọc thẳng từ template, không cần ứng dụng chạy:
+
+```bash
+python scripts/kiem-tu-ngu.py      # không còn thuật ngữ trong chữ người dùng thấy
+python scripts/kiem-giao-dien.py   # mỗi màn hình 1 dòng giải thích, tối đa 1 nút nổi bật
+python scripts/kiem-ban-phim.py    # mọi nút có tên đọc được; có đường tắt bỏ qua menu
+```
+
 Xem [`scripts/README.md`](scripts/README.md).
 
 ### 7.3. Kịch bản kiểm thử thủ công
@@ -287,7 +295,7 @@ vnpt-billing/
 | [`docs/mo-ta-csdl.md`](docs/mo-ta-csdl.md) | Mô tả 15 bảng + 2 view (mục 6: cảnh báo quy đổi đơn vị DATA) |
 | [`docs/kich-ban-kiem-thu.md`](docs/kich-ban-kiem-thu.md) | 70 ca kiểm thủ công + tổng hợp test tự động |
 | [`docs/kich-ban-demo.md`](docs/kich-ban-demo.md) | 12 bước demo 18 phút, kèm câu hỏi hội đồng |
-| [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md) | 69 ảnh màn hình cần chụp cho báo cáo |
+| [`docs/danh-sach-anh-chup.md`](docs/danh-sach-anh-chup.md) | 70 ảnh màn hình cần chụp cho báo cáo |
 | [`docs/toi-uu-hieu-nang.md`](docs/toi-uu-hieu-nang.md) | Số đo ghi hàng loạt CDR, chỉ mục, và **trần quy mô đo trên 200.000 bản ghi** |
 | [`docs/mau-cdr.csv`](docs/mau-cdr.csv) | File CSV mẫu cho chức năng nhập CDR |
 | [`scripts/README.md`](scripts/README.md) | Script kiểm thử giao diện |

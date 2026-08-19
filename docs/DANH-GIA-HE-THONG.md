@@ -1,8 +1,15 @@
 # ĐÁNH GIÁ HỆ THỐNG — ĐƯỢC BAO NHIÊU PHẦN TRĂM?
 
 > Đánh giá do đọc mã nguồn và đo trên hệ thống đang chạy, không phải kiểm toán độc lập.
-> **Chưa** chạy kiểm thử tải, **chưa** kiểm thử xâm nhập, **chưa** kiểm khả năng tiếp cận
-> bằng trình đọc màn hình. Ba việc đó nếu làm có thể kéo điểm xuống.
+> **Chưa** chạy kiểm thử tải, **chưa** kiểm thử xâm nhập. Hai việc đó nếu làm có thể kéo điểm
+> xuống.
+>
+> **Cập nhật sau việc V6:** khả năng tiếp cận **đã kiểm một phần** — đi bằng bàn phím thật trên
+> trình duyệt, ghi lại thứ tự tiêu điểm. Bốn vấn đề tìm được đã sửa (xem
+> [`KE-HOACH-HOAN-THIEN.md`](KE-HOACH-HOAN-THIEN.md) mục 7bis): số lần bấm Tab để tới ô nhập
+> đầu tiên **20 → 5**, hộp thoại trả tiêu điểm về đúng nút vừa bấm, và **0/213** nút còn thiếu
+> tên đọc được. **Vẫn chưa** kiểm bằng trình đọc màn hình thật (NVDA/JAWS) — đó là việc khác
+> với đi bằng bàn phím, và chưa làm.
 
 ---
 

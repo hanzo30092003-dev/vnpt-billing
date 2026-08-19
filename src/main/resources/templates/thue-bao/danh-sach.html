@@ -50,7 +50,7 @@
                     <button type="submit" class="btn btn-outline-primary w-100">
                         <i class="bi bi-search"></i> Lọc
                     </button>
-                    <a class="btn btn-outline-secondary" th:href="@{/thue-bao}" title="Xoá bộ lọc">
+                    <a class="btn btn-outline-secondary" th:href="@{/thue-bao}" title="Xoá bộ lọc" aria-label="Xoá bộ lọc">
                         <i class="bi bi-x-lg"></i>
                     </a>
                 </div>
@@ -109,7 +109,7 @@
                         </td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-secondary"
-                               th:href="@{/thue-bao/{id}(id=${tb.id})}" title="Xem chi tiết">
+                               th:href="@{/thue-bao/{id}(id=${tb.id})}" title="Xem chi tiết" aria-label="Xem chi tiết">
                                 <i class="bi bi-eye"></i>
                             </a>
                         </td>

@@ -70,7 +70,7 @@
 
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-primary"
-                               th:href="@{/quan-tri/nguoi-dung/{id}/sua(id=${nd.id})}" title="Sửa">
+                               th:href="@{/quan-tri/nguoi-dung/{id}/sua(id=${nd.id})}" title="Sửa" aria-label="Sửa">
                                 <i class="bi bi-pencil"></i>
                             </a>
 
@@ -87,7 +87,7 @@
                                             + ' của ' + ${nd.hoTen}
                                             + '? Người này sẽ không đăng nhập được nữa, và nếu đang mở phần mềm thì bị thoát ra ngay.'"
                                         data-xac-nhan-tieu-de="Khoá tài khoản"
-                                        title="Khoá tài khoản">
+                                        title="Khoá tài khoản" aria-label="Khoá tài khoản">
                                     <i class="bi bi-lock"></i>
                                 </button>
                             </form>
@@ -99,7 +99,7 @@
                                         th:data-xac-nhan="'Mở khoá tài khoản ' + ${nd.tenDangNhap}
                                             + '? Người này đăng nhập lại được ngay bằng mật khẩu cũ.'"
                                         data-xac-nhan-tieu-de="Mở khoá tài khoản"
-                                        title="Mở khoá tài khoản">
+                                        title="Mở khoá tài khoản" aria-label="Mở khoá tài khoản">
                                     <i class="bi bi-unlock"></i>
                                 </button>
                             </form>

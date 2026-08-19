@@ -25,6 +25,20 @@
 </head>
 <body>
 
+<!--/*
+    ĐƯỜNG TẮT BỎ QUA MENU — mắt thường không thấy, chỉ hiện khi có tiêu điểm bàn phím.
+
+    Vì sao cần: đo bằng bàn phím ở việc V6 cho thấy phải bấm Tab **20 lần** mới tới ô nhập
+    đầu tiên của màn hình thêm khách hàng — 15 mục sidebar, nút đăng xuất, rồi 3 mắt xích
+    vệt bánh mì. Và phải trả lại từng ấy lần ở MỌI trang, vì sidebar vẽ lại sau mỗi lần nạp.
+    Người chỉ dùng bàn phím trả cái giá đó cả ngày.
+
+    Dùng href tĩnh chứ không th:href: đây là neo trong trang, không phải một đường dẫn của
+    ứng dụng. Đích đến khai tabindex="-1" để tiêu điểm THẬT SỰ nhảy vào đó chứ không chỉ
+    cuộn màn hình tới.
+*/-->
+<a class="bo-qua-menu" href="#noi-dung">Bỏ qua menu, tới nội dung chính</a>
+
 <div class="app-shell">
 
     <!--/* ================= SIDEBAR TRÁI ================= */-->
@@ -195,7 +209,7 @@
         </header>
 
         <!--/* ================= NỘI DUNG TRANG ================= */-->
-        <main class="content">
+        <main class="content" id="noi-dung" tabindex="-1">
 
             <!--/*
                 Breadcrumb suy TỰ ĐỘNG từ đường dẫn trong LayoutAdvice, nên mọi màn hình
@@ -221,14 +235,16 @@
                  th:if="${thongBaoThanhCong}">
                 <i class="bi bi-check-circle me-2"></i>
                 <span th:text="${thongBaoThanhCong}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                        aria-label="Đóng thông báo"></button>
             </div>
 
             <div class="alert alert-danger alert-dismissible fade show tu-an" role="alert"
                  th:if="${thongBaoLoi}">
                 <i class="bi bi-exclamation-triangle me-2"></i>
                 <span th:text="${thongBaoLoi}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                        aria-label="Đóng thông báo"></button>
             </div>
 
             <div th:replace="${noiDung}">Nội dung của trang con sẽ được chèn vào đây.</div>
@@ -250,7 +266,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Xác nhận thao tác</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Đóng hộp thoại"></button>
             </div>
             <div class="modal-body">
                 <p class="noi-dung-xac-nhan mb-0"></p>

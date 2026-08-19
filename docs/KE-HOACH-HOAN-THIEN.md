@@ -145,7 +145,7 @@ tức gần một nửa nghiệp vụ của hệ thống.
 Gạch đầu dòng đã soạn sẵn ở [`PHASE-7-REPORT.md` mục 10](PHASE-7-REPORT.md) — bạn viết theo đó.
 **Ước 1–2 ngày.** Đây là việc của bạn, không phải của tôi.
 
-### 📸 N2. 69 ảnh màn hình chưa chụp
+### 📸 N2. 70 ảnh màn hình chưa chụp
 
 [`danh-sach-anh-chup.md`](danh-sach-anh-chup.md) liệt kê 62 ảnh + 3 ảnh của đợt làm lại giao
 diện + 3 ảnh của màn hình quản lý người dùng + 1 ảnh màn hình đổi mật khẩu. **Toàn bộ ảnh cũ (nếu có) đã hết dùng được** vì giao diện vừa đổi hết.
@@ -225,12 +225,13 @@ nói rõ **biết là thiếu** và **thiếu vì sao**. Biết mình thiếu g�
 | 2 | 8 script giao diện | ≥ 215, 0 sai |
 | 3 | `python scripts/kiem-tu-ngu.py` | 0 |
 | 4 | `python scripts/kiem-giao-dien.py` | 0 |
+| 4b | `python scripts/kiem-ban-phim.py` | 0 — *tiêu chí mới của việc V6* |
 | 5 | Ba bất biến (sổ cái · thanh toán · điều hướng) | 0 lệch |
 | 6 | **Bất biến thanh toán dưới tải đồng thời** | 0 lệch — *tiêu chí mới của đợt này* |
 | 7 | `reset` chạy hai lần | giống hệt từng dòng |
 | 8 | Clone kho về thư mục mới, làm theo README | chạy được |
 | 9 | Kỳ 8/2026 rỗng · kỳ 6, 7 giữ 0 thanh toán | ✓ |
-| 10 | 69 ảnh chụp trên bản mã đã đóng băng | đủ |
+| 10 | 70 ảnh chụp trên bản mã đã đóng băng | đủ |
 
 Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm nay, bất biến trung tâm của đồ
 án mới chỉ được chứng minh **khi có một người dùng tại một thời điểm**.
@@ -265,10 +266,10 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **V3b** đổi mật khẩu | ✅ xong | `8f41400` |
 | **V4** Flyway + CI | ✅ xong (CI chưa chạy được tới khi đẩy mã) | `73fab44` |
 | **V5** đo hiệu năng + VAT ra cấu hình | ✅ xong | `eb31aa8` |
-| **V6** kiểm bàn phím | ⬜ **việc tiếp theo** | — |
+| **V6** kiểm bàn phím | ✅ xong | `<commit-V6>` |
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
 | **N1** báo cáo mục B, C, D | ⬜ chưa làm | — |
-| **N2** 69 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
+| **N2** 70 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
 | **N3** quyết cách xử lý bảng tuổi nợ | ⬜ chưa quyết | — |
 
 ### Ghi chú của V3a — hai thứ kế hoạch không nói tới
@@ -406,6 +407,49 @@ ghi rõ là **ngoại suy chứ không phải số đo** — trong `toi-uu-hieu-
 **Đã khôi phục:** `reset` sau khi đo, rồi đối chiếu bản dump với bản trước lúc đo — **0 dòng
 lệch trên 20.519 dòng**. 200.000 bản ghi thử và kỳ 9/2026 không còn dấu vết.
 
+### Ghi chú của V6 — đo bằng bàn phím thật, và một giới hạn phải nói ra
+
+Kế hoạch đoán *"thường sẽ lộ 2–3 lỗi: modal không nhốt tiêu điểm, thứ tự Tab sai, nút chỉ có
+biểu tượng thiếu aria-label"*. Đo thật ra **bốn** phát hiện, và **không** phát hiện nào trùng
+với dự đoán đầu tiên:
+
+| # | Phát hiện | Đo bằng gì |
+|---|---|---|
+| 1 | **Phải bấm Tab 20 lần** mới tới ô nhập đầu tiên của màn hình thêm khách hàng — 15 mục sidebar + đăng xuất + 3 mắt xích vệt bánh mì — và trả lại từng ấy lần ở **mọi** trang | Nghe sự kiện `focusin` rồi bấm Tab 26 lần, ghi lại thứ tự thật |
+| 2 | **Bấm Esc đóng hộp thoại thì tiêu điểm nằm lại trên nút "Đồng ý" của hộp thoại vừa ẩn đi** — lần Tab kế tiếp bắt đầu lại từ đầu trang | Mở modal bằng bàn phím, bấm Esc, so `document.activeElement` |
+| 3 | **7 nút không có tên đọc được nào** (6 nút đóng của Bootstrap + 1 nút xoá dòng bảng giá) | Quét tĩnh 213 nút/liên kết |
+| 4 | **12 nút chỉ có `title`** — trình đọc màn hình nhiều cái bỏ qua, người dùng bàn phím không bao giờ thấy | Quét tĩnh |
+
+Thứ tự Tab **đúng** với thứ tự nhìn thấy, và hộp thoại **có** nhốt tiêu điểm — hai thứ kế hoạch
+đoán là hỏng thì lại không hỏng. Ngược lại, hai thứ hỏng nặng nhất (số 1 và số 2) không nằm
+trong dự đoán. Đây đúng là chuẩn làm việc 43.1: *kiểm bất biến, đừng kiểm luật cụ thể* — đi đo
+thật thì thấy cái mình không nghĩ tới.
+
+**Đã sửa cả bốn, và đo lại bằng trình duyệt thật:**
+
+| | Trước | Sau |
+|---|---:|---:|
+| Số lần Tab tới ô nhập đầu tiên | 20 | **5** |
+| Tiêu điểm sau khi Esc đóng hộp thoại | nút đã ẩn | **đúng nút vừa bấm** |
+| Nút thiếu tên đọc được | 20 | **0** / 213 |
+
+**Phép kiểm mới `scripts/kiem-ban-phim.py`** canh hai điều: mọi nút có tên đọc được, và đường
+tắt bỏ qua menu còn nguyên. Đối chứng đã chạy: trên bản template trước khi sửa nó báo đúng
+**21** chỗ, sau khi sửa báo **0**.
+
+> ⚠️ **Một giới hạn phải nói ra.** Trình duyệt tự động hoá trong phiên làm việc gửi phím tổng
+> hợp **không kích hoạt hành vi mặc định của trình duyệt**: Tab chuyển được tiêu điểm, Escape
+> tới được trình nghe của Bootstrap, nhưng **Enter không gửi được biểu mẫu và không bấm được
+> nút**. Đã kiểm chứng điều này là giới hạn công cụ chứ không phải lỗi ứng dụng: trang đăng
+> nhập không nạp một dòng JavaScript nào — biểu mẫu HTML thuần với `<button type="submit">` —
+> mà Enter trong ô mật khẩu vẫn không kích hoạt gửi.
+>
+> Nghĩa là **phần "Enter kích hoạt" của V6 chưa được kiểm bằng máy**. Việc còn lại là một lượt
+> đi tay 3 phút: đăng nhập → thêm khách hàng → đăng ký thuê bao → ghi nhận thanh toán, chỉ bằng
+> `Tab` và `Enter`. Về mặt mã đánh dấu thì không có gì cản: mọi thứ bấm được đều là `<button>`
+> hoặc `<a href>` thật, không có `<div onclick>` nào, và `href="#"` chết đã bị
+> `KiemTraDieuHuongTest` cấm từ Phase 6.
+
 ### Việc phát sinh ngoài kế hoạch, đã làm
 
 Hai lỗ hổng do bản quét bảo mật tìm ra, cả hai đều **tự dựng lại được** trước khi vá:
@@ -445,7 +489,7 @@ liệu mà báo cáo mô tả.
 | `mvnw test` | 277 | **315** |
 | Phép kiểm giao diện | 177 | **215** |
 | Lớp test cần MySQL | 8 | 11 |
-| Ảnh cần chụp | 65 | **69** |
+| Ảnh cần chụp | 65 | **70** |
 
 ---
 

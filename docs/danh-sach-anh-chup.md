@@ -22,6 +22,7 @@
 > | 66 | `/quan-tri/nguoi-dung` | Cột *Tình trạng* có **cả ba** huy hiệu: Đang dùng · Đã khoá · Tạm khoá tới HH:mm. Dòng của chính người đang đăng nhập mang nhãn *chính bạn* và **không có nút khoá** |
 > | 67 | `/quan-tri/nguoi-dung/them` | Ô *Quyền sử dụng* ba lựa chọn; ô mật khẩu kèm câu giải thích |
 > | 68 | ⭐ **Khoá tài khoản đá được phiên đang mở** | **Hai cửa sổ cạnh nhau**: bên trái `admin` vừa bấm Khoá; bên phải là phiên của người vừa bị khoá, bấm F5 thì bị đưa về trang đăng nhập. Đây là ảnh trả lời câu *"khoá tài khoản có tác dụng ngay không"* |
+> | 70 | ⭐ **Đường tắt bỏ qua menu** (việc V6) | Bấm `Tab` một lần ở bất kỳ màn hình nào → dải xanh đậm *"Bỏ qua menu, tới nội dung chính"* hiện ở góc trên bên trái. Đây là ảnh trả lời câu *"người không dùng chuột thì sao"* |
 > | 69 | `/doi-mat-khau` (việc V3b) | Ba ô mật khẩu + khối *Cần biết trước khi đổi* bên phải. Chụp thêm một ảnh trạng thái lỗi: gõ sai mật khẩu hiện tại → khung đỏ *"Mật khẩu hiện tại không đúng"*. Đăng nhập bằng `nhanvien01` để cho thấy **mọi vai trò** đều vào được màn hình này |
 >
 > Ảnh 66 cần **ba** tình trạng cùng lúc, mà bộ dữ liệu mẫu chỉ có 3 tài khoản đều đang dùng.
