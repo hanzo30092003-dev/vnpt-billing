@@ -229,7 +229,7 @@ nói rõ **biết là thiếu** và **thiếu vì sao**. Biết mình thiếu g�
 | 5 | Ba bất biến (sổ cái · thanh toán · điều hướng) | 0 lệch |
 | 6 | **Bất biến thanh toán dưới tải đồng thời** | 0 lệch — *tiêu chí mới của đợt này* |
 | 7 | `reset` chạy hai lần | giống hệt từng dòng |
-| 8 | Clone kho về thư mục mới, làm theo README | chạy được |
+| 8 | Clone kho về thư mục mới, làm theo README | ✅ **đã chạy** — xem mục 7bis |
 | 9 | Kỳ 8/2026 rỗng · kỳ 6, 7 giữ 0 thanh toán | ✓ |
 | 10 | 70 ảnh chụp trên bản mã đã đóng băng | đủ |
 
@@ -270,7 +270,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **N1** báo cáo mục A | ✅ xong | `0c7d93f` |
 | **N1** báo cáo mục B, C, D | ⬜ chưa làm | — |
 | **N2** 70 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
-| **N3** quyết cách xử lý bảng tuổi nợ | ⬜ chưa quyết | — |
+| **N3** quyết cách xử lý bảng tuổi nợ | ✅ **quyết cách A** — chấp nhận 4 nhóm, giải thích bằng một câu | `<commit-N3>` |
 
 ### Ghi chú của V3a — hai thứ kế hoạch không nói tới
 
@@ -449,6 +449,53 @@ tắt bỏ qua menu còn nguyên. Đối chứng đã chạy: trên bản templa
 > `Tab` và `Enter`. Về mặt mã đánh dấu thì không có gì cản: mọi thứ bấm được đều là `<button>`
 > hoặc `<a href>` thật, không có `<div onclick>` nào, và `href="#"` chết đã bị
 > `KiemTraDieuHuongTest` cấm từ Phase 6.
+
+### ✅ Tiêu chí nghiệm thu số 8 — clone kho về thư mục mới, ĐÃ CHẠY
+
+Đây là tiêu chí duy nhất trong bảng mục 6 chưa từng chạy lần nào, và nó vừa trở nên đáng chạy
+hơn hẳn: việc V4 đổi hẳn cách nạp CSDL (Flyway thay `spring.sql.init`), nên câu *"clone về máy
+trắng có chạy được không"* không còn là câu hỏi đã trả lời.
+
+Đã `git clone` từ chính kho này ra một thư mục mới rồi đi đúng bốn bước của README:
+
+| Bước | Kết quả |
+|---|---|
+| 1. `git clone` | 80 commit; **mọi file quyết định đều có** — hai file di trú, hai file dữ liệu mẫu, `FlywayResetConfig`, workflow CI, ba script python |
+| 2. Khai `MYSQL_PASSWORD` | biến môi trường đã có sẵn |
+| 3. `mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"` | Flyway chạy V1 → V2, nạp hai file dữ liệu, khởi động 7,7 giây |
+| 4. `mvnw spring-boot:run` | *"Schema is up to date. No migration necessary"*, khởi động 4,9 giây |
+
+**Phần đáng giá nhất là phép đối chiếu kèm theo:** CSDL do bản clone dựng so với CSDL đang có —
+**0 dòng lệch trên 20.519 dòng**. Tức là toàn bộ bộ dữ liệu mà báo cáo mô tả **dựng lại được từ
+mã nguồn**, không phụ thuộc vào thứ gì còn sót trên máy này.
+
+Chạy nốt cả bộ nghiệm thu **từ trong bản clone**: `mvnw test` 315/315 · 8 script giao diện
+215/215 · 3 script python đều 0.
+
+> Vì clone lấy từ kho chứ không chép thư mục, phép kiểm này còn trả lời một câu khác: **có file
+> nào chỉ nằm trong thư mục làm việc mà quên commit không.** Không có file nào.
+
+Thư mục clone đã xoá sau khi đo.
+
+### ✅ N3 — quyết cách A, kèm số đo
+
+Mốc 14/08/2026 đã qua. **Chọn cách A: chấp nhận 4 nhóm và giải thích bằng một câu.** Cách B
+(dời hạn thanh toán) và cách C (thêm kỳ 9) đều đụng dữ liệu vận hành đúng lúc không nên đụng gì
+cả, và cách C còn phá trạng thái *"kỳ 8 rỗng để demo"*.
+
+Đo ngày 19/08/2026: **chỉ nhóm *Trong hạn* rỗng**, bốn nhóm quá hạn đều có nội dung và mỗi kỳ
+cước rơi đúng một nhóm — kỳ 7 → *1–30* · kỳ 6 → *31–60* · kỳ 5 → *61–90* · kỳ 3 và 4 → *trên
+90*. Tổng 165 hóa đơn / 62.322.325 đ, khớp đúng số bàn giao.
+
+Câu giải thích để dán dưới ảnh, bảng số đo đầy đủ và mốc **15/09/2026** (từ ngày đó chỉ còn 3
+nhóm, vì kỳ 7 rời nhóm *1–30* mà không có kỳ nào thay chỗ) đã ghi ở đầu
+[`danh-sach-anh-chup.md`](danh-sach-anh-chup.md).
+
+> **Một nhánh dự đoán của `PHASE-6-REPORT.md` mục 1.2 nay đã tự gỡ.** Báo cáo đó (viết
+> 10/08/2026) dự đoán *"từ 14/08 nhóm 61–90 rỗng"* — đúng cho ngày 14/08, nhưng nhóm ấy **đã
+> đầy lại** vì kỳ 5 già thêm và rơi vào nó. Các nhóm quá hạn cạn rồi đầy lại khi kỳ cước già
+> đi; riêng *Trong hạn* rỗng vĩnh viễn vì bộ dữ liệu mẫu không sinh thêm hóa đơn nào nữa. Ghi
+> lại để người đọc sau không thấy hai tài liệu nói khác nhau mà tưởng có gì sai.
 
 ### Việc phát sinh ngoài kế hoạch, đã làm
 
