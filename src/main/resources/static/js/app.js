@@ -200,3 +200,55 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }());
 }());
+
+/* =====================================================================
+   DONG BO CHIEU CAO THANH MAY VAO BIEN CSS
+   =====================================================================
+   Rail dinh o top = chieu cao that cua thanh may. Neu lech thi hoac ho ra
+   mot vach, hoac rail chui xuong duoi thanh may - va do lech chi lo ra khi
+   cuon, tuc rat de sot.
+
+   GHI VAO --thanh-may-thuc, KHONG ghi vao --thanh-may-cao. Bien
+   --thanh-may-cao la thu .thanh-may doc lam min-height; ghi chieu cao do
+   duoc nguoc lai vao no la tao vong phan hoi: thanh cao len mot lan (vi du
+   luc cua so hep lam chu xuong dong) thi min-height khoa luon o do va
+   khong bao gio co lai. Da dinh dung loi nay mot lan - thanh may bi khoa
+   o 375px, chiem gan nua khung.
+
+   CSS khai top: var(--thanh-may-thuc, var(--thanh-may-cao)) nen JavaScript
+   hong thi chi lech vai pixel chu khong vo bo cuc.
+   ===================================================================== */
+(function () {
+    var thanhMay = document.querySelector('.thanh-may');
+    if (!thanhMay) {
+        return;
+    }
+
+    function dongBo() {
+        document.documentElement.style.setProperty(
+            '--thanh-may-thuc', thanhMay.offsetHeight + 'px');
+    }
+
+    dongBo();
+    window.addEventListener('resize', dongBo);
+
+    /* Nguyen nhan lech LON nhat va de doan nhat la phong chu: luc script nay
+       chay, Be Vietnam Pro chua tai xong nen thanh may do duoc 58px; tai xong
+       thi no cao 73px. Neo thang vao fonts.ready thay vi trong cho mot co che
+       chung chung bat duoc.
+
+       Do duoc: khong co moc nay thi rail dinh o 58px trong khi thanh may cao
+       73px - 15px dau cua rail chui xuong duoi thanh, dung muc "Trang chu". */
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(dongBo);
+    }
+    // Chot chan cuoi: anh, bang, moi thu da xong
+    window.addEventListener('load', dongBo);
+
+    /* ResizeObserver la lop bo sung, KHONG duoc la cho dua duy nhat: no chi
+       chay khi trinh duyet con chay vong ve. Trong khung xem tich hop cua
+       Claude Code no khong chay lan nao - da do. */
+    if (window.ResizeObserver) {
+        new ResizeObserver(dongBo).observe(thanhMay);
+    }
+}());

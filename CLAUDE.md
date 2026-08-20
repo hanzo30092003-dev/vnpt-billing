@@ -177,6 +177,20 @@ dump** `data-van-hanh.sql`.
 * **Đường tắt "Bỏ qua menu" trong `layout.html` không được bỏ**, và đích `#noi-dung` phải giữ
   `tabindex="-1"` — thiếu nó thì bấm đường tắt chỉ cuộn màn hình chứ tiêu điểm không nhảy vào.
   Đo được: không có đường tắt thì phải bấm Tab **20 lần** mới tới ô nhập đầu tiên, ở mọi trang.
+* **`--thanh-may-cao` KHÔNG được để JavaScript ghi đè.** `.thanh-may` đọc biến đó làm
+  `min-height`, nên ghi chiều cao đo được ngược vào nó là tạo vòng phản hồi: thanh cao lên một
+  lần (ví dụ lúc cửa sổ hẹp làm chữ xuống dòng) thì `min-height` khoá luôn ở đó và **không bao
+  giờ co lại**. Đã dính đúng lỗi này một lần — thanh máy bị khoá ở 375px, chiếm gần nửa khung.
+  Chiều cao đo được đi vào **`--thanh-may-thuc`**, một biến khác, và chỉ rail đọc nó.
+* **Phép đo `--thanh-may-thuc` phải neo vào `document.fonts.ready`, không chỉ `ResizeObserver`.**
+  Lúc `app.js` chạy, Be Vietnam Pro chưa tải xong nên thanh máy đo được 58px; tải xong nó cao
+  73px. `ResizeObserver` đáng lẽ bù lại, nhưng nó **chỉ chạy khi trình duyệt còn chạy vòng vẽ** —
+  trong khung xem tích hợp thì không chạy lần nào. Lệch 15px nghĩa là mục "Trang chủ" trên rail
+  chui xuống dưới thanh máy.
+* **Không có chữ giao diện thường trực nào dưới 13px; nhãn gắn với một con số thì ≥14px.**
+  Bản đầu của đợt G1 để nhãn bốn con số ở `.62rem` VIẾT HOA — đo ra **9,92px**, và nhãn đó là
+  thứ duy nhất nói con số bên cạnh nghĩa là gì. Tiếng Việt có dấu viết hoa ở cỡ nhỏ khó đọc hơn
+  hẳn viết thường, nên đừng dùng `text-transform: uppercase` để bù cho chữ nhỏ.
 * **Bảng màu chỉ có MỘT nguồn: `:root` trong `app.css`.** Biểu đồ đọc qua `window.MAU` khai ở
   `app.js` (đọc thẳng từ biến CSS), **không gõ mã màu trong template**. Trước đợt G1, bảy màn
   hình có biểu đồ mỗi cái tự gõ một bộ — đổi bảng màu là quên đúng 4 chỗ.

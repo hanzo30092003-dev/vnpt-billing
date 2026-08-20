@@ -326,6 +326,51 @@ vĩnh viễn mà chẳng canh gì. Đúng chuẩn làm việc số 5.
 khớp chuỗi con. Phá lại bằng một tên không chứa chuỗi cũ thì đỏ đúng một phép kiểm đã nêu tên.
 *Một đối chứng dựng sai cũng cho cảm giác an toàn giả y hệt một phép kiểm sai.*
 
+#### Soát lại trên trình duyệt — năm lỗi mà phép kiểm tĩnh không thể thấy
+
+Cả `kiem-giao-dien.py`, `kiem-ban-phim.py` lẫn 215 phép kiểm HTTP đều **xanh** ở bản đầu của
+G1, vì cả ba đều đọc **mã nguồn hoặc chuỗi HTML**. Không cái nào biết trình duyệt cuối cùng
+dựng ra hình gì. Đo trên DOM đã dựng xong thì lòi ra năm lỗi:
+
+| Lỗi | Đo được | Vì sao phép kiểm tĩnh mù |
+|---|---|---|
+| Thanh máy và rail cuộn mất | Cuộn 900px → thanh máy ở `y=-900` | `position` là thuộc tính tính ra lúc dựng hình |
+| Nhãn bốn con số quá nhỏ | **9,92px** (`.62rem` viết hoa) | `rem` trong CSS không nói ra pixel cuối cùng |
+| Tiêu đề nhóm menu, vai trò | 10,24px và 10,88px | như trên |
+| Cuộn ngang ở 375px | `scrollWidth` 430 / khung 375 | tràn là kết quả của bố cục, không có trong mã |
+| Nút mở rail hụt vùng bấm | 32×40, chuẩn là 40×40 | kích thước thật do nội dung quyết định |
+
+Lỗi đầu tiên nặng nhất **không phải vì nó xấu** mà vì nó làm chính lý lẽ dựng nên thanh máy
+thành sai: tôi đã viết "bốn con số cần thấy TRONG LÚC đang làm việc khác", trong khi thực tế
+chỉ thấy được lúc đang ở đầu trang — mà ở đầu trang thì đã có trang chủ rồi. *Một lời giải
+thích nghe xuôi tai không chứng minh được thứ nó giải thích có tồn tại hay không.*
+
+#### Ba lần đo sai trước khi đo đúng
+
+Đáng ghi lại vì cả ba đều cho kết quả **trông như đã đạt**:
+
+1. **Đo cuộn ngay sau khi gọi cuộn.** `scrollTo(900)` rồi đọc `scrollY` lập tức ra `0`, nên
+   "thanh máy không xê dịch" — kết luận đúng vì lý do sai. Bootstrap đặt
+   `scroll-behavior: smooth`, cuộn còn đang chạy. Phải chờ rồi mới đo.
+2. **Dò `prefers-reduced-motion` bằng cách duyệt `document.styleSheets`** → báo "không có".
+   Thật ra **8/9 stylesheet là CDN nên `.cssRules` bị chặn cross-origin**, và tôi nuốt lỗi đó
+   trong `try/catch`. Bootstrap có sẵn quy tắc ấy. Âm tính giả thuần tuý.
+3. **Kết luận biểu đồ không vẽ** vì canvas trả về 0 pixel. Thật ra khung xem không compositing
+   nên `requestAnimationFrame` không chạy, mà Chart.js vẽ qua đó. Gọi thẳng `chart.draw()` thì
+   ra 8811 pixel đúng bảng màu mới. Cùng gốc với việc canvas ở 375px vẫn giữ bề ngang 956px.
+
+Bài học chung: **khi phép đo chạy trong một môi trường thiếu một cơ chế, thứ thiếu đó trông
+giống hệt một lỗi của sản phẩm.** Mỗi lần như vậy đều phải dựng đối chứng tách hai khả năng ra
+trước khi ghi vào danh sách lỗi.
+
+#### Một lỗi tự tạo ra trong lúc sửa
+
+Bản vá đầu cho lỗi "thanh máy cuộn mất" ghi chiều cao đo được vào `--thanh-may-cao` — đúng
+biến mà `.thanh-may` đọc làm `min-height`. Vòng phản hồi: lúc khung tụt về 0×0, thanh máy xuống
+dòng thành 375px, JavaScript ghi 375px vào biến, và min-height khoá cứng ở đó. Một cái bánh
+cóc — chỉ tăng, không bao giờ giảm. Tách thành hai biến (`--thanh-may-cao` vào,
+`--thanh-may-thuc` ra) là hết đường trôi.
+
 #### Nghiệm thu sau khi đổi
 
 315/315 test · 215/215 phép kiểm HTTP · `kiem-tu-ngu` 46 file · `kiem-giao-dien` 38 màn hình ·

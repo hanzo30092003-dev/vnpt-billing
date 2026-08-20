@@ -67,6 +67,10 @@
     --den-loi: #ef5f68;
 
     --rail-rong: 232px;
+    /* Chiều cao TỐI THIỂU do CSS quy định. KHÔNG được để JavaScript ghi đè
+       biến này: .thanh-may đọc nó làm min-height, nên ghi chiều cao đo được
+       vào đây là tạo vòng phản hồi — thanh cao lên một lần rồi không bao giờ
+       co lại. Chiều cao ĐO ĐƯỢC đi vào --thanh-may-thuc, một biến khác. */
     --thanh-may-cao: 52px;
 
     --chu-giao-dien: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
@@ -265,9 +269,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .o-so-lieu .nhan {
-    font-size: .62rem;
-    letter-spacing: .09em;
-    text-transform: uppercase;
+    /* 14px, viết thường. Bản đầu để .62rem VIẾT HOA cho ra dáng bảng điều
+       khiển — đo ra 9,92px. Nhãn này là thứ DUY NHẤT nói con số bên cạnh
+       nghĩa là gì; để nó nhỏ hơn chữ trong bảng là đặt trang trí lên trên
+       việc đọc. Bỏ viết hoa còn vì tiếng Việt có dấu viết hoa ở cỡ nhỏ
+       khó đọc hơn hẳn viết thường. */
+    font-size: .875rem;
+    letter-spacing: .01em;
     color: var(--muc-chu-mo);
 }
 
@@ -313,9 +321,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .thanh-may-nguoi .vai-tro {
-    font-size: .68rem;
-    letter-spacing: .07em;
-    text-transform: uppercase;
+    font-size: .8125rem;   /* 13px — sàn cho chữ giao diện thường trực */
+    letter-spacing: .01em;
     color: var(--muc-chu-mo);
 }
 
@@ -334,6 +341,38 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+}
+
+/* =====================================================================
+   THANH MÁY VÀ RAIL DÍNH LẠI KHI CUỘN
+   =====================================================================
+   Bản đầu để cả hai ở position: static. Đo ra: cuộn xuống 900px thì thanh
+   máy nằm ở y=-900, tức mất hẳn. Như vậy chính lý lẽ dựng nên nó — "bốn
+   con số cần thấy TRONG LÚC đang làm việc khác" — là sai: chỉ thấy được
+   khi đang ở đầu trang, mà ở đầu trang thì đã có trang chủ rồi.
+
+   Vẫn để tài liệu tự cuộn (không dựng khung cuộn nội bộ) vì phần mềm này
+   in ra giấy nhiều; khung cuộn nội bộ là kiểu bố cục chỉ in được đúng phần
+   đang nhìn thấy. @media print đã display:none cả hai nên bản in không đổi.
+
+   Chỉ áp từ 992px trở lên: dưới ngưỡng đó rail đã là ngăn kéo trượt
+   (position: fixed), hai cơ chế chồng nhau là hỏng.
+   ===================================================================== */
+@media (min-width: 992px) {
+    .thanh-may {
+        position: sticky;
+        top: 0;
+        z-index: 1030;   /* dưới modal của Bootstrap (1055) */
+    }
+
+    .rail {
+        position: sticky;
+        /* --thanh-may-thuc do app.js đo và ghi. Thiếu JavaScript thì rơi về
+           chiều cao tối thiểu — lệch vài pixel, không vỡ bố cục. */
+        top: var(--thanh-may-thuc, var(--thanh-may-cao));
+        align-self: flex-start;
+        height: calc(100vh - var(--thanh-may-thuc, var(--thanh-may-cao)));
+    }
 }
 
 .than-ung-dung {
@@ -360,9 +399,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .rail-nav .nav-group {
     padding: 1.1rem .9rem .3rem;
-    font-size: .64rem;
-    letter-spacing: .11em;
-    text-transform: uppercase;
+    font-size: .8125rem;   /* 13px, viết thường — bản đầu .64rem viết hoa ra 10,24px */
+    letter-spacing: .01em;
+    font-weight: 600;
     color: var(--muc-chu-mo);
 }
 
@@ -599,7 +638,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .the-so-lieu .nhan {
-    font-size: .82rem;
+    font-size: .875rem;
     line-height: 1.3;
     color: var(--chu-mo);
     padding-right: 1.75rem;   /* chừa chỗ cho biểu tượng góc phải */
@@ -625,7 +664,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .the-so-lieu .phu {
     margin-top: auto;
-    font-size: .82rem;
+    font-size: .875rem;
     line-height: 1.3;
     color: var(--chu-mo);
 }
@@ -1031,6 +1070,8 @@ label.form-label {
 .nut-mo-rail {
     display: none;
     margin-right: .5rem;
+    min-width: 40px;    /* đo ra 32x40 — hụt bề ngang */
+    min-height: 40px;
 }
 
 @media (max-width: 991.98px) {
@@ -1071,6 +1112,16 @@ label.form-label {
 
     .o-so-lieu {
         padding: .35rem .75rem;
+    }
+
+    /* Đo ở 375px: khối này rộng 430px và có white-space: nowrap nên đẩy cả
+       trang ra 55px — nguồn cuộn ngang DUY NHẤT của bản màn hình hẹp. */
+    .thanh-may-nguoi {
+        margin-left: 0;
+        border-left: none;
+        flex-wrap: wrap;
+        white-space: normal;
+        min-width: 0;
     }
 
     .thanh-may-nguoi .vai-tro {
@@ -1126,4 +1177,21 @@ label.form-label {
 /* Đích của đường tắt nhận tiêu điểm bằng mã, không cần viền riêng của nó */
 .content:focus {
     outline: none;
+}
+
+/* =====================================================================
+   17. TÔN TRỌNG YÊU CẦU GIẢM CHUYỂN ĐỘNG
+   =====================================================================
+   Bootstrap đã bọc scroll-behavior: smooth của nó trong
+   prefers-reduced-motion: no-preference, nhưng nó không biết tới các
+   transition khai trong file này. Người bật "giảm chuyển động" thường bật
+   vì chuyển động gây chóng mặt hoặc buồn nôn — không phải vì thẩm mỹ.
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    .loi-tat,
+    .rail,
+    .nav-item,
+    .the-so-lieu {
+        transition: none !important;
+    }
 }
