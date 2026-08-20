@@ -274,7 +274,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **G1** làm lại giao diện — hướng "trạm viễn thông" | ✅ xong — **phá quyết định đóng băng mã, có chủ ý** | `ded07b9` |
 | **G1b** sửa 5 lỗi chỉ thấy được khi đo trên trình duyệt | ✅ xong | `8cd9b55` |
 | **G1c** bỏ dòng "dữ liệu mẫu" khỏi hóa đơn, phiếu thu, Excel | ✅ xong | `960eeab` |
-| **G1d** đổi bên phát hành sang công ty hư cấu, bỏ nốt "(GIẢ LẬP)" | ✅ xong | `(ghi sau)` |
+| **G1d** đổi bên phát hành sang công ty hư cấu, bỏ nốt "(GIẢ LẬP)" | ✅ xong | `b21743b` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
