@@ -38,7 +38,20 @@ public class HoaDonPdfService {
     private static final DateTimeFormatter NGAY = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final float LE = 36f;
 
-    public static final String CHAN_TRANG = "Hóa đơn mẫu phục vụ mục đích học tập";
+    /**
+     * Chân trang của tờ hóa đơn: số hiệu chứng từ.
+     *
+     * <p>Trước đây chỗ này ghi "Hóa đơn mẫu phục vụ mục đích học tập". Bỏ đi theo cùng
+     * hướng Phase 8 đã đi với chân trang màn hình và đầu trang bản in báo cáo — những
+     * dòng ấy là thông tin phụ, không nên tranh chỗ với dữ liệu. Dấu nhận biết vẫn còn
+     * ở chữ "(GIẢ LẬP)" cạnh tên công ty.</p>
+     *
+     * <p>Thay bằng số hiệu chứ không bỏ trống: hóa đơn có thể dài hơn một trang, và một
+     * tờ rời khỏi tập thì số hiệu ở chân trang là thứ duy nhất nói nó thuộc về đâu.</p>
+     */
+    public static String chanTrang(HoaDon hoaDon) {
+        return "Hóa đơn " + hoaDon.getMaHoaDon();
+    }
 
     private final com.hanzo.billing.config.ThamSoNghiepVu thamSo;
     private final PdfFont font;
@@ -52,12 +65,11 @@ public class HoaDonPdfService {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Document taiLieu = new Document(PageSize.A4, LE, LE, LE, LE + 12);
             PdfWriter writer = PdfWriter.getInstance(taiLieu, out);
-            writer.setPageEvent(new ChanTrangPdf(font, CHAN_TRANG));
+            writer.setPageEvent(new ChanTrangPdf(font, chanTrang(hoaDon)));
             taiLieu.open();
 
             taiLieu.add(tieuDeChinh());
             taiLieu.add(khoiTieuDe(hoaDon));
-            taiLieu.add(canhBaoDuLieuMau());
             taiLieu.add(khoiKhachHang(hoaDon));
             taiLieu.add(bangKhoanMuc(khoanMuc));
             taiLieu.add(khoiTong(hoaDon));
@@ -108,21 +120,6 @@ public class HoaDonPdfService {
         bang.addCell(phai);
 
         bang.setSpacingAfter(8f);
-        return bang;
-    }
-
-    private PdfPTable canhBaoDuLieuMau() {
-        PdfPTable bang = new PdfPTable(1);
-        bang.setWidthPercentage(100);
-        PdfPCell o = new PdfPCell(new Phrase(
-                "DỮ LIỆU MẪU TỰ SINH — PHỤC VỤ MỤC ĐÍCH HỌC TẬP, KHÔNG PHẢI HÓA ĐƠN THẬT",
-                font.dam(9)));
-        o.setHorizontalAlignment(Element.ALIGN_CENTER);
-        o.setPadding(5f);
-        o.setBackgroundColor(PdfFont.MAU_NEN_TIEU_DE);
-        o.setBorderColor(PdfFont.MAU_VIEN);
-        bang.addCell(o);
-        bang.setSpacingAfter(10f);
         return bang;
     }
 

@@ -30,7 +30,10 @@ public class PhieuThuPdfService {
     private static final DateTimeFormatter NGAY_GIO =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    public static final String CHAN_TRANG = "Phiếu thu mẫu phục vụ mục đích học tập";
+    /** Chân trang phiếu thu: số hiệu giao dịch. Xem javadoc cùng tên ở HoaDonPdfService. */
+    public static String chanTrang(ThanhToan giaoDich) {
+        return "Phiếu thu " + giaoDich.getMaGiaoDich();
+    }
 
     private final PdfFont font;
 
@@ -42,7 +45,7 @@ public class PhieuThuPdfService {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Document taiLieu = new Document(PageSize.A5.rotate(), 32, 32, 28, 40);
             PdfWriter writer = PdfWriter.getInstance(taiLieu, out);
-            writer.setPageEvent(new ChanTrangPdf(font, CHAN_TRANG));
+            writer.setPageEvent(new ChanTrangPdf(font, chanTrang(giaoDich)));
             taiLieu.open();
 
             taiLieu.add(canhLe("CÔNG TY VIỄN THÔNG VNPT (GIẢ LẬP)", font.dam(10),

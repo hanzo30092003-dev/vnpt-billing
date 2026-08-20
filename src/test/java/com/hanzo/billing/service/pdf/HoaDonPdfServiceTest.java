@@ -129,10 +129,19 @@ class HoaDonPdfServiceTest {
     }
 
     @Test
-    @DisplayName("5. Chân trang ghi rõ đây là dữ liệu mẫu học tập")
-    void chanTrangCanhBao() {
-        assertThat(vanBan).contains(HoaDonPdfService.CHAN_TRANG);
-        assertThat(vanBan).contains("DỮ LIỆU MẪU TỰ SINH");
+    @DisplayName("5. Chân trang ghi số hiệu hóa đơn; dòng dữ liệu mẫu đã bỏ, dấu (GIẢ LẬP) còn")
+    void chanTrangGhiSoHieuVaConDauNhanBiet() {
+        assertThat(vanBan).contains(HoaDonPdfService.chanTrang(hoaDonMau()));
+
+        // Đợt G1c bỏ băng cảnh báo và dòng chân trang cũ. Hai khẳng định phủ định này
+        // canh việc chúng không lặng lẽ quay lại — ví dụ khi ai đó chép lại từ bản cũ.
+        assertThat(vanBan).doesNotContain("DỮ LIỆU MẪU TỰ SINH");
+        assertThat(vanBan).doesNotContain("phục vụ mục đích học tập");
+
+        // Và canh chiều ngược lại, quan trọng hơn: dấu nhận biết DUY NHẤT còn lại
+        // không được biến mất. Tờ này mang tên một nhà mạng có thật, mã số thuế và
+        // địa chỉ trông như thật; bỏ nốt chữ này là nó thành một tờ hóa đơn giả hoàn chỉnh.
+        assertThat(vanBan).contains("(GIẢ LẬP)");
     }
 
     @Test

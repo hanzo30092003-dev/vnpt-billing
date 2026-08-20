@@ -290,6 +290,10 @@ Khuôn chung đúng bằng yêu cầu D.1: tiêu đề, phạm vi, ngày xuất,
 **freeze pane**, số tiền có phân cách nghìn, dòng tổng in đậm, chân trang *"Dữ liệu mẫu phục vụ
 mục đích học tập"*.
 
+> **Cập nhật sau đợt G1c:** dòng chân trang ấy **đã bỏ**. File Excel đã có sẵn *"Ngày xuất:
+> dd/MM/yyyy HH:mm"* ở đầu nên nó chỉ lặp lại thông tin. Xem `KE-HOACH-HOAN-THIEN.md` mục
+> ghi chú G1c. Phần còn lại của khuôn chung giữ nguyên.
+
 > **Freeze pane đặt ngay dưới dòng header**, không phải dòng 1 — phía trên header còn ba dòng
 > tiêu đề báo cáo. Khoá nhầm chỗ thì cuộn xuống sẽ mất tên cột, tức mất đúng thứ mà freeze pane
 > sinh ra để giữ.
@@ -439,7 +443,7 @@ tay **không bắt được**, vì hằng số chỉ chứng minh hôm nay dữ 
 | 7 | Doanh thu theo gói cước | `/bao-cao/doanh-thu-goi-cuoc` | Tỷ trọng cộng đủ 100% |
 | 8 | Doanh thu theo loại dịch vụ | `/bao-cao/doanh-thu-dich-vu` | Dòng giảm trừ mang **dấu âm** |
 | 9 | Top thuê bao cước cao | `/bao-cao/top-thue-bao?soLuong=50` | Đổi 10/20/50 giữ nguyên kỳ đang chọn |
-| 10 | **File Excel mở trong Excel** | Bấm *Xuất Excel* ở ảnh 2 | Header có nền, **freeze pane**, dòng tổng đậm, chân trang |
+| 10 | **File Excel mở trong Excel** | Bấm *Xuất Excel* ở ảnh 2 | Header có nền, **freeze pane**, dòng tổng đậm, đầu file ghi ngày xuất |
 | 11 | **Bản in A4** | Bấm *In* ở ảnh 3 → xem trước | Không còn sidebar/nút; có tiêu đề riêng cho bản in |
 | 12 | Sinh CDR có hạt giống | `/cdr/sinh-du-lieu` | Ô **Hạt giống** và khối kết quả hiện hạt giống đã dùng |
 

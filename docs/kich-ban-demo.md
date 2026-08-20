@@ -233,8 +233,8 @@ tự động cắt dịch vụ của khách.
 dịch vụ** (so với kỳ trước) → bấm **Xuất Excel** và mở file ra.
 
 **Nói:** 7 báo cáo, mọi truy vấn gom nhóm **ngay trong CSDL** chứ không load dữ liệu lên rồi
-cộng trong Java. File Excel có freeze pane, dòng tổng in đậm, và chân trang ghi rõ *dữ liệu mẫu
-phục vụ học tập*.
+cộng trong Java. File Excel có freeze pane, dòng tổng in đậm, và đầu file ghi phạm vi báo cáo
+cùng ngày giờ xuất.
 
 > **Hỏi:** *Làm sao biết số trên báo cáo là đúng?*
 > **Đáp:** có test kiểm **chéo ba đường truy vấn khác nhau** cho cùng một con số — gom theo kỳ,

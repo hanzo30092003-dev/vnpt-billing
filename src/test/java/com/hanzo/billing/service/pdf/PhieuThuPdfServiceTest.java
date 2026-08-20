@@ -66,9 +66,11 @@ class PhieuThuPdfServiceTest {
     }
 
     @Test
-    @DisplayName("4. Chân trang ghi rõ là phiếu thu mẫu học tập")
-    void chanTrangCanhBao() {
-        assertThat(vanBan).contains(PhieuThuPdfService.CHAN_TRANG);
+    @DisplayName("4. Chân trang ghi số hiệu phiếu thu; dòng dữ liệu mẫu đã bỏ, dấu (GIẢ LẬP) còn")
+    void chanTrangGhiSoHieuVaConDauNhanBiet() {
+        assertThat(vanBan).contains(PhieuThuPdfService.chanTrang(giaoDichMau()));
+        assertThat(vanBan).doesNotContain("phục vụ mục đích học tập");
+        assertThat(vanBan).contains("(GIẢ LẬP)");
     }
 
     @Test

@@ -272,6 +272,8 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **N2** 70 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
 | **N3** quyết cách xử lý bảng tuổi nợ | ✅ **quyết cách A** — chấp nhận 4 nhóm, giải thích bằng một câu | `71b3520` |
 | **G1** làm lại giao diện — hướng "trạm viễn thông" | ✅ xong — **phá quyết định đóng băng mã, có chủ ý** | `ded07b9` |
+| **G1b** sửa 5 lỗi chỉ thấy được khi đo trên trình duyệt | ✅ xong | `8cd9b55` |
+| **G1c** bỏ dòng "dữ liệu mẫu" khỏi hóa đơn, phiếu thu, Excel | ✅ xong | `(ghi sau)` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
@@ -375,6 +377,51 @@ cóc — chỉ tăng, không bao giờ giảm. Tách thành hai biến (`--thanh
 
 315/315 test · 215/215 phép kiểm HTTP · `kiem-tu-ngu` 46 file · `kiem-giao-dien` 38 màn hình ·
 `kiem-ban-phim` 213 nút/liên kết. Mọi cặp chữ–nền đều đo lại, không cặp nào dưới ngưỡng.
+
+---
+
+### Ghi chú của G1c — bỏ dòng "dữ liệu mẫu" khỏi chứng từ
+
+**Không phải phá quyết định cũ mà làm nốt một quyết định cũ.** `PHASE-8-REPORT.md` mục 283 và
+287 đã thay chân trang màn hình *"Đồ án… dữ liệu mẫu phục vụ học tập"* thành *"Hệ thống quản
+lý thuê bao & tính cước — phiên bản 1.0"*, và đầu trang bản in báo cáo thành *"Ngày in: …"*,
+với lý do ghi ở dòng 308: *"Chúng là thông tin phụ, không nên tranh chỗ với dữ liệu."* Hóa đơn
+PDF, phiếu thu và Excel là ba chỗ Phase 8 chưa với tới.
+
+Dòng đó nằm ở **năm** chỗ chứ không phải một — tìm được một chỗ rồi dừng là sót bốn:
+
+| Nơi | Trước | Sau |
+|---|---|---|
+| PDF hóa đơn — băng ngang nền xám | *DỮ LIỆU MẪU TỰ SINH — … KHÔNG PHẢI HÓA ĐƠN THẬT* | bỏ hẳn |
+| PDF hóa đơn — chân trang | *Hóa đơn mẫu phục vụ mục đích học tập* | `Hóa đơn HD202607-000058` |
+| PDF phiếu thu — chân trang | *Phiếu thu mẫu phục vụ mục đích học tập* | `Phiếu thu TT20260620-0004` |
+| Màn hình chi tiết hóa đơn | huy hiệu vàng | bỏ hẳn |
+| File Excel — chân trang | *Dữ liệu mẫu phục vụ mục đích học tập — Đồ án…* | bỏ hẳn |
+
+**Thay chứ không chỉ xoá.** Chân trang PDF để trống là phí một chỗ có ích: hóa đơn có thể dài
+hơn một trang, và một tờ rời khỏi tập thì số hiệu ở chân trang là thứ duy nhất nói nó thuộc về
+đâu. Excel thì không cần thay vì đã có sẵn *"Ngày xuất: dd/MM/yyyy HH:mm"* ở đầu file.
+
+**Một thứ giữ lại có chủ ý: chữ "(GIẢ LẬP)" cạnh tên công ty.** Sau đợt này, tờ hóa đơn mang
+tên một nhà mạng có thật, mã số thuế và địa chỉ trông như thật — mà hóa đơn điện thoại ở Việt
+Nam hay được dùng làm giấy chứng minh nơi cư trú. Chữ ấy là dấu nhận biết duy nhất còn lại, và
+nó rẻ: bốn ký tự, không tranh chỗ với dữ liệu nào.
+
+**Cũng giữ lại: câu cảnh báo trên màn hình sinh dữ liệu CDR** (`cdr/sinh-du-lieu.html`). Đó
+không phải dấu trên chứng từ mà là lời cảnh báo về việc một cái nút sắp làm gì — người bấm cần
+biết nó tạo ra cuộc gọi bịa, không phải cuộc gọi thật của khách.
+
+**Ba phép kiểm cũ suýt thành phép kiểm chết.** Chúng khẳng định PDF *có chứa* hằng số
+`CHAN_TRANG`. Nếu tôi chỉ đổi hằng số đó thành chuỗi rỗng thì `contains("")` luôn đúng — ba
+phép kiểm xanh vĩnh viễn mà không canh gì. Nay viết lại thành ba khẳng định có thể đỏ: chân
+trang **có** số hiệu, văn bản **không** còn dòng cũ, và **còn** chữ "(GIẢ LẬP)".
+
+Đối chứng, dự đoán công bố trước: gỡ "(GIẢ LẬP)" khỏi cả hai service thì đỏ **đúng 3** phép
+kiểm đã nêu tên. Chạy ra đúng 3 — `Tests run: 17, Failures: 3`.
+
+Nghiệm thu: 315/315 test · 215/215 phép kiểm HTTP · 3 phép kiểm Python đạt. Xuất PDF thật qua
+HTTP rồi trích văn bản bằng OpenPDF để soi, không dựa vào mã nguồn: cả hai tờ đều sạch dòng cũ
+và đều còn "(GIẢ LẬP)".
 
 ---
 

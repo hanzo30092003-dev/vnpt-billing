@@ -131,7 +131,7 @@ Cột **Kết quả thực tế** và **Đạt/Không** để trống cho ngư�
 | 56 | Thống kê thuê bao | `/bao-cao/thue-bao` | — | Các lát biểu đồ cộng lại đúng **80**; biểu đồ đường mới/rời mạng cùng một trục | | |
 | 57 | Top thuê bao | `/bao-cao/top-thue-bao`, đổi 10 → 50 | — | Sắp giảm dần; đổi số lượng **giữ nguyên kỳ** đang chọn | | |
 | 58 | Sản lượng dịch vụ | `/bao-cao/san-luong` kỳ 7 | — | Cột *Kỳ trước* là kỳ **6/2026**; biến động có dấu +/− và màu | | |
-| 59 | Xuất Excel | Bấm **Xuất Excel** ở bất kỳ báo cáo nào | — | File mở được: header có nền, **freeze pane**, số có phân cách nghìn, dòng tổng đậm, chân trang ghi *dữ liệu mẫu* | | |
+| 59 | Xuất Excel | Bấm **Xuất Excel** ở bất kỳ báo cáo nào | — | File mở được: header có nền, **freeze pane**, số có phân cách nghìn, dòng tổng đậm, đầu file ghi *Ngày xuất* | | |
 | 60 | In báo cáo | Bấm **In** → xem trước | — | Mất sidebar và nút; có tiêu đề riêng cho bản in | | |
 
 ### 2.9. Trường hợp biên và xử lý lỗi

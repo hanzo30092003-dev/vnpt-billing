@@ -71,7 +71,8 @@ class PhieuThuPdfTaiLieuThatTest {
                 .contains(giaoDich.getHoaDon().getMaHoaDon())
                 .contains(giaoDich.getHoaDon().getKhachHang().getTenKh())
                 .contains(giaoDich.getHoaDon().getThueBao().getSoThueBao())
-                .contains(PhieuThuPdfService.CHAN_TRANG);
+                .contains(PhieuThuPdfService.chanTrang(giaoDich))
+                .contains("(GIẢ LẬP)");
     }
 
     @Test

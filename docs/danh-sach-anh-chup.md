@@ -172,7 +172,7 @@ thích bằng một câu — đó là số học, không phải lỗi. Chi tiế
 | 46 | Thống kê thuê bao | `/bao-cao/thue-bao` | Biểu đồ đường mới/rời mạng trên **cùng một trục** |
 | 47 | Top thuê bao cước cao | `/bao-cao/top-thue-bao?soLuong=50` | Đổi 10/20/50 vẫn giữ nguyên kỳ đang chọn |
 | 48 | Sản lượng dịch vụ | `/bao-cao/san-luong` kỳ 7 | Cột *Kỳ trước* = kỳ 6; biến động có dấu +/− |
-| 49 | **File Excel mở trong Excel** | Ảnh 43 → **Xuất Excel** | Header có nền, **freeze pane**, dòng tổng đậm, chân trang |
+| 49 | **File Excel mở trong Excel** | Ảnh 43 → **Xuất Excel** | Header có nền, **freeze pane**, dòng tổng đậm, đầu file ghi ngày xuất |
 | 50 | **Bản in báo cáo** | Ảnh 43 → **In** → xem trước | Có tiêu đề riêng cho bản in |
 
 ## Chương 8 — Chất lượng và kiểm thử

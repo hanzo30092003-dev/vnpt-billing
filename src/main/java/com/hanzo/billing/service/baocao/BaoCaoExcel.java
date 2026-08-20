@@ -47,10 +47,6 @@ public class BaoCaoExcel {
 
     private static final DateTimeFormatter NGAY_GIO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    /** Ghi ở chân mọi file xuất ra — bắt buộc theo yêu cầu D.1. */
-    private static final String CHAN_TRANG =
-            "Dữ liệu mẫu phục vụ mục đích học tập — Đồ án Thực tập nghề nghiệp";
-
     /** Định dạng tiền của Excel: dấu chấm phân cách nghìn theo quy ước Việt Nam. */
     private static final String DINH_DANG_TIEN = "#,##0";
 
@@ -177,9 +173,6 @@ public class BaoCaoExcel {
      * freeze pane sinh ra để giữ.</p>
      */
     public byte[] xuat() {
-        dongHienTai++;
-        oChu(dongHienTai, 0, CHAN_TRANG, kieuPhu);
-
         for (int i = 0; i < Math.max(soCot, 1); i++) {
             sheet.autoSizeColumn(i);
             // autoSizeColumn không tính tới ô đã gộp và hay cho cột quá sát chữ

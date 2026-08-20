@@ -177,6 +177,16 @@ dump** `data-van-hanh.sql`.
 * **Đường tắt "Bỏ qua menu" trong `layout.html` không được bỏ**, và đích `#noi-dung` phải giữ
   `tabindex="-1"` — thiếu nó thì bấm đường tắt chỉ cuộn màn hình chứ tiêu điểm không nhảy vào.
   Đo được: không có đường tắt thì phải bấm Tab **20 lần** mới tới ô nhập đầu tiên, ở mọi trang.
+* **Chữ "(GIẢ LẬP)" cạnh tên công ty là dấu nhận biết DUY NHẤT còn lại trên hóa đơn và phiếu
+  thu — không được bỏ.** Đợt G1c đã gỡ băng cảnh báo, huy hiệu vàng và hai dòng chân trang
+  *"mẫu phục vụ mục đích học tập"* cho tờ hóa đơn trông chuyên nghiệp. Sau đợt đó, tờ hóa đơn
+  mang tên một nhà mạng có thật, mã số thuế và địa chỉ trông như thật — mà hóa đơn điện thoại
+  ở Việt Nam hay được dùng làm giấy chứng minh nơi cư trú. Bỏ nốt chữ này là nó thành một tờ
+  hóa đơn giả hoàn chỉnh. Ba phép kiểm canh: `HoaDonPdfServiceTest` và `PhieuThuPdfServiceTest`
+  mục *chanTrangGhiSoHieuVaConDauNhanBiet*, và `PhieuThuPdfTaiLieuThatTest`. Đã chạy đối chứng:
+  gỡ chữ đó khỏi hai service thì đỏ đúng ba phép kiểm ấy.
+* **Chân trang PDF ghi SỐ HIỆU chứng từ, không bỏ trống.** Hóa đơn có thể dài hơn một trang;
+  một tờ rời khỏi tập thì số hiệu ở chân trang là thứ duy nhất nói nó thuộc về đâu.
 * **`--thanh-may-cao` KHÔNG được để JavaScript ghi đè.** `.thanh-may` đọc biến đó làm
   `min-height`, nên ghi chiều cao đo được ngược vào nó là tạo vòng phản hồi: thanh cao lên một
   lần (ví dụ lúc cửa sổ hẹp làm chữ xuống dòng) thì `min-height` khoá luôn ở đó và **không bao
