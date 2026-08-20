@@ -271,7 +271,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **N1** báo cáo mục B, C, D | ✅ xong | `58d3a2f` |
 | **N2** 70 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
 | **N3** quyết cách xử lý bảng tuổi nợ | ✅ **quyết cách A** — chấp nhận 4 nhóm, giải thích bằng một câu | `71b3520` |
-| **G1** làm lại giao diện — hướng "trạm viễn thông" | ✅ xong — **phá quyết định đóng băng mã, có chủ ý** | `(ghi sau)` |
+| **G1** làm lại giao diện — hướng "trạm viễn thông" | ✅ xong — **phá quyết định đóng băng mã, có chủ ý** | `ded07b9` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
