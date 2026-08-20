@@ -10,7 +10,10 @@ Mô phỏng nghiệp vụ viễn thông: khách hàng → thuê bao → gói cư
 quan trọng ngang mã nguồn — sửa code mà không cập nhật tài liệu là làm hỏng một nửa sản phẩm.
 
 > ⚠️ **Dữ liệu:** toàn bộ là **dữ liệu mẫu tự sinh** phục vụ học tập. Hệ thống **không** dùng
-> dữ liệu thật của bất kỳ nhà mạng nào. Tên "VNPT" chỉ là bối cảnh giả định.
+> dữ liệu thật của bất kỳ nhà mạng nào. Đơn vị phát hành hóa đơn là **Công ty Cổ phần Viễn
+> thông Sông Hậu** — một doanh nghiệp **hư cấu** dựng riêng cho đồ án; mã số thuế và số tổng
+> đài trên chứng từ cũng là số bịa. Tên thư mục và gói Java vẫn giữ chữ `vnpt` vì đó là tên
+> kỹ thuật có từ đầu, không hiện ra cho người dùng.
 
 ## Stack
 
@@ -177,14 +180,16 @@ dump** `data-van-hanh.sql`.
 * **Đường tắt "Bỏ qua menu" trong `layout.html` không được bỏ**, và đích `#noi-dung` phải giữ
   `tabindex="-1"` — thiếu nó thì bấm đường tắt chỉ cuộn màn hình chứ tiêu điểm không nhảy vào.
   Đo được: không có đường tắt thì phải bấm Tab **20 lần** mới tới ô nhập đầu tiên, ở mọi trang.
-* **Chữ "(GIẢ LẬP)" cạnh tên công ty là dấu nhận biết DUY NHẤT còn lại trên hóa đơn và phiếu
-  thu — không được bỏ.** Đợt G1c đã gỡ băng cảnh báo, huy hiệu vàng và hai dòng chân trang
-  *"mẫu phục vụ mục đích học tập"* cho tờ hóa đơn trông chuyên nghiệp. Sau đợt đó, tờ hóa đơn
-  mang tên một nhà mạng có thật, mã số thuế và địa chỉ trông như thật — mà hóa đơn điện thoại
-  ở Việt Nam hay được dùng làm giấy chứng minh nơi cư trú. Bỏ nốt chữ này là nó thành một tờ
-  hóa đơn giả hoàn chỉnh. Ba phép kiểm canh: `HoaDonPdfServiceTest` và `PhieuThuPdfServiceTest`
-  mục *chanTrangGhiSoHieuVaConDauNhanBiet*, và `PhieuThuPdfTaiLieuThatTest`. Đã chạy đối chứng:
-  gỡ chữ đó khỏi hai service thì đỏ đúng ba phép kiểm ấy.
+* **Đơn vị phát hành chứng từ là công ty HƯ CẤU "Công ty Cổ phần Viễn thông Sông Hậu" —
+  không được đổi về tên một nhà mạng có thật.** Đợt G1c gỡ hết dòng cảnh báo *"dữ liệu mẫu"*
+  cho tờ hóa đơn trông chuyên nghiệp; làm được điều đó **chỉ vì** bên phát hành là công ty
+  bịa, nên tờ giấy không mạo danh ai và không có gì phải cảnh báo. Đổi ngược về "VNPT" mà vẫn
+  giữ tình trạng không cảnh báo là biến nó thành hóa đơn giả hoàn chỉnh của một doanh nghiệp
+  có thật — mà hóa đơn điện thoại ở Việt Nam hay được dùng làm giấy chứng minh nơi cư trú.
+  Mã số thuế `1800000000` và tổng đài `1800 6060` cũng là số bịa; tổng đài thật của VNPT là
+  `1800 1166`, đừng chép lại. Ba phép kiểm canh cả hai chiều (`contains` tên hư cấu +
+  `doesNotContain("VNPT")`): `HoaDonPdfServiceTest`, `PhieuThuPdfServiceTest`,
+  `PhieuThuPdfTaiLieuThatTest`.
 * **Chân trang PDF ghi SỐ HIỆU chứng từ, không bỏ trống.** Hóa đơn có thể dài hơn một trang;
   một tờ rời khỏi tập thì số hiệu ở chân trang là thứ duy nhất nói nó thuộc về đâu.
 * **`--thanh-may-cao` KHÔNG được để JavaScript ghi đè.** `.thanh-may` đọc biến đó làm

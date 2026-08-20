@@ -39,7 +39,7 @@ Chỉ đổi **chữ hiển thị**. Đường dẫn, tên biến, tên lớp CS
 | Block | Đơn vị tính tiền |
 | Hạt giống | Mã tạo lại |
 | Engine tính cước | Hệ thống / phần tính tiền |
-| VNPT Billing | VNPT — Quản lý cước |
+| VNPT Billing | Sông Hậu · Quản lý cước |
 
 ### 2.1. Bốn enum in thẳng tên hằng ra cho người dùng đọc
 

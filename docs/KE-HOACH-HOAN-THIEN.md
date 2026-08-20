@@ -274,6 +274,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **G1** làm lại giao diện — hướng "trạm viễn thông" | ✅ xong — **phá quyết định đóng băng mã, có chủ ý** | `ded07b9` |
 | **G1b** sửa 5 lỗi chỉ thấy được khi đo trên trình duyệt | ✅ xong | `8cd9b55` |
 | **G1c** bỏ dòng "dữ liệu mẫu" khỏi hóa đơn, phiếu thu, Excel | ✅ xong | `960eeab` |
+| **G1d** đổi bên phát hành sang công ty hư cấu, bỏ nốt "(GIẢ LẬP)" | ✅ xong | `(ghi sau)` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
@@ -404,8 +405,9 @@ hơn một trang, và một tờ rời khỏi tập thì số hiệu ở chân t
 
 **Một thứ giữ lại có chủ ý: chữ "(GIẢ LẬP)" cạnh tên công ty.** Sau đợt này, tờ hóa đơn mang
 tên một nhà mạng có thật, mã số thuế và địa chỉ trông như thật — mà hóa đơn điện thoại ở Việt
-Nam hay được dùng làm giấy chứng minh nơi cư trú. Chữ ấy là dấu nhận biết duy nhất còn lại, và
-nó rẻ: bốn ký tự, không tranh chỗ với dữ liệu nào.
+Nam hay được dùng làm giấy chứng minh nơi cư trú. Chữ ấy là dấu nhận biết duy nhất còn lại.
+
+> **Đợt G1d đã bỏ nốt chữ này** bằng một cách gọn hơn hẳn — xem ghi chú G1d ngay dưới.
 
 **Cũng giữ lại: câu cảnh báo trên màn hình sinh dữ liệu CDR** (`cdr/sinh-du-lieu.html`). Đó
 không phải dấu trên chứng từ mà là lời cảnh báo về việc một cái nút sắp làm gì — người bấm cần
@@ -422,6 +424,41 @@ kiểm đã nêu tên. Chạy ra đúng 3 — `Tests run: 17, Failures: 3`.
 Nghiệm thu: 315/315 test · 215/215 phép kiểm HTTP · 3 phép kiểm Python đạt. Xuất PDF thật qua
 HTTP rồi trích văn bản bằng OpenPDF để soi, không dựa vào mã nguồn: cả hai tờ đều sạch dòng cũ
 và đều còn "(GIẢ LẬP)".
+
+---
+
+### Ghi chú của G1d — đổi bên phát hành sang công ty hư cấu
+
+**Đề xuất đến từ người làm đồ án, và nó đúng hơn cách tôi đang bảo vệ.** Ở G1c tôi giữ chữ
+"(GIẢ LẬP)" cạnh tên VNPT vì lo tờ hóa đơn không còn dấu nhận biết nào. Nhưng dán nhãn "giả
+lập" lên tên một doanh nghiệp có thật là chữa triệu chứng: tờ giấy vẫn mạo danh họ, chỉ là có
+thêm một dòng đính chính. **Đổi hẳn bên phát hành sang một công ty bịa thì vấn đề biến mất chứ
+không phải được che đi** — không mạo danh ai thì không có gì để cảnh báo, nên bỏ hết dấu là
+hợp lý chứ không phải nhân nhượng.
+
+Tên chọn: **Công ty Cổ phần Viễn thông Sông Hậu**. Sông Hậu chảy qua Ninh Kiều, Cần Thơ nên
+khớp với địa chỉ vốn đã có trên chứng từ, và không trùng nhà mạng nào.
+
+**Bắt được thêm một thứ nhờ đổi tên: số tổng đài `1800 1166` trên hóa đơn là tổng đài THẬT của
+VNPT.** Nó nằm im ở đó từ Phase 5, qua mọi đợt rà soát, vì không phép kiểm nào biết một chuỗi
+số là số thật của ai. Nay đổi thành `1800 6060`, mã số thuế đổi từ `0100000000` sang
+`1800000000` — đầu 18 là Cần Thơ, khớp địa chỉ.
+
+**Phép kiểm đổi chiều canh.** Trước: "PDF phải chứa (GIẢ LẬP)". Nay: "PDF phải chứa tên công ty
+hư cấu **và không được chứa** VNPT". Chiều phủ định là chiều quan trọng — nó bắt đúng cái sai
+thật sự, là chuyện tên một nhà mạng có thật quay lại trên một tờ chứng từ không còn dòng cảnh
+báo nào.
+
+Đối chứng, dự đoán nêu trước: đổi bên phát hành ngược về VNPT thì đỏ đúng 3 phép kiểm. Chạy ra
+`Tests run: 17, Failures: 3` — mỗi lớp kiểm PDF một cái.
+
+**Không đổi:** tên thư mục `vnpt-billing` và gói Java `com.hanzo.billing`. Đó là tên kỹ thuật
+có từ Phase 0, không hiện ra cho người dùng, và đổi thì kéo theo cả lịch sử git lẫn đường dẫn
+CI mà chẳng được gì.
+
+Nghiệm thu: 315/315 test · 215/215 phép kiểm HTTP · 3 phép kiểm Python. Xuất PDF thật qua HTTP
+rồi trích văn bản: cả hai tờ đều không còn "VNPT", "GIẢ LẬP", dòng dữ liệu mẫu, lẫn số tổng đài
+thật.
 
 ---
 

@@ -129,7 +129,7 @@ class HoaDonPdfServiceTest {
     }
 
     @Test
-    @DisplayName("5. Chân trang ghi số hiệu hóa đơn; dòng dữ liệu mẫu đã bỏ, dấu (GIẢ LẬP) còn")
+    @DisplayName("5. Chân trang ghi số hiệu; hết dòng dữ liệu mẫu; bên phát hành là công ty hư cấu")
     void chanTrangGhiSoHieuVaConDauNhanBiet() {
         assertThat(vanBan).contains(HoaDonPdfService.chanTrang(hoaDonMau()));
 
@@ -138,10 +138,11 @@ class HoaDonPdfServiceTest {
         assertThat(vanBan).doesNotContain("DỮ LIỆU MẪU TỰ SINH");
         assertThat(vanBan).doesNotContain("phục vụ mục đích học tập");
 
-        // Và canh chiều ngược lại, quan trọng hơn: dấu nhận biết DUY NHẤT còn lại
-        // không được biến mất. Tờ này mang tên một nhà mạng có thật, mã số thuế và
-        // địa chỉ trông như thật; bỏ nốt chữ này là nó thành một tờ hóa đơn giả hoàn chỉnh.
-        assertThat(vanBan).contains("(GIẢ LẬP)");
+        // Và canh chiều ngược lại: đơn vị phát hành phải là công ty HƯ CẤU của đồ án.
+        // Đây là thứ khiến tờ hóa đơn không cần dòng cảnh báo nào — nó không mạo danh ai.
+        // Đổi ngược về tên một nhà mạng có thật là tờ giấy này thành hóa đơn giả của họ.
+        assertThat(vanBan).contains("VIỄN THÔNG SÔNG HẬU");
+        assertThat(vanBan).doesNotContain("VNPT");
     }
 
     @Test

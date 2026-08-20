@@ -43,8 +43,11 @@ public class HoaDonPdfService {
      *
      * <p>Trước đây chỗ này ghi "Hóa đơn mẫu phục vụ mục đích học tập". Bỏ đi theo cùng
      * hướng Phase 8 đã đi với chân trang màn hình và đầu trang bản in báo cáo — những
-     * dòng ấy là thông tin phụ, không nên tranh chỗ với dữ liệu. Dấu nhận biết vẫn còn
-     * ở chữ "(GIẢ LẬP)" cạnh tên công ty.</p>
+     * dòng ấy là thông tin phụ, không nên tranh chỗ với dữ liệu.</p>
+     *
+     * <p>Bỏ được hết mọi dòng cảnh báo là nhờ đơn vị phát hành đã đổi sang một công ty
+     * <b>hư cấu</b>. Tờ này không mạo danh ai nên không có gì để cảnh báo — cách xử lý
+     * gọn hơn hẳn việc dán nhãn "giả lập" lên tên một nhà mạng có thật.</p>
      *
      * <p>Thay bằng số hiệu chứ không bỏ trống: hóa đơn có thể dài hơn một trang, và một
      * tờ rời khỏi tập thì số hiệu ở chân trang là thứ duy nhất nói nó thuộc về đâu.</p>
@@ -104,9 +107,9 @@ public class HoaDonPdfService {
         PdfPTable bang = bangKhungRong(new float[]{55, 45});
 
         PdfPCell trai = oTrong();
-        trai.addElement(doan("CÔNG TY VIỄN THÔNG VNPT (GIẢ LẬP)", font.dam(11)));
+        trai.addElement(doan("CÔNG TY CỔ PHẦN VIỄN THÔNG SÔNG HẬU", font.dam(11)));
         trai.addElement(doan("01 Đại lộ Hòa Bình, Ninh Kiều, Cần Thơ", font.phu(9)));
-        trai.addElement(doan("Mã số thuế: 0100000000 · Điện thoại: 1800 1166", font.phu(9)));
+        trai.addElement(doan("Mã số thuế: 1800000000 · Điện thoại: 1800 6060", font.phu(9)));
         bang.addCell(trai);
 
         PdfPCell phai = oTrong();
