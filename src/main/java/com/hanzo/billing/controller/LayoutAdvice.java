@@ -1,10 +1,21 @@
 package com.hanzo.billing.controller;
 
+import com.hanzo.billing.entity.KyCuoc;
+import com.hanzo.billing.enums.TrangThaiHoaDon;
+import com.hanzo.billing.enums.TrangThaiKyCuoc;
+import com.hanzo.billing.enums.TrangThaiTinhCuoc;
+import com.hanzo.billing.repository.ChiTietSuDungRepository;
+import com.hanzo.billing.repository.HoaDonRepository;
+import com.hanzo.billing.repository.KyCuocRepository;
+import com.hanzo.billing.util.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +27,57 @@ import java.util.Map;
  * tô sáng mục menu đang mở thì phải truyền qua model như thế này.</p>
  */
 @ControllerAdvice
+@RequiredArgsConstructor
 public class LayoutAdvice {
+
+    private final KyCuocRepository kyCuocRepository;
+    private final ChiTietSuDungRepository chiTietSuDungRepository;
+    private final HoaDonRepository hoaDonRepository;
+
+    /**
+     * Bốn con số trên thanh máy, ứng với bốn câu hỏi người vận hành hỏi mỗi sáng.
+     *
+     * @param kyDangMo   kỳ cước mới nhất còn mở, hoặc {@code "—"} nếu không còn kỳ nào
+     * @param soChuaTinh bản ghi sử dụng chưa tính cước
+     * @param soQuaHan   hóa đơn đang ở trạng thái quá hạn
+     * @param conNo      tổng số tiền khách còn nợ
+     */
+    public record TinhTrangVanHanh(String kyDangMo, long soChuaTinh, long soQuaHan,
+                                   BigDecimal conNo) {
+    }
+
+    /**
+     * Số liệu vận hành hiện lên thanh máy ở <b>mọi</b> màn hình.
+     *
+     * <h2>Vì sao đặt ở đây chứ không ở trang chủ</h2>
+     * <p>Trang chủ đã có dashboard, nhưng người dùng chỉ ghé trang chủ lúc mới đăng nhập. Bốn
+     * con số này là thứ cần thấy <b>trong lúc đang làm việc khác</b>: đang nhập khách hàng mà
+     * thấy 148 hóa đơn quá hạn thì biết chiều nay có việc.</p>
+     *
+     * <h2>Giá phải trả, nói thẳng</h2>
+     * <p>Bốn phép đếm chạy ở <b>mỗi lần tải trang</b>. Cả bốn đều là phép đếm hoặc cộng gộp
+     * trong CSDL, có chỉ mục sẵn, và bộ dữ liệu này chỉ vài trăm hóa đơn — nên chi phí không
+     * đáng kể ở quy mô đồ án. Với quy mô thật thì đây là chỗ đầu tiên cần một lớp đệm.</p>
+     *
+     * <p>Trả về {@code null} khi chưa đăng nhập, để trang đăng nhập và trang lỗi không phải
+     * chạm vào CSDL. Template khai {@code th:if="${tinhTrang != null}"}.</p>
+     */
+    @ModelAttribute("tinhTrang")
+    public TinhTrangVanHanh tinhTrang() {
+        if (SecurityUtils.layNguoiDungHienTai().isEmpty()) {
+            return null;
+        }
+        String kyDangMo = kyCuocRepository.findByTrangThai(TrangThaiKyCuoc.MO).stream()
+                .max(Comparator.comparing(KyCuoc::getNam).thenComparing(KyCuoc::getThang))
+                .map(k -> k.getThang() + "/" + k.getNam())
+                .orElse("—");
+
+        return new TinhTrangVanHanh(
+                kyDangMo,
+                chiTietSuDungRepository.countByTrangThaiTinhCuoc(TrangThaiTinhCuoc.CHUA_TINH),
+                hoaDonRepository.countByTrangThai(TrangThaiHoaDon.QUA_HAN),
+                hoaDonRepository.tongConNoToanHeThong());
+    }
 
     /** Một mắt xích của breadcrumb. */
     public record MatXich(String nhan, String duongDan) {

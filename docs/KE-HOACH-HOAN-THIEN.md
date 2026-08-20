@@ -271,6 +271,67 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **N1** báo cáo mục B, C, D | ✅ xong | `58d3a2f` |
 | **N2** 70 ảnh chụp | ⬜ chưa làm — **chỉ chụp sau khi đóng băng mã** | — |
 | **N3** quyết cách xử lý bảng tuổi nợ | ✅ **quyết cách A** — chấp nhận 4 nhóm, giải thích bằng một câu | `71b3520` |
+| **G1** làm lại giao diện — hướng "trạm viễn thông" | ✅ xong — **phá quyết định đóng băng mã, có chủ ý** | `(ghi sau)` |
+
+### Ghi chú của G1 — làm lại giao diện
+
+**Đây là việc phá quyết định của chính kế hoạch này.** Mục 7 ghi rõ: *"Không sửa giao diện
+sau ngày 6, kể cả sửa tí cho đẹp"*, và N2 ghi *"chỉ chụp sau khi đóng băng mã"*. Người làm đồ
+án được nêu cái giá trước — phải viết lại phép kiểm giao diện và chạy lại toàn bộ nghiệm thu —
+và vẫn chọn làm cả bố cục. Hệ quả bắt buộc: **N2 phải chụp trên bản giao diện này**, ảnh chụp
+của bản cũ không dùng lại được dòng nào.
+
+**Đã đổi những gì.** Khung vỏ tách làm hai tầng: một *thanh máy* chạy hết bề ngang mang bốn
+con số vận hành (kỳ đang mở, bản ghi chờ tính, hóa đơn quá hạn, tổng còn nợ) — số do
+`LayoutAdvice.tinhTrang()` nạp, hiện ở **mọi** màn hình chứ không riêng trang chủ; và một
+*rail* dọc bên trái giữ nguyên cách gom menu theo công việc của Phase 8. Chữ giao diện chuyển
+sang Be Vietnam Pro, chữ số liệu sang IBM Plex Mono đều cột. Cả hai nạp từ jsDelivr — cùng
+origin với Bootstrap nên **không phải nới CSP**.
+
+#### Ba thứ chỉ lòi ra khi đo, không lòi ra khi nhìn
+
+**1. Một lỗi tương phản có sẵn từ trước, nằm ngoài tầm mắt của phép kiểm.** Nhóm *"Quá hạn
+31–60 ngày"* trong `NhomTuoiNo` là chữ trắng trên `#fd7e14` — **2,57:1**, dưới ngưỡng AA
+4,5:1 khá xa. Nó sống sót qua cả đợt Phase 8 vì `kiem-giao-dien.py` đọc **template**, còn màu
+này khai trong **enum Java**. Cả thang màu tuổi nợ nay đo lại từng bậc, bậc thấp nhất 5,85:1.
+
+*Bài học:* phép kiểm tự động chỉ canh được nơi nó nhìn tới. Chuyển một giá trị hiển thị từ
+template vào mã Java là lặng lẽ đưa nó ra khỏi tầm canh.
+
+**2. Hai màu tín hiệu của chính bản thiết kế mới cũng trượt.** `--tin-on` làm chữ được 4,44:1
+và `--tin-canh` với chữ trắng được 4,24:1 — cả hai *trông* hoàn toàn ổn trên màn hình. Sửa
+theo đúng cách từng màu được dùng: `--tin-on` đậm thêm; `--tin-canh` **giữ nguyên độ đậm** vì
+nó còn làm viền tiêu điểm của đường tắt "Bỏ qua menu" (sáng hơn thì viền đó tụt xuống dưới
+ngưỡng 3:1 trên nền trắng), chỉ đổi chữ trên nền cảnh báo từ trắng sang đen.
+
+Đèn tín hiệu trên thanh máy phải có **bộ màu riêng**: ba màu trên chọn để đọc trên nền trắng,
+đặt lên nền mực chúng chỉ còn 2,3–2,9:1, tức ba chấm xám. Cùng ý nghĩa, khác nền, thì khác
+trị số.
+
+**3. Bảng màu biểu đồ nằm rải ở 7 file.** Mỗi màn hình có biểu đồ tự gõ bộ mã màu của riêng
+nó. Đổi bảng màu lần này quên mất 4 chỗ, và chỉ phát hiện khi đối chiếu trang chủ với phần
+còn lại — trang chủ đã sang màu mới còn bốn báo cáo vẫn xanh Bootstrap. Nay biểu đồ đọc qua
+`window.MAU` khai trong `app.js`, lấy thẳng từ biến CSS: bảng màu chỉ còn **một** nguồn là
+`:root` của `app.css`.
+
+#### Một phép kiểm suýt chết lặng
+
+Đổi tên lớp `sidebar-brand` → `thanh-may-hieu` làm hai khẳng định trong `test-auth.ps1` mất
+neo. Một cái **đỏ ngay** (trang 403 phải còn khung vỏ). Cái kia nguy hiểm hơn nhiều: nó khẳng
+định trang đăng nhập **không** chứa chuỗi đó — chuỗi không còn tồn tại ở đâu nữa thì nó xanh
+vĩnh viễn mà chẳng canh gì. Đúng chuẩn làm việc số 5.
+
+Đối chứng chạy sau khi sửa, dự đoán công bố trước: đỏ **đúng 1** phép kiểm. Lần đối chứng đầu
+**không đỏ** — vì tôi phá bằng cách đổi thành `thanh-may-hieu-DOICHUNG`, mà `.Contains()` vẫn
+khớp chuỗi con. Phá lại bằng một tên không chứa chuỗi cũ thì đỏ đúng một phép kiểm đã nêu tên.
+*Một đối chứng dựng sai cũng cho cảm giác an toàn giả y hệt một phép kiểm sai.*
+
+#### Nghiệm thu sau khi đổi
+
+315/315 test · 215/215 phép kiểm HTTP · `kiem-tu-ngu` 46 file · `kiem-giao-dien` 38 màn hình ·
+`kiem-ban-phim` 213 nút/liên kết. Mọi cặp chữ–nền đều đo lại, không cặp nào dưới ngưỡng.
+
+---
 
 ### Ghi chú của V3a — hai thứ kế hoạch không nói tới
 

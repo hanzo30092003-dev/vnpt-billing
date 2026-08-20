@@ -84,64 +84,52 @@
         </div>
     </div>
 
-    <!--/* ================== BỐN THẺ SỐ LIỆU ================== */-->
+    <!--/*
+        ================== BỐN THẺ SỐ LIỆU ==================
+        Vạch màu bên trái nói bản chất con số, không phải để trang trí:
+        chàm = số đếm trung tính, xanh = tiền đã vào, đỏ = tiền chưa vào.
+        Cùng bộ tín hiệu với đèn trên thanh máy, nên người dùng chỉ phải học
+        một lần cho cả phần mềm.
+    */-->
     <div class="row g-3 mb-3">
         <div class="col-sm-6 col-xl-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-1">
-                        <i class="bi bi-sim text-primary me-2 fs-5"></i>
-                        <span class="small text-secondary">Tổng thuê bao</span>
-                    </div>
-                    <div class="h3 mb-0" th:text="${@soLieu.so(dashboard.tongThueBao)}">0</div>
-                    <div class="small text-success">
-                        <span th:text="${@soLieu.so(dashboard.dangHoatDong)}">0</span> đang hoạt động
-                    </div>
-                </div>
+            <div class="the-so-lieu">
+                <span class="nhan">Tổng thuê bao</span>
+                <span class="gia-tri" th:text="${@soLieu.so(dashboard.tongThueBao)}">0</span>
+                <span class="phu">
+                    <span th:text="${@soLieu.so(dashboard.dangHoatDong)}">0</span> đang hoạt động
+                </span>
+                <i class="bi bi-sim"></i>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-1">
-                        <i class="bi bi-person-plus text-info me-2 fs-5"></i>
-                        <span class="small text-secondary">Thuê bao mới trong tháng</span>
-                    </div>
-                    <div class="h3 mb-0" th:text="${@soLieu.so(dashboard.thueBaoMoiTrongThang)}">0</div>
-                    <div class="small text-secondary">tính theo ngày kích hoạt</div>
-                </div>
+            <div class="the-so-lieu">
+                <span class="nhan">Thuê bao mới trong tháng</span>
+                <span class="gia-tri" th:text="${@soLieu.so(dashboard.thueBaoMoiTrongThang)}">0</span>
+                <span class="phu">tính theo ngày kích hoạt</span>
+                <i class="bi bi-person-plus"></i>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-1">
-                        <i class="bi bi-cash-stack text-success me-2 fs-5"></i>
-                        <span class="small text-secondary">Doanh thu kỳ gần nhất</span>
-                    </div>
-                    <div class="h3 mb-0" th:if="${dashboard.kyGanNhat != null}"
-                         th:text="${@soLieu.tien(dashboard.kyGanNhat.phatSinh)}">0</div>
-                    <div class="h3 mb-0 text-secondary" th:if="${dashboard.kyGanNhat == null}">—</div>
-                    <div class="small text-secondary" th:if="${dashboard.kyGanNhat != null}">
-                        kỳ <span th:text="${dashboard.kyGanNhat.nhanKy()}">6/2026</span>,
-                        <span th:text="${@soLieu.so(dashboard.kyGanNhat.soHoaDon)}">0</span> hóa đơn
-                    </div>
-                    <div class="small text-secondary" th:if="${dashboard.kyGanNhat == null}">
-                        chưa lập hóa đơn nào
-                    </div>
-                </div>
+            <div class="the-so-lieu vach-on">
+                <span class="nhan">Doanh thu kỳ gần nhất</span>
+                <span class="gia-tri" th:if="${dashboard.kyGanNhat != null}"
+                      th:text="${@soLieu.tien(dashboard.kyGanNhat.phatSinh)}">0</span>
+                <span class="gia-tri trong" th:if="${dashboard.kyGanNhat == null}">—</span>
+                <span class="phu" th:if="${dashboard.kyGanNhat != null}">
+                    kỳ <span th:text="${dashboard.kyGanNhat.nhanKy()}">6/2026</span>,
+                    <span th:text="${@soLieu.so(dashboard.kyGanNhat.soHoaDon)}">0</span> hóa đơn
+                </span>
+                <span class="phu" th:if="${dashboard.kyGanNhat == null}">chưa lập hóa đơn nào</span>
+                <i class="bi bi-cash-stack"></i>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-1">
-                        <i class="bi bi-wallet2 text-danger me-2 fs-5"></i>
-                        <span class="small text-secondary">Tổng công nợ</span>
-                    </div>
-                    <div class="h3 mb-0 text-danger" th:text="${@soLieu.tien(dashboard.tongCongNo)}">0</div>
-                    <div class="small text-secondary">Tổng tiền khách còn nợ</div>
-                </div>
+            <div class="the-so-lieu vach-loi">
+                <span class="nhan">Tổng công nợ</span>
+                <span class="gia-tri" th:text="${@soLieu.tien(dashboard.tongCongNo)}">0</span>
+                <span class="phu">tổng tiền khách còn nợ</span>
+                <i class="bi bi-wallet2"></i>
             </div>
         </div>
     </div>
@@ -263,43 +251,65 @@
         const nhanTrangThai = /*[[${nhanTrangThai}]]*/ [];
         const soTrangThai = /*[[${soTrangThai}]]*/ [];
         /*]]>*/
+        /*
+            Màu lấy từ window.MAU — bảng màu dùng chung khai trong app.js, đọc thẳng
+            từ biến CSS. Xem chú thích ở app.js để biết vì sao không gõ mã màu ở đây.
+        */
         document.addEventListener('DOMContentLoaded', function () {
             new Chart(document.getElementById('bieuDoDoanhThu'), {
                 type: 'bar',
                 data: {
                     labels: nhanKy,
                     datasets: [
-                        { label: 'Phát sinh (đ)', data: soPhatSinh, backgroundColor: '#0d6efd' },
-                        { label: 'Đã thu (đ)', data: soDaThu, backgroundColor: '#198754' }
+                        { label: 'Phát sinh (đ)', data: soPhatSinh, backgroundColor: MAU.cham },
+                        { label: 'Đã thu (đ)', data: soDaThu, backgroundColor: MAU.xanh }
                     ]
                 },
                 options: {
-                    scales: { y: { beginAtZero: true,
-                        ticks: { callback: v => (v / 1000000).toFixed(0) + ' tr' } } }
+                    plugins: { legend: { labels: { boxWidth: 12, boxHeight: 12 } } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            beginAtZero: true,
+                            border: { display: false },
+                            grid: { color: MAU.vach },
+                            ticks: { callback: v => (v / 1000000).toFixed(0) + ' tr' }
+                        }
+                    }
                 }
             });
             new Chart(document.getElementById('bieuDoGoi'), {
                 type: 'doughnut',
                 data: {
                     labels: nhanGoi,
-                    datasets: [{ data: soGoi,
-                        backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1'] }]
+                    datasets: [{
+                        data: soGoi,
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        backgroundColor: MAU.day
+                    }]
                 },
                 options: {
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    plugins: { legend: { position: 'bottom',
+                        labels: { boxWidth: 12, boxHeight: 12, padding: 12 } } }
                 }
             });
             new Chart(document.getElementById('bieuDoTrangThai'), {
                 type: 'doughnut',
                 data: {
                     labels: nhanTrangThai,
-                    datasets: [{ data: soTrangThai,
-                        backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#6c757d'] }]
+                    datasets: [{
+                        data: soTrangThai,
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        backgroundColor: [MAU.xanh, MAU.vang, MAU.do, MAU.xam]
+                    }]
                 },
                 options: {
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    plugins: { legend: { position: 'bottom',
+                        labels: { boxWidth: 12, boxHeight: 12, padding: 12 } } }
                 }
             });
         });

@@ -83,13 +83,13 @@
                     labels: nhanKy,
                     datasets: [
                         { type: 'bar', label: 'Phát sinh (đ)', data: soPhatSinh,
-                          backgroundColor: '#0d6efd', order: 2 },
+                          backgroundColor: MAU.cham, order: 2 },
                         { type: 'bar', label: 'Đã thu (đ)', data: soDaThu,
-                          backgroundColor: '#198754', order: 2 },
+                          backgroundColor: MAU.xanh, order: 2 },
                         /* Đường tỷ lệ thu nằm trên trục phải: nó là phần trăm, ghép chung
                            trục tiền sẽ bị bẹp thành một đường sát đáy và không đọc được. */
                         { type: 'line', label: 'Tỷ lệ thu (%)', data: soTyLeThu,
-                          borderColor: '#dc3545', backgroundColor: '#dc3545',
+                          borderColor: MAU.vang, backgroundColor: MAU.vang,
                           yAxisID: 'tyLe', tension: 0.3, order: 1 }
                     ]
                 },

@@ -177,6 +177,23 @@ dump** `data-van-hanh.sql`.
 * **Đường tắt "Bỏ qua menu" trong `layout.html` không được bỏ**, và đích `#noi-dung` phải giữ
   `tabindex="-1"` — thiếu nó thì bấm đường tắt chỉ cuộn màn hình chứ tiêu điểm không nhảy vào.
   Đo được: không có đường tắt thì phải bấm Tab **20 lần** mới tới ô nhập đầu tiên, ở mọi trang.
+* **Bảng màu chỉ có MỘT nguồn: `:root` trong `app.css`.** Biểu đồ đọc qua `window.MAU` khai ở
+  `app.js` (đọc thẳng từ biến CSS), **không gõ mã màu trong template**. Trước đợt G1, bảy màn
+  hình có biểu đồ mỗi cái tự gõ một bộ — đổi bảng màu là quên đúng 4 chỗ.
+* **Thang màu tuổi nợ nằm trong enum `NhomTuoiNo`, và mọi bậc phải đạt AA 4,5:1.** Đây là chỗ
+  `kiem-giao-dien.py` **không nhìn tới** vì nó đọc template chứ không đọc mã Java — bậc
+  "31–60 ngày" từng là chữ trắng trên `#fd7e14` = **2,57:1** và sống sót qua cả Phase 8. Thêm
+  màu hiển thị vào mã Java là đưa nó ra khỏi tầm canh của phép kiểm, phải tự đo tay.
+* **Đèn tín hiệu trên thanh máy dùng bộ màu riêng (`--den-*`), không dùng lại `--tin-*`.**
+  Ba màu `--tin-*` chọn để đọc trên nền TRẮNG; đặt lên nền mực chúng chỉ còn 2,3–2,9:1.
+* **`--tin-canh` không được làm sáng lên.** Nó còn làm viền tiêu điểm của đường tắt "Bỏ qua
+  menu"; sáng hơn là viền đó tụt xuống dưới 3:1 trên nền trắng. Nền cảnh báo đi với **chữ
+  đen** (4,95:1), chữ trắng chỉ được 4,24:1.
+* **`thanh-may-hieu` là dấu hiệu "trang này có khung vỏ"** mà `test-auth.ps1` mục 1 và mục 5
+  dựa vào. Đổi tên lớp đó phải sửa cả hai chỗ trong script — và lưu ý phép kiểm mục 1 khẳng
+  định điều **phủ định** (trang đăng nhập không được có), nên đổi tên mà quên sửa thì nó xanh
+  vĩnh viễn chứ không đỏ. Dựng đối chứng bằng tên **không chứa** chuỗi cũ: `.Contains()` vẫn
+  khớp chuỗi con.
 * **Hộp xác nhận phải trả tiêu điểm về nút đã mở nó** (`hidden.bs.modal` trong `app.js`).
   Bootstrap tự làm việc này khi modal mở bằng `data-bs-toggle`, nhưng ở đây modal mở bằng mã
   nên nó không biết nút nào gọi.

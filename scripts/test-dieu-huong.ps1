@@ -25,7 +25,7 @@ function Xac-Nhan($ten, $dieuKien, $chiTiet) {
     if ($chiTiet)  { Write-Host ("         {0}" -f $chiTiet) }
 }
 
-# Rut moi href cua the <a class="nav-item"> trong sidebar
+# Rut moi href cua the <a class="nav-item"> tren rail
 function Lay-MucMenu($html) {
     $ketQua = @()
     foreach ($m in [regex]::Matches($html, '<a[^>]*class="nav-item[^"]*"[^>]*href="([^"]+)"')) {
@@ -38,7 +38,7 @@ function Lay-MucMenu($html) {
     return $ketQua | Sort-Object -Unique
 }
 
-# Rut moi lien ket noi bo trong PHAN NOI DUNG (khong phai sidebar)
+# Rut moi lien ket noi bo trong PHAN NOI DUNG (khong phai rail)
 function Lay-LienKetNoiDung($html) {
     $ketQua = @()
     foreach ($m in [regex]::Matches($html, 'href="(/[^"#]*)"')) {
@@ -67,7 +67,7 @@ foreach ($vt in $vaiTro) {
     Kiem-Tra -Ten ("$($vt.Ten): trang chu mo duoc") -KetQua $trangChu | Out-Null
 
     $menu = Lay-MucMenu $trangChu.body
-    Xac-Nhan ("$($vt.Ten): sidebar co it nhat $($vt.MucToiThieu) muc") `
+    Xac-Nhan ("$($vt.Ten): rail co it nhat $($vt.MucToiThieu) muc") `
         ($menu.Count -ge $vt.MucToiThieu) ("doc duoc {0} muc tu HTML" -f $menu.Count)
 
     $hong = @()

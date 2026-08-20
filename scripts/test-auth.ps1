@@ -16,10 +16,10 @@ $t = Get-Trang $khach "/dang-nhap"
 # khoan dung thu tung in san tren trang dang nhap nay da go di - mot man hinh
 # dang nhap cong khai ten dang nhap va mat khau la thu khong ton tai trong
 # phan mem that. Nay do cai dang co that o do: form dang nhap, o mat khau, va
-# KHONG duoc lo sidebar (tuc chua dang nhap thi khong thay gi ben trong).
+# KHONG duoc lo khung vo (tuc chua dang nhap thi khong thay gi ben trong).
 Kiem-Tra -Ten "Mo /dang-nhap khi chua dang nhap" -KetQua $t -StatusMongDoi 200 `
     -CanCo @('name="_csrf"', 'name="tenDangNhap"', 'name="matKhau"') `
-    -KhongDuocCo @('sidebar-brand') | Out-Null
+    -KhongDuocCo @('thanh-may-hieu') | Out-Null
 
 # Doi chung cho viec bo bang tai khoan: trang dang nhap KHONG duoc lo ten
 # tai khoan hay mat khau nao nua.
@@ -37,14 +37,14 @@ $t = Get-Trang $sSai "/"
 Kiem-Tra -Ten "admin voi mat khau sai van chi thay form dang nhap" -KetQua $t -StatusMongDoi 200 `
     -CanCo @('name="matKhau"') | Out-Null
 
-Muc "4. Dang nhap dung va phan quyen menu sidebar"
-# SUA O PHASE 6: truoc day phep kiem nay do CHU trong sidebar ('Hoa don',
+Muc "4. Dang nhap dung va phan quyen menu tren rail"
+# SUA O PHASE 6: truoc day phep kiem nay do CHU trong menu ('Hoa don',
 # 'Khach hang'). No dung tinh co, vi trang chu cu la trang gioi thieu tam
 # khong chua nhung chu do. Tu khi trang chu thanh dashboard, cac chu ay xuat
 # hien hop le trong THAN TRANG - cot bang "Khach hang", dong "... hoa don" -
 # va phep kiem bao dong gia.
 #
-# Nay do DUONG DAN cua lien ket sidebar. Dau nhay dong sau ten la co y:
+# Nay do DUONG DAN cua lien ket tren rail. Dau nhay dong sau ten la co y:
 # 'href="/hoa-don"' KHONG khop voi 'href="/hoa-don/307"' cua bang top thue
 # bao, nen phep kiem chi noi ve muc menu chu khong dinh vao du lieu.
 $phien = @{ }
@@ -60,14 +60,14 @@ foreach ($tk in @("admin", "nhanvien01", "ketoan01")) {
     $s = Connect-App $tk "123456"
     $phien[$tk] = $s
     $t = Get-Trang $s "/"
-    Kiem-Tra -Ten "$tk dang nhap duoc va sidebar dung theo vai tro" -KetQua $t -StatusMongDoi 200 `
+    Kiem-Tra -Ten "$tk dang nhap duoc va rail dung theo vai tro" -KetQua $t -StatusMongDoi 200 `
         -CanCo ($mongDoi[$tk].co + @('Đăng xuất')) -KhongDuocCo $mongDoi[$tk].khong | Out-Null
 }
 
 Muc "5. Go thang URL khong co quyen thi tra 403"
 $t = Get-Trang $phien["ketoan01"] "/khach-hang"
 Kiem-Tra -Ten "ketoan01 mo /khach-hang" -KetQua $t -StatusMongDoi 403 `
-    -CanCo @('Không đủ quyền truy cập', 'sidebar-brand') | Out-Null
+    -CanCo @('Không đủ quyền truy cập', 'thanh-may-hieu') | Out-Null
 
 $t = Get-Trang $phien["nhanvien01"] "/hoa-don"
 Kiem-Tra -Ten "nhanvien01 mo /hoa-don" -KetQua $t -StatusMongDoi 403 | Out-Null

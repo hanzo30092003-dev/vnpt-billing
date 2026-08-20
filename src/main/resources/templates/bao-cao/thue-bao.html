@@ -114,7 +114,8 @@
                 data: {
                     labels: nhanTrangThai,
                     datasets: [{ data: soTrangThai,
-                        backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#6c757d'] }]
+                        backgroundColor: [MAU.xanh, MAU.vang, MAU.do, MAU.xam],
+                        borderColor: '#fff', borderWidth: 2 }]
                 },
                 options: { plugins: { legend: { position: 'bottom' } } }
             });
@@ -122,7 +123,8 @@
                 type: 'doughnut',
                 data: {
                     labels: nhanLoai,
-                    datasets: [{ data: soLoai, backgroundColor: ['#0d6efd', '#20c997'] }]
+                    datasets: [{ data: soLoai, backgroundColor: [MAU.cham, MAU.muc],
+                        borderColor: '#fff', borderWidth: 2 }]
                 },
                 options: { plugins: { legend: { position: 'bottom' } } }
             });
@@ -132,9 +134,9 @@
                     labels: mocThoiGian,
                     datasets: [
                         { label: 'Thuê bao mới', data: thueBaoMoi,
-                          borderColor: '#198754', backgroundColor: '#198754', tension: 0.3 },
+                          borderColor: MAU.xanh, backgroundColor: MAU.xanh, tension: 0.3 },
                         { label: 'Rời mạng', data: thueBaoRoiMang,
-                          borderColor: '#dc3545', backgroundColor: '#dc3545', tension: 0.3 }
+                          borderColor: MAU.do, backgroundColor: MAU.do, tension: 0.3 }
                     ]
                 },
                 options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }

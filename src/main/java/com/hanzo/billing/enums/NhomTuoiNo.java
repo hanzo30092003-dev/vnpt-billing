@@ -20,11 +20,11 @@ package com.hanzo.billing.enums;
  */
 public enum NhomTuoiNo {
 
-    TRONG_HAN("Trong hạn", "#6c757d", "#ffffff", Integer.MIN_VALUE, 0),
-    QUA_HAN_1_30("Quá hạn 1–30 ngày", "#ffc107", "#212529", 1, 30),
-    QUA_HAN_31_60("Quá hạn 31–60 ngày", "#fd7e14", "#ffffff", 31, 60),
-    QUA_HAN_61_90("Quá hạn 61–90 ngày", "#dc3545", "#ffffff", 61, 90),
-    QUA_HAN_TREN_90("Quá hạn trên 90 ngày", "#8b0000", "#ffffff", 91, Integer.MAX_VALUE);
+    TRONG_HAN("Trong hạn", "#5c6670", "#ffffff", Integer.MIN_VALUE, 0),
+    QUA_HAN_1_30("Quá hạn 1–30 ngày", "#d18a00", "#1f1400", 1, 30),
+    QUA_HAN_31_60("Quá hạn 31–60 ngày", "#9c4a10", "#ffffff", 31, 60),
+    QUA_HAN_61_90("Quá hạn 61–90 ngày", "#b3232c", "#ffffff", 61, 90),
+    QUA_HAN_TREN_90("Quá hạn trên 90 ngày", "#7a141b", "#ffffff", 91, Integer.MAX_VALUE);
 
     private final String nhan;
     private final String mauNen;

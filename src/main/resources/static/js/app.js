@@ -98,19 +98,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // -----------------------------------------------------------------
-    // Sidebar thu gon tren man hinh hep (Phase 7 muc B4).
+    // Rail dieu huong thu gon tren man hinh hep (Phase 7 muc B4).
     //
     // Nut chi hien duoi 992px (xem app.css). Lop phu mo phia sau vua de
-    // lam ro sidebar dang che noi dung, vua la vung bam de dong - tren
+    // lam ro rail dang che noi dung, vua la vung bam de dong - tren
     // dien thoai khong co phim Esc.
     // -----------------------------------------------------------------
-    var sidebar = document.querySelector('.sidebar');
-    var nutMo = document.getElementById('nutMoSidebar');
-    if (sidebar && nutMo) {
+    var rail = document.querySelector('.rail');
+    var nutMo = document.getElementById('nutMoRail');
+    if (rail && nutMo) {
         var lopPhu = null;
 
-        function dongSidebar() {
-            sidebar.classList.remove('dang-mo');
+        function dongRail() {
+            rail.classList.remove('dang-mo');
             if (lopPhu) {
                 lopPhu.remove();
                 lopPhu = null;
@@ -118,28 +118,85 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         nutMo.addEventListener('click', function () {
-            if (sidebar.classList.contains('dang-mo')) {
-                dongSidebar();
+            if (rail.classList.contains('dang-mo')) {
+                dongRail();
                 return;
             }
-            sidebar.classList.add('dang-mo');
+            rail.classList.add('dang-mo');
             lopPhu = document.createElement('div');
-            lopPhu.className = 'lop-phu-sidebar';
-            lopPhu.addEventListener('click', dongSidebar);
+            lopPhu.className = 'lop-phu-rail';
+            lopPhu.addEventListener('click', dongRail);
             document.body.appendChild(lopPhu);
         });
 
-        // Bam mot muc menu thi dong luon - neu khong, sidebar van che noi
+        // Bam mot muc menu thi dong luon - neu khong, rail van che noi
         // dung cua chinh trang vua mo
-        sidebar.querySelectorAll('.nav-item').forEach(function (a) {
-            a.addEventListener('click', dongSidebar);
+        rail.querySelectorAll('.nav-item').forEach(function (a) {
+            a.addEventListener('click', dongRail);
         });
 
         // Keo rong man hinh tro lai thi bo trang thai mo, tranh ket lop phu
         window.addEventListener('resize', function () {
             if (window.innerWidth >= 992) {
-                dongSidebar();
+                dongRail();
             }
         });
     }
 });
+
+/* =====================================================================
+   BANG MAU BIEU DO - MOT NGUON DUY NHAT
+   =====================================================================
+   Truoc dot nay, moi man hinh co bieu do tu go bo ma mau cua rieng no:
+   trang chu mot bo, bao cao doanh thu ky mot bo, bao cao thue bao mot bo.
+   Bay bo mau nam rai o 7 file, nen doi bang mau la phai nho sua du 7 cho -
+   va lan nay quen dung 4 cho, phat hien ra khi doi chieu trang chu voi
+   phan con lai cua phan mem.
+
+   Doc thang tu bien CSS thi bang mau chi con MOT nguon: :root trong
+   app.css. Doi mau o do la ca 7 man hinh doi theo.
+
+   window.MAU la mot object thuong (khong phai ham) vi Chart.js can gia tri
+   ngay luc dung; getComputedStyle chay duoc tu luc DOMContentLoaded.
+   ===================================================================== */
+(function () {
+    function doc(ten) {
+        return getComputedStyle(document.documentElement).getPropertyValue(ten).trim();
+    }
+
+    /*
+       CHAY NGAY, KHONG DOI DOMContentLoaded.
+
+       Script noi dung cua tung trang nam TRUOC the <script src=app.js> trong
+       body, nen listener DOMContentLoaded cua no dang ky truoc va chay truoc.
+       Neu bang mau dat trong listener cua app.js thi luc trang ve bieu do,
+       window.MAU van con undefined.
+
+       Chay ngay thi an toan: CSS o <head> da phan tich xong tu lau, con
+       Chart.defaults chi can dat xong truoc khi bieu do dau tien duoc tao -
+       tuc truoc DOMContentLoaded.
+    */
+    (function () {
+        window.MAU = {
+            cham: doc('--nhan'),          // so lieu trung tinh, mau chu dao
+            chamNhat: doc('--nhan-nhat'),
+            xanh: doc('--tin-on'),        // tien da vao
+            vang: doc('--tin-canh'),      // can theo doi
+            do: doc('--tin-loi'),         // tien chua vao, qua han
+            muc: doc('--muc'),            // mau nen toi
+            xam: doc('--chu-mo'),
+            vach: doc('--vach')
+        };
+        // Day du 5 mau phan biet duoc cho bieu do tron nhieu phan
+        window.MAU.day = [window.MAU.cham, window.MAU.xanh, window.MAU.vang,
+                          window.MAU.do, window.MAU.muc];
+
+        if (window.Chart) {
+            Chart.defaults.font.family = doc('--chu-giao-dien') || 'system-ui, sans-serif';
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = window.MAU.xam;
+            Chart.defaults.plugins.legend.labels.boxWidth = 12;
+            Chart.defaults.plugins.legend.labels.boxHeight = 12;
+        }
+    }());
+}());

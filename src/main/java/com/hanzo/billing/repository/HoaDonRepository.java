@@ -240,6 +240,9 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Long> {
     @Query("SELECT COALESCE(SUM(h.conNo), 0) FROM HoaDon h WHERE h.conNo > 0")
     BigDecimal tongConNoToanHeThong();
 
+    /** Đếm hóa đơn theo trạng thái — dùng cho dải số liệu trên thanh máy. */
+    long countByTrangThai(com.hanzo.billing.enums.TrangThaiHoaDon trangThai);
+
     /** Hóa đơn còn nợ kèm quan hệ, để dựng màn hình công nợ và bảng tuổi nợ. */
     @Query("""
             SELECT h FROM HoaDon h
