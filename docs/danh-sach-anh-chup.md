@@ -94,7 +94,7 @@ thích bằng một câu — đó là số học, không phải lỗi. Chi tiế
 
 | # | Màn hình | Cách lấy | Điểm cần thấy rõ |
 |---|---|---|---|
-| 1 | Đăng nhập | `/dang-nhap`, chưa đăng nhập | Ba tài khoản demo ghi ngay trên form |
+| 1 | Đăng nhập | `/dang-nhap`, chưa đăng nhập | Dải mực ở đầu thẻ; **KHÔNG** còn bảng tài khoản demo — Phase 8 đã bỏ, xem `PHASE-8-REPORT.md` mục *Bảng tài khoản in sẵn* |
 | 2 | Trang 403 | `nhanvien01` gõ `/hoa-don` | Trang lỗi tiếng Việt, có nút về trang chủ |
 | 3 | 🔴 **Dashboard** | `/` sau khi đăng nhập `admin` | 4 thẻ số liệu; biểu đồ **5 cột**; 2 biểu đồ tròn; 2 bảng có nội dung |
 
@@ -139,7 +139,7 @@ thích bằng một câu — đó là số học, không phải lỗi. Chi tiế
 | 23 | ⭐ **Đối soát — sát ranh giới quota** | `/tinh-cuoc/doi-soat/34/1` | `99,6 phút (5.978 giây)` cạnh quota 100 phút → **0 đ** |
 | 24 | Khối 4 — đối chiếu hóa đơn | Cuộn cuối ảnh 22 | Cột chênh lệch **toàn 0 đ**, khung *"Khớp tuyệt đối"* |
 | 25 | Dòng làm vượt ưu đãi | Ảnh 22, khối 3 | Dòng tô nền + chú thích quy tắc **không cắt đôi bản ghi** |
-| 26 | **Bản in A4 bảng đối soát** | Ảnh 22 → **In** → xem trước | Mất sidebar và nút; hiện đủ mọi dòng |
+| 26 | **Bản in A4 bảng đối soát** | Ảnh 22 → **In** → xem trước | Mất rail và thanh máy, mất mọi nút; hiện đủ mọi dòng |
 | 27 | Modal cảnh báo chốt kỳ | Bấm **Chốt kỳ**, chưa xác nhận | Câu *"MỘT CHIỀU, không có đường quay lại"* |
 
 ## Chương 6 — Hóa đơn, thanh toán, công nợ
@@ -179,17 +179,17 @@ thích bằng một câu — đó là số học, không phải lỗi. Chi tiế
 
 | # | Ảnh | Cách lấy | Điểm cần thấy rõ |
 |---|---|---|---|
-| 51 | **Kết quả 269 test** | Console `mvnw test` | Dòng `Tests run: 269, Failures: 0` |
+| 51 | **Kết quả 315 test** | Console `mvnw test` | Dòng `Tests run: 315, Failures: 0` |
 | 52 | ⭐ **Test ĐỎ → XANH** | Cố ý `UPDATE thue_bao SET so_du = so_du + 1000 WHERE id = 1`, chạy `KiemTraSoCaiSoDuTest` → đỏ; khôi phục → xanh | Hai ảnh cạnh nhau; thông báo lỗi nêu **đúng thuê bao và số chênh** |
 | 53 | Test bất biến thanh toán | Chạy `KiemTraBatBienThanhToanTest` | 4 test xanh |
 | 54 | Test hạt giống bộ sinh CDR | Chạy `CdrGeneratorHatGiongTest` | 3 test xanh |
 | 55 | **Test bất biến điều hướng** | Chạy `KiemTraDieuHuongTest` | 5 test xanh — không còn link hỏng |
-| 56 | Script đi theo menu | `.\scripts\test-dieu-huong.ps1` | 13 đạt / 0 sai |
+| 56 | Script đi theo menu | `.\scripts\test-dieu-huong.ps1` | 15 đạt / 0 sai |
 | 57 | Script rà kỳ rỗng | `.\scripts\test-ky-rong.ps1` | 28 đạt / 0 sai |
 | 58 | Script trường hợp biên | `.\scripts\test-bien.ps1` | 42 đạt / 0 sai |
 | 59 | Trang lỗi 400 | Gõ `/hoa-don/abc` | Nêu rõ **tham số nào sai** |
 | 60 | Trang lỗi 500 có mã sự cố | (chụp nếu dựng được tình huống) | Mã sự cố để tra file log |
-| 61 | Sidebar thu gọn | Thu cửa sổ dưới 992px | Nút mở menu; sidebar trượt ra; **không cuộn ngang** |
+| 61 | Rail thu gọn | Thu cửa sổ dưới 992px | Nút mở menu; rail trượt ra như ngăn kéo; **không cuộn ngang** (đo ở việc G1b) |
 | 62 | Lịch sử Git toàn dự án | `git log --oneline` | Thấy được tiến trình 8 phase |
 
 ---
@@ -199,7 +199,7 @@ thích bằng một câu — đó là số học, không phải lỗi. Chi tiế
 | Việc | Quy ước |
 |---|---|
 | Độ phân giải | Cửa sổ **1280×800** cho ảnh toàn màn hình |
-| Cắt cúp | Giữ nguyên sidebar để người đọc định vị được đang ở đâu |
+| Cắt cúp | Giữ nguyên rail bên trái **và thanh máy** để người đọc định vị được đang ở đâu |
 | Phóng to | Với ảnh 22, 23, 24 nên chèn thêm ảnh **phóng to đúng vùng số** |
 | Đặt tên file | `NN-ten-man-hinh.png`, ví dụ `22-doi-soat-vuot-quota-data.png` |
 | Chú thích | Mỗi ảnh một câu dưới ảnh, nói **điều cần thấy**, không mô tả lại ảnh |

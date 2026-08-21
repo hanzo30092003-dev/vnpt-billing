@@ -43,7 +43,7 @@ Cột **Kết quả thực tế** và **Đạt/Không** để trống cho ngư�
 | 3 | Chưa đăng nhập | Gõ thẳng `/hoa-don` khi chưa đăng nhập | — | Bị đẩy về form đăng nhập | | |
 | 4 | Phân quyền nhân viên | Đăng nhập `nhanvien01`, gõ `/hoa-don` | — | Trang **403** tiếng Việt, không phải 500 | | |
 | 5 | Phân quyền kế toán | Đăng nhập `ketoan01`, gõ `/khach-hang` | — | Trang **403** | | |
-| 6 | Menu theo vai trò | Đăng nhập lần lượt 3 tài khoản, nhìn sidebar | — | `admin` 13 mục · `nhanvien01` 4 mục · `ketoan01` 6 mục. Cả ba đều thấy *Báo cáo* | | |
+| 6 | Menu theo vai trò | Đăng nhập lần lượt 3 tài khoản, nhìn rail bên trái | — | `admin` **14 mục** · `nhanvien01` 4 mục · `ketoan01` 6 mục. Cả ba đều thấy *Báo cáo* | | |
 | 7 | Đăng xuất | Bấm **Đăng xuất** | — | Về form đăng nhập; bấm Back không vào lại được | | |
 
 ### 2.2. Khách hàng
@@ -132,7 +132,7 @@ Cột **Kết quả thực tế** và **Đạt/Không** để trống cho ngư�
 | 57 | Top thuê bao | `/bao-cao/top-thue-bao`, đổi 10 → 50 | — | Sắp giảm dần; đổi số lượng **giữ nguyên kỳ** đang chọn | | |
 | 58 | Sản lượng dịch vụ | `/bao-cao/san-luong` kỳ 7 | — | Cột *Kỳ trước* là kỳ **6/2026**; biến động có dấu +/− và màu | | |
 | 59 | Xuất Excel | Bấm **Xuất Excel** ở bất kỳ báo cáo nào | — | File mở được: header có nền, **freeze pane**, số có phân cách nghìn, dòng tổng đậm, đầu file ghi *Ngày xuất* | | |
-| 60 | In báo cáo | Bấm **In** → xem trước | — | Mất sidebar và nút; có tiêu đề riêng cho bản in | | |
+| 60 | In báo cáo | Bấm **In** → xem trước | — | Mất rail và thanh máy, mất mọi nút; có tiêu đề riêng cho bản in | | |
 
 ### 2.9. Trường hợp biên và xử lý lỗi
 
@@ -177,14 +177,18 @@ Chi tiết 8 script:
 
 | Script | Phép kiểm | Nội dung |
 |---|---|---|
-| `test-auth.ps1` | 11 | Đăng nhập, đăng xuất, phân quyền, sidebar theo vai trò |
-| `test-kh.ps1` | 12 | Khách hàng: lọc, phân trang, validation, chặn nghiệp vụ |
-| `test-tb.ps1` | 16 | Thuê bao: lọc, đăng ký, 4 tab, ma trận trạng thái |
+| `test-auth.ps1` | 42 | Đăng nhập, đăng xuất, phân quyền, menu theo vai trò, **quản lý người dùng**, **đổi mật khẩu**, **khoá tài khoản đá phiên đang mở** |
+| `test-kh.ps1` | 14 | Khách hàng: lọc, phân trang, validation, chặn nghiệp vụ |
+| `test-tb.ps1` | 18 | Thuê bao: lọc, đăng ký, 4 tab, ma trận trạng thái |
 | `test-muc-F.ps1` | 17 | Công nợ, tuổi nợ, chốt chặn huỷ hóa đơn kỳ đã thu |
-| `test-bao-cao.ps1` | 38 | Dashboard, 7 báo cáo, 13 con số đối chiếu chéo, 11 file Excel |
-| `test-dieu-huong.ps1` | 13 | Đi theo **menu**, không gõ URL cứng |
+| `test-bao-cao.ps1` | 39 | Dashboard, 7 báo cáo, 13 con số đối chiếu chéo, 11 file Excel |
+| `test-dieu-huong.ps1` | 15 | Đi theo **menu**, không gõ URL cứng |
 | `test-ky-rong.ps1` | 28 | Kỳ 8/2026 rỗng trên 17 màn hình + 4 Excel + 3 thao tác |
 | `test-bien.ps1` | 42 | Trường hợp biên và 12 ca phân quyền 403 |
+
+**Tổng: 215.** Bảng này từng ghi 177 — nó lập ở Phase 7 rồi không cập nhật khi V3a, V3b và
+V6 thêm phép kiểm. Số ở đây là số **đếm khi chạy thật**, không phải đếm lời gọi trong mã: một
+số lời gọi nằm trong vòng lặp nên sinh ra nhiều phép kiểm.
 
 **Bất biến kiểm liên tục trên dữ liệu thật:**
 

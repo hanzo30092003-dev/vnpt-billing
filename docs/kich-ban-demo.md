@@ -194,7 +194,7 @@ chữ, rồi bấm **Xuất PDF**.
 
 ## Bước 9 — Kế toán: ghi nhận thanh toán *(1,5 phút)*
 
-**Làm:** đăng xuất, đăng nhập `ketoan01`. Chỉ vào sidebar — **không còn** mục Khách hàng và
+**Làm:** đăng xuất, đăng nhập `ketoan01`. Chỉ vào rail bên trái — **không còn** mục Khách hàng và
 Thuê bao. Gõ thẳng `/khach-hang` → trang **403**.
 
 Mở một hóa đơn còn nợ → **Ghi nhận thanh toán**, thu **một phần** → trạng thái đổi sang *Thanh

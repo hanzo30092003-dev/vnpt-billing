@@ -457,7 +457,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .app-footer {
     padding: .6rem 1.35rem;
-    font-size: .78rem;
+    font-size: .8125rem;
     color: #8a939c;
     border-top: 1px solid var(--vach-mo);
 }
@@ -478,11 +478,17 @@ h1, h2, h3, h4, h5, h6 {
 .card-header {
     background-color: var(--be-mat);
     border-bottom: 1px solid var(--vach-mo);
-    font-size: .72rem;
+    /* 14px, viết thường. Đợt G1 để .72rem VIẾT HOA cho ra dáng bảng điều khiển —
+       đo ra 11,5px, và nó có mặt 54 lần trên 24 màn hình. Đây là TIÊU ĐỀ của cả
+       một khối nội dung, không phải nhãn phụ; trước đợt G1 nó vốn là .95rem.
+
+       Cùng luật đã đặt ở G1b cho nhãn thanh máy và nhóm menu: không có chữ giao
+       diện thường trực nào dưới 13px, và không dùng VIẾT HOA để bù cho chữ nhỏ —
+       tiếng Việt có dấu viết hoa ở cỡ nhỏ khó đọc hơn hẳn viết thường. */
+    font-size: .875rem;
     font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--chu-mo);
+    letter-spacing: .01em;
+    color: var(--chu);
     padding: .65rem 1rem;
 }
 
@@ -515,7 +521,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .breadcrumb {
-    font-size: .78rem;
+    font-size: .8125rem;
     margin-bottom: .4rem;
     --bs-breadcrumb-divider-color: var(--chu-mo);
 }
@@ -529,6 +535,14 @@ h1, h2, h3, h4, h5, h6 {
 .bang-du-lieu {
     --bs-table-border-color: var(--vach-mo);
     margin-bottom: 0;
+}
+
+/* Chặn cộng dồn: .small của Bootstrap là 0.875em — LƯỢNG TƯƠNG ĐỐI, nên lồng
+   trong .card-header (14px) nó rơi xuống 12,3px. Các liên kết phụ "Xem báo cáo",
+   "kỳ 7/2026" nằm đúng chỗ đó. Khai rem để cắt hẳn chuỗi nhân. */
+.card-header .small,
+.card-header small {
+    font-size: .8125rem;
 }
 
 /* Chữ trong bảng: không dưới 14px, kể cả khi đã khai .table-sm hay .small */
@@ -828,7 +842,7 @@ label.form-label {
 
 .dang-nhap-mao p {
     margin: .15rem 0 0;
-    font-size: .8rem;
+    font-size: .8125rem;
     color: var(--muc-chu-mo);
 }
 
@@ -877,7 +891,7 @@ label.form-label {
 }
 
 .loi-tat small {
-    font-size: .8rem;
+    font-size: .8125rem;
     color: var(--chu-mo);
     line-height: 1.25;
 }
@@ -925,7 +939,7 @@ label.form-label {
 }
 
 .timeline-time {
-    font-size: .8rem;
+    font-size: .8125rem;
     color: var(--chu-mo);
     font-family: var(--chu-so-lieu);
 }

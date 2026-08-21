@@ -182,7 +182,7 @@ Thứ tự đã tính tới rủi ro: **việc đụng mã làm trước, đóng
 | **4** | V4 Flyway + CI | Nâng cấp CSDL được, có huy hiệu xanh |
 | **5** | V5 đo hiệu năng + VAT cấu hình · V6 kiểm bàn phím | Lời tuyên bố thành số đo |
 | **6** | **ĐÓNG BĂNG MÃ.** Chạy trọn nghiệm thu: `mvnw test` · 8 script · 3 bất biến · `reset` đối chiếu từng dòng | Bản demo cuối |
-| **7** | N2 chụp 65 ảnh · N3 quyết cách xử lý aging | Đủ ảnh cho báo cáo |
+| **7** | N2 chụp 70 ảnh · N3 quyết cách xử lý aging | Đủ ảnh cho báo cáo |
 | **8** | N1 viết mục A–D · rà lại toàn bộ tài liệu | Báo cáo hoàn chỉnh |
 
 ### Đường lui khi thiếu thời gian
@@ -275,6 +275,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **G1b** sửa 5 lỗi chỉ thấy được khi đo trên trình duyệt | ✅ xong | `8cd9b55` |
 | **G1c** bỏ dòng "dữ liệu mẫu" khỏi hóa đơn, phiếu thu, Excel | ✅ xong | `960eeab` |
 | **G1d** đổi bên phát hành sang công ty hư cấu, bỏ nốt "(GIẢ LẬP)" | ✅ xong | `b21743b` |
+| **G2** rà soát tổng thể · sửa 5 mục tồn | ✅ xong | `(ghi sau)` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
@@ -424,6 +425,60 @@ kiểm đã nêu tên. Chạy ra đúng 3 — `Tests run: 17, Failures: 3`.
 Nghiệm thu: 315/315 test · 215/215 phép kiểm HTTP · 3 phép kiểm Python đạt. Xuất PDF thật qua
 HTTP rồi trích văn bản bằng OpenPDF để soi, không dựa vào mã nguồn: cả hai tờ đều sạch dòng cũ
 và đều còn "(GIẢ LẬP)".
+
+---
+
+### Ghi chú của G2 — rà soát tổng thể
+
+**Phần nghiệp vụ không có lỗi nào.** Truy vấn thẳng MySQL: cả 10 con số `CLAUDE.md` ghi đều
+khớp CSDL (6 kỳ · 18.723 CDR · 280 hóa đơn · 620 chi tiết · 161 thanh toán · 34 biến động ·
+2 giảm trừ · doanh thu 111.513.012 · đã thu 49.190.687 · còn nợ 62.322.325). Bốn bất biến
+**0 lệch**: `con_no = tổng − đã thu`, `đã thu = SUM(thanh_toan)`, sổ cái số dư 80 thuê bao,
+và `so_du_sau = so_du_truoc ± so_tien` từng dòng. Kỳ 8 rỗng, kỳ 6–7 giữ 0 thanh toán.
+
+Đáng ghi: trước lượt đối chiếu này, 8 script đã chạy vài lượt, có lượt **huỷ rồi lập lại hóa
+đơn kỳ 6 và kỳ 8**. Dữ liệu vẫn về đúng con số tài liệu ghi — đó là bằng chứng các script thật
+sự idempotent, chứ không phải chỉ tự nhận vậy.
+
+#### Năm mục đã sửa
+
+| Mục | Vấn đề | Sửa |
+|---|---|---|
+| 1 | `.card-header` **11,5px** — đợt G1 hạ từ `.95rem`, có mặt 54 lần trên 24 màn hình | 14px, bỏ viết hoa |
+| 2 | `kich-ban-kiem-thu.md` ghi `test-auth.ps1` có **11** phép kiểm; cả bảng cộng được 177 | đo lại: 42, tổng **215** |
+| 3 | Ba tài liệu người ta *làm theo* vẫn nói "sidebar"; `admin` ghi 13 mục menu | đổi sang "rail"; đo lại: **14 mục** |
+| 4 | `danh-sach-anh-chup.md` #51 ghi "269 test", #56 ghi "13 đạt" | 315 và 15 |
+| 5 | Số ảnh chụp: kế hoạch ghi 70, một chỗ ghi 65 | thống nhất **70** |
+
+Kèm theo: nâng 5 khai báo còn ở 12,5–12,8px lên 13px cho luật *"không có chữ giao diện thường
+trực nào dưới 13px"* thành đúng, và chặn cộng dồn `.small` trong `.card-header` (0.875em lồng
+trong 14px ra 12,3px).
+
+#### Bốn lần phép kiểm của tôi báo động giả
+
+Cùng loại với ba lần ở G1b, nên ghi lại thành một chỗ:
+
+1. Báo `.so-lieu` được dùng 9 lần → cả 9 đều là `dai-/o-/the-so-lieu`; `` trong grep khớp cả
+   sau dấu gạch nối. Lớp đó **đúng là mồ côi**, phép kiểm chứng mới sai.
+2. Báo `--tin-canh` tụt tương phản → tôi đo cặp *chữ trắng trên nền cam*, mà chú thích ngay
+   trong `app.css` đã ghi màu này **luôn đi với chữ đen**. Cặp tôi đo không tồn tại.
+3. Báo 25 biến `--bs-*` là mã chết → đó chính là biến của Bootstrap; tôi chỉ quét trong
+   `app.css` nên không thấy nơi tiêu thụ.
+4. Báo danh sách ảnh chỉ có **62** mục → thật ra đủ **70**; các mục 63–70 nằm trong khối trích
+   dẫn `> |` nên biểu thức `^\| [0-9]+ \|` bỏ sót.
+
+Bài học chung, đúng chuẩn làm việc số 5: **phép kiểm viết vội để xác minh một phát hiện cũng
+là một phép kiểm** — nó sai thì hậu quả y hệt.
+
+#### Một thứ tìm ra nhưng CỐ Ý không sửa
+
+`.badge` của Bootstrap là `0.75em`; lồng trong ô bảng 14,4px thì ra **10,8px**. Trên `/cong-no`
+có 175 chỗ như vậy, và đó là chữ mang nghĩa — *Quá hạn*, *Đang dùng*, *Trong hạn*.
+
+Không sửa vì hai lẽ: nó là **lỗi có sẵn** (kiểm `git show ded07b9^` — trước đợt G1 cũng vậy),
+và nâng lên 13px sẽ đổi mật độ hiển thị của **mọi** bảng trong phần mềm. Đó là quyết định về
+hình thức, không phải sửa lỗi, nên để người làm đồ án quyết. Sửa thì chỉ một quy tắc:
+`.badge { font-size: .8125rem; }`.
 
 ---
 
