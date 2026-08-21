@@ -277,7 +277,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **G1d** đổi bên phát hành sang công ty hư cấu, bỏ nốt "(GIẢ LẬP)" | ✅ xong | `b21743b` |
 | **G2** rà soát tổng thể · sửa 5 mục tồn | ✅ xong | `9d5df48` |
 | **G2b** dọn 3 lớp CSS mồ côi và 1 biến chết | ✅ xong | `e64a27e` |
-| **G3** script khởi động `chay.cmd` | ✅ xong | `(ghi sau)` |
+| **G3** script khởi động `chay.cmd` | ✅ xong | `f8d60d6` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
