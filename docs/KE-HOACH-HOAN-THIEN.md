@@ -470,6 +470,21 @@ Cùng loại với ba lần ở G1b, nên ghi lại thành một chỗ:
 Bài học chung, đúng chuẩn làm việc số 5: **phép kiểm viết vội để xác minh một phát hiện cũng
 là một phép kiểm** — nó sai thì hậu quả y hệt.
 
+#### Mục 6 — dọn 3 lớp CSS mồ côi và 1 biến chết
+
+Làm sau, khi người làm đồ án hỏi tới. Trước khi xoá có tra nguồn gốc từng cái bằng
+`git show ded07b9^`, vì "rác của chính mình" và "mã chết có sẵn" là hai chuyện khác nhau:
+
+| | Có trước G1? | Kết luận |
+|---|---|---|
+| `.nhan-muc` (+ `::after`) | không | đợt G1 tạo ra rồi không dùng — rác của chính đợt đó |
+| `--tin-loi-nen` | không | như trên |
+| `.o-tim-kiem` | có, và **cũng đã mồ côi từ trước** | mã chết cũ, đợt G1 chép sang |
+| `.so-lieu` | có, và **cũng đã mồ côi từ trước** | như trên; chỉ bỏ khỏi nhóm chọn, giữ `.the-so-lieu .gia-tri` |
+
+Bỏ 27 dòng. Sau khi bỏ, ba phép dò đều ra rỗng: **0 lớp mồ côi · 0 biến chết · 0 khai báo
+`font-size` dưới 13px** — `.nhan-muc` chính là khai báo 11,5px cuối cùng còn sót.
+
 #### Một thứ tìm ra nhưng CỐ Ý không sửa
 
 `.badge` của Bootstrap là `0.75em`; lồng trong ô bảng 14,4px thì ra **10,8px**. Trên `/cong-no`

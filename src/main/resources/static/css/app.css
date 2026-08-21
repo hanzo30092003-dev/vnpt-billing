@@ -56,7 +56,6 @@
     --tin-canh: #b26a00;
     --tin-loi: #b3232c;
     --tin-canh-nen: #fdf3e3;
-    --tin-loi-nen: #fbeaeb;
 
     /* Đèn tín hiệu trên thanh máy dùng BỘ MÀU KHÁC, không dùng lại ba màu trên.
        Ba màu trên chọn để đọc được trên nền TRẮNG nên đặt lên nền mực chúng chỉ
@@ -184,30 +183,8 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--chu);
 }
 
-/* Nhãn mục: chữ hoa nhỏ, giãn chữ. Đây là thứ thay cho tiêu đề thẻ ở bản
-   cũ — nó phân đoạn nội dung mà không cần vẽ thêm một cái hộp quanh. */
-.nhan-muc {
-    font-size: .72rem;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--chu-mo);
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    margin-bottom: .6rem;
-}
-
-.nhan-muc::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background-color: var(--vach-mo);
-}
-
 /* Số liệu: chữ đều cột. Trong phần mềm tính tiền, cột tiền lệch nhau từng
    pixel là mắt rất khó so con số nào lớn hơn. */
-.so-lieu,
 .the-so-lieu .gia-tri {
     font-family: var(--chu-so-lieu);
     font-variant-numeric: tabular-nums;
@@ -947,10 +924,6 @@ label.form-label {
 /* =====================================================================
    14. BẢNG ĐỐI SOÁT CƯỚC
    ===================================================================== */
-.o-tim-kiem {
-    max-width: 320px;
-}
-
 /* Bản ghi làm vượt ưu đãi: tô nền VÀ thêm viền trái, để không phụ thuộc
    riêng vào màu sắc */
 .dong-lam-vuot > td {
