@@ -276,6 +276,8 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **G1c** bỏ dòng "dữ liệu mẫu" khỏi hóa đơn, phiếu thu, Excel | ✅ xong | `960eeab` |
 | **G1d** đổi bên phát hành sang công ty hư cấu, bỏ nốt "(GIẢ LẬP)" | ✅ xong | `b21743b` |
 | **G2** rà soát tổng thể · sửa 5 mục tồn | ✅ xong | `9d5df48` |
+| **G2b** dọn 3 lớp CSS mồ côi và 1 biến chết | ✅ xong | `e64a27e` |
+| **G3** script khởi động `chay.cmd` | ✅ xong | `(ghi sau)` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
@@ -425,6 +427,70 @@ kiểm đã nêu tên. Chạy ra đúng 3 — `Tests run: 17, Failures: 3`.
 Nghiệm thu: 315/315 test · 215/215 phép kiểm HTTP · 3 phép kiểm Python đạt. Xuất PDF thật qua
 HTTP rồi trích văn bản bằng OpenPDF để soi, không dựa vào mã nguồn: cả hai tờ đều sạch dòng cũ
 và đều còn "(GIẢ LẬP)".
+
+---
+
+### Ghi chú của G3 — script khởi động
+
+**Đo trước khi tối ưu.** Bấm giờ từ lúc gõ lệnh tới lúc `/dang-nhap` trả về 200 — không dùng
+con số `Started BillingApplication` mà JVM tự báo, vì nó bỏ qua phần Maven ở đầu. Chạy xen kẽ
+3 lượt mỗi cách để triệt tiêu trôi do máy bận:
+
+| Cách chạy | Thời gian | Đánh đổi |
+|---|---|---|
+| `mvnw spring-boot:run` | ~9,8 giây | có DevTools, tự biên dịch lại |
+| `java -jar` | ~5,9 giây | phải đóng gói lại (8 giây) sau khi sửa mã |
+| `java -jar` + CDS | ~4,9 giây | thêm kho **96 MB**, phải dựng lại sau mỗi lần đóng gói |
+
+**CDS bị loại dù nhanh nhất.** Nó mua thêm 1 giây bằng 96 MB và một bước dựng nữa — với một
+đồ án thì đó là cái giá sai. Ghi lại ở đây để lần sau khỏi đo lại.
+
+**Một giả thuyết bị bác bỏ:** `mvnw spring-boot:run` truyền cờ `-XX:TieredStopAtLevel=1`, và
+JVM của nó khởi động nhanh hơn `java -jar` (4,5s so với 5,7s), nên tôi đoán áp cờ đó cho jar
+sẽ nhanh hơn. Đo ra **chậm hơn**: 6,9 giây so với 5,9 giây. Cờ đó bị bỏ.
+
+#### Cái thật sự làm mất thời gian không phải mấy giây đó
+
+Là **cổng 8080 còn bận** vì một bản chạy cũ chưa tắt. Spring Boot báo *Port 8080 was already
+in use* rồi dừng hẳn, và thông báo đó không nói ai đang giữ cổng. Sáng nay chuyện này đã xảy
+ra thật một lần. `chay.ps1` kiểm cổng **trước tiên**, in ra số hiệu tiến trình, tên và giờ nó
+bắt đầu chạy, rồi hỏi có dừng không.
+
+#### Ba chế độ
+
+| Lệnh | Làm gì | Đo được |
+|---|---|---|
+| `chay` | Phát triển — biên dịch lại, có DevTools | ~8–10 giây |
+| `chay demo` | Chạy từ bản đóng gói, **không** biên dịch lại | **~6,2 giây** |
+| `chay reset` | Xoá sạch CSDL rồi nạp lại dữ liệu mẫu | hỏi xác nhận trước |
+
+`demo` **không tự đóng gói lại** khi jar cũ hơn `src/` — nó chỉ nói rõ file nào mới hơn. Lý
+do: đóng gói 8 giây cộng chạy 6 giây là 14 giây, chậm hơn cả chế độ phát triển. Người dùng tự
+chọn, nhưng phải biết mình đang chạy bản cũ.
+
+Câu xác nhận của `reset` đặt **trước** bảng thông tin, không phải sau: một cảnh báo phá huỷ
+nằm dưới một khối chào thân thiện thì rất dễ bấm cho qua.
+
+#### Đã thử từng nhánh, không chỉ nhánh thuận
+
+| Nhánh | Kết quả |
+|---|---|
+| `reset` trả lời "k" | in *Đã huỷ*, thoát 0 — **280 hóa đơn còn nguyên** |
+| Cổng bận, trả lời "k" | giữ tiến trình cũ, không giết nhầm |
+| Cổng bận, trả lời "c" | thay PID 33388 bằng 33112, phục vụ được sau 8,1 giây |
+| jar cũ hơn `src/` | cảnh báo đúng tên file và giờ sửa |
+
+#### Ba lỗi thoát ký tự khi viết script
+
+Sinh file `.ps1` qua Python rồi qua JSON làm `` trong `targetilling` thành **ký tự
+backspace 0x08**, và `	` trong `	est-dieu-huong` thành **Tab**. PowerShell báo *Illegal
+characters in path*. Cách chữa: viết file bằng heredoc trích dẫn của shell, không qua tầng
+thoát nào, rồi mới chuyển sang UTF-8 có BOM bằng PowerShell.
+
+Cũng ở đợt này, phép kiểm cổng `netstat | grep "LISTENING.*:8080"` **luôn báo trống** vì
+`netstat` in `:8080` *trước* chữ `LISTENING`. Nó làm một phép đo khởi động cho ra 124 ms —
+con số vô lý mà suýt thì tin. Đây là lần thứ tư trong đợt hoàn thiện một phép kiểm viết vội
+cho kết quả trông như đã đạt.
 
 ---
 

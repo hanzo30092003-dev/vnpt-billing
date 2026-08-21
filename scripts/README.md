@@ -19,12 +19,13 @@ mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 
 | Script | Kiểm gì | Có ghi dữ liệu? |
 |---|---|---|
-| `test-auth.ps1` | Đăng nhập, đăng xuất, phân quyền 3 vai trò, trang 403, sidebar theo vai trò | Không |
+| `test-auth.ps1` | Đăng nhập, đăng xuất, phân quyền 3 vai trò, trang 403, menu theo vai trò | Không |
 | `test-kh.ps1` | Danh sách/lọc/phân trang khách hàng, validation CCCD và MST, trùng giấy tờ, chặn ngừng giao dịch | Không (mọi ca đều là ca bị chặn) |
 | `test-tb.ps1` | Danh sách/lọc thuê bao, validation đăng ký, 4 tab chi tiết, lịch sử biến động, chặn khôi phục thuê bao đã thanh lý | Không |
 | `test-muc-F.ps1` | Công nợ, bảng tuổi nợ, danh sách thanh toán; chốt chặn huỷ hóa đơn kỳ đã thu tiền | **Có** — huỷ rồi lập lại hóa đơn kỳ 6 |
 | `test-bao-cao.ps1` | Dashboard và bảy báo cáo, 13 con số đối chiếu chéo bằng SQL, 11 file Excel, báo cáo trên kỳ rỗng | **Có** — tạo rồi xoá một kỳ thử |
 | `chay-ky-moi-phase6.ps1` | Dựng kỳ 3, 4, 7/2026: tạo kỳ → sinh CDR → tính cước → lập hóa đơn → chốt | **Có** — chỉ chạy một lần ở Phase 6 |
+| `chay.ps1` | **Không phải phép kiểm** — script khởi động ứng dụng, gọi qua `chay.cmd` ở gốc dự án | Không |
 | `_chung.ps1` | Hàm dùng chung, không chạy trực tiếp | — |
 
 > ⚠️ Ba script cuối **ghi vào CSDL**. `test-muc-F.ps1` và `test-bao-cao.ps1` tự trả dữ liệu về
@@ -71,7 +72,7 @@ mã khác 200 thì báo lỗi ngay, thay vì âm thầm lấy token từ một t
 
 Rút ra ở Phase 6 sau hai lần báo động giả liên tiếp (`PHASE-6-REPORT.md` mục 16.1):
 
-- `test-auth.ps1` từng kiểm phân quyền sidebar bằng cách dò **chữ** `'Hóa đơn'` trên cả trang.
+- `test-auth.ps1` từng kiểm phân quyền menu bằng cách dò **chữ** `'Hóa đơn'` trên cả trang.
   Nó đúng *tình cờ*, vì trang chủ cũ không chứa chữ đó. Trang chủ thành dashboard → chữ ấy xuất
   hiện hợp lệ trong thân trang → phép kiểm đỏ oan. Nay dò `href="/hoa-don"`, chính xác tới mức
   không nhầm với `href="/hoa-don/307"` của bảng dữ liệu.

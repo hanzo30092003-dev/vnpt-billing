@@ -116,10 +116,25 @@ mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ### Bước 4 — Chạy ứng dụng
 
 ```bash
-mvnw spring-boot:run
+chay
 ```
 
 Mở <http://localhost:8080>.
+
+`chay.cmd` ở gốc dự án — bấm đúp từ Explorer cũng chạy được. Nó kiểm cổng 8080 trước và hỏi
+nếu cổng đang bị một bản chạy cũ chiếm, thay vì để Spring Boot chết với *Port 8080 was
+already in use*.
+
+| Lệnh | Làm gì | Đo được |
+|---|---|---|
+| `chay` | Phát triển — biên dịch lại, sửa mã là tự nạp lại | ~8–10 giây |
+| `chay demo` | Chạy thẳng từ bản đóng gói, **không** biên dịch lại | **~6 giây** |
+| `chay reset` | **Xoá sạch CSDL** rồi nạp lại dữ liệu mẫu (hỏi xác nhận) | |
+
+Dùng `chay demo` khi chỉ cần xem hoặc chụp ảnh màn hình. Sửa mã xong thì quay lại `chay`;
+nếu quên, script sẽ báo bản đóng gói đang cũ hơn mã nguồn.
+
+Vẫn gọi tay được: `mvnw spring-boot:run`.
 
 > Từ bước 4 trở đi, Flyway chỉ chạy những file di trú **chưa từng chạy** trên CSDL này, nên
 > dữ liệu **được giữ nguyên** qua mọi lần khởi động lại. Chỉ chạy lại profile `reset` khi chủ

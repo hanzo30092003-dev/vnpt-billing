@@ -25,14 +25,34 @@ Chart.js 4.4.2 · Apache POI 5.4.1 · Lombok 1.18.46 · Maven Wrapper.
 
 ## Lệnh hay dùng
 
-Chạy thường (Flyway chỉ chạy file di trú **chưa từng chạy**, dữ liệu giữ nguyên):
+Có `chay.cmd` ở gốc dự án gói sẵn ba việc hay làm. Nó kiểm cổng 8080 trước — thứ hay làm mất
+thời gian nhất là một bản chạy cũ chưa tắt, Spring Boot báo *Port 8080 was already in use*
+rồi dừng hẳn:
+
+```bash
+chay
+```
+
+| Lệnh | Làm gì | Đo được |
+|---|---|---|
+| `chay` | Phát triển — biên dịch lại, có DevTools tự nạp lại | **~8–10 giây** |
+| `chay demo` | Chạy thẳng từ bản đóng gói, **không** biên dịch lại | **~6 giây** |
+| `chay reset` | **XOÁ SẠCH CSDL** rồi nạp lại dữ liệu mẫu (hỏi xác nhận trước) | |
+
+`chay demo` nhanh hơn vì bỏ được phần Maven (~4 giây). Đổi lại nó không biên dịch, nên chỉ
+dùng khi mã nguồn đang đứng yên — lúc chụp ảnh, lúc demo. Nếu jar cũ hơn `src/` thì script
+**nói rõ file nào mới hơn** chứ không tự đóng gói lại: đóng gói mất 8 giây, cộng 6 giây chạy
+là 14 giây, chậm hơn cả chế độ phát triển.
+
+Số giây đo bằng cách chạy xen kẽ 3 lượt mỗi cách, tính từ lúc gõ lệnh tới lúc `/dang-nhap`
+trả về 200 — không phải con số `Started BillingApplication` mà JVM tự báo (nó bỏ qua phần
+Maven ở đầu).
+
+Vẫn gọi tay được nếu muốn:
 
 ```bash
 mvnw spring-boot:run
 ```
-
-Nạp lại dữ liệu mẫu — **XOÁ SẠCH CSDL** (`flyway clean` → `migrate` → nạp 2 file dữ liệu,
-xem `FlywayResetConfig`):
 
 ```bash
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
