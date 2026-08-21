@@ -275,7 +275,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **G1b** sửa 5 lỗi chỉ thấy được khi đo trên trình duyệt | ✅ xong | `8cd9b55` |
 | **G1c** bỏ dòng "dữ liệu mẫu" khỏi hóa đơn, phiếu thu, Excel | ✅ xong | `960eeab` |
 | **G1d** đổi bên phát hành sang công ty hư cấu, bỏ nốt "(GIẢ LẬP)" | ✅ xong | `b21743b` |
-| **G2** rà soát tổng thể · sửa 5 mục tồn | ✅ xong | `(ghi sau)` |
+| **G2** rà soát tổng thể · sửa 5 mục tồn | ✅ xong | `9d5df48` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
