@@ -164,28 +164,32 @@
                     </div>
 
                     <h6 class="small text-uppercase text-secondary">Phân bố theo loại dịch vụ</h6>
-                    <table class="table table-sm bang-du-lieu">
-                        <tbody>
-                        <tr th:each="e : ${ketQua.theoLoaiDichVu}">
-                            <td th:text="${e.key}"></td>
-                            <td class="text-end" th:text="${e.value}"></td>
-                            <td class="text-end text-secondary"
-                                th:text="${#numbers.formatDecimal(e.value * 100.0 / ketQua.tongBanGhi, 1, 1)} + '%'"></td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm bang-du-lieu">
+                            <tbody>
+                            <tr th:each="e : ${ketQua.theoLoaiDichVu}">
+                                <td th:text="${e.key}"></td>
+                                <td class="text-end" th:text="${e.value}"></td>
+                                <td class="text-end text-secondary"
+                                    th:text="${#numbers.formatDecimal(e.value * 100.0 / ketQua.tongBanGhi, 1, 1)} + '%'"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
                     <h6 class="small text-uppercase text-secondary">Phân bố theo hướng</h6>
-                    <table class="table table-sm bang-du-lieu mb-0">
-                        <tbody>
-                        <tr th:each="e : ${ketQua.theoHuong}">
-                            <td th:text="${e.key}"></td>
-                            <td class="text-end" th:text="${e.value}"></td>
-                            <td class="text-end text-secondary"
-                                th:text="${#numbers.formatDecimal(e.value * 100.0 / ketQua.tongBanGhi, 1, 1)} + '%'"></td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm bang-du-lieu mb-0">
+                            <tbody>
+                            <tr th:each="e : ${ketQua.theoHuong}">
+                                <td th:text="${e.key}"></td>
+                                <td class="text-end" th:text="${e.value}"></td>
+                                <td class="text-end text-secondary"
+                                    th:text="${#numbers.formatDecimal(e.value * 100.0 / ketQua.tongBanGhi, 1, 1)} + '%'"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
                     <a class="btn btn-outline-primary mt-3" th:href="@{/cdr}">
                         <i class="bi bi-list-ul me-1"></i> Xem dữ liệu vừa sinh

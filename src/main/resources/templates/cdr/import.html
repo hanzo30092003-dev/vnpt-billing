@@ -60,48 +60,50 @@
                     <p>File CSV mã hoá UTF-8, dòng đầu là tiêu đề, gồm 7 cột theo đúng thứ tự:</p>
                     <pre class="bg-light p-2 rounded mb-3"><code>so_thue_bao,so_bi_goi,loai_dich_vu,huong,thoi_gian_bat_dau,thoi_luong_giay,so_luong</code></pre>
 
-                    <table class="table table-sm bang-du-lieu">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Cột</th>
-                            <th>Quy tắc</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td><code>so_thue_bao</code></td>
-                            <td>Phải tồn tại trong hệ thống, không ở trạng thái tạm ngưng 2 chiều hoặc đã thanh lý</td>
-                        </tr>
-                        <tr>
-                            <td><code>so_bi_goi</code></td>
-                            <td>Có thể để trống (ví dụ với bản ghi DATA)</td>
-                        </tr>
-                        <tr>
-                            <td><code>loai_dich_vu</code></td>
-                            <td><code>THOAI</code> · <code>SMS</code> · <code>DATA</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>huong</code></td>
-                            <td><code>NOI_MANG</code> · <code>NGOAI_MANG</code> · <code>QUOC_TE</code></td>
-                        </tr>
-                        <tr>
-                            <td><code>thoi_gian_bat_dau</code></td>
-                            <td>Đúng định dạng <code>yyyy-MM-dd HH:mm:ss</code>, không sớm hơn ngày kích hoạt thuê bao</td>
-                        </tr>
-                        <tr>
-                            <td><code>thoi_luong_giay</code></td>
-                            <td>Số giây. Bản ghi <code>THOAI</code> bắt buộc lớn hơn 0; SMS và DATA để 0</td>
-                        </tr>
-                        <tr>
-                            <td><code>so_luong</code></td>
-                            <td>
-                                SMS ghi <code>1</code>.
-                                <strong>DATA ghi theo đơn vị KB</strong> (ví dụ 153600 = 150 MB).
-                                THOAI để 0.
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm bang-du-lieu">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Cột</th>
+                                <th>Quy tắc</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>so_thue_bao</code></td>
+                                <td>Phải tồn tại trong hệ thống, không ở trạng thái tạm ngưng 2 chiều hoặc đã thanh lý</td>
+                            </tr>
+                            <tr>
+                                <td><code>so_bi_goi</code></td>
+                                <td>Có thể để trống (ví dụ với bản ghi DATA)</td>
+                            </tr>
+                            <tr>
+                                <td><code>loai_dich_vu</code></td>
+                                <td><code>THOAI</code> · <code>SMS</code> · <code>DATA</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>huong</code></td>
+                                <td><code>NOI_MANG</code> · <code>NGOAI_MANG</code> · <code>QUOC_TE</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>thoi_gian_bat_dau</code></td>
+                                <td>Đúng định dạng <code>yyyy-MM-dd HH:mm:ss</code>, không sớm hơn ngày kích hoạt thuê bao</td>
+                            </tr>
+                            <tr>
+                                <td><code>thoi_luong_giay</code></td>
+                                <td>Số giây. Bản ghi <code>THOAI</code> bắt buộc lớn hơn 0; SMS và DATA để 0</td>
+                            </tr>
+                            <tr>
+                                <td><code>so_luong</code></td>
+                                <td>
+                                    SMS ghi <code>1</code>.
+                                    <strong>DATA ghi theo đơn vị KB</strong> (ví dụ 153600 = 150 MB).
+                                    THOAI để 0.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
                     <div class="alert alert-info py-2 mb-0">
                         <i class="bi bi-info-circle me-1"></i>

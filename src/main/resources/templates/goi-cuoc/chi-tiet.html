@@ -156,7 +156,7 @@
                     </div>
 
                     <nav th:if="${trangThueBao.totalPages > 1}" class="mt-2">
-                        <ul class="pagination pagination-sm mb-0 justify-content-center">
+                        <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
                             <li class="page-item" th:classappend="${trangThueBao.first} ? 'disabled'">
                                 <a class="page-link"
                                    th:href="@{'/goi-cuoc/' + ${goiCuoc.id} + '?trang=' + ${trangThueBao.number - 1}}">Trước</a>

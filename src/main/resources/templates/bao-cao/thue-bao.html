@@ -57,14 +57,16 @@
                     <div class="card-header bg-white fw-semibold">Theo trạng thái</div>
                     <div class="card-body">
                         <canvas id="bieuDoTrangThai" height="200"></canvas>
-                        <table class="table table-sm bang-du-lieu mt-3 mb-0">
-                            <tbody>
-                            <tr th:each="m : ${thongKe.theoTrangThai}">
-                                <td th:text="${m.nhan}">Hoạt động</td>
-                                <td class="text-end fw-semibold" th:text="${@soLieu.so(m.soLuong)}">0</td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-sm bang-du-lieu mt-3 mb-0">
+                                <tbody>
+                                <tr th:each="m : ${thongKe.theoTrangThai}">
+                                    <td th:text="${m.nhan}">Hoạt động</td>
+                                    <td class="text-end fw-semibold" th:text="${@soLieu.so(m.soLuong)}">0</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -73,14 +75,16 @@
                     <div class="card-header bg-white fw-semibold">Theo loại thuê bao</div>
                     <div class="card-body">
                         <canvas id="bieuDoLoai" height="200"></canvas>
-                        <table class="table table-sm bang-du-lieu mt-3 mb-0">
-                            <tbody>
-                            <tr th:each="m : ${thongKe.theoLoai}">
-                                <td th:text="${m.nhan}">Trả sau</td>
-                                <td class="text-end fw-semibold" th:text="${@soLieu.so(m.soLuong)}">0</td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-sm bang-du-lieu mt-3 mb-0">
+                                <tbody>
+                                <tr th:each="m : ${thongKe.theoLoai}">
+                                    <td th:text="${m.nhan}">Trả sau</td>
+                                    <td class="text-end fw-semibold" th:text="${@soLieu.so(m.soLuong)}">0</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

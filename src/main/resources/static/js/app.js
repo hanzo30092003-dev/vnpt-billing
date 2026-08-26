@@ -193,7 +193,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (window.Chart) {
             Chart.defaults.font.family = doc('--chu-giao-dien') || 'system-ui, sans-serif';
-            Chart.defaults.font.size = 12;
+            // D5 — 12px la chu NHO NHAT tren man hinh, va no nam tren dung thu
+            // hoi dong nhin lau nhat khi chieu len tuong. Do o 1024x768: bieu do
+            // doanh thu 699x233px, hai bieu do tron moi cai 324x280px.
+            // Khong len 16: chu giai se an vao vung ve cua bieu do tron 324px.
+            Chart.defaults.font.size = 14;
             Chart.defaults.color = window.MAU.xam;
             Chart.defaults.plugins.legend.labels.boxWidth = 12;
             Chart.defaults.plugins.legend.labels.boxHeight = 12;

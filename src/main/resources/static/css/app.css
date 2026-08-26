@@ -72,6 +72,14 @@
        co lại. Chiều cao ĐO ĐƯỢC đi vào --thanh-may-thuc, một biến khác. */
     --thanh-may-cao: 52px;
 
+    /* Màu viền tiêu điểm bàn phím. Đo được: KHÔNG màu nào đạt 3:1 trên cả bốn
+       bề mặt của giao diện này, nên token đổi giá trị theo ngữ cảnh thay vì
+       chia thành hai quy tắc rời:
+         --nhan     trên --nen 6,39:1 · trên --be-mat 7,37:1   (vùng nội dung)
+         --muc-chu  trên --muc 8,67:1 · trên --muc-sau 10,13:1 (rail, thanh máy)
+       Giá trị cho nền mực khai lại ở khối .rail/.thanh-may bên dưới. */
+    --vien-tieu-diem: var(--nhan);
+
     --chu-giao-dien: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
     --chu-so-lieu: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
 }
@@ -98,6 +106,87 @@
     --bs-border-radius: .3rem;
     --bs-border-radius-sm: .25rem;
     --bs-border-radius-lg: .4rem;
+
+    /* Đ1 — Bootstrap tính --bs-focus-ring-color lúc BIÊN DỊCH từ $primary của
+       nó, nên ghi đè --bs-primary-rgb lúc chạy KHÔNG kéo theo. Đo được: vòng
+       tiêu điểm mặc định rgba(13,110,253,.25) trộn ra #b4cff6 = 1,38:1, vừa
+       trượt ngưỡng 3:1 vừa là màu xanh dương không có trong bảng màu này. */
+    --bs-focus-ring-color: var(--vien-tieu-diem);
+}
+
+/* =====================================================================
+   Đ3 — NHUỘM NỐT BA BIẾN THỂ NÚT VIỀN
+   =====================================================================
+   Đợt G1 nhuộm --bs-primary nhưng bỏ success/danger/secondary. Ba cái đó
+   trượt AA trên nền --nen: #198754 = 3,93:1 · #dc3545 = 3,93:1 ·
+   #6c757d = 4,07:1, đều dưới 4,5:1.
+
+   Phải ghi đè TỪNG lớp chứ không đặt --bs-success ở :root: mixin
+   button-outline-variant của Bootstrap sinh ra mã màu ĐẶC trong
+   --bs-btn-color, không tham chiếu qua var(). Đặt --bs-success không kéo
+   theo gì cả — đã kiểm.
+
+   Ba token thay thế đều có sẵn trong :root, không thêm màu mới.
+   ===================================================================== */
+.btn-outline-success {
+    --bs-btn-color: var(--tin-on);              /* 4,56:1 trên --nen */
+    --bs-btn-border-color: var(--tin-on);
+    --bs-btn-hover-bg: var(--tin-on);
+    --bs-btn-hover-border-color: var(--tin-on);
+    --bs-btn-active-bg: var(--tin-on);
+    --bs-btn-active-border-color: var(--tin-on);
+    --bs-btn-disabled-color: var(--tin-on);
+    --bs-btn-disabled-border-color: var(--tin-on);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--tin-loi);             /* 5,70:1 trên --nen */
+    --bs-btn-border-color: var(--tin-loi);
+    --bs-btn-hover-bg: var(--tin-loi);
+    --bs-btn-hover-border-color: var(--tin-loi);
+    --bs-btn-active-bg: var(--tin-loi);
+    --bs-btn-active-border-color: var(--tin-loi);
+    --bs-btn-disabled-color: var(--tin-loi);
+    --bs-btn-disabled-border-color: var(--tin-loi);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--chu-mo);              /* 5,07:1 trên --nen */
+    --bs-btn-border-color: var(--vach);
+    --bs-btn-hover-bg: var(--chu-mo);
+    --bs-btn-hover-border-color: var(--chu-mo);
+    --bs-btn-active-bg: var(--chu-mo);
+    --bs-btn-active-border-color: var(--chu-mo);
+    --bs-btn-disabled-color: var(--chu-mo);
+    --bs-btn-disabled-border-color: var(--vach);
+}
+
+/* =====================================================================
+   Đ1 — VIỀN TIÊU ĐIỂM BÀN PHÍM
+   =====================================================================
+   app.css trước đây không có quy tắc :focus nào cho .btn hay liên kết —
+   phó mặc hoàn toàn cho mặc định Bootstrap. Dùng outline ĐẶC chứ không
+   dùng bóng mờ: đã tính --nhan ở alpha 0,25 / 0,40 / 0,50 ra 1,47 / 1,90 /
+   2,28:1, đều vẫn trượt. Alpha mới là vấn đề, không phải màu.
+
+   :focus-visible chứ không :focus — bấm chuột vào nút thì không hiện viền,
+   chỉ khi đi bằng bàn phím mới hiện. Đó là hành vi người dùng chuột mong đợi.
+   ===================================================================== */
+.btn:focus-visible,
+.page-link:focus-visible,
+.rail-nav .nav-item:focus-visible,
+.bang-du-lieu a:focus-visible,
+.thanh-may a:focus-visible,
+.thanh-may button:focus-visible {
+    outline: 2px solid var(--vien-tieu-diem);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+/* Trên nền mực, --nhan chỉ được 2,05–2,39:1 nên token đổi sang màu sáng */
+.rail,
+.thanh-may {
+    --vien-tieu-diem: var(--muc-chu);
 }
 
 .btn-primary {
@@ -435,7 +524,11 @@ h1, h2, h3, h4, h5, h6 {
 .app-footer {
     padding: .6rem 1.35rem;
     font-size: .8125rem;
-    color: #8a939c;
+    /* Đ2 — trước là #8a939c gõ cứng: 2,70:1 trên --nen, trượt AA, và là mã
+       màu nằm ngoài bảng màu (vi phạm luật "bảng màu chỉ có MỘT nguồn").
+       var(--chu-mo) cho 5,07:1. Chân trang nằm trong layout.html nên dòng
+       này có mặt ở cả 46 màn hình. */
+    color: var(--chu-mo);
     border-top: 1px solid var(--vach-mo);
 }
 

@@ -119,7 +119,7 @@
             </div>
 
             <nav th:if="${ketQua.totalPages > 1}">
-                <ul class="pagination pagination-sm mb-0 justify-content-center">
+                <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
                     <li class="page-item" th:classappend="${ketQua.first} ? 'disabled'">
                         <a class="page-link" th:href="@{'/thue-bao?trang=' + ${ketQua.number - 1} + ${chuoiLoc}}">Trước</a>
                     </li>
