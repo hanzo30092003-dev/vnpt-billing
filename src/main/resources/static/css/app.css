@@ -80,6 +80,80 @@
        Giá trị cho nền mực khai lại ở khối .rail/.thanh-may bên dưới. */
     --vien-tieu-diem: var(--nhan);
 
+    /* =================================================================
+       THANG KHOẢNG CÁCH — bội số của 4px
+       =================================================================
+       Trước đợt này, 38 trong 58 giá trị padding/margin/gap lệch khỏi mọi
+       thang — 16 giá trị khác nhau như .55rem, .65rem, .85rem, 1.35rem.
+       Chúng sinh ra vì mỗi lần chỉnh mắt lại nhích một chút, nên hai khối
+       cạnh nhau lệch 1–2px mà không ai chủ ý.
+       ================================================================= */
+    --cach-1: 4px;
+    --cach-2: 8px;
+    --cach-3: 12px;
+    --cach-4: 16px;
+    --cach-6: 24px;
+    --cach-8: 32px;
+    --cach-12: 48px;
+
+    /* =================================================================
+       THANG CỠ CHỮ — 8 bậc
+       =================================================================
+       Trước đợt này có 15 giá trị khác nhau, nhiều cái sát nhau tới mức
+       không ai phân biệt được: 13,0 / 13,4 / 13,6 và 14,0 / 14,1 / 14,4 /
+       14,7. Chúng là dấu vết của những lần chỉnh bằng mắt.
+
+       Sàn 13px và mức 14px cho nhãn gắn với con số là ngưỡng đã lập ở các
+       vòng trước — thang này giữ nguyên cả hai, không bậc nào xuống dưới.
+       ================================================================= */
+    --chu-1: .8125rem;   /* 13px — sàn tuyệt đối */
+    --chu-2: .875rem;    /* 14px — chữ trong bảng, nhãn gắn với con số */
+    --chu-3: .9375rem;   /* 15px */
+    --chu-4: 1rem;       /* 16px — chữ thân */
+    --chu-5: 1.125rem;   /* 18px */
+    --chu-6: 1.25rem;    /* 20px */
+    --chu-7: 1.5rem;     /* 24px */
+    --chu-8: 1.75rem;    /* 28px */
+
+    /* =================================================================
+       ĐỘ NÂNG, BO GÓC, ĐỘ DÀY VIỀN — mỗi loại tối đa 3 mức
+       =================================================================
+       Trước: 5 giá trị bo góc, 7 giá trị đổ bóng, 3 độ dày viền, phần lớn
+       gõ thẳng. Bóng đổ là chỗ lộn xộn nhất — có chỗ dùng bóng để làm nổi
+       thẻ, có chỗ dùng để vẽ viền trái, có chỗ dùng làm vòng tiêu điểm.
+       Ba việc khác nhau trong cùng một thuộc tính.
+
+       Ba mức nâng ở đây tương ứng ba khoảng cách với mặt giấy: nằm phẳng
+       (thẻ), nhấc nhẹ (thanh dính), và nổi hẳn (hộp thoại, thẻ đăng nhập).
+       ================================================================= */
+    --bo-1: .2rem;       /* huy hiệu, ô nhỏ */
+    --bo-2: .3rem;       /* mặc định — thẻ, nút, ô nhập */
+    --bo-3: .4rem;       /* khối lớn: thẻ đăng nhập */
+
+    --nang-0: none;
+    --nang-1: 0 1px 0 rgba(16, 24, 40, .04);
+    --nang-2: 0 2px 8px rgba(16, 24, 40, .08);
+    --nang-3: 0 18px 40px rgba(0, 0, 0, .35);
+
+    --vien-manh: 1px;
+    --vien-day: 2px;
+    --vien-vach: 3px;    /* vạch tín hiệu bên trái thẻ số liệu */
+
+    /* Hai màu trước đây gõ thẳng ngoài bảng màu */
+    --nen-dau-bang: #f4f6f9;   /* nền hàng tiêu đề bảng */
+    --nhan-sang: #6ecfd8;      /* chàm sáng, chỉ dùng trên nền mực */
+
+    /* =================================================================
+       NHỊP THỊ GIÁC CỦA BẢNG DỮ LIỆU
+       =================================================================
+       Bảng là loại màn hình chiếm đa số phần mềm này, nên nhịp của nó đặt
+       thành token riêng thay vì rải trong từng quy tắc.
+       ================================================================= */
+    --bang-cao-dong: 40px;     /* chiều cao tối thiểu một dòng */
+    --bang-dem-doc: var(--cach-2);
+    --bang-dem-ngang: var(--cach-3);
+    --bang-nen-hover: var(--nhan-nhat);
+
     --chu-giao-dien: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
     --chu-so-lieu: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
 }
@@ -103,9 +177,9 @@
     --bs-body-bg: var(--nen);
     --bs-font-sans-serif: var(--chu-giao-dien);
     --bs-body-font-family: var(--chu-giao-dien);
-    --bs-border-radius: .3rem;
-    --bs-border-radius-sm: .25rem;
-    --bs-border-radius-lg: .4rem;
+    --bs-border-radius: var(--bo-2);
+    --bs-border-radius-sm: var(--bo-1);
+    --bs-border-radius-lg: var(--bo-3);
 
     /* Đ1 — Bootstrap tính --bs-focus-ring-color lúc BIÊN DỊCH từ $primary của
        nó, nên ghi đè --bs-primary-rgb lúc chạy KHÔNG kéo theo. Đo được: vòng
@@ -262,7 +336,7 @@ body {
     background-color: var(--nen);
     color: var(--chu);
     font-family: var(--chu-giao-dien);
-    font-size: 1rem;
+    font-size: var(--chu-4);
     -webkit-font-smoothing: antialiased;
 }
 
@@ -293,26 +367,26 @@ h1, h2, h3, h4, h5, h6 {
     min-height: var(--thanh-may-cao);
     background-color: var(--muc-sau);
     color: #fff;
-    border-bottom: 1px solid #000;
+    border-bottom: var(--vien-manh) solid #000;
 }
 
 .thanh-may-hieu {
     display: flex;
     align-items: center;
-    gap: .55rem;
+    gap: var(--cach-2);
     width: var(--rail-rong);
     flex-shrink: 0;
-    padding: 0 1rem;
+    padding: 0 var(--cach-4);
     font-weight: 600;
-    font-size: .95rem;
+    font-size: var(--chu-3);
     letter-spacing: .01em;
     color: #fff;
-    border-right: 1px solid var(--muc-vien);
+    border-right: var(--vien-manh) solid var(--muc-vien);
 }
 
 .thanh-may-hieu i {
     color: var(--nhan);
-    font-size: 1.15rem;
+    font-size: var(--chu-5);
 }
 
 /* Dải số liệu vận hành */
@@ -328,9 +402,9 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: .1rem;
-    padding: .35rem 1.1rem;
-    border-right: 1px solid var(--muc-vien);
+    gap: var(--cach-1);
+    padding: var(--cach-1) var(--cach-4);
+    border-right: var(--vien-manh) solid var(--muc-vien);
     white-space: nowrap;
 }
 
@@ -340,20 +414,20 @@ h1, h2, h3, h4, h5, h6 {
        nghĩa là gì; để nó nhỏ hơn chữ trong bảng là đặt trang trí lên trên
        việc đọc. Bỏ viết hoa còn vì tiếng Việt có dấu viết hoa ở cỡ nhỏ
        khó đọc hơn hẳn viết thường. */
-    font-size: .875rem;
+    font-size: var(--chu-2);
     letter-spacing: .01em;
     color: var(--muc-chu-mo);
 }
 
 .o-so-lieu .gia-tri {
     font-family: var(--chu-so-lieu);
-    font-size: .95rem;
+    font-size: var(--chu-3);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     color: #fff;
     display: flex;
     align-items: center;
-    gap: .4rem;
+    gap: var(--cach-2);
 }
 
 /* Chấm tín hiệu: trạng thái đọc được cả khi không phân biệt được màu, vì
@@ -372,11 +446,11 @@ h1, h2, h3, h4, h5, h6 {
 .thanh-may-nguoi {
     display: flex;
     align-items: center;
-    gap: .5rem;
-    padding: 0 .9rem;
+    gap: var(--cach-2);
+    padding: 0 var(--cach-4);
     margin-left: auto;
-    border-left: 1px solid var(--muc-vien);
-    font-size: .88rem;
+    border-left: var(--vien-manh) solid var(--muc-vien);
+    font-size: var(--chu-2);
     color: var(--muc-chu);
     white-space: nowrap;
 }
@@ -387,7 +461,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .thanh-may-nguoi .vai-tro {
-    font-size: .8125rem;   /* 13px — sàn cho chữ giao diện thường trực */
+    font-size: var(--chu-1);   /* 13px — sàn cho chữ giao diện thường trực */
     letter-spacing: .01em;
     color: var(--muc-chu-mo);
 }
@@ -455,7 +529,7 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--muc-chu);
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--muc-sau);
+    border-right: var(--vien-manh) solid var(--muc-sau);
 }
 
 .rail-nav {
@@ -464,8 +538,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .rail-nav .nav-group {
-    padding: 1.1rem .9rem .3rem;
-    font-size: .8125rem;   /* 13px, viết thường — bản đầu .64rem viết hoa ra 10,24px */
+    padding: var(--cach-4) var(--cach-4) var(--cach-1);
+    font-size: var(--chu-1);   /* 13px, viết thường — bản đầu .64rem viết hoa ra 10,24px */
     letter-spacing: .01em;
     font-weight: 600;
     color: var(--muc-chu-mo);
@@ -474,17 +548,17 @@ h1, h2, h3, h4, h5, h6 {
 .rail-nav .nav-item {
     display: flex;
     align-items: center;
-    gap: .6rem;
+    gap: var(--cach-2);
     min-height: 40px;
-    padding: .5rem .9rem;
+    padding: var(--cach-2) var(--cach-4);
     color: var(--muc-chu);
     text-decoration: none;
-    font-size: .92rem;
-    border-left: 3px solid transparent;
+    font-size: var(--chu-3);
+    border-left: var(--vien-vach) solid transparent;
 }
 
 .rail-nav .nav-item i {
-    font-size: 1rem;
+    font-size: var(--chu-4);
     color: var(--muc-chu-mo);
     width: 1.15rem;
     text-align: center;
@@ -518,18 +592,18 @@ h1, h2, h3, h4, h5, h6 {
 
 .content {
     flex: 1;
-    padding: 1.1rem 1.35rem 2rem;
+    padding: var(--cach-4) var(--cach-6) var(--cach-8);
 }
 
 .app-footer {
-    padding: .6rem 1.35rem;
-    font-size: .8125rem;
+    padding: var(--cach-2) var(--cach-6);
+    font-size: var(--chu-1);
     /* Đ2 — trước là #8a939c gõ cứng: 2,70:1 trên --nen, trượt AA, và là mã
        màu nằm ngoài bảng màu (vi phạm luật "bảng màu chỉ có MỘT nguồn").
        var(--chu-mo) cho 5,07:1. Chân trang nằm trong layout.html nên dòng
        này có mặt ở cả 46 màn hình. */
     color: var(--chu-mo);
-    border-top: 1px solid var(--vach-mo);
+    border-top: var(--vien-manh) solid var(--vach-mo);
 }
 
 /* =====================================================================
@@ -540,14 +614,14 @@ h1, h2, h3, h4, h5, h6 {
    phẳng, phân tách bằng kẻ mảnh và khoảng trắng.
    ===================================================================== */
 .card {
-    border: 1px solid var(--vach);
-    border-radius: .3rem;
+    border: var(--vien-manh) solid var(--vach);
+    border-radius: var(--bo-2);
     background-color: var(--be-mat);
 }
 
 .card-header {
     background-color: var(--be-mat);
-    border-bottom: 1px solid var(--vach-mo);
+    border-bottom: var(--vien-manh) solid var(--vach-mo);
     /* 14px, viết thường. Đợt G1 để .72rem VIẾT HOA cho ra dáng bảng điều khiển —
        đo ra 11,5px, và nó có mặt 54 lần trên 24 màn hình. Đây là TIÊU ĐỀ của cả
        một khối nội dung, không phải nhãn phụ; trước đợt G1 nó vốn là .95rem.
@@ -555,22 +629,22 @@ h1, h2, h3, h4, h5, h6 {
        Cùng luật đã đặt ở G1b cho nhãn thanh máy và nhóm menu: không có chữ giao
        diện thường trực nào dưới 13px, và không dùng VIẾT HOA để bù cho chữ nhỏ —
        tiếng Việt có dấu viết hoa ở cỡ nhỏ khó đọc hơn hẳn viết thường. */
-    font-size: .875rem;
+    font-size: var(--chu-2);
     font-weight: 600;
     letter-spacing: .01em;
     color: var(--chu);
-    padding: .65rem 1rem;
+    padding: var(--cach-3) var(--cach-4);
 }
 
 /* Bóng đổ gần như bỏ hẳn: giữ một nét rất mảnh để thẻ không dính vào nền */
 .shadow-sm {
-    box-shadow: 0 1px 0 rgba(16, 24, 40, .04) !important;
+    box-shadow: var(--nang-1) !important;
 }
 
 /* Đầu trang: tiêu đề và câu giải thích */
 .dau-trang h2,
 .dau-trang .h4 {
-    font-size: 1.35rem;
+    font-size: var(--chu-7);
     font-weight: 600;
 }
 
@@ -580,7 +654,7 @@ h1, h2, h3, h4, h5, h6 {
    Bootstrap vì màu đó nhạt hơn, mà câu này là câu NGƯỜI MỚI ĐỌC ĐẦU TIÊN. */
 .mo-ta-trang {
     color: var(--chu-mo);
-    font-size: .95rem;
+    font-size: var(--chu-3);
     max-width: 70ch;
 }
 
@@ -591,8 +665,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .breadcrumb {
-    font-size: .8125rem;
-    margin-bottom: .4rem;
+    font-size: var(--chu-1);
+    margin-bottom: var(--cach-2);
     --bs-breadcrumb-divider-color: var(--chu-mo);
 }
 
@@ -604,6 +678,14 @@ h1, h2, h3, h4, h5, h6 {
    ===================================================================== */
 .bang-du-lieu {
     --bs-table-border-color: var(--vach-mo);
+    /* Nhịp dọc khai qua biến của Bootstrap để .table-sm không ghi đè lại:
+       trước đây 28 trong 42 bảng có table-hover còn 14 thì không, và hai
+       bảng trong CÙNG một màn hình lệch nhau. Nay mọi bảng mang lớp
+       .bang-du-lieu đều có cùng nhịp và cùng màu rê chuột. */
+    --bs-table-cell-padding-y: var(--bang-dem-doc);
+    --bs-table-cell-padding-x: var(--bang-dem-ngang);
+    --bs-table-hover-bg: var(--bang-nen-hover);
+    --bs-table-hover-color: var(--chu);
     margin-bottom: 0;
 }
 
@@ -612,33 +694,38 @@ h1, h2, h3, h4, h5, h6 {
    "kỳ 7/2026" nằm đúng chỗ đó. Khai rem để cắt hẳn chuỗi nhân. */
 .card-header .small,
 .card-header small {
-    font-size: .8125rem;
+    font-size: var(--chu-1);
 }
 
 /* Chữ trong bảng: không dưới 14px, kể cả khi đã khai .table-sm hay .small */
 .bang-du-lieu,
+.bang-du-lieu tbody td,
+.bang-du-lieu tbody th {
+    height: var(--bang-cao-dong);
+}
+
 .bang-du-lieu td,
 .bang-du-lieu th {
-    font-size: .9rem;
+    font-size: var(--chu-2);
     vertical-align: middle;
 }
 
 .bang-du-lieu .small,
 .bang-du-lieu small {
-    font-size: .875rem;
+    font-size: var(--chu-2);
 }
 
 /* Tiêu đề cột: chữ hoa, giãn chữ, nền rất nhạt — tách khỏi phần dữ liệu.
    KHÔNG hạ cỡ chữ xuống dưới 14px dù kiểu này thường đi kèm chữ nhỏ:
    ngưỡng ">= 14px cho mọi chữ trong bảng" là tiêu chí đã nghiệm thu. */
 .bang-du-lieu thead th {
-    font-size: .875rem;
+    font-size: var(--chu-2);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .05em;
     color: var(--chu-mo);
-    background-color: #f4f6f9;
-    border-bottom: 1px solid var(--vach);
+    background-color: var(--nen-dau-bang);
+    border-bottom: var(--vien-manh) solid var(--vach);
     white-space: nowrap;
 }
 
@@ -652,7 +739,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bang-du-lieu code {
-    font-size: .84rem;
+    font-size: var(--chu-1);
     color: var(--chu);
     background-color: transparent;
     padding: 0;
@@ -667,22 +754,22 @@ h1, h2, h3, h4, h5, h6 {
    PHẢI đứng sát một cột chữ căn TRÁI: "562.254 Chuyển khoản" đọc ra như
    một cụm. */
 .bang-du-lieu > :not(caption) > * > * {
-    padding-left: .7rem;
-    padding-right: .7rem;
+    padding-left: var(--cach-3);
+    padding-right: var(--cach-3);
 }
 
 .bang-du-lieu > :not(caption) > * > *:first-child {
-    padding-left: .35rem;
+    padding-left: var(--cach-2);
 }
 
 .bang-du-lieu > :not(caption) > * > *:last-child {
-    padding-right: .35rem;
+    padding-right: var(--cach-2);
 }
 
 /* Liên kết trong bảng vẫn phải đủ cao để bấm trúng */
 .bang-du-lieu td a:not(.btn) {
     display: inline-block;
-    padding: .3rem 0;
+    padding: var(--cach-1) 0;
 }
 
 .bang-thong-tin th {
@@ -692,7 +779,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bang-cdr {
-    font-size: .875rem;
+    font-size: var(--chu-2);
 }
 
 /* =====================================================================
@@ -703,11 +790,11 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: .9rem 1rem;
+    padding: var(--cach-4);
     background-color: var(--be-mat);
-    border: 1px solid var(--vach);
-    border-left: 3px solid var(--nhan);
-    border-radius: .3rem;
+    border: var(--vien-manh) solid var(--vach);
+    border-left: var(--vien-vach) solid var(--nhan);
+    border-radius: var(--bo-2);
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
 }
@@ -722,15 +809,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .the-so-lieu .nhan {
-    font-size: .875rem;
+    font-size: var(--chu-2);
     line-height: 1.3;
     color: var(--chu-mo);
-    padding-right: 1.75rem;   /* chừa chỗ cho biểu tượng góc phải */
+    /* 32px chứ không 28px. Biểu tượng đặt right .95rem, cỡ 1.15rem, tức mép
+       trái của nó cách lề phải 33,6px — giá trị cũ 28px để nhãn chạy DƯỚI biểu
+       tượng 5,6px. Đây là chỗ làm tròn LÊN, không xuống. */
+    padding-right: var(--cach-8);
 }
 
 .the-so-lieu .gia-tri {
-    margin: .4rem 0 .2rem;
-    font-size: 1.6rem;
+    margin: var(--cach-2) 0 var(--cach-1);
+    font-size: var(--chu-7);
     font-weight: 600;
     line-height: 1.15;
     color: var(--chu);
@@ -748,7 +838,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .the-so-lieu .phu {
     margin-top: auto;
-    font-size: .875rem;
+    font-size: var(--chu-2);
     line-height: 1.3;
     color: var(--chu-mo);
 }
@@ -757,7 +847,7 @@ h1, h2, h3, h4, h5, h6 {
     position: absolute;
     top: .85rem;
     right: .95rem;
-    font-size: 1.15rem;
+    font-size: var(--chu-5);
     line-height: 1;
     color: var(--nhan);
     opacity: .4;
@@ -775,9 +865,9 @@ h1, h2, h3, h4, h5, h6 {
 .form-label,
 .form-label.small,
 label.form-label {
-    font-size: .95rem;
+    font-size: var(--chu-3);
     font-weight: 500;
-    margin-bottom: .3rem;
+    margin-bottom: var(--cach-1);
     color: var(--chu);
 }
 
@@ -788,12 +878,17 @@ label.form-label {
 
 .form-control:focus,
 .form-select:focus {
-    border-color: var(--nhan);
-    box-shadow: 0 0 0 .2rem rgba(10, 95, 104, .15);
+    border-color: var(--vien-tieu-diem);
+    /* Cùng một cơ chế với nút (xem khối Đ1): viền đặc, không bóng mờ. Trước
+       đây ô nhập dùng bóng mờ .2rem còn nút dùng outline — hai cơ chế song
+       song cho cùng một trạng thái. */
+    outline: var(--vien-day) solid var(--vien-tieu-diem);
+    outline-offset: 1px;
+    box-shadow: none;
 }
 
 .form-text {
-    font-size: .85rem;
+    font-size: var(--chu-2);
     color: var(--chu-mo);
 }
 
@@ -808,12 +903,12 @@ label.form-label {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: .3rem;
+    gap: var(--cach-1);
     font-weight: 500;
 }
 
 .btn-sm {
-    font-size: .875rem;
+    font-size: var(--chu-2);
     padding-top: .25rem;
     padding-bottom: .25rem;
 }
@@ -852,7 +947,7 @@ label.form-label {
     font-weight: 500;
     letter-spacing: .01em;
     padding: .34em .6em;
-    border-radius: .2rem;
+    border-radius: var(--bo-1);
 }
 
 /* =====================================================================
@@ -881,38 +976,38 @@ label.form-label {
 .dang-nhap-card {
     max-width: 400px;
     width: 100%;
-    border: 1px solid var(--vach);
-    border-radius: .4rem;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, .35) !important;
+    border: var(--vien-manh) solid var(--vach);
+    border-radius: var(--bo-3);
+    box-shadow: var(--nang-3) !important;
     overflow: hidden;   /* để dải mực bo góc theo thẻ */
 }
 
 .dang-nhap-mao {
     display: flex;
     align-items: center;
-    gap: .75rem;
-    padding: 1rem 1.25rem;
+    gap: var(--cach-3);
+    padding: var(--cach-4) var(--cach-6);
     background-color: var(--muc);
-    border-bottom: 3px solid var(--nhan);
+    border-bottom: var(--vien-vach) solid var(--nhan);
 }
 
 .dang-nhap-mao > .bi {
-    font-size: 1.75rem;
-    color: #6ecfd8;
+    font-size: var(--chu-8);
+    color: var(--nhan-sang);
     flex: none;
 }
 
 .dang-nhap-mao h1 {
     margin: 0;
-    font-size: 1.02rem;
+    font-size: var(--chu-4);
     font-weight: 600;
     line-height: 1.25;
     color: #fff;
 }
 
 .dang-nhap-mao p {
-    margin: .15rem 0 0;
-    font-size: .8125rem;
+    margin: var(--cach-1) 0 0;
+    font-size: var(--chu-1);
     color: var(--muc-chu-mo);
 }
 
@@ -926,13 +1021,13 @@ label.form-label {
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    gap: .15rem;
+    gap: var(--cach-1);
     height: 100%;
     min-height: 88px;
-    padding: .85rem .9rem;
-    border: 1px solid var(--vach);
-    border-left: 3px solid var(--vach);
-    border-radius: .3rem;
+    padding: var(--cach-3) var(--cach-4);
+    border: var(--vien-manh) solid var(--vach);
+    border-left: var(--vien-vach) solid var(--vach);
+    border-radius: var(--bo-2);
     background-color: var(--be-mat);
     color: var(--chu);
     text-decoration: none;
@@ -948,20 +1043,20 @@ label.form-label {
 }
 
 .loi-tat i {
-    font-size: 1.25rem;
+    font-size: var(--chu-6);
     color: var(--nhan);
     line-height: 1;
     margin-bottom: .25rem;
 }
 
 .loi-tat span {
-    font-size: .95rem;
+    font-size: var(--chu-3);
     font-weight: 600;
     line-height: 1.2;
 }
 
 .loi-tat small {
-    font-size: .8125rem;
+    font-size: var(--chu-1);
     color: var(--chu-mo);
     line-height: 1.25;
 }
@@ -972,7 +1067,7 @@ label.form-label {
 .timeline {
     list-style: none;
     margin: 0;
-    padding: 0 0 0 1.75rem;
+    padding: 0 0 0 var(--cach-8);
     position: relative;
 }
 
@@ -988,19 +1083,21 @@ label.form-label {
 
 .timeline-item {
     position: relative;
-    padding-bottom: 1.25rem;
+    padding-bottom: var(--cach-6);
 }
 
 .timeline-item::before {
     content: "";
     position: absolute;
-    left: -1.55rem;
+    /* Bù cho .timeline nới padding-left 28px -> 32px: giữ nguyên vị trí
+       tuyệt đối của chấm để nó còn khớp đường kẻ dọc ở .timeline::before. */
+    left: -1.8rem;
     top: .35rem;
     width: .8rem;
     height: .8rem;
     border-radius: 50%;
     background-color: var(--nhan);
-    border: 2px solid var(--be-mat);
+    border: var(--vien-day) solid var(--be-mat);
     box-shadow: 0 0 0 2px var(--vach);
 }
 
@@ -1009,7 +1106,7 @@ label.form-label {
 }
 
 .timeline-time {
-    font-size: .8125rem;
+    font-size: var(--chu-1);
     color: var(--chu-mo);
     font-family: var(--chu-so-lieu);
 }
@@ -1032,7 +1129,7 @@ label.form-label {
     width: 1.6rem;
     height: .85rem;
     vertical-align: -1px;
-    border: 1px solid var(--vach);
+    border: var(--vien-manh) solid var(--vach);
     margin-right: .25rem;
 }
 
@@ -1088,10 +1185,10 @@ label.form-label {
     }
 
     .card {
-        border: 1px solid #adb5bd !important;
+        border: var(--vien-manh) solid #adb5bd !important;
         box-shadow: none !important;
         break-inside: avoid;
-        margin-bottom: .6rem !important;
+        margin-bottom: var(--cach-2) !important;
     }
 
     .card-header {
@@ -1118,7 +1215,7 @@ label.form-label {
 
     /* Huy hiệu in ra giấy chỉ còn viền — không dựa vào màu nền để truyền đạt */
     .badge {
-        border: 1px solid #495057;
+        border: var(--vien-manh) solid #495057;
         color: #000 !important;
         background-color: transparent !important;
     }
@@ -1191,7 +1288,7 @@ label.form-label {
     }
 
     .o-so-lieu {
-        padding: .35rem .75rem;
+        padding: var(--cach-1) var(--cach-3);
     }
 
     /* Đo ở 375px: khối này rộng 430px và có white-space: nowrap nên đẩy cả
@@ -1222,7 +1319,7 @@ label.form-label {
     .dai-so-lieu {
         order: 3;
         width: 100%;
-        border-top: 1px solid var(--muc-vien);
+        border-top: var(--vien-manh) solid var(--muc-vien);
     }
 }
 
@@ -1240,10 +1337,10 @@ label.form-label {
     left: -9999px;
     top: 0;
     z-index: 2000;
-    padding: .6rem 1rem;
+    padding: var(--cach-2) var(--cach-4);
     background-color: var(--nhan);
     color: #fff;
-    border-radius: 0 0 .3rem 0;
+    border-radius: 0 0 var(--bo-2) 0;
     text-decoration: none;
     font-weight: 600;
 }
@@ -1273,5 +1370,71 @@ label.form-label {
     .nav-item,
     .the-so-lieu {
         transition: none !important;
+    }
+}
+
+/* Nút chỉ có biểu tượng trong bảng: ép đủ 40x40.
+   Đo được trước đợt này: 32x40 — đủ cao nhưng hụt bề ngang, dưới ngưỡng
+   40x40 của chính dự án. Sửa ở đây chứ không ở 24 template vì mọi nút
+   thao tác trong bảng đều đi qua đúng cặp lớp này. */
+.bang-du-lieu .btn-sm {
+    min-width: var(--bang-cao-dong);
+}
+
+/* =====================================================================
+   18. BỐN TRẠNG THÁI CỦA MỌI THỨ BẤM ĐƯỢC
+   =====================================================================
+   Rà ở cổng 2 cho thấy app.css có :hover (3 lần) và :focus-visible (8 lần)
+   nhưng KHÔNG có :active và KHÔNG có :disabled lần nào — hai trong bốn
+   trạng thái phó mặc hoàn toàn cho mặc định Bootstrap. Hệ quả: nút nhấn
+   xuống không phản hồi thống nhất, và nút bị vô hiệu chỉ mờ đi bằng
+   opacity nên vẫn trông như bấm được.
+
+   Bốn trạng thái, một bộ quy tắc:
+     hover          — nhấc nhẹ, đổi nền
+     active         — lún xuống, bỏ nhấc: phản hồi xúc giác của cú bấm
+     focus-visible  — viền đặc (khối Đ1 ở trên)
+     disabled       — bỏ hẳn con trỏ và mọi hiệu ứng, không chỉ làm mờ
+   ===================================================================== */
+.btn,
+.loi-tat,
+.page-link {
+    transition: background-color .12s ease, border-color .12s ease,
+                box-shadow .12s ease, transform .06s ease;
+}
+
+.btn:active:not(:disabled),
+.page-link:active {
+    transform: translateY(1px);
+    box-shadow: var(--nang-0);
+}
+
+.loi-tat:active {
+    transform: translateY(1px);
+}
+
+.btn:disabled,
+.btn.disabled,
+fieldset:disabled .btn {
+    cursor: not-allowed;
+    box-shadow: var(--nang-0);
+    transform: none;
+}
+
+.form-control:disabled,
+.form-select:disabled,
+.form-control[readonly] {
+    cursor: not-allowed;
+    background-color: var(--nen);
+    color: var(--chu-mo);
+}
+
+/* Người xin giảm chuyển động không nhận cú lún — mục 17 tắt transition,
+   khối này tắt nốt phần biến hình. */
+@media (prefers-reduced-motion: reduce) {
+    .btn:active:not(:disabled),
+    .page-link:active,
+    .loi-tat:active {
+        transform: none;
     }
 }
