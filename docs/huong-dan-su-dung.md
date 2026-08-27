@@ -7,6 +7,25 @@
 
 ---
 
+## Cách mở phần mềm
+
+Trên màn hình nền có biểu tượng **Quản lý thuê bao & tính cước** hình cột phát sóng.
+**Nháy đúp vào đó.** Khoảng 10 giây sau, trình duyệt tự mở vào trang đăng nhập — bạn không phải
+gõ địa chỉ hay bất cứ câu lệnh nào.
+
+Một cửa sổ màu đen hiện ra và ở lại. Đó chính là phần mềm đang chạy:
+
+* **Muốn tắt phần mềm** — đóng cửa sổ màu đen đó.
+* **Lỡ đóng nhầm tab trình duyệt** — nháy đúp biểu tượng lần nữa, nó mở lại trang chứ không
+  làm chậm máy vì mở thêm bản thứ hai.
+* **Có thông báo lỗi** — thông báo luôn nói *chuyện gì xảy ra* và *bạn cần làm gì*. Làm theo
+  đúng các bước đánh số trong đó.
+
+> Chưa thấy biểu tượng trên màn hình nền? Nhờ người cài đặt chạy `khoi-dong/Tao-LoiTat.ps1`
+> một lần. Sau lần đó thì không phải làm lại nữa.
+
+---
+
 ## 1. Đăng nhập và phân quyền
 
 Mở <http://localhost:8080>. Ba tài khoản, mật khẩu đều là `123456`:

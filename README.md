@@ -51,6 +51,27 @@ Java, để dễ đối chiếu với báo cáo.
 
 ---
 
+## 2bis. Cách mở phần mềm — dành cho người dùng
+
+> Mục này dành cho người **dùng** phần mềm. Từ mục 3 trở đi là hướng dẫn cho người **dựng lại**
+> nó. Nhân viên giao dịch chỉ cần đọc mục này.
+
+**Làm một lần:** mở thư mục `khoi-dong`, bấm chuột phải vào `Tao-LoiTat.ps1` → *Run with
+PowerShell*. Trên màn hình nền hiện ra biểu tượng **Quản lý thuê bao & tính cước**.
+
+**Từ đó về sau:** nháy đúp biểu tượng đó. Khoảng 10 giây sau trình duyệt tự mở vào trang đăng
+nhập — không phải mở PowerShell, không phải gõ lệnh, không phải gõ địa chỉ.
+
+Một cửa sổ màu đen ở lại; **đóng cửa sổ đó là tắt phần mềm**. Nháy đúp lần nữa lúc đang chạy
+thì chỉ mở lại trình duyệt, không khởi động bản thứ hai.
+
+Script tự bật MySQL nếu nó đang tắt, tự đóng gói lại nếu mã nguồn mới hơn bản đóng gói, và mọi
+thông báo lỗi đều bằng tiếng Việt kèm cách xử lý. Chi tiết và cách gỡ: [`khoi-dong/README.md`](khoi-dong/README.md).
+
+> Thư mục `khoi-dong/` **không** có đường nào tới profile `reset`.
+
+---
+
 ## 3. Yêu cầu môi trường
 
 - **JDK 21** trở lên
