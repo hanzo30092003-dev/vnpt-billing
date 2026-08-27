@@ -46,14 +46,7 @@
                                 th:selected="${goiCuocId != null and goiCuocId == g.id}"></option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-search"></i> Lọc
-                    </button>
-                    <a class="btn btn-outline-secondary" th:href="@{/thue-bao}" title="Xoá bộ lọc" aria-label="Xoá bộ lọc">
-                        <i class="bi bi-x-lg"></i>
-                    </a>
-                </div>
+                <div th:replace="~{fragments/trang :: nutLoc('/thue-bao', 'col-md-2')}"></div>
             </form>
         </div>
     </div>
@@ -68,7 +61,7 @@
             </p>
 
             <div class="table-responsive">
-                <table class="table table-hover bang-du-lieu align-middle">
+                <table class="table bang-du-lieu align-middle">
                     <thead class="table-light">
                     <tr>
                         <th>Số thuê bao</th>
@@ -118,21 +111,7 @@
                 </table>
             </div>
 
-            <nav th:if="${ketQua.totalPages > 1}">
-                <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
-                    <li class="page-item" th:classappend="${ketQua.first} ? 'disabled'">
-                        <a class="page-link" th:href="@{'/thue-bao?trang=' + ${ketQua.number - 1} + ${chuoiLoc}}">Trước</a>
-                    </li>
-                    <li class="page-item"
-                        th:each="i : ${#numbers.sequence(0, ketQua.totalPages - 1)}"
-                        th:classappend="${i == ketQua.number} ? 'active'">
-                        <a class="page-link" th:href="@{'/thue-bao?trang=' + ${i} + ${chuoiLoc}}" th:text="${i + 1}"></a>
-                    </li>
-                    <li class="page-item" th:classappend="${ketQua.last} ? 'disabled'">
-                        <a class="page-link" th:href="@{'/thue-bao?trang=' + ${ketQua.number + 1} + ${chuoiLoc}}">Sau</a>
-                    </li>
-                </ul>
-            </nav>
+            <div th:replace="~{fragments/trang :: phanTrang(${ketQua}, '/thue-bao', ${chuoiLoc})}"></div>
         </div>
     </div>
 

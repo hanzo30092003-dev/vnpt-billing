@@ -15,9 +15,7 @@
      class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
     <div th:replace="~{fragments/trang :: tieuDe(${bieuTuong}, ${tieuDe}, ${moTa})}"></div>
     <div class="khong-in d-flex gap-2">
-        <a class="btn btn-outline-success btn-sm" th:href="${duongDanExcel}">
-            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
-        </a>
+        <div th:replace="~{fragments/trang :: nutExcel(${duongDanExcel})}"></div>
         <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
             <i class="bi bi-printer me-1"></i> In
         </button>

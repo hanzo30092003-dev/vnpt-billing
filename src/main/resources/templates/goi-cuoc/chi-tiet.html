@@ -126,7 +126,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover bang-du-lieu mb-0">
+                        <table class="table table-sm bang-du-lieu mb-0">
                             <thead class="table-light">
                             <tr>
                                 <th>Số thuê bao</th>
@@ -155,24 +155,7 @@
                         </table>
                     </div>
 
-                    <nav th:if="${trangThueBao.totalPages > 1}" class="mt-2">
-                        <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
-                            <li class="page-item" th:classappend="${trangThueBao.first} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{'/goi-cuoc/' + ${goiCuoc.id} + '?trang=' + ${trangThueBao.number - 1}}">Trước</a>
-                            </li>
-                            <li class="page-item"
-                                th:each="i : ${#numbers.sequence(0, trangThueBao.totalPages - 1)}"
-                                th:classappend="${i == trangThueBao.number} ? 'active'">
-                                <a class="page-link"
-                                   th:href="@{'/goi-cuoc/' + ${goiCuoc.id} + '?trang=' + ${i}}" th:text="${i + 1}"></a>
-                            </li>
-                            <li class="page-item" th:classappend="${trangThueBao.last} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{'/goi-cuoc/' + ${goiCuoc.id} + '?trang=' + ${trangThueBao.number + 1}}">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
+                    <div th:replace="~{fragments/trang :: phanTrang(${trangThueBao}, '/goi-cuoc/' + ${goiCuoc.id}, '')}"></div>
                 </div>
             </div>
         </div>

@@ -60,14 +60,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-search"></i> Lọc
-                    </button>
-                    <a class="btn btn-outline-secondary" th:href="@{/bang-gia}" title="Xoá bộ lọc" aria-label="Xoá bộ lọc">
-                        <i class="bi bi-x-lg"></i>
-                    </a>
-                </div>
+                <div th:replace="~{fragments/trang :: nutLoc('/bang-gia', 'col-md-2')}"></div>
             </form>
         </div>
     </div>
@@ -78,7 +71,7 @@
                 Tìm thấy <strong th:text="${#lists.size(danhSach)}">0</strong> dòng bảng giá.
             </p>
             <div class="table-responsive">
-                <table class="table table-hover bang-du-lieu align-middle">
+                <table class="table bang-du-lieu align-middle">
                     <thead class="table-light">
                     <tr>
                         <th>Áp dụng cho</th>

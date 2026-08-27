@@ -48,6 +48,79 @@
 <p th:fragment="moTa(chu)" class="mo-ta-trang mb-0" th:text="${chu}">Màn hình này dùng để làm gì.</p>
 
 <!--/*
+    HAI NÚT CUỐI KHỐI LỌC: "Lọc" và "Xoá bộ lọc".
+
+    Trước đợt G4, sáu màn hình danh sách vẽ cặp nút này ba kiểu khác nhau:
+        btn-outline-primary w-100  (khách hàng, thuê bao)
+        btn-outline-primary btn-sm (hóa đơn, thanh toán, công nợ)
+        btn-outline-primary        (CDR)
+    và nút xoá thì hai kiểu — chỉ biểu tượng ở hai màn hình, có chữ ở bốn.
+    Cùng một cặp việc, sáu màn hình, ba cỡ.
+
+    Lớp cột truyền vào chứ không gói cứng: mỗi khối lọc có số ô khác nhau nên
+    bề rộng cột nút phải khác. Chỉ CẶP NÚT là thống nhất.
+
+    Nút xoá luôn có chữ, không để chỉ biểu tượng: dấu X một mình không nói
+    được nó xoá bộ lọc hay xoá dữ liệu.
+*/-->
+<div th:fragment="nutLoc(duongDanGoc, lopCot)" th:class="${lopCot} + ' d-flex gap-2'">
+    <button type="submit" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-search me-1"></i> Lọc
+    </button>
+    <a class="btn btn-outline-secondary btn-sm" th:href="@{${duongDanGoc}}">
+        <i class="bi bi-x-lg me-1"></i> Xoá bộ lọc
+    </a>
+</div>
+
+<!--/*
+    Nút xuất Excel. Trước đây bốn màn hình dùng cỡ mặc định còn khối báo cáo
+    dùng btn-sm — cùng một hành động, hai cỡ.
+*/-->
+<a th:fragment="nutExcel(duongDan)" class="btn btn-outline-success btn-sm"
+   th:href="@{${duongDan}}">
+    <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+</a>
+
+<!--/*
+    KHỐI PHÂN TRANG DÙNG CHUNG.
+
+    Trước đợt G4, khối này được chép tay ở SÁU chỗ: cdr, hóa đơn, thanh toán,
+    khách hàng, thuê bao và chi tiết gói cước. Sáu bản đã trôi ra hai nhánh —
+    ba bản có flex-wrap, ba bản không — nên cùng một danh sách nhiều trang thì
+    ở màn hình này dãy số xuống dòng, ở màn hình kia đẩy ngang.
+
+    Ba tham số:
+        trang     — đối tượng Page của Spring Data
+        duongDan  — đường dẫn gốc, ví dụ '/hoa-don' hoặc '/goi-cuoc/' + id
+        chuoiLoc  — chuỗi truy vấn của bộ lọc, truyền '' nếu màn hình không lọc
+
+    Cửa sổ ±3 trang quanh trang hiện tại. Bản ở chi tiết gói cước trước đây
+    liệt kê MỌI trang; gói cước nào có nhiều thuê bao thì dãy số dài bằng cả
+    bảng. Nay nó theo cùng luật với năm màn hình kia.
+*/-->
+<nav th:fragment="phanTrang(trang, duongDan, chuoiLoc)"
+     th:if="${trang.totalPages > 1}" class="mt-3">
+    <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
+        <li class="page-item" th:classappend="${trang.first} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{${duongDan} + '?trang=' + ${trang.number - 1} + ${chuoiLoc}}">Trước</a>
+        </li>
+        <li class="page-item"
+            th:each="i : ${#numbers.sequence(
+                trang.number - 3 < 0 ? 0 : trang.number - 3,
+                trang.number + 3 >= trang.totalPages ? trang.totalPages - 1 : trang.number + 3)}"
+            th:classappend="${i == trang.number} ? 'active'">
+            <a class="page-link"
+               th:href="@{${duongDan} + '?trang=' + ${i} + ${chuoiLoc}}" th:text="${i + 1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${trang.last} ? 'disabled'">
+            <a class="page-link"
+               th:href="@{${duongDan} + '?trang=' + ${trang.number + 1} + ${chuoiLoc}}">Sau</a>
+        </li>
+    </ul>
+</nav>
+
+<!--/*
     Bảng rỗng. Thay cho một dòng "Không có dữ liệu" cụt lủn.
 
     Một bảng trống làm người mới dùng đứng lại: họ không biết là mình lọc hụt,

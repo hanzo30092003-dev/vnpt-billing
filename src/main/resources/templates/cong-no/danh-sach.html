@@ -9,9 +9,7 @@
         <div th:replace="~{fragments/trang :: tieuDe(
                 'bi-exclamation-circle', 'Công nợ',
                 'Khách nào đang nợ, nợ bao lâu và nợ bao nhiêu. Kèm danh sách thuê bao nên tạm ngừng.')}"></div>
-        <a class="btn btn-outline-success" th:href="@{'/cong-no/xuat-excel?' + ${chuoiLoc}}">
-            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
-        </a>
+        <div th:replace="~{fragments/trang :: nutExcel('/cong-no/xuat-excel?' + ${chuoiLoc})}"></div>
     </div>
 
     <!--/* ---------- Bang tuoi no + bieu do ---------- */-->
@@ -84,7 +82,7 @@
                 khai khi đăng ký thuê bao, xem ở màn hình chi tiết thuê bao.
             </p>
             <div class="table-responsive">
-                <table class="table table-sm table-hover bang-du-lieu align-middle mb-0">
+                <table class="table table-sm bang-du-lieu align-middle mb-0">
                     <thead class="table-light">
                     <tr>
                         <th>Số thuê bao</th>
@@ -141,7 +139,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                <table class="table table-sm bang-du-lieu mb-0">
                     <thead class="table-light">
                     <tr>
                         <th>Số thuê bao</th>
@@ -207,17 +205,12 @@
                                 th:selected="${n == nhomTuoiNo}"></option>
                     </select>
                 </div>
-                <div class="col-md-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-search me-1"></i> Lọc
-                    </button>
-                    <a class="btn btn-outline-secondary btn-sm" th:href="@{/cong-no}">Xoá bộ lọc</a>
-                </div>
+                <div th:replace="~{fragments/trang :: nutLoc('/cong-no', 'col-md-4')}"></div>
             </form>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-sm table-hover bang-du-lieu mb-0">
+                <table class="table table-sm bang-du-lieu mb-0">
                     <thead class="table-light">
                     <tr>
                         <th>Mã hóa đơn</th>

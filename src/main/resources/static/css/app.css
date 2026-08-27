@@ -745,6 +745,16 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0;
 }
 
+/* NGUỒN DUY NHẤT của hiệu ứng rê chuột trên mọi bảng dữ liệu.
+
+   Đợt G4 đã gỡ lớp .table-hover khỏi 23 template vì nó không đóng góp gì:
+   dựng đối chứng bằng cách nhân bản đúng hai quy tắc rồi thay :hover bằng
+   một lớp, hai bảng — một có .table-hover một không — cho ra CÙNG màu
+   rgb(232,243,244). Quy tắc này thắng nhờ độ đặc hiệu (0,2,2) so với
+   (0,1,2) của Bootstrap.
+
+   Hệ quả: bỏ quy tắc này là MẤT hover trên toàn bộ phần mềm, không còn
+   .table-hover đỡ nữa. */
 .bang-du-lieu tbody tr:hover > * {
     background-color: var(--nhan-nhat);
 }
