@@ -186,6 +186,13 @@
        tiêu điểm mặc định rgba(13,110,253,.25) trộn ra #b4cff6 = 1,38:1, vừa
        trượt ngưỡng 3:1 vừa là màu xanh dương không có trong bảng màu này. */
     --bs-focus-ring-color: var(--vien-tieu-diem);
+
+    /* .text-secondary giai ra tu --bs-secondary-rgb, KHONG phai tu
+       --bs-secondary-color. Gia tri goc 108,117,125 (#6c757d) cho 4,07:1
+       tren --nen va 4,45:1 tren #f8f9fa — ca hai duoi 4,5:1. Do la mau CHU,
+       khac cho voi nut vien da sua o khoi D3.
+       92,102,112 la --chu-mo: 5,07:1 tren --nen. */
+    --bs-secondary-rgb: 92, 102, 112;
 }
 
 /* =====================================================================
