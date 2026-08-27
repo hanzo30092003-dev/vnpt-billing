@@ -163,7 +163,8 @@ Phase 0–8 ✅. **Đang chạy đợt hoàn thiện** theo
 
 **Dữ liệu hiện tại:** **6 kỳ cước** (3, 4, 5/2026 `DA_CHOT` · 6, 7, 8/2026 `MO`; **kỳ 8 rỗng có chủ đích**) · 18.723 CDR (tất
 cả `DA_TINH`) · **280 hóa đơn** (55 · 55 · 54 · 58 · 58) · 620 chi tiết hóa đơn · **161 thanh
-toán** (kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · kỳ 6–8: **0**) · 34 dòng `bien_dong_so_du` · 2 giảm trừ.
+toán** (kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · kỳ 6–8: **0**) · **35 dòng** `bien_dong_so_du`
+(18 `DIEU_CHINH` mở sổ · 16 `TRU_CUOC` · **1 `NAP_TIEN`** thêm ở đợt G5) · 2 giảm trừ.
 
 Tiền: doanh thu **111.513.012 đ**, đã thu **49.190.687 đ**, còn nợ **62.322.325 đ** (44,1%).
 Chi tiết bàn giao: `PHASE-6-REPORT.md` mục 14.
@@ -187,6 +188,13 @@ dump** `data-van-hanh.sql`.
 * **Kỳ 6 và kỳ 7 phải giữ 0 giao dịch thanh toán.** Có thanh toán là `huyBillingKy` từ chối xoá
   hóa đơn, và mất luôn hai kỳ còn demo được trọn vòng huỷ → lập lại.
 * `db/data-van-hanh.sql` là **bản dump**, không phải file soạn tay — sửa qua service rồi dump lại.
+* **Mục 6 và mục 7 của `data-van-hanh.sql` phải sửa CÙNG NHAU.** Mục 6 dump
+  `bien_dong_so_du`, mục 7 là câu UPDATE *suy ra* số dư từ chính các dòng đó. Sửa một chỗ là
+  `reset` vỡ bất biến sổ cái: thêm loại biến động vào mục 6 mà quên mục 7 thì dòng nạp bị
+  **trừ thay vì cộng**. Bộ lọc dump hiện là `IN ('TRU_CUOC','NAP_TIEN')` và công thức mục 7
+  phân dấu theo loại. Cách kiểm mà **không** phải chạy `reset`: đọc `so_du` gốc từ
+  `data-mau.sql`, gộp sổ cái của cả hai file, áp công thức mục 7, so với CSDL đang chạy — đợt
+  G5 làm vậy, ra 0 lệch trên cả 80 thuê bao.
 * **Quét quá hạn chỉ chạm hóa đơn chưa thu đồng nào** — bỏ điều kiện đó thì `TT_MOT_PHAN` thành
   trạng thái không thể tồn tại sau hạn.
 * Mọi truy vấn thống kê **gom nhóm trong CSDL** (`SELECT new` + `GROUP BY`), không load entity

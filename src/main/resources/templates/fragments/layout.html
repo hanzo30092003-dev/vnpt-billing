@@ -274,8 +274,14 @@
                     </li>
                     <li class="breadcrumb-item" th:each="m, lap : ${breadcrumb}"
                         th:classappend="${lap.last} ? 'active'">
-                        <span th:if="${lap.last}" th:text="${m.nhan}">Trang</span>
-                        <a th:unless="${lap.last}" class="text-decoration-none"
+                        <!--/*
+                            Mắt xích chỉ thành liên kết khi LayoutAdvice xác nhận đường dẫn đó
+                            có controller phục vụ (duongDan != null). Trước đợt này mọi mắt xích
+                            giữa đều là liên kết, nên /thanh-toan/moi và /tinh-cuoc/ky — hai
+                            đoạn đường dẫn không có màn hình nào — bấm vào ra 404.
+                        */-->
+                        <span th:if="${lap.last or m.duongDan == null}" th:text="${m.nhan}">Trang</span>
+                        <a th:unless="${lap.last or m.duongDan == null}" class="text-decoration-none"
                            th:href="@{${m.duongDan}}" th:text="${m.nhan}">Mục</a>
                     </li>
                 </ol>

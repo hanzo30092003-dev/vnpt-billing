@@ -10,8 +10,11 @@ import com.hanzo.billing.repository.KyCuocRepository;
 import com.hanzo.billing.util.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -19,6 +22,9 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Đưa sẵn vài giá trị dùng chung cho mọi view.
@@ -33,6 +39,16 @@ public class LayoutAdvice {
     private final KyCuocRepository kyCuocRepository;
     private final ChiTietSuDungRepository chiTietSuDungRepository;
     private final HoaDonRepository hoaDonRepository;
+
+    /**
+     * Sổ đường dẫn của ứng dụng.
+     *
+     * <p>Dùng {@link ObjectProvider} chứ không tiêm thẳng: {@code RequestMappingHandlerMapping}
+     * được dựng SAU lớp advice này, tiêm thẳng là vòng phụ thuộc lúc khởi động.</p>
+     */
+    private final ObjectProvider<RequestMappingHandlerMapping> soDuongDan;
+
+    private volatile Set<String> duongDanGet;
 
     /**
      * Bốn con số trên thanh máy, ứng với bốn câu hỏi người vận hành hỏi mỗi sáng.
@@ -79,8 +95,58 @@ public class LayoutAdvice {
                 hoaDonRepository.tongConNoToanHeThong());
     }
 
-    /** Một mắt xích của breadcrumb. */
+    /**
+     * Một mắt xích của breadcrumb.
+     *
+     * @param duongDan {@code null} nghĩa là mắt xích này KHÔNG bấm được — template dựng nó
+     *                 thành chữ thường thay vì liên kết.
+     */
     public record MatXich(String nhan, String duongDan) {
+    }
+
+    /**
+     * Những đường dẫn GET <b>tĩnh</b> (không chứa biến đường dẫn) mà ứng dụng thật sự phục vụ.
+     *
+     * <p>Vì sao cần: breadcrumb suy mắt xích từ từng đoạn của đường dẫn, nên nó sinh ra cả
+     * những đoạn <b>không có controller nào phục vụ</b>. Ở màn hình ghi nhận thanh toán
+     * {@code /thanh-toan/moi/461}, nó sinh mắt xích {@code /thanh-toan/moi} — bấm vào ra
+     * <b>404</b>. Tương tự {@code /tinh-cuoc/ky}. Đo được ở đợt rà tính năng: 2 trong 12 mắt
+     * xích hỏng, và một trong hai nằm trên màn hình kế toán dùng hằng ngày.</p>
+     *
+     * <p>Hỏi thẳng Spring thay vì giữ một danh sách khai tay: danh sách khai tay sẽ lệch ngay
+     * lần đầu ai đó thêm màn hình mới, và lệch <b>im lặng</b>.</p>
+     */
+    private Set<String> duongDanGet() {
+        Set<String> daCo = duongDanGet;
+        if (daCo != null) {
+            return daCo;
+        }
+        RequestMappingHandlerMapping anhXa = soDuongDan.getIfAvailable();
+        if (anhXa == null) {
+            return Set.of();   // chưa dựng xong: coi như không mắt xích nào bấm được
+        }
+        Set<String> tap = anhXa.getHandlerMethods().keySet().stream()
+                .filter(LayoutAdvice::laGet)
+                .flatMap(LayoutAdvice::mauDuongDan)
+                .filter(d -> !d.contains("{"))
+                .collect(Collectors.toUnmodifiableSet());
+        duongDanGet = tap;
+        return tap;
+    }
+
+    private static boolean laGet(RequestMappingInfo thongTin) {
+        var pt = thongTin.getMethodsCondition().getMethods();
+        return pt.isEmpty() || pt.stream().anyMatch(m -> "GET".equals(m.name()));
+    }
+
+    private static Stream<String> mauDuongDan(RequestMappingInfo thongTin) {
+        if (thongTin.getPathPatternsCondition() != null) {
+            return thongTin.getPathPatternsCondition().getPatternValues().stream();
+        }
+        if (thongTin.getPatternsCondition() != null) {
+            return thongTin.getPatternsCondition().getPatterns().stream();
+        }
+        return Stream.empty();
     }
 
     /**
@@ -173,13 +239,17 @@ public class LayoutAdvice {
             String nhan = laDoanDau
                     ? TEN_PHAN_HE.getOrDefault(d, viHoaChuDau(d))
                     : TEN_TRANG_CON.getOrDefault(d, viHoaChuDau(d));
-            matXich.add(new MatXich(nhan, daDi.toString()));
+            // Chỉ gắn liên kết khi đường dẫn đó THẬT SỰ có controller phục vụ; nếu không thì
+            // để null và template dựng thành chữ thường. Xem javadoc của duongDanGet().
+            String dich = duongDanGet().contains(daDi.toString()) ? daDi.toString() : null;
+            matXich.add(new MatXich(nhan, dich));
             laDoanDau = false;
         }
 
         // Chi tiết một bản ghi: đường dẫn kết thúc bằng id nên không sinh mắt xích nào cho nó
         if (!matXich.isEmpty() && duongDan.matches(".*/\\d+/?$")) {
-            matXich.add(new MatXich("Chi tiết", duongDan));
+            // Mắt xích cuối là chính trang đang mở — không bấm được, để null cho nhất quán.
+            matXich.add(new MatXich("Chi tiết", null));
         }
         return matXich;
     }

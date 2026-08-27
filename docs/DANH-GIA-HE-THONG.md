@@ -245,7 +245,7 @@ CSRF bật mặc định, Thymeleaf tự thoát HTML (đã kiểm chống XSS), 
 | Đối soát liên mạng, chuyển vùng | Không tính được cước gọi sang mạng khác / ra nước ngoài đúng nghĩa |
 | Quy trình nhắc nợ tự động (dunning) | Hiện chỉ *gợi ý* tạm ngừng, người dùng tự bấm |
 | Quản lý kho số, hợp đồng | Số thuê bao nhập tay, không có vòng đời số |
-| Cưỡng chế hạn mức tín dụng | Cột `hanMucTinDung` **có lưu nhưng không chỗ nào dùng để chặn** — cột chết |
+| Cưỡng chế hạn mức tín dụng **tự động** | Đợt V2 đã làm cột `hanMucTinDung` sống lại: `HoaDonRepository.timThueBaoVuotHanMuc()` dùng nó, và `/cong-no` có bảng *Thuê bao vượt hạn mức*. Nhưng đó là **cảnh báo để người dùng tự xử**, chưa phải cưỡng chế — hệ thống không tự chặn cuộc gọi |
 | Thu tiền đa kênh, đối soát ngân hàng | Chỉ ghi nhận thủ công ba hình thức |
 | Cổng tự phục vụ cho khách hàng | Khách không tra được cước của mình |
 
