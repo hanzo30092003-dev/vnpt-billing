@@ -36,8 +36,11 @@ Năm nhóm, xếp theo thứ tự bạn hay dùng trong ngày:
 ### Trang chủ có sẵn lối tắt
 
 Ngay dưới các thẻ số liệu là khối **Việc thường làm** với 6 nút lớn: *Thêm khách hàng*,
-*Đăng ký thuê bao*, *Tra cứu hóa đơn*, *Ghi nhận thanh toán*, *Tính tiền hằng tháng*,
+*Đăng ký thuê bao*, *Tra cứu hóa đơn*, *Tra cứu để thu tiền*, *Tính tiền hằng tháng*,
 *Xem báo cáo*. Chưa quen menu thì cứ bắt đầu từ đó.
+
+> *Tra cứu để thu tiền* đưa bạn tới màn hình **Công nợ** để tìm hóa đơn còn nợ của khách.
+> Nút **Ghi nhận thanh toán** nằm trên màn hình chi tiết hóa đơn, mở từ đó.
 
 ### Mỗi màn hình tự giải thích
 

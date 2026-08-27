@@ -71,7 +71,7 @@ nêu chỗ hở, nhưng **đánh dấu rõ** mục nào chạm tầng được b
 | Quản lý thuê bao (đăng ký, 4 trạng thái, đổi gói) | đầy đủ | ✓ | ✅ | `ThueBaoController` 6 route |
 | Gói cước và bảng giá | đầy đủ | ✓ | ✅ | `GoiCuocController` 5 · `BangGiaController` 5 |
 | Ghi nhận sử dụng — sinh CDR | đầy đủ | ✓ | ✅ | `CdrGeneratorService`, có hạt giống |
-| Ghi nhận sử dụng — **nhập CDR từ CSV** | đầy đủ | ✓ | ⚠️ | có mã + màn hình, **0 phép kiểm** — xem 🔴-2 |
+| Ghi nhận sử dụng — **nhập CDR từ CSV** | đầy đủ | ✓ | ✅ | **27 phép kiểm** thêm ở G6 (trước là 0) |
 | Engine tính cước (rating) | đầy đủ | ✓ | ✅ | `RatingService` 23 test |
 | Lập hóa đơn (billing) | đầy đủ | ✓ | ✅ | `BillingService` 30 test |
 | Prorate cước thuê bao theo ngày | đầy đủ | ✓ | ✅ | `BillingService:218`, 6 hóa đơn thật |
@@ -152,7 +152,7 @@ lên vệt bánh mì, bấm — ra trang lỗi.
 > **Đối chứng âm** cho phép kiểm này: cho nó 2 đường chắc chắn sống và 3 đường chắc chắn chết —
 > khớp đúng cả 5/5. Nó phân biệt được hai chiều, nên con số "2 hỏng / 12" là thật.
 
-#### 🔴-2 — Nhập CDR từ CSV: có mã, có màn hình, tới được từ menu, **0 phép kiểm** · *chưa sửa*
+#### 🔴-2 — Nhập CDR từ CSV: có mã, có màn hình, tới được từ menu, **0 phép kiểm** · **ĐÃ SỬA 27/08**
 
 | Mức | Kết quả |
 |---|---|
@@ -299,8 +299,8 @@ nhánh/đơn vị.
 | **1** ✅ | Sửa vệt bánh mì 404 — bỏ mắt xích cho đoạn không có controller | **S** | Lỗi duy nhất hội đồng **nhìn thấy** trên đường demo | **Đã làm 27/08.** Hỏi thẳng Spring qua `RequestMappingHandlerMapping` thay vì giữ danh sách khai tay. Đo lại: 0/10 mắt xích hỏng |
 | **2** ✅ | Sửa `DANH-GIA-HE-THONG.md:248` — hạn mức không còn là cột chết | **S** | Tài liệu là **sản phẩm nộp** | **Đã làm 27/08** |
 | **3** ✅ | Nạp một giao dịch `NAP_TIEN` vào bộ dữ liệu mẫu | **S** | Để kịch bản 4 có dòng lịch sử chỉ vào | **Đã làm 27/08.** Nạp 100.000 đ thẻ cào cho `0818901208` qua giao diện; dump lại mục 6 và sửa công thức mục 7 |
-| **4** | Thêm phép kiểm cho `/cdr/import` | **M** (1–2 giờ) | Chức năng duy nhất trong phạm vi cam kết không có phép kiểm nào | Thấp. Thêm mới, không sửa cũ. **Chạm `src/test/`** |
-| **5** | Đổi chữ lối tắt "Ghi nhận thanh toán" → "Tra cứu để thu tiền" | **S** (10 phút) | Nhãn đang hứa một việc mà màn hình đích không làm | Thấp. `kiem-tu-ngu.py` + `kiem-giao-dien.py` phải chạy lại |
+| **4** ✅ | Thêm phép kiểm cho `/cdr/import` | **M** | Chức năng duy nhất trong phạm vi cam kết không có phép kiểm nào | **Đã làm 27/08.** 27 phép kiểm Mockito, không ghi dòng nào vào CSDL |
+| **5** ✅ | Đổi chữ lối tắt "Ghi nhận thanh toán" → "Tra cứu để thu tiền" | **S** | Nhãn đang hứa một việc mà màn hình đích không làm | **Đã làm 27/08** |
 
 Mục 1 và 2 nên làm **trước khi chụp 70 ảnh** — mục 1 đổi trang, mục 2 đổi tài liệu sẽ in kèm.
 
@@ -327,8 +327,8 @@ thì đứt ở **một mắt xích đã được ghi là cố ý không làm** 
 liệu mẫu chứ không thiếu chức năng** (nạp tiền). Phần làm thêm ngoài cam kết — quản trị người
 dùng, đổi mật khẩu, nhật ký — là điểm cộng.
 
-**Cập nhật 27/08:** ba việc S (mục 1, 2, 3) **đã làm xong** — xem `docs/G5-REPORT.md`. Còn lại
-mục 4 (phép kiểm cho nhập CSV) và mục 5 (đổi chữ lối tắt), cả hai đều không chặn việc bảo vệ.
+**Cập nhật 27/08:** **cả năm mục đã làm xong** — mục 1–3 ở `docs/G5-REPORT.md`, mục 4–5 ở
+`docs/G6-REPORT.md`. Không còn khuyến nghị nào treo.
 
 Điều đáng nói nhất khi bảo vệ **không phải** là danh sách tính năng, mà là: mọi thứ cố ý không
 làm đều có vết trong tài liệu, kèm lý do. Đó là thứ hiếm hơn một phân hệ nữa.

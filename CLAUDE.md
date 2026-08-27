@@ -58,7 +58,7 @@ mvnw spring-boot:run
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-Chạy test (315 test, cần MySQL đang chạy):
+Chạy test (342 test, cần MySQL đang chạy):
 
 ```bash
 mvnw test

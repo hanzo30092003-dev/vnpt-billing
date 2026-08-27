@@ -60,8 +60,14 @@
                 <div class="col" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
                     <a class="loi-tat" th:href="@{/cong-no}">
                         <i class="bi bi-cash-coin"></i>
-                        <span>Ghi nhận thanh toán</span>
-                        <small>Khách vừa trả tiền</small>
+                        <!--/*
+                            Nhãn nói đúng thứ màn hình đích LÀM, không nói thứ người dùng muốn.
+                            Lối tắt này dẫn tới /cong-no — màn hình đó chứa 0 nút "Ghi nhận thanh
+                            toán"; nút thật nằm trên chi tiết hóa đơn, cách đây ba lần bấm nữa.
+                            Nhãn cũ hứa một việc mà chỗ nó dẫn tới không làm được.
+                        */-->
+                        <span>Tra cứu để thu tiền</span>
+                        <small>Tìm hóa đơn còn nợ của khách</small>
                     </a>
                 </div>
 

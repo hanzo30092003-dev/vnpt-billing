@@ -179,7 +179,7 @@ thích bằng một câu — đó là số học, không phải lỗi. Chi tiế
 
 | # | Ảnh | Cách lấy | Điểm cần thấy rõ |
 |---|---|---|---|
-| 51 | **Kết quả 315 test** | Console `mvnw test` | Dòng `Tests run: 315, Failures: 0` |
+| 51 | **Kết quả 342 test** | Console `mvnw test` | Dòng `Tests run: 342, Failures: 0` |
 | 52 | ⭐ **Test ĐỎ → XANH** | Cố ý `UPDATE thue_bao SET so_du = so_du + 1000 WHERE id = 1`, chạy `KiemTraSoCaiSoDuTest` → đỏ; khôi phục → xanh | Hai ảnh cạnh nhau; thông báo lỗi nêu **đúng thuê bao và số chênh** |
 | 53 | Test bất biến thanh toán | Chạy `KiemTraBatBienThanhToanTest` | 4 test xanh |
 | 54 | Test hạt giống bộ sinh CDR | Chạy `CdrGeneratorHatGiongTest` | 3 test xanh |

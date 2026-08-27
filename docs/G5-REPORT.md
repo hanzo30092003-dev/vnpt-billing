@@ -166,10 +166,10 @@ Một lần `reset` sau này sẽ dựng lại đúng trạng thái hiện tại
 
 ## Còn lại từ bản rà tính năng
 
-| | Vì sao chưa làm |
+| | Trạng thái |
 |---|---|
-| **Mục 4** — phép kiểm cho `/cdr/import` | **M** (1–2 giờ), không chặn việc bảo vệ. Vẫn là chức năng duy nhất trong phạm vi cam kết không có phép kiểm nào |
-| **Mục 5** — đổi chữ lối tắt *"Ghi nhận thanh toán"* | **S**, nhưng chạm chữ hiển thị nên phải chạy lại `kiem-tu-ngu.py` và `kiem-giao-dien.py`; để cùng đợt với mục 4 |
+| **Mục 4** — phép kiểm cho `/cdr/import` | ✅ **đã làm ở đợt G6** — 27 phép kiểm, xem `docs/G6-REPORT.md` |
+| **Mục 5** — đổi chữ lối tắt *"Ghi nhận thanh toán"* | ✅ **đã làm ở đợt G6** |
 
 Kết luận của bản rà tính năng **không đổi**: phần mềm đã đủ tính năng cốt lõi để bảo vệ đồ án.
 Ba việc này chỉ dọn ba chỗ hội đồng có thể chạm phải.
