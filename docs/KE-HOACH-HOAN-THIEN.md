@@ -280,7 +280,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **G3** script khởi động `chay.cmd` | ✅ xong | `f8d60d6` |
 | **G4** nâng cấp thị giác ở tầng token và fragment | ✅ xong — xem `docs/G4-REPORT.md` | `623bba7` `6a4108a` `5f8824e` |
 | **G5** ba việc S sau đợt rà tính năng | ✅ xong — xem `docs/G5-REPORT.md` | `b7a5015` |
-| **G6** hai mục cuối của bản rà tính năng | ✅ xong — xem `docs/G6-REPORT.md` | `(ghi sau)` |
+| **G6** hai mục cuối của bản rà tính năng | ✅ xong — xem `docs/G6-REPORT.md` | `2df1eff` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
