@@ -161,17 +161,22 @@ Phase 0–8 ✅. **Đang chạy đợt hoàn thiện** theo
 | 7 | Hoàn thiện, kiểm thử, tài liệu | `docs/PHASE-7-REPORT.md` |
 | 8 | Làm lại giao diện cho người không rành công nghệ | `docs/PHASE-8-REPORT.md` |
 
-**Dữ liệu hiện tại:** **6 kỳ cước** (3, 4, 5/2026 `DA_CHOT` · 6, 7, 8/2026 `MO`; **kỳ 8 rỗng có chủ đích**) · 18.723 CDR (tất
-cả `DA_TINH`) · **280 hóa đơn** (55 · 55 · 54 · 58 · 58) · 620 chi tiết hóa đơn · **161 thanh
-toán** (kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · kỳ 6–8: **0**) · **35 dòng** `bien_dong_so_du`
-(18 `DIEU_CHINH` mở sổ · 16 `TRU_CUOC` · **1 `NAP_TIEN`** thêm ở đợt G5) · 2 giảm trừ.
+**Dữ liệu hiện tại** *(cập nhật đợt G8)***:** **7 kỳ cước** (3, 4, 5, 8/2026 `DA_CHOT` · 6, 7,
+9/2026 `MO`; **kỳ 9 rỗng có chủ đích**) · 23.223 CDR (tất cả `DA_TINH`) · **338 hóa đơn**
+(55 · 55 · 54 · 58 · 58 · 58) · 753 chi tiết hóa đơn · **161 thanh toán** (kỳ 3: 58 · kỳ 4: 55 ·
+kỳ 5: 48 · kỳ 6–9: **0**) · **50 dòng** `bien_dong_so_du` (18 `DIEU_CHINH` mở sổ · 31
+`TRU_CUOC` từ kỳ 6 và kỳ 8 · **1 `NAP_TIEN`** thêm ở đợt G5) · 2 giảm trừ.
 
-Tiền: doanh thu **111.513.012 đ**, đã thu **49.190.687 đ**, còn nợ **62.322.325 đ** (44,1%).
-Chi tiết bàn giao: `PHASE-6-REPORT.md` mục 14.
+Tiền: doanh thu **135.038.984 đ**, đã thu **49.190.687 đ**, còn nợ **85.848.297 đ** (tỷ lệ thu
+**36,4%**). Chi tiết bàn giao: `PHASE-6-REPORT.md` mục 14.
+
+> **Bảng tuổi nợ đủ 5 nhóm chỉ tới hết 15/09/2026.** Nhóm *Trong hạn* do 58 hóa đơn kỳ 8 lấp
+> vào, hạn thanh toán 15/09. Sau mốc đó chúng rơi sang *Quá hạn 1–30* và bảng lại còn 4 nhóm.
+> Đây là tính chất của **ngày xem**, không phải của dữ liệu. Xem `G8-REPORT.md`.
 
 **Hạt giống CDR** (thứ duy nhất dựng lại được dữ liệu nếu mất): kỳ 3 `20260300` · kỳ 4
-`20260400` · kỳ 7 `20260700`. Kỳ 5 và 6 sinh trước khi có tham số hạt giống nên **chỉ còn bản
-dump** `data-van-hanh.sql`.
+`20260400` · kỳ 7 `20260700` · kỳ 8 `20260800`. Kỳ 5 và 6 sinh trước khi có tham số hạt giống
+nên **chỉ còn bản dump** `data-van-hanh.sql`.
 
 **Ràng buộc sinh ra ở Phase 5 — đừng phá:**
 
@@ -184,7 +189,13 @@ dump** `data-van-hanh.sql`.
   trạng thái không thể tồn tại sau ngày hết hạn — xem báo cáo mục 23.2.
 * Quy tắc dấu chỉ nằm trong enum `LoaiBienDongSoDu`, không chép ra chỗ khác.
 * Trừ cước **không giao hoán theo kỳ**; `huyRatingKy` bị chặn khi kỳ đã trừ cước.
-* **Kỳ 8/2026 phải giữ RỖNG** — đó là kỳ demo trực tiếp và là kỳ kiểm "màn hình chịu được kỳ rỗng".
+* **Kỳ 9/2026 phải giữ RỖNG** — đó là kỳ demo trực tiếp và là kỳ kiểm "màn hình chịu được kỳ
+  rỗng". *(Trước đợt G8 vai này thuộc kỳ 8; kỳ 8 nay đã chạy trọn và `DA_CHOT` để lấp nhóm
+  "Trong hạn" của bảng tuổi nợ.)*
+* **Trừ cước trả trước bị chặn khi một kỳ MUỘN HƠN đã trừ.** Kỳ 8 đã trừ, nên kỳ 7 **không trừ
+  được nữa** cho tới khi huỷ trừ cước kỳ 8. Đây là trạng thái có chủ đích, không phải thiếu sót
+  — nút *Trừ cước trả trước* của kỳ 7 vẫn hiện nhưng sẽ báo lỗi nghiệp vụ giải thích rõ lý do.
+  `huyBillingKy` **không** bị ràng buộc này, nên kỳ 6 và kỳ 7 vẫn huỷ hóa đơn được như trước.
 * **Kỳ 6 và kỳ 7 phải giữ 0 giao dịch thanh toán.** Có thanh toán là `huyBillingKy` từ chối xoá
   hóa đơn, và mất luôn hai kỳ còn demo được trọn vòng huỷ → lập lại.
 * `db/data-van-hanh.sql` là **bản dump**, không phải file soạn tay — sửa qua service rồi dump lại.

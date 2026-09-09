@@ -192,8 +192,8 @@ Hai file chạy nối tiếp khi `reset`, ranh giới giữa chúng là ranh gi�
 
 | File | Nội dung | Nguồn gốc |
 |---|---|---|
-| `db/data-mau.sql` | 3 tài khoản · 50 khách hàng · 80 thuê bao · 5 gói cước · 10 dòng bảng giá · **6 kỳ cước** · 18 dòng mở sổ số dư | Viết tay — sửa được |
-| `db/data-van-hanh.sql` | 18.723 CDR đã định giá · 280 hóa đơn · 620 chi tiết · 161 thanh toán · 34 dòng sổ cái số dư · 2 giảm trừ | **Bản dump** do máy sinh |
+| `db/data-mau.sql` | 3 tài khoản · 50 khách hàng · 80 thuê bao · 5 gói cước · 10 dòng bảng giá · **7 kỳ cước** · 18 dòng mở sổ số dư | Viết tay — sửa được |
+| `db/data-van-hanh.sql` | 23.223 CDR đã định giá · 338 hóa đơn · 753 chi tiết · 161 thanh toán · 32 dòng sổ cái số dư · 2 giảm trừ | **Bản dump** do máy sinh |
 
 Sáu kỳ cước sau khi nạp:
 
@@ -261,7 +261,7 @@ bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng 
 | `test-muc-F.ps1` | 17 | Bất biến thanh toán và công nợ |
 | `test-bao-cao.ps1` | 39 | 7 báo cáo + dashboard + xuất Excel |
 | `test-dieu-huong.ps1` | 15 | **Đi theo link thật** trên trang, không gõ URL |
-| `test-ky-rong.ps1` | 28 | Kỳ 8/2026 rỗng: 17 màn hình + 4 Excel + 3 thao tác |
+| `test-ky-rong.ps1` | 28 | Kỳ 9/2026 rỗng: 17 màn hình + 4 Excel + 3 thao tác |
 | `test-bien.ps1` | 42 | Tham số biên, dữ liệu xấu, 12 × 403 |
 
 Ba phép kiểm tĩnh đọc thẳng từ template, không cần ứng dụng chạy:

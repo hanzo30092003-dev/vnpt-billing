@@ -41,41 +41,53 @@ cáo cuối**. Đăng nhập `admin` trừ khi ghi khác.
 
 ## 🔴 ĐỌC TRƯỚC — ba ảnh phụ thuộc thời điểm
 
-> ### ✅ Đã quyết: **cách A — chấp nhận 4 nhóm, giải thích bằng một câu** (việc N3)
+> ### ✅ Quyết định hiện hành *(đợt G8, 09/09/2026)*: **đủ 5 nhóm, và phải chụp trước 15/09/2026**
 >
-> Mốc 14/08/2026 đã qua. **Không dời hạn thanh toán, không thêm kỳ 9** để ép ảnh đẹp: cách B và
-> C đều đụng dữ liệu vận hành đúng lúc không nên đụng gì cả, và bản thân việc *giải thích được
-> vì sao chỉ còn 4 nhóm* đã là điểm cộng — nó cho thấy người viết hiểu bảng tuổi nợ phụ thuộc
-> **ngày xem**, không phải phụ thuộc dữ liệu.
+> **Quyết định cũ (việc N3) đã bị thay.** Trước đây chốt *"chấp nhận 4 nhóm, giải thích bằng một
+> câu"*, với lý do không nên đụng dữ liệu vận hành chỉ để ép ảnh đẹp. Lý do đó vẫn đúng — nhưng
+> đợt G8 thêm kỳ 8/2026 **vì một lý do khác**: kỳ cước mới nhất khi đó là 7/2026 kết thúc 31/07,
+> trong khi demo diễn ra đầu tháng 9. Một phần mềm tính cước có kỳ gần nhất cũ gần hai tháng
+> trông như hệ thống bị bỏ quên — đó là vấn đề của **sản phẩm**, không phải của tấm ảnh. Nhóm
+> *Trong hạn* đầy trở lại là **hệ quả**, không phải mục đích.
+>
+> Kỳ 8 đã chạy trọn vòng qua giao diện (4.500 CDR, hạt giống `20260800`, 58 hóa đơn, chốt kỳ) và
+> **cố ý không có giao dịch thanh toán nào**, nên 58 hóa đơn ở `CHUA_TT` với hạn 15/09/2026.
+>
+> ⚠️ **Hạn chụp: trước hết ngày 15/09/2026.** Sau mốc đó kỳ 8 rơi sang *Quá hạn 1–30* và bảng
+> lại còn 4 nhóm. Nếu lỡ mốc thì **không phải lỗi** — câu giải thích cũ ở dưới vẫn dùng lại
+> được, chỉ đổi số nhóm.
 
-**Đo ngày 19/08/2026** — mỗi kỳ rơi đúng một nhóm, và chỉ nhóm *Trong hạn* rỗng:
+**Đo ngày 09/09/2026, sau đợt G8** — mỗi kỳ rơi đúng một nhóm, và **cả năm nhóm đều có nội
+dung**:
 
 | Nhóm tuổi nợ | Kỳ | Hạn thanh toán | Số ngày quá hạn | Hóa đơn còn nợ | Còn nợ |
 |---|---|---|---:|---:|---:|
-| Trong hạn | — | — | — | **0** | **0 đ** |
-| Quá hạn 1–30 | 7/2026 | 15/08/2026 | 4 | 58 | 23.161.085 đ |
-| Quá hạn 31–60 | 6/2026 | 15/07/2026 | 35 | 58 | 23.828.605 đ |
-| Quá hạn 61–90 | 5/2026 | 15/06/2026 | 65 | 22 | 6.171.688 đ |
-| Quá hạn trên 90 | 3 và 4/2026 | 15/04 · 15/05 | 126 · 96 | 27 | 9.160.947 đ |
+| **Trong hạn** | **8/2026** | **15/09/2026** | **−6** | **58** | **23.525.972 đ** |
+| Quá hạn 1–30 | 7/2026 | 15/08/2026 | 25 | 58 | 23.161.085 đ |
+| Quá hạn 31–60 | 6/2026 | 15/07/2026 | 56 | 58 | 23.828.605 đ |
+| Quá hạn 61–90 | 5/2026 | 15/06/2026 | 86 | 22 | 6.171.688 đ |
+| Quá hạn trên 90 | 3 và 4/2026 | 15/04 · 15/05 | 147 · 117 | 27 | 9.160.947 đ |
 
 *(nhóm trên 90 gộp hai kỳ — kỳ 3: 11 hóa đơn / 3.851.262 đ · kỳ 4: 16 hóa đơn / 5.309.685 đ.
-Tổng bốn nhóm: **165 hóa đơn / 62.322.325 đ**, khớp đúng số bàn giao trong `PHASE-6-REPORT.md`
-mục 14.)*
+Tổng năm nhóm: **223 hóa đơn / 85.848.297 đ**, khớp đúng số bàn giao trong `CLAUDE.md`.)*
+
+> **Số đo cũ, giữ lại để đối chiếu** — đo ngày 19/08/2026, khi chưa có kỳ 8: *Trong hạn* **0** ·
+> 1–30: 58 · 31–60: 58 · 61–90: 22 · trên 90: 27 — tổng **165 hóa đơn / 62.322.325 đ**.
 
 **Câu để dán dưới ảnh #30 và #31** (chép nguyên, thay ngày nếu chụp ngày khác):
 
-> *Ảnh chụp ngày 19/08/2026. Nhóm “Trong hạn” rỗng vì hạn thanh toán muộn nhất của bộ dữ liệu
-> mẫu là 15/08/2026 — tính tới ngày chụp thì **mọi** hóa đơn đều đã quá hạn. Bảng tuổi nợ phản
-> ánh **ngày xem**, không phản ánh chất lượng dữ liệu: bốn nhóm quá hạn vẫn có nội dung, và mỗi
-> kỳ cước rơi đúng một nhóm.*
+> *Ảnh chụp ngày 09/09/2026. Cả năm nhóm tuổi nợ đều có nội dung: nhóm “Trong hạn” là 58 hóa
+> đơn kỳ 8/2026, hạn thanh toán 15/09/2026 nên tới ngày chụp vẫn chưa tới hạn. Mỗi kỳ cước rơi
+> đúng một nhóm. Bảng tuổi nợ phản ánh **ngày xem**, không phản ánh chất lượng dữ liệu.*
 
-⚠️ **Từ 15/09/2026 sẽ chỉ còn 3 nhóm** — kỳ 7 rời nhóm *1–30* sang *31–60* mà không có kỳ nào
-thay chỗ. Nếu bảo vệ sau ngày đó thì con số sẽ khác ảnh, và **vẫn không phải lỗi**; câu giải
-thích ở trên dùng lại được, chỉ đổi số nhóm.
+⚠️ **Từ 15/09/2026 sẽ còn 4 nhóm** — kỳ 8 rời *Trong hạn* sang *Quá hạn 1–30*, kỳ 7 sang
+*31–60*, và không có kỳ nào thay chỗ ở đầu bảng. Nếu bảo vệ sau ngày đó thì con số sẽ khác ảnh,
+và **vẫn không phải lỗi**; đổi câu trên thành *"nhóm Trong hạn rỗng vì hạn thanh toán muộn nhất
+là 15/09/2026 đã qua"*.
 
 | Ảnh | Hạn chụp | Vì sao |
 |---|---|---|
-| ~~**#31 Bảng tuổi nợ đủ 5 nhóm**~~ → **#31 Bảng tuổi nợ 4 nhóm** | mốc 5 nhóm đã qua | Dải tuổi nợ rộng 30 ngày, các kỳ cách nhau 30–31 ngày ⇒ cửa sổ 5 nhóm chỉ rộng 29 ngày, và nó đã đóng |
+| **#31 Bảng tuổi nợ đủ 5 nhóm** | **trước 15/09/2026** | Dải tuổi nợ rộng 30 ngày, các kỳ cách nhau 30–31 ngày ⇒ cửa sổ 5 nhóm chỉ rộng vài ngày. Đợt G8 mở lại cửa sổ đó bằng kỳ 8; nó đóng lại ngày 15/09 |
 | **#30 Công nợ** | bất kỳ, **ghi ngày chụp** | Cùng lý do — biểu đồ tuổi nợ đổi hình theo ngày xem |
 | **#3 Dashboard** | bất kỳ, nhưng ghi ngày | Thẻ *Thuê bao mới trong tháng* đổi theo tháng hiện tại |
 
@@ -148,8 +160,8 @@ thích bằng một câu — đó là số học, không phải lỗi. Chi tiế
 |---|---|---|---|
 | 28 | Danh sách hóa đơn kỳ 5 | `/hoa-don?kyCuocId=2` | Đủ **ba** badge: Đã TT / TT một phần / Quá hạn |
 | 29 | Chi tiết hóa đơn trả **hai đợt** | `/hoa-don/307` | Tab lịch sử thu có **2 dòng**; đã thu + còn nợ = tổng |
-| 30 | 🔴 **Công nợ** | `/cong-no` | Tổng **62.322.325 đ / 165 hóa đơn**; biểu đồ tuổi nợ |
-| 31 | 🔴 **Bảng tuổi nợ 4 nhóm** | `/cong-no`, khối trên cùng | Bốn nhóm quá hạn có nội dung, *Trong hạn* rỗng — **dán câu giải thích ở khối đầu tài liệu này**, đừng sửa dữ liệu cho khớp ảnh cũ |
+| 30 | 🔴 **Công nợ** | `/cong-no` | Tổng **85.848.297 đ / 223 hóa đơn**; biểu đồ tuổi nợ |
+| 31 | 🔴 **Bảng tuổi nợ đủ 5 nhóm** | `/cong-no`, khối trên cùng | Cả năm nhóm có nội dung (58·58·58·22·27) — **chụp trước 15/09/2026**, dán câu giải thích ở khối đầu tài liệu này, đừng sửa dữ liệu cho khớp ảnh cũ |
 | 32 | Đề xuất tạm ngừng | `/cong-no`, khối cuối | Ghi chú **cảnh báo không chặn nghiệp vụ** |
 | 33 | Danh sách giao dịch thanh toán | `/thanh-toan` | 161 giao dịch, đủ 3 hình thức, người thu `ketoan01` |
 | 34 | Form ghi nhận thanh toán | `/thanh-toan/moi/{id}` | Số còn nợ hiện sẵn để đối chiếu |

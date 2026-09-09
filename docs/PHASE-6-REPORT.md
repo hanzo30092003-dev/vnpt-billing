@@ -406,22 +406,28 @@ tay **không bắt được**, vì hằng số chỉ chứng minh hôm nay dữ 
 | Bảng | Số bản ghi | Ghi chú |
 |---|---|---|
 | `khach_hang` · `thue_bao` · `goi_cuoc` | 50 · 80 · 5 | Không đổi |
-| `ky_cuoc` | **5** | 3, 4, 5/2026 `DA_CHOT` · 6, 7/2026 `MO` |
-| `chi_tiet_su_dung` | **18.723** | Tất cả `DA_TINH` |
-| `hoa_don` | **280** | 55 · 55 · 54 · 58 · 58 |
-| `chi_tiet_hoa_don` | **620** | Gồm 2 dòng "Giảm trừ" thành tiền âm |
-| `thanh_toan` | **161** | Kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · kỳ 6–7: **0** |
-| `bien_dong_so_du` | **34** | 18 mở sổ + 16 `TRU_CUOC` kỳ 6 |
+| `ky_cuoc` | **7** | 3, 4, 5, 8/2026 `DA_CHOT` · 6, 7, 9/2026 `MO`; kỳ 9 rỗng |
+| `chi_tiet_su_dung` | **23.223** | Tất cả `DA_TINH` |
+| `hoa_don` | **338** | 55 · 55 · 54 · 58 · 58 · 58 |
+| `chi_tiet_hoa_don` | **753** | Gồm 2 dòng "Giảm trừ" thành tiền âm |
+| `thanh_toan` | **161** | Kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · kỳ 6–9: **0** |
+| `bien_dong_so_du` | **50** | 18 mở sổ + 31 `TRU_CUOC` (kỳ 6 và kỳ 8) + 1 `NAP_TIEN` |
 | `giam_tru` | **2** | Cả hai `DA_AP_DUNG` |
 
 **Tiền:**
 
 | Chỉ tiêu | Giá trị |
 |---|---|
-| Doanh thu 5 kỳ | **111.513.012 đ** |
+| Doanh thu 6 kỳ | **135.038.984 đ** |
 | Đã thu | **49.190.687 đ** |
-| Còn nợ | **62.322.325 đ** |
-| Tỷ lệ thu chung | **44,1%** |
+| Còn nợ | **85.848.297 đ** |
+| Tỷ lệ thu chung | **36,4%** |
+
+> **Số liệu ở mục này đã được cập nhật ở đợt G8** (09/09/2026) cho khớp hiện trạng, vì đây là
+> bảng *bàn giao* — nó mô tả thứ đang có, không phải thứ đã có. Số đo **tại thời điểm Phase 6**
+> là: 5 kỳ · 18.723 CDR · 280 hóa đơn · 620 chi tiết · 34 dòng sổ cái · doanh thu 111.513.012 đ
+> · đã thu 49.190.687 đ · còn nợ 62.322.325 đ · tỷ lệ thu 44,1%. Phần phân tích và kết luận của
+> báo cáo này dựa trên bộ số cũ đó và **giữ nguyên**.
 
 ## 15. Danh sách màn hình chụp ảnh cho Phase 6
 

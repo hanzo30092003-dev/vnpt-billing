@@ -219,16 +219,22 @@ báo cáo.
 
 | Hạng mục | Số lượng |
 |---|---|
-| Kỳ cước | **6** (3, 4, 5/2026 đã chốt · 6, 7, 8/2026 mở) |
-| CDR | 18.723, tất cả `DA_TINH` |
-| Hóa đơn | 280 · chi tiết hóa đơn 620 |
-| Thanh toán | 161 (kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · **kỳ 6, 7, 8: 0**) |
+| Kỳ cước | **7** (3, 4, 5, 8/2026 đã chốt · 6, 7, 9/2026 mở; kỳ 9 rỗng) |
+| CDR | 23.223, tất cả `DA_TINH` |
+| Hóa đơn | 338 · chi tiết hóa đơn 753 |
+| Thanh toán | 161 (kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · **kỳ 6, 7, 8, 9: 0**) |
 | Khách hàng · thuê bao | 50 · 80 |
-| Sổ cái biến động số dư | 34 dòng |
+| Sổ cái biến động số dư | 50 dòng |
 | Test tự động | **275** (237 độc lập · 38 cần MySQL, 8 lớp) |
 | Phép kiểm giao diện | **177** trên 8 script |
 
-Tiền: doanh thu **111.513.012 đ**, đã thu **49.190.687 đ**, còn nợ **62.322.325 đ** (44,1%).
+Tiền: doanh thu **135.038.984 đ**, đã thu **49.190.687 đ**, còn nợ **85.848.297 đ** (tỷ lệ thu
+**36,4%**).
+
+> **Bảng này đã cập nhật ở đợt G8** (09/09/2026) cho khớp hiện trạng — nó là bảng *bàn giao*.
+> Số đo **tại thời điểm Phase 7**: 6 kỳ · 18.723 CDR · 280 hóa đơn · 620 chi tiết · 34 dòng sổ
+> cái · doanh thu 111.513.012 đ · còn nợ 62.322.325 đ (44,1%). Hai dòng *test tự động* và *phép
+> kiểm giao diện* dưới đây giữ nguyên số của Phase 7; số hiện hành xem `CLAUDE.md`.
 
 ---
 
@@ -236,7 +242,7 @@ Tiền: doanh thu **111.513.012 đ**, đã thu **49.190.687 đ**, còn nợ **62
 
 | Điều kiện | Trạng thái |
 |---|---|
-| Kỳ 8/2026 rỗng, sẵn sàng chạy trực tiếp trên sân khấu | ✅ 0 CDR · 0 hóa đơn · trạng thái `MO` |
+| Kỳ 9/2026 rỗng, sẵn sàng chạy trực tiếp trên sân khấu | ✅ 0 CDR · 0 hóa đơn · trạng thái `MO` — *(tại Phase 7 vai này thuộc kỳ 8; đợt G8 chuyển sang kỳ 9)* |
 | Kỳ 6 và 7 giữ 0 thanh toán → còn huỷ hóa đơn được | ✅ 0 / 0 |
 | Ba kỳ đã chốt có đủ 5 nhóm tuổi nợ | ✅ (tới 13/08/2026 — mục 9.1) |
 | Cả ba bất biến | ✅ 0 lệch |

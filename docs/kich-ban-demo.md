@@ -16,7 +16,7 @@
 | 2 | Chạy `mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"` rồi **dừng lại** | Đưa dữ liệu về đúng bộ chuẩn |
 | 3 | Chạy `mvnw spring-boot:run` bình thường | |
 | 4 | Mở sẵn **3 tab**: `localhost:8080`, cửa sổ terminal, thư mục chứa ảnh chụp dự phòng | |
-| 5 | Kiểm nhanh: kỳ **8/2026 phải rỗng** (0 CDR, 0 hóa đơn) | Đây là kỳ dùng để chạy trực tiếp |
+| 5 | Kiểm nhanh: kỳ **9/2026 phải rỗng** (0 CDR, 0 hóa đơn) | Đây là kỳ dùng để chạy trực tiếp |
 | 6 | Chạy sẵn `mvnw test` một lần, **giữ nguyên console** | Phòng khi cuối giờ không kịp chạy lại |
 
 > **Dự phòng:** nếu máy chiếu hoặc MySQL trục trặc, chuyển sang bộ ảnh chụp trong
@@ -30,7 +30,7 @@
 
 **Nói:** hệ thống mô phỏng trọn vòng nghiệp vụ viễn thông: khách hàng → thuê bao → gói cước →
 CDR → tính cước → hóa đơn → thanh toán → báo cáo. Dashboard đọc số từ **5 kỳ cước** đã chạy
-thật: doanh thu 111.513.012 đ, đã thu 49.190.687 đ, còn nợ 62.322.325 đ.
+thật: doanh thu 135.038.984 đ, đã thu 49.190.687 đ, còn nợ 85.848.297 đ.
 
 Chỉ vào biểu đồ cột 5 kỳ: hai màu là **phát sinh** và **đã thu**; khoảng cách giữa hai cột
 chính là công nợ.

@@ -465,7 +465,7 @@ bổ sung kỳ 3, 4 và 7:
 
 | Bảng | Số bản ghi | Ghi chú |
 |---|---|---|
-| `chi_tiet_su_dung` | 18.723 | 2.770 + 3.239 + 3.697 + 5.017 + 4.000 cho kỳ 3→7, tất cả `DA_TINH`; kỳ 8 không có bản ghi nào |
+| `chi_tiet_su_dung` | 23.223 | 2.770 + 3.239 + 3.697 + 5.017 + 4.000 + 4.500 cho kỳ 3→8, tất cả `DA_TINH`; kỳ 9 không có bản ghi nào |
 | `hoa_don` | 280 | 55 · 55 · 54 · 58 · 58 theo thứ tự kỳ 3→7 |
 | `chi_tiet_hoa_don` | 620 | 618 dòng cước + 2 dòng "Giảm trừ" thành tiền âm |
 | `thanh_toan` | 161 | Kỳ 3: 58 · kỳ 4: 55 · kỳ 5: 48 · **kỳ 6, 7, 8: 0** |

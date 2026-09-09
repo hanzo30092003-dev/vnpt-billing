@@ -25,8 +25,8 @@
 | `nhanvien01` | Nhân viên | Khách hàng, thuê bao, báo cáo |
 | `ketoan01` | Kế toán | Hóa đơn, thanh toán, công nợ, giảm trừ, báo cáo |
 
-**Trạng thái dữ liệu chuẩn:** 6 kỳ cước (3, 4, 5/2026 đã chốt · 6, 7/2026 mở · **8/2026 rỗng**) ·
-18.723 CDR · 280 hóa đơn · 161 giao dịch thanh toán · 80 thuê bao · 50 khách hàng.
+**Trạng thái dữ liệu chuẩn:** 7 kỳ cước (3, 4, 5, 8/2026 đã chốt · 6, 7/2026 mở · **9/2026 rỗng**) ·
+23.223 CDR · 338 hóa đơn · 161 giao dịch thanh toán · 80 thuê bao · 50 khách hàng.
 
 ---
 
@@ -183,7 +183,7 @@ Chi tiết 8 script:
 | `test-muc-F.ps1` | 17 | Công nợ, tuổi nợ, chốt chặn huỷ hóa đơn kỳ đã thu |
 | `test-bao-cao.ps1` | 39 | Dashboard, 7 báo cáo, 13 con số đối chiếu chéo, 11 file Excel |
 | `test-dieu-huong.ps1` | 15 | Đi theo **menu**, không gõ URL cứng |
-| `test-ky-rong.ps1` | 28 | Kỳ 8/2026 rỗng trên 17 màn hình + 4 Excel + 3 thao tác |
+| `test-ky-rong.ps1` | 28 | Kỳ 9/2026 rỗng trên 17 màn hình + 4 Excel + 3 thao tác |
 | `test-bien.ps1` | 42 | Trường hợp biên và 12 ca phân quyền 403 |
 
 **Tổng: 215.** Bảng này từng ghi 177 — nó lập ở Phase 7 rồi không cập nhật khi V3a, V3b và

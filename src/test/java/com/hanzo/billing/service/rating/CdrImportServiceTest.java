@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
  *
  * <h2>Vì sao dùng Mockito chứ không chạy trên CSDL thật</h2>
  * <p>Service ghi thẳng vào {@code chi_tiet_su_dung} bằng {@code JdbcTemplate}. Bộ test của dự án
- * chạy trên <b>CSDL thật</b>, mà <b>18.723 CDR</b> là con số tài liệu bàn giao ghi rõ. Một phép
+ * chạy trên <b>CSDL thật</b>, mà <b>23.223 CDR</b> là con số tài liệu bàn giao ghi rõ. Một phép
  * kiểm chèn thật vào đó là làm hỏng dữ liệu mẫu ngay lần chạy đầu. Giả lập cả ba phụ thuộc thì
  * không dòng nào được ghi, và vẫn kiểm được trọn bộ luật — vì toàn bộ luật nằm ở tầng phân tích
  * dòng, trước khi chạm CSDL.</p>
