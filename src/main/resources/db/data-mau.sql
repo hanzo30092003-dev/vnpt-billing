@@ -269,15 +269,26 @@ INSERT INTO ky_cuoc (id, thang, nam, ngay_bat_dau, ngay_ket_thuc, trang_thai,
 (3, 7, 2026, '2026-07-01', '2026-07-31', 'MO', NULL, 0, 0, 0),
 (4, 3, 2026, '2026-03-01', '2026-03-31', 'MO', NULL, 0, 0, 0),
 (5, 4, 2026, '2026-04-01', '2026-04-30', 'MO', NULL, 0, 0, 0),
--- Ky 8/2026 them o Phase 7 muc C2. CO Y de RONG HOAN TOAN - khong CDR,
--- khong hoa don - va giu nguyen nhu vay:
---   1. La ky de kiem "man hinh chiu duoc ky rong" (scripts/test-ky-rong.ps1)
---   2. La ky de DEMO TRUC TIEP: sinh CDR, tinh cuoc, lap hoa don ngay tren
---      san khau (docs/kich-ban-demo.md buoc 5-8)
+-- Ky 8/2026 them o Phase 7 muc C2. TU DOT G8 KY NAY DA CO DU LIEU va da chot:
+-- 4500 CDR, 58 hoa don, hat giong 20260800. No khong con la ky rong nua.
+-- Ly do doi: ky moi nhat truoc do la 7/2026 ket thuc 31/07, trong khi demo
+-- dien ra dau thang 9 - mot phan mem tinh cuoc co ky gan nhat cu gan hai
+-- thang trong nhu bi bo quen. Ky 8 con lap day nhom "Trong han" cua bang
+-- tuoi no (han thanh toan 15/09/2026), thu ma truoc do khong ky nao co.
+-- Trang thai DA_CHOT do muc 8 cua data-van-hanh.sql dat.
 -- ID nhay tu 5 len 8 vi id 6 va 7 da bi cac ky thu nghiem tam dung roi xoa.
 -- Giu dung ID that thay vi danh so lai - xem ghi chu tuong tu o muc 6 cua
 -- data-van-hanh.sql.
-(8, 8, 2026, '2026-08-01', '2026-08-31', 'MO', NULL, 0, 0, 0);
+(8, 8, 2026, '2026-08-01', '2026-08-31', 'MO', NULL, 0, 0, 0),
+-- Ky 9/2026 them o dot G8, THAY CHO ky 8 lam ky rong. CO Y de RONG HOAN
+-- TOAN - khong CDR, khong hoa don - va giu nguyen nhu vay:
+--   1. La ky de kiem "man hinh chiu duoc ky rong" (scripts/test-ky-rong.ps1)
+--   2. La ky de DEMO TRUC TIEP: sinh CDR, tinh cuoc, lap hoa don ngay tren
+--      san khau (docs/kich-ban-demo.md buoc 5-8)
+-- ID 46 la ID THAT do CSDL cap; auto_increment da nhay xa vi cac ky thu
+-- nghiem cua scripts/test-*.ps1 tao roi xoa. Giu dung ID that, khong danh
+-- so lai - danh so lai la tu tao ra mot nguon su that thu hai.
+(46, 9, 2026, '2026-09-01', '2026-09-30', 'MO', NULL, 0, 0, 0);
 
 -- ---------------------------------------------------------------------
 -- 8. lich_su_thue_bao - lich su bien dong trang thai
