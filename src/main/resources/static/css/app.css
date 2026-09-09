@@ -960,7 +960,15 @@ label.form-label {
 /* =====================================================================
    10. HUY HIỆU TRẠNG THÁI
    ===================================================================== */
+/* Cỡ chữ đặt TUYỆT ĐỐI, không để thừa kế.
+   Bootstrap để `.badge { font-size: .75em }` — tương đối với ô chứa, nên cùng
+   một huy hiệu ra hai cỡ khác nhau tuỳ chỗ đặt: đo được 12px trên /cong-no
+   (ô cha 16px) nhưng chỉ 10,5px trong bảng /hoa-don (ô cha 14px). Chiếu lên
+   máy chiếu thì 10,5px không đọc được, mà đó lại đúng là chỗ huy hiệu mang
+   thông tin trạng thái hóa đơn.
+   Neo vào --chu-1 = 13px, sàn tuyệt đối của thang cỡ chữ lập ở G4. */
 .badge {
+    font-size: var(--chu-1);
     font-weight: 500;
     letter-spacing: .01em;
     padding: .34em .6em;
