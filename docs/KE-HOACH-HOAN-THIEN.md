@@ -282,7 +282,7 @@ Tiêu chí **6** là cái mới và là cái đáng giá nhất: cho tới hôm 
 | **G5** ba việc S sau đợt rà tính năng | ✅ xong — xem `docs/G5-REPORT.md` | `b7a5015` |
 | **G6** hai mục cuối của bản rà tính năng | ✅ xong — xem `docs/G6-REPORT.md` | `2df1eff` |
 | **G7** mở phần mềm bằng một cú nháy đúp | ✅ xong — xem `docs/G7-REPORT.md` | `2fd9cdc` |
-| **G8** làm mới dữ liệu demo: kỳ 8 chạy trọn, kỳ 9 rỗng | ✅ xong — xem `docs/G8-REPORT.md` | `(ghi sau)` |
+| **G8** làm mới dữ liệu demo: kỳ 8 chạy trọn, kỳ 9 rỗng | ✅ xong — xem `docs/G8-REPORT.md` | `6b90eba` |
 
 ### Ghi chú của G1 — làm lại giao diện
 
