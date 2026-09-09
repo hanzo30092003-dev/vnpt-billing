@@ -72,8 +72,8 @@ hai đều nằm trong đúng đoạn chú thích giải thích vì sao không c
 ### 3.1. Desktop không phải `%USERPROFILE%\Desktop` — thất bại **im lặng**
 
 ```
-GetFolderPath('Desktop')  = C:\Users\HANZO\OneDrive\Desktop
-$env:USERPROFILE\Desktop  = C:\Users\HANZO\Desktop      <- CÓ TỒN TẠI, nhưng rỗng
+GetFolderPath('Desktop')  = C:\Users\<tên-tài-khoản>\OneDrive\Desktop
+$env:USERPROFILE\Desktop  = C:\Users\<tên-tài-khoản>\Desktop   <- CÓ TỒN TẠI, nhưng rỗng
 ```
 
 Máy này đồng bộ OneDrive nên Desktop thật đã bị chuyển hướng. Đường dẫn cũ **vẫn còn** — nên

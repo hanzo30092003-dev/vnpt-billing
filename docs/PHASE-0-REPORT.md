@@ -199,7 +199,7 @@ header giống trình duyệt thật.
 
 ```
 WARN .s.s.UserDetailsServiceAutoConfiguration :
-Using generated security password: 1e4748c3-f4f8-4610-a161-b42e0647f369
+Using generated security password: 1e47***
 ```
 
 Đây là thông báo mặc định của Spring Security khi chưa khai báo người dùng. Phase 0
