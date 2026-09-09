@@ -179,6 +179,35 @@ cước, và cũng commit trước khi chạy.
 
 ---
 
-## B. Nâng cỡ huy hiệu — *(đang đo)*
+## C.1b — DỰ ĐOÁN GIAI ĐOẠN 2: trừ cước trả trước, công bố TRƯỚC khi chạy
+
+Sinh CDR xong (4.500 bản ghi, hạt giống `20260800`), chạy tính cước (0 lỗi, tổng cước
+8.455.062 đ) và lập hóa đơn xong. Giờ mới dự đoán được phần trả trước.
+
+**Luật trừ cước, đọc từ `TruCuocTraTruocService`:** duyệt CDR theo `thoi_gian_bat_dau, id`;
+khi gặp bản ghi có cước **lớn hơn số dư còn lại** thì đặt cờ hết số dư và **bỏ qua toàn bộ bản
+ghi còn lại** (không cắt đôi bản ghi — quyết định 5.3). Nếu trừ được 0 đồng thì **không sinh
+dòng sổ cái nào**.
+
+Mô phỏng bằng luỹ kế cửa sổ, 15 thuê bao trả trước có phát sinh trong kỳ 8:
+
+| Dự đoán | Số thuê bao |
+|---|--:|
+| **Hết số dư giữa kỳ** | **6** — id 1 · 4 · 9 · 11 · 17 · 19 |
+| Trừ đủ toàn bộ | 9 — id 2 · 3 · 6 · 7 · 10 · 13 · 14 · 16 · 18 |
+| Không phát sinh CDR (tạm ngưng 2 chiều / đã thanh lý) | 5 |
+
+| | Dự đoán |
+|---|--:|
+| Tổng tiền trừ được | **1.238.927 đ** |
+| Số dòng `bien_dong_so_du` mới | **15** |
+| `bien_dong_so_du` sau | 35 → **50** |
+
+Trường hợp đáng chú ý: thuê bao **id 4** (`0944567804`) số dư còn **220 đ**, cước kỳ 8 là
+72.554 đ — dự đoán chỉ trừ được **99 đ** (đúng một bản ghi SMS) rồi dừng.
+
+---
+
+## B. Nâng cỡ huy hiệu — ✅ `e79cfc9`
 
 ## C.2–C.4 · D · E — *(chưa chạy)*
