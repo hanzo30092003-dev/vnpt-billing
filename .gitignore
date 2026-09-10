@@ -58,3 +58,7 @@ run.log
 run.err
 reset.log
 reset.err
+
+# Cong cu chup anh - CA NHAN, khong phai mot phan phan mem duoc cham.
+# Dat ngoai san pham nop theo dung yeu cau dot chup anh.
+tools-chup-anh/
