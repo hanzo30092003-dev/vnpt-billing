@@ -58,7 +58,7 @@ mvnw spring-boot:run
 mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"
 ```
 
-Chạy test (342 test, cần MySQL đang chạy):
+Chạy test (343 test, cần MySQL đang chạy):
 
 ```bash
 mvnw test
@@ -265,6 +265,11 @@ nên **chỉ còn bản dump** `data-van-hanh.sql`.
 * **Hộp xác nhận phải trả tiêu điểm về nút đã mở nó** (`hidden.bs.modal` trong `app.js`).
   Bootstrap tự làm việc này khi modal mở bằng `data-bs-toggle`, nhưng ở đây modal mở bằng mã
   nên nó không biết nút nào gọi.
+* **Không đặt `th:if`/`th:unless`/`th:each`/`sec:authorize` cùng thẻ với `th:replace`/`th:insert`.**
+  Thymeleaf chạy `th:replace` (ưu tiên 100) **trước** điều kiện (300): thẻ đã bị thay bằng mảnh nên
+  điều kiện không bao giờ được xét — 6 màn hình báo cáo từng hiện khối "chưa có dữ liệu" ngay trên
+  bảng đầy số suốt ba phase. Bọc điều kiện lên `<th:block>` ngoài, `th:replace` ở thẻ con.
+  `KiemTraUuTienThuocTinhTest` quét toàn bộ template và đỏ ngay khi ai viết lại kiểu cũ.
 * **Mỗi màn hình đúng MỘT nút nổi bật.** Muốn phá luật thì khai `NUT-NOI-BAT-CO-Y:` kèm lý do
   ngay trong template, đừng sửa file kiểm thử.
 * **`HoaDon.phienBan` (`@Version`) không được bỏ.** Thiếu nó, hai người cùng thu tiền một hóa

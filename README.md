@@ -240,7 +240,7 @@ số khác và mọi con số trong báo cáo mất khả năng tái lập.
 mvnw test
 ```
 
-**342 test.** Phần lớn chạy độc lập không cần CSDL; 11 lớp cần MySQL đang chạy vì chúng kiểm
+**343 test.** Phần lớn chạy độc lập không cần CSDL; 11 lớp cần MySQL đang chạy vì chúng kiểm
 bất biến trên **dữ liệu thật** chứ không trên dữ liệu dựng sẵn — kể cả bất biến thanh toán
 **dưới tải đồng thời**.
 
@@ -318,7 +318,7 @@ vnpt-billing/
     │           ├── fragments/layout.html
     │           ├── error/{400,403,404,500}.html
     │           └── <phân-hệ>/*.html
-    └── test/java/com/hanzo/billing/     # 342 test
+    └── test/java/com/hanzo/billing/     # 343 test
 ```
 
 ---

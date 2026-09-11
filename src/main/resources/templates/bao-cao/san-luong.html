@@ -12,8 +12,9 @@
                        ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
     <div th:replace="~{bao-cao/fragments :: chonKy('/bao-cao/san-luong')}"></div>
 
-    <div th:if="${sanLuong.rong()}"
-         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có cuộc gọi, tin nhắn hay lần truy cập mạng nào.')}"></div>
+    <th:block th:if="${sanLuong.rong()}">
+        <div th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có cuộc gọi, tin nhắn hay lần truy cập mạng nào.')}"></div>
+    </th:block>
 
     <div th:unless="${sanLuong.rong()}">
         <div class="alert alert-secondary py-2 small" th:if="${kyTruoc == null}">

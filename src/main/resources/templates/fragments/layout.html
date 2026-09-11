@@ -106,7 +106,9 @@
                     <span th:text="${@soLieu.so(tinhTrang.soQuaHan())}">0</span>
                 </span>
             </div>
-            <div class="o-so-lieu">
+            <!--/* Ô này là tổng tiền khách còn nợ — cùng mức quyền với /cong-no
+                   (SecurityConfig). Vai trò khác không thấy ô, không thấy chỗ trống. */-->
+            <div class="o-so-lieu" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
                 <span class="nhan">Còn nợ</span>
                 <span class="gia-tri" th:text="${@soLieu.tienDong(tinhTrang.conNo())}">0 đ</span>
             </div>

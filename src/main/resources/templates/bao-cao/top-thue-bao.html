@@ -36,8 +36,9 @@
         </div>
     </form>
 
-    <div th:if="${#lists.isEmpty(danhSach)}"
-         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có hóa đơn nào.')}"></div>
+    <th:block th:if="${#lists.isEmpty(danhSach)}">
+        <div th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có hóa đơn nào.')}"></div>
+    </th:block>
 
     <div class="card shadow-sm" th:unless="${#lists.isEmpty(danhSach)}">
         <div class="card-header bg-white fw-semibold">

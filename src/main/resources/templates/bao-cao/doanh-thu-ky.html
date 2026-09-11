@@ -11,8 +11,9 @@
     <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO DOANH THU THEO KỲ',
                        'Toàn bộ kỳ cước')}"></div>
 
-    <div th:if="${#lists.isEmpty(danhSach)}"
-         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Chưa có kỳ cước nào trong hệ thống.')}"></div>
+    <th:block th:if="${#lists.isEmpty(danhSach)}">
+        <div th:replace="~{bao-cao/fragments :: khongCoDuLieu('Chưa có kỳ cước nào trong hệ thống.')}"></div>
+    </th:block>
 
     <div th:unless="${#lists.isEmpty(danhSach)}">
         <div class="card shadow-sm mb-3">

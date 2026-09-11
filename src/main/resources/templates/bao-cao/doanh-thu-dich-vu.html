@@ -12,8 +12,9 @@
                        ${ky != null} ? 'Kỳ ' + ${ky.thang} + '/' + ${ky.nam} : 'Chưa chọn kỳ')}"></div>
     <div th:replace="~{bao-cao/fragments :: chonKy('/bao-cao/doanh-thu-dich-vu')}"></div>
 
-    <div th:if="${coCau.rong()}"
-         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có hóa đơn nào.')}"></div>
+    <th:block th:if="${coCau.rong()}">
+        <div th:replace="~{bao-cao/fragments :: khongCoDuLieu('Kỳ đã chọn chưa có hóa đơn nào.')}"></div>
+    </th:block>
 
     <div class="row g-3" th:unless="${coCau.rong()}">
         <div class="col-lg-7">

@@ -11,8 +11,9 @@
     <div th:replace="~{bao-cao/fragments :: tieuDeBanIn('BÁO CÁO THỐNG KÊ THUÊ BAO',
                        'Toàn bộ hệ thống')}"></div>
 
-    <div th:if="${thongKe.rong()}"
-         th:replace="~{bao-cao/fragments :: khongCoDuLieu('Chưa có thuê bao nào.')}"></div>
+    <th:block th:if="${thongKe.rong()}">
+        <div th:replace="~{bao-cao/fragments :: khongCoDuLieu('Chưa có thuê bao nào.')}"></div>
+    </th:block>
 
     <div th:unless="${thongKe.rong()}">
         <div class="row g-3 mb-3">

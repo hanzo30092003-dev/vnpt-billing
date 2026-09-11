@@ -8,9 +8,10 @@
 
 ---
 
-## ⚠️ Đọc trước — một lỗi giao diện phát hiện trong lúc chụp
+## Đọc trước — một lỗi giao diện phát hiện trong lúc chụp (ĐÃ SỬA chiều 11/09)
 
 **6 trên 7 màn hình báo cáo hiện khối "chưa có dữ liệu" ngay phía trên bảng có đủ dữ liệu.**
+*(Tình trạng lúc chụp 10/09. Đã sửa và chụp lại — xem đợt chiều 11/09 bên dưới.)*
 
 Nguyên nhân: `th:if` đặt **cùng thẻ** với `th:replace`. Trong Thymeleaf 3, `th:replace` có độ ưu
 tiên **100**, chạy **trước** `th:if` (300) — thẻ bị thay thế trước khi điều kiện được xét, nên
@@ -26,9 +27,9 @@ tiên **100**, chạy **trước** `th:if` (300) — thẻ bị thay thế trư�
 | `bao-cao/san-luong.html` | 15 | *"…chưa có cuộc gọi, tin nhắn hay lần truy cập mạng nào."* | **7** |
 | `bao-cao/cong-no.html` | — | *(không dính)* | 15 |
 
-**Không sửa ở lượt này** — đây là lượt chụp ảnh, đặc tả cấm sửa mã. Nhưng **6 ảnh 43·44·45·46·47·48
-đang chứa câu nói sai đó** và nên **chụp lại sau khi sửa**, nếu không người chấm sẽ thấy màn hình
-tự mâu thuẫn với chính nó.
+**Không sửa ở lượt 10/09** — đó là lượt chụp ảnh, đặc tả cấm sửa mã. **Chiều 11/09 đã sửa cả 6 chỗ
+cùng một cách** (bọc `<th:block th:if>` ngoài, `th:replace` ở thẻ con), thêm test bất biến
+`KiemTraUuTienThuocTinhTest` quét toàn bộ 46 template, và **chụp lại 43·44·45·46·47·48**.
 
 ---
 
@@ -62,6 +63,8 @@ Sau sửa: `mvnw test` **342/342** · 8 script giao diện **215/215** · 3 phé
 >    số vừa bị khoá ở thẻ *Tổng công nợ* ngay bên dưới. Khoá thẻ mà để nguyên thanh máy là tự mâu thuẫn.
 > 2. **Biểu đồ Doanh thu theo kỳ** (`index.html`, ngoài 4 khối đã nêu): tiền theo kỳ, kèm link *Xem báo
 >    cáo* → `/bao-cao/doanh-thu-ky` — nhân viên bấm vào nhận 403.
+>
+> → **Cả hai đã sửa chiều 11/09** theo quyết định của bạn — xem mục B của đợt chiều bên dưới.
 
 ### Số mục menu trên rail — phép kiểm phân quyền cho ảnh 03 · 63 · 65
 
@@ -112,6 +115,11 @@ thiết kế cố ý). Lần mở `/hoa-don` kế tiếp sẽ trả về 148. T�
 tác đổi trạng thái. Hệ quả: 6 ảnh chụp hôm nay (08 · 27 · 35 · 36 · 40 · 63) ghi **90** trên thanh máy,
 55 ảnh hôm qua ghi **148**. Nếu muốn đồng nhất: mở `/hoa-don` một lần rồi chụp lại 6 ảnh đó.
 
+→ **Đã làm chiều 11/09** theo quyết định của bạn: dự đoán công bố trước *90 → 148* (58 hóa đơn kỳ 6
+`CHUA_TT`, hạn 15/07, chưa thu đồng nào; kỳ 8 hạn 15/09 chưa tới nên đứng yên). Mở `/hoa-don` một lần:
+thanh máy đọc trước = 90, sau = **148**, đúng dự đoán. Số hóa đơn vẫn 338. Cả 6 ảnh đã chụp lại;
+**mọi ảnh trong kho giờ đều ghi 148**, kiểm bằng DOM cho cả ba vai trò.
+
 ### F. Rail chỉ phủ khung nhìn đầu — đo trên 37 ảnh chụp cả trang có rail
 
 Rail là `position: fixed`, cao bằng khung nhìn. Đo cột x = 60px trên từng ảnh: rail dừng đúng **768px**
@@ -153,6 +161,99 @@ Danh sách ảnh **nặng** (cột tối cụt ngang rõ nhất khi in):
 cả trang rồi cắt bỏ rail bằng `clip` từ x = 232px — mất menu nhưng ảnh sạch. Hướng (c) hợp với báo cáo
 in nhất vì menu đã có riêng ở ảnh 03/63/65.
 
+→ **Bạn chọn (c), đã làm chiều 11/09** — xem đợt bên dưới. 20 ảnh trên cộng 27 và 36 (chụp sau bảng
+này nhưng cùng tiêu chí: 41% và 40%) = **22 ảnh** đã cắt rail.
+
+---
+
+## Đợt chiều 11/09/2026 — sửa `th:if`, rào thanh máy, cắt rail, đồng nhất 148
+
+### A. `th:if` cùng thẻ với `th:replace` — sửa 6 chỗ, một cách, kèm test bất biến
+
+Quét **toàn bộ** 46 template, **3.372 thẻ** (bộ nhận diện thẻ chịu được thuộc tính trải nhiều dòng
+và dấu `>` trong giá trị): đúng **6** thẻ mang đồng thời `th:if` và `th:replace`, tất cả ở `bao-cao/`.
+Toàn dự án có **139** `th:replace`, **0** `th:insert`; không thẻ nào ghép `th:each` hay `sec:authorize`
+với `th:replace` — hai thuộc tính đó có ưu tiên 200/300 nên cũng sẽ bị vô hiệu y như `th:if`.
+`cong-no.html` không dính (dùng `<tr th:if>` thường, không có `th:replace`) — nên là **6**, không phải 7.
+
+Cách sửa, **cùng một kiểu cho cả 6**:
+
+```html
+<th:block th:if="${#lists.isEmpty(danhSach)}">
+    <div th:replace="~{bao-cao/fragments :: khongCoDuLieu('…')}"></div>
+</th:block>
+```
+
+`th:block` không để lại thẻ nào trong HTML, nên bố cục không đổi.
+
+**Test bất biến mới:** `KiemTraUuTienThuocTinhTest` (JUnit thuần, không cần Spring hay MySQL) quét mọi
+thẻ của mọi template, khẳng định không thẻ nào mang đồng thời `th:if`/`th:unless`/`th:each`/`sec:authorize`
+và `th:replace`/`th:insert`. Có chốt *"phải quét được > 2.000 thẻ"* để test không xanh suông khi
+biểu thức nhận diện thẻ hỏng (bài học 43.5). **`mvnw test` 342 → 343.**
+
+**Đối chứng âm:** cố ý đặt `th:if` trở lại thẻ `th:replace` ở `san-luong.html` → test đỏ, chỉ đúng
+`bao-cao\san-luong.html:15  th:if cùng thẻ với th:replace`. Khôi phục → xanh.
+
+**Kiểm trên DOM, hai chiều** (`tools-chup-anh/kiem-bao-cao.mjs`):
+
+| | Khối "chưa có dữ liệu" | Bảng |
+|---|--:|--:|
+| 6 trang báo cáo đang có dữ liệu | **0** | có |
+| Cùng 4 trang đó với kỳ 9/2026 rỗng (`kyCuocId=46`) | **1** | không |
+
+Chiều thứ hai là đối chứng: nếu khối rỗng không hiện với kỳ rỗng thì sửa xong lại thành "không bao giờ hiện".
+
+### B. Thanh máy và link dẫn tới 403
+
+1. `fragments/layout.html`: ô *Còn nợ* rào `hasAnyRole('KE_TOAN','ADMIN')`. `.dai-so-lieu` là flex
+   nên bỏ ô là ba ô còn lại xếp sát, **không có chỗ trống**.
+2. `index.html`: link *Xem báo cáo* của biểu đồ *Doanh thu theo kỳ* rào cùng mức; **biểu đồ giữ nguyên**
+   (chỉ có tổng theo kỳ, không có tên khách).
+
+Đếm trên DOM (`dem-khoi-tien.mjs`, mở rộng): ô *Còn nợ* đếm trên **hai** trang (`/` và `/bao-cao/thue-bao`)
+vì thanh máy là layout chung.
+
+| Vai trò | Khối tiền trang chủ | Ô *Còn nợ* thanh máy | Link *Xem báo cáo* | Ô trên thanh máy | |
+|---|--:|--:|--:|--:|:--:|
+| admin | **4** | **1** | **1** | 4 | ✅ |
+| ketoan01 | **4** | **1** | **1** | 4 | ✅ |
+| nhanvien01 | **0** | **0** | **0** | 3 | ✅ |
+
+**Đối chứng âm:** bỏ cả hai rào mới, dựng lại → *"nhanvien01 … ô Còn nợ 1/1 … link Xem báo cáo 1 → SAI"*.
+Khôi phục, dựng lại → đạt. `SecurityConfig` không đụng.
+
+### C. Cắt rail từ x = 232px — 22 ảnh
+
+Đo trên trang thật: `--rail-rong: 232px`, rail chiếm x 0–232, `main` bắt đầu đúng 232, thương hiệu
+*"Sông Hậu · Quản lý cước"* trên thanh máy cũng nằm gọn trong 0–232 → cắt tại 232 là **một nhát sạch**:
+ảnh bắt đầu ngay ô *Kỳ đang mở*. Không gõ cứng 232: script đọc `--rail-rong` từ CSS lúc chụp.
+
+Ảnh còn **1134 × cao** CSS (2268px thật). Kiểm (`kiem-rail.mjs`, mở rộng): 22/22 ảnh rộng đúng 1134;
+tỷ lệ hàng tối ở cột x = 60px trong vùng khung nhìn (y 60–768) chỉ **0–18%**, trong khi cùng phép đo
+trên 20 ảnh **còn** rail ra **89%** — đó là đối chứng cho phép đo. 17 ảnh nhóm *vừa* và *ổn* giữ nguyên.
+
+### Ảnh chụp lại: 28 tấm
+
+| Lý do | Ảnh |
+|---|---|
+| Sửa `th:if` (A) | 43 · 44 · 45 · 46 · 47 · 48 |
+| Thanh máy 90 → 148 | 08 · 27 · 35 · 36 · 40 · 63 |
+| Cắt rail (C) | 3 · 6 · 10 · 14 · 19 · 20 · 22 · 23 · 27 · 28 · 33 · 36 · 43 · 46 · 47 · 63 · 65 · 70 · 75 · 77 · 78 · 79 |
+
+(Một ảnh có thể thuộc hai nhóm.) 63 chụp sau B nên thanh máy chỉ còn 3 ô và biểu đồ không còn link.
+Sáu ảnh 08 · 27 · 35 · 36 · 40 · 63 chụp bằng `chup-bo-sung.mjs` với kiểm dữ liệu sau **mỗi** ảnh —
+`ky=7 cdr=23223 hd=338 tt=161 kh=50 gt=2 ky9=MO/0/0` nguyên vẹn cả 6 lần, kỳ 7 vẫn `MO`.
+
+**Dữ liệu sau đợt:** 7 kỳ · 23.223 CDR · 338 hóa đơn · 161 thanh toán · 50 KH · 2 giảm trừ · 50 sổ cái ·
+kỳ 9 `MO` 0/0 · bất biến **0 · 0 · 0** · doanh thu 135.038.984 · đã thu 49.190.687 · còn nợ 85.848.297.
+Thay đổi duy nhất: 58 hóa đơn kỳ 6 `CHUA_TT` → `QUA_HAN` (đúng việc `capNhatQuaHan()` phải làm).
+
+**Không chạy:** 8 script trong `scripts/`, profile `reset`. Ba phép kiểm template (`kiem-tu-ngu`,
+`kiem-giao-dien`, `kiem-ban-phim` — chỉ đọc) đạt. `mvnw test` **343/343**.
+
+> Ảnh 51 (`51-ket-qua-342-test-tu-dong.png`, chụp tay) vẫn ghi *Tests run: 342* — con số đúng tại ngày
+> chụp; nay là 343. Muốn khớp thì chụp tay lại dòng đó.
+
 ---
 
 ## Cấu hình chụp
@@ -161,7 +262,8 @@ in nhất vì menu đã có riêng ở ảnh 03/63/65.
 |---|---|
 | Công cụ | Playwright (`playwright-core`) + Microsoft Edge đã cài sẵn |
 | Khung nhìn | **1366 × 768** |
-| `deviceScaleFactor` | **2** → ảnh ra 2732px, bố cục vẫn 1366 |
+| `deviceScaleFactor` | **2** → ảnh ra 2732px, bố cục vẫn 1366 (ảnh đã cắt rail: 2268px) |
+| Cắt rail | **22 ảnh** cả trang nhóm *nặng*: `clip` từ x = `--rail-rong` (232px) — xem đợt chiều 11/09 |
 | Cuộn ngang | **0** trên toàn bộ 55 trang |
 | Nơi đặt công cụ | `tools-chup-anh/` — đã `.gitignore`, **không** đụng `pom.xml` |
 
@@ -214,69 +316,69 @@ Kết quả trên **60 ảnh tự động** (chạy lại 11/09 sau khi thêm 12
 |---|---|---|---|--:|---|---|
 | 1 | `01-dang-nhap.png` | `/dang-nhap` | (chua dang nhap) | 59 KB | khung nhìn | — |
 | 2 | `02-trang-403.png` | `/hoa-don` | nhanvien01 | 138 KB | khung nhìn | — |
-| 3 | `03-dashboard-admin.png` | `/` | admin | 561 KB | cả trang | — |
-| 6 | `06-danh-sach-khach-hang.png` | `/khach-hang` | admin | 724 KB | cả trang | — |
+| 3 | `03-dashboard-admin.png` | `/` | admin | 465 KB | cả trang | cắt rail 1134x1750 |
+| 6 | `06-danh-sach-khach-hang.png` | `/khach-hang` | admin | 625 KB | cả trang | cắt rail 1134x1970 |
 | 7 | `07-form-them-khach-ca-nhan.png` | `/khach-hang/them` | admin | 223 KB | khung nhìn | — |
-| 8 | `08-validation-chan-cccd-sai.png` | `/khach-hang/luu` | admin | 275 KB | cả trang | POST bị từ chối |
+| 8 | `08-validation-chan-cccd-sai.png` | `/khach-hang/luu` | admin | 274 KB | cả trang | POST bị từ chối · thanh máy 148 |
 | 9 | `09-chi-tiet-khach-hang.png` | `/khach-hang/1` | admin | 271 KB | cả trang | — |
-| 10 | `10-danh-sach-thue-bao.png` | `/thue-bao` | admin | 625 KB | cả trang | — |
+| 10 | `10-danh-sach-thue-bao.png` | `/thue-bao` | admin | 530 KB | cả trang | cắt rail 1134x1370 |
 | 11 | `11-chi-tiet-thue-bao-tra-truoc.png` | `/thue-bao/4` | admin | 265 KB | cả trang | — |
 | 12 | `12-lich-su-bien-dong-trang-thai.png` | `/thue-bao/45` | admin | 262 KB | cả trang | tab `#tab-trang-thai` |
 | 13 | `13-danh-sach-goi-cuoc.png` | `/goi-cuoc` | admin | 356 KB | cả trang | — |
-| 14 | `14-bang-gia.png` | `/bang-gia` | admin | 500 KB | cả trang | — |
+| 14 | `14-bang-gia.png` | `/bang-gia` | admin | 406 KB | cả trang | cắt rail 1134x1526 |
 | 15 | `15-tra-cuu-don-gia.png` | `/bang-gia/tra-cuu` | admin | 406 KB | khung nhìn | — |
 | 16 | `16-form-sinh-cdr.png` | `/cdr/sinh-du-lieu` | admin | 310 KB | khung nhìn | — |
 | 18 | `18-form-nhap-cdr-csv.png` | `/cdr/import` | admin | 395 KB | khung nhìn | — |
-| 19 | `19-tra-cuu-cdr.png` | `/cdr` | admin | 871 KB | cả trang | — |
-| 20 | `20-man-hinh-tinh-cuoc.png` | `/tinh-cuoc` | admin | 706 KB | cả trang | — |
-| 22 | `22-doi-soat-vuot-quota-data.png` | `/tinh-cuoc/doi-soat/21/1` | admin | 1627 KB | cả trang | — |
-| 23 | `23-doi-soat-sat-ranh-gioi-quota.png` | `/tinh-cuoc/doi-soat/34/1` | admin | 1674 KB | cả trang | — |
+| 19 | `19-tra-cuu-cdr.png` | `/cdr` | admin | 770 KB | cả trang | cắt rail 1134x1962 |
+| 20 | `20-man-hinh-tinh-cuoc.png` | `/tinh-cuoc` | admin | 607 KB | cả trang | cắt rail 1134x1869 |
+| 22 | `22-doi-soat-vuot-quota-data.png` | `/tinh-cuoc/doi-soat/21/1` | admin | 1504 KB | cả trang | cắt rail 1134x3965 |
+| 23 | `23-doi-soat-sat-ranh-gioi-quota.png` | `/tinh-cuoc/doi-soat/34/1` | admin | 1548 KB | cả trang | cắt rail 1134x3986 |
 | 26 | `26-ban-in-a4-bang-doi-soat.png` | `/tinh-cuoc/doi-soat/21/1` | admin | 1792 KB | cả trang | bản in |
-| 27 | `27-modal-canh-bao-chot-ky.png` | `/tinh-cuoc` | admin | 655 KB | cả trang | modal, chưa xác nhận |
-| 28 | `28-danh-sach-hoa-don-ky-5.png` | `/hoa-don?kyCuocId=2` | admin | 916 KB | cả trang | — |
+| 27 | `27-modal-canh-bao-chot-ky.png` | `/tinh-cuoc` | admin | 565 KB | cả trang | modal, chưa xác nhận · cắt rail 1134x1869 · thanh máy 148 |
+| 28 | `28-danh-sach-hoa-don-ky-5.png` | `/hoa-don?kyCuocId=2` | admin | 816 KB | cả trang | cắt rail 1134x2053 |
 | 29 | `29-chi-tiet-hoa-don-tra-hai-dot.png` | `/hoa-don/307` | admin | 474 KB | cả trang | — |
 | 30 | `30-cong-no.png` | `/cong-no` | ketoan01 | 530 KB | cả trang | cắt 1366x1250 · chặn cao 21412 -> 1250 px |
 | 31 | `31-bang-tuoi-no-5-nhom.png` | `/cong-no` | ketoan01 | 71 KB | cả trang | cắt 643x368 |
 | 32 | `32-de-xuat-tam-ngung.png` | `/cong-no` | ketoan01 | 690 KB | cả trang | cắt 1102x1400 · chặn cao 6988 -> 1400 px |
-| 33 | `33-danh-sach-thanh-toan.png` | `/thanh-toan` | ketoan01 | 925 KB | cả trang | — |
+| 33 | `33-danh-sach-thanh-toan.png` | `/thanh-toan` | ketoan01 | 871 KB | cả trang | cắt rail 1134x1825 |
 | 34 | `34-form-ghi-nhan-thanh-toan.png` | `/thanh-toan/moi/3123` | ketoan01 | 242 KB | khung nhìn | — |
-| 35 | `35-chan-thu-vuot-so-con-no.png` | `/thanh-toan (POST)` | ketoan01 | 317 KB | cả trang | POST bị từ chối |
-| 36 | `36-chan-huy-hoa-don-ky-da-chot.png` | `POST /tinh-cuoc/2/huy-hoa-don` | admin | 722 KB | cả trang | POST bị từ chối |
+| 35 | `35-chan-thu-vuot-so-con-no.png` | `/thanh-toan (POST)` | ketoan01 | 316 KB | cả trang | POST bị từ chối · thanh máy 148 |
+| 36 | `36-chan-huy-hoa-don-ky-da-chot.png` | `POST /tinh-cuoc/2/huy-hoa-don` | admin | 624 KB | cả trang | POST bị từ chối · cắt rail 1134x1943 · thanh máy 148 |
 | 37 | `37-hoa-don-pdf.png` | PDF hóa đơn HD202608-000058 | (tự chụp) | 147 KB | chụp tay | Snipping Tool, không qua Playwright |
 | 38 | `38-phieu-thu-pdf.png` | PDF phiếu thu TT20260620-0004 | (tự chụp) | 97 KB | chụp tay | Snipping Tool, không qua Playwright |
 | 39 | `39-danh-sach-giam-tru.png` | `/giam-tru` | admin | 303 KB | cả trang | — |
-| 40 | `40-chan-khai-ca-tien-lan-ty-le.png` | `/giam-tru (POST)` | admin | 292 KB | cả trang | POST bị từ chối |
+| 40 | `40-chan-khai-ca-tien-lan-ty-le.png` | `/giam-tru (POST)` | admin | 291 KB | cả trang | POST bị từ chối · thanh máy 148 |
 | 41 | `41-bien-dong-so-du-tra-truoc.png` | `/tinh-cuoc` | admin | 209 KB | cả trang | cắt 1102x667 |
 | 42 | `42-menu-bao-cao.png` | `/bao-cao` | admin | 392 KB | cả trang | — |
-| 43 | `43-bao-cao-doanh-thu-ky.png` | `/bao-cao/doanh-thu-ky` | admin | 433 KB | cả trang | — |
-| 44 | `44-bao-cao-doanh-thu-goi-cuoc.png` | `/bao-cao/doanh-thu-goi-cuoc` | admin | 345 KB | cả trang | — |
-| 45 | `45-bao-cao-doanh-thu-dich-vu.png` | `/bao-cao/doanh-thu-dich-vu?kyCuocId=1` | admin | 358 KB | cả trang | — |
-| 46 | `46-bao-cao-thong-ke-thue-bao.png` | `/bao-cao/thue-bao` | admin | 492 KB | cả trang | — |
-| 47 | `47-bao-cao-top-thue-bao.png` | `/bao-cao/top-thue-bao?soLuong=50` | admin | 1828 KB | cả trang | — |
-| 48 | `48-bao-cao-san-luong.png` | `/bao-cao/san-luong?kyCuocId=3` | admin | 379 KB | cả trang | — |
+| 43 | `43-bao-cao-doanh-thu-ky.png` | `/bao-cao/doanh-thu-ky` | admin | 297 KB | cả trang | cắt rail 1134x1109 · chụp lại sau sửa th:if |
+| 44 | `44-bao-cao-doanh-thu-goi-cuoc.png` | `/bao-cao/doanh-thu-goi-cuoc` | admin | 301 KB | cả trang | chụp lại sau sửa th:if |
+| 45 | `45-bao-cao-doanh-thu-dich-vu.png` | `/bao-cao/doanh-thu-dich-vu?kyCuocId=1` | admin | 314 KB | cả trang | chụp lại sau sửa th:if |
+| 46 | `46-bao-cao-thong-ke-thue-bao.png` | `/bao-cao/thue-bao` | admin | 355 KB | cả trang | cắt rail 1134x1599 · chụp lại sau sửa th:if |
+| 47 | `47-bao-cao-top-thue-bao.png` | `/bao-cao/top-thue-bao?soLuong=50` | admin | 1665 KB | cả trang | cắt rail 1134x3342 · chụp lại sau sửa th:if |
+| 48 | `48-bao-cao-san-luong.png` | `/bao-cao/san-luong?kyCuocId=3` | admin | 331 KB | cả trang | chụp lại sau sửa th:if |
 | 50 | `50-ban-in-bao-cao-doanh-thu.png` | `/bao-cao/doanh-thu-ky` | admin | 258 KB | cả trang | bản in |
 | 51 | `51-ket-qua-342-test-tu-dong.png` | Console: Tests run 342, Failures 0 | (tự chụp) | 15 KB | chụp tay | Snipping Tool, không qua Playwright |
 | 52a | `52a-doi-chung-am-do-27-test-4-loi.png` | Console: 27 test, 4 lỗi sau khi gỡ luật | (tự chụp) | 14 KB | chụp tay | Snipping Tool, không qua Playwright |
 | 52b | `52b-doi-chung-am-xanh-27-test-0-loi.png` | Console: 27 test, 0 lỗi sau khôi phục | (tự chụp) | 15 KB | chụp tay | Snipping Tool, không qua Playwright |
 | 59 | `59-trang-loi-400.png` | `/hoa-don/abc` | admin | 176 KB | khung nhìn | — |
 | 61 | `61-rail-thu-gon-duoi-992px.png` | `/` | admin | 206 KB | khung nhìn | — |
-| 63 | `63-dashboard-nhanvien.png` | `/` | nhanvien01 | 363 KB | cả trang | — |
+| 63 | `63-dashboard-nhanvien.png` | `/` | nhanvien01 | 317 KB | cả trang | cắt rail 1134x1638 · thanh máy 148 |
 | 64 | `64-bao-cao-cong-no.png` | `/bao-cao/cong-no` | ketoan01 | 411 KB | cả trang | — |
-| 65 | `65-dashboard-ketoan.png` | `/` | ketoan01 | 480 KB | cả trang | — |
+| 65 | `65-dashboard-ketoan.png` | `/` | ketoan01 | 435 KB | cả trang | cắt rail 1134x1650 |
 | 66 | `66-form-them-khach-doanh-nghiep.png` | `/khach-hang/them` | admin | 223 KB | khung nhìn | — |
 | 67 | `67-form-dang-ky-thue-bao.png` | `/thue-bao/dang-ky` | admin | 257 KB | khung nhìn | — |
 | 68 | `68-chi-tiet-goi-cuoc.png` | `/goi-cuoc/1` | admin | 339 KB | cả trang | — |
 | 69 | `69-danh-sach-ky-cuoc.png` | `/ky-cuoc` | admin | 436 KB | cả trang | — |
-| 70 | `70-doi-soat-ky-8.png` | `/tinh-cuoc/doi-soat/21/8` | admin | 1617 KB | cả trang | — |
+| 70 | `70-doi-soat-ky-8.png` | `/tinh-cuoc/doi-soat/21/8` | admin | 1493 KB | cả trang | cắt rail 1134x3965 |
 | 71 | `71-quan-tri-nguoi-dung.png` | `/quan-tri/nguoi-dung` | admin | 304 KB | cả trang | — |
 | 72 | `72-no-vuot-han-muc-tin-dung.png` | `/cong-no` | ketoan01 | 185 KB | cả trang | cắt 1102x467 |
 | 73 | `73-thue-bao-tab-bien-dong-so-du.png` | `/thue-bao/4` | admin | 291 KB | cả trang | tab `#tab-so-du` |
 | 74 | `74-thue-bao-tab-lich-su-goi-cuoc.png` | `/thue-bao/4` | admin | 241 KB | cả trang | tab `#tab-goi` |
-| 75 | `75-danh-sach-hoa-don-tat-ca.png` | `/hoa-don` | admin | 909 KB | cả trang | — |
+| 75 | `75-danh-sach-hoa-don-tat-ca.png` | `/hoa-don` | admin | 806 KB | cả trang | cắt rail 1134x2014 |
 | 76 | `76-chi-tiet-thue-bao-tra-sau.png` | `/thue-bao/21` | admin | 253 KB | cả trang | — |
-| 77 | `77-hoa-don-cua-ky-8.png` | `/tinh-cuoc/ky/8` | admin | 1936 KB | cả trang | — |
-| 78 | `78-tra-cuu-cdr-co-bo-loc.png` | `/cdr?loaiDichVu=DATA&huong=NOI_MANG` | admin | 950 KB | cả trang | — |
-| 79 | `79-danh-sach-hoa-don-ky-8.png` | `/hoa-don?kyCuocId=8` | admin | 925 KB | cả trang | — |
+| 77 | `77-hoa-don-cua-ky-8.png` | `/tinh-cuoc/ky/8` | admin | 1809 KB | cả trang | cắt rail 1134x4530 |
+| 78 | `78-tra-cuu-cdr-co-bo-loc.png` | `/cdr?loaiDichVu=DATA&huong=NOI_MANG` | admin | 849 KB | cả trang | cắt rail 1134x1962 |
+| 79 | `79-danh-sach-hoa-don-ky-8.png` | `/hoa-don?kyCuocId=8` | admin | 825 KB | cả trang | cắt rail 1134x2014 |
 | 80 | `80-bieu-tuong-desktop.png` | Biểu tượng trên màn hình nền | (tự chụp) | 29 KB | chụp tay | Snipping Tool, không qua Playwright |
 | 81 | `81-cua-so-khoi-dong.png` | Cửa sổ khởi động năm bước | (tự chụp) | 49 KB | chụp tay | Snipping Tool, không qua Playwright |
 
@@ -341,7 +443,7 @@ Danh sách gốc không có, nhưng đặc tả lượt này yêu cầu (dashboa
 
 ## Ghi chú vận hành
 
-**Dung lượng:** tổng **32,9 MB** cho 67 ảnh. Thư mục `docs/screenshots/` **giữ trong git** — quyết
+**Dung lượng:** tổng **30,6 MB** cho 67 ảnh (32,9 MB trước khi cắt rail 22 ảnh). Thư mục `docs/screenshots/` **giữ trong git** — quyết
 định ngày 10/09: ảnh là tài liệu của báo cáo, ai clone kho về cũng phải có. `tools-chup-anh/` thì
 vẫn `.gitignore` vì đó là công cụ cá nhân, không phải phần mềm được chấm.
 
@@ -364,6 +466,10 @@ trừ cước, chốt kỳ, sinh CDR. Lần POST **duy nhất** trong toàn bộ
 ```bash
 node tools-chup-anh/chup.mjs tatca
 ```
+
+Chụp lại vài ảnh chọn số: `node tools-chup-anh/chup.mjs so=3,6,10`. Sáu ảnh có POST bị từ chối và
+modal: `node tools-chup-anh/chup-bo-sung.mjs`. Danh sách ảnh cắt rail nằm trong `CAT_RAIL` của hai
+script đó.
 
 ```bash
 node tools-chup-anh/kiem-anh.mjs

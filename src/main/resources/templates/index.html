@@ -166,7 +166,11 @@
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-white d-flex align-items-center">
             <strong>Doanh thu theo kỳ</strong>
-            <a class="ms-auto small text-decoration-none khong-in" th:href="@{/bao-cao/doanh-thu-ky}">
+            <!--/* Biểu đồ chỉ có tổng theo kỳ, không có tên khách, nên ai cũng xem được;
+                   riêng link dẫn tới /bao-cao/doanh-thu-ky thì chỉ hiện cho vai trò vào
+                   được trang đó (SecurityConfig) — không bày ra một nút bấm vào là 403. */-->
+            <a class="ms-auto small text-decoration-none khong-in" th:href="@{/bao-cao/doanh-thu-ky}"
+               sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
                 Xem báo cáo <i class="bi bi-chevron-right"></i>
             </a>
         </div>
