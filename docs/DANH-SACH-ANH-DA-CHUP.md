@@ -32,6 +32,129 @@ tự mâu thuẫn với chính nó.
 
 ---
 
+## Đợt bổ sung 11/09/2026 — sửa rào phân quyền, chụp thêm 12 ảnh
+
+### A. Lỗ hổng phân quyền trên trang chủ — đã sửa, chỉ trong `index.html`
+
+Trước: bốn khối tiền — *Doanh thu kỳ gần nhất* (dòng 121), *Tổng công nợ* (135), *Top 5 thuê bao
+cước cao nhất* (185), *5 giao dịch thanh toán gần nhất* (220) — **không có `sec:authorize`**, trong
+khi `SecurityConfig:108-111` chặn nhân viên ở `/bao-cao/top-thue-bao/**` vì đúng nội dung đó.
+Nhân viên bị 403 ở báo cáo nhưng nhìn được tên khách và số nợ ngay trang chủ.
+
+Sau: cả bốn khối rào `hasAnyRole('KE_TOAN','ADMIN')`. Vai trò khác nhận **thẻ thay thế cùng khung**
+với biểu tượng khoá và một câu nói rõ vì sao — không để trống, lưới bốn thẻ không vỡ.
+**Không sửa `SecurityConfig`** — cấu hình đó đúng, template mới là chỗ sai.
+
+| Vai trò | Khối tiền thật hiện ra | Thẻ khoá | |
+|---|--:|--:|:--:|
+| admin | **4** | 0 | ✅ |
+| ketoan01 | **4** | 0 | ✅ |
+| nhanvien01 | **0** | 4 | ✅ |
+
+**Đối chứng âm:** bỏ đúng một rào (*Tổng công nợ*), dựng lại, chạy lại → phép kiểm kêu
+*"nhanvien01 1 khối · Tổng công nợ"*. Khôi phục → đạt lại.
+
+Sau sửa: `mvnw test` **342/342** · 8 script giao diện **215/215** · 3 phép kiểm template đạt.
+
+> ⚠️ **Hai chỗ tiền còn sót, ngoài phạm vi "chỉ sửa `index.html`" — chưa sửa, cần bạn quyết:**
+>
+> 1. **Thanh máy** (`fragments/layout.html`) hiện *"Còn nợ 85.848.297 đ"* cho **mọi** vai trò — đúng con
+>    số vừa bị khoá ở thẻ *Tổng công nợ* ngay bên dưới. Khoá thẻ mà để nguyên thanh máy là tự mâu thuẫn.
+> 2. **Biểu đồ Doanh thu theo kỳ** (`index.html`, ngoài 4 khối đã nêu): tiền theo kỳ, kèm link *Xem báo
+>    cáo* → `/bao-cao/doanh-thu-ky` — nhân viên bấm vào nhận 403.
+
+### Số mục menu trên rail — phép kiểm phân quyền cho ảnh 03 · 63 · 65
+
+Đếm trên DOM trang thật, cùng khung 1366 với lúc chụp (rail 232px, mở đầy đủ):
+
+| Ảnh | Vai trò | Mục menu |
+|---|---|--:|
+| 03 | admin | **14** |
+| 63 | nhanvien01 | **4** |
+| 65 | ketoan01 | **6** |
+
+03 > 63 ✅ · 03 > 65 ✅. **Đối chứng âm:** admin so với chính admin → *"bằng nhau"* — phép kiểm biết kêu.
+
+### 12 ảnh mới — cách chụp và bằng chứng không ghi dữ liệu
+
+| # | Cách lấy | Dữ liệu sau khi chụp |
+|---|---|---|
+| 63 | Chụp lại sau khi rào | — |
+| 27 | Bấm *Chốt kỳ* kỳ 7 → `app.js` gọi `preventDefault()` rồi mở modal → chụp → **Esc** | kỳ 7 vẫn `MO` |
+| 08 | POST CCCD 11 số → máy chủ từ chối, form giữ nguyên dữ liệu đã nhập | `khach_hang` = 50 |
+| 35 | POST 999.999.999 đ cho hóa đơn còn nợ 160.648 đ → từ chối | `thanh_toan` = 161 |
+| 40 | POST khai **cả** tiền lẫn tỷ lệ → `@AssertTrue` từ chối | `giam_tru` = 2 |
+| 36 | POST thẳng `/tinh-cuoc/2/huy-hoa-don` (UI đã ẩn nút) → *"Kỳ cước tháng 5/2026 đã chốt, không thể hủy hóa đơn"* | `hoa_don` = 338 |
+| 37 · 38 · 51 · 52a · 52b · 80 · 81 | Ảnh **chụp tay** của bạn, đổi tên từ zip (hash khớp từng file) | — |
+
+Dữ liệu kiểm **sau từng ảnh**: 7 kỳ · 23.223 CDR · 338 hóa đơn · 161 thanh toán · kỳ 9 `MO` 0/0 — không
+lệch lần nào.
+
+> **Ảnh 36 khác mô tả trong danh sách gốc.** Danh sách ghi thông báo *"48 giao dịch"* (chặn huỷ vì đã thu
+> tiền). Nhưng kỳ 5 nay đã **`DA_CHOT`**, và rào "đã chốt" đứng **trước** rào "đã thu tiền" trong
+> `huyBillingKy`, nên thông báo thật là *"đã chốt, không thể hủy"*. Muốn ra đúng câu *"48 giao dịch"*
+> phải mở lại kỳ 5 — một thao tác ghi. Ảnh vẫn chứng minh điều quan trọng hơn: **gõ thẳng đường dẫn
+> vẫn bị chặn ở tầng nghiệp vụ** (bài học 4.4), dù giao diện đã ẩn nút.
+
+> **Hai lần chụp sai của tôi, đã chụp lại.** Ảnh 35 lượt đầu hiện *"Vui lòng chọn hình thức thanh toán"*
+> — tôi bỏ trống ô hình thức nên `@NotNull` nổ **trước** rào "vượt số còn nợ". Ảnh 40 lượt đầu lẫn hai
+> lỗi *"Vui lòng chọn…"* vì bỏ trống thuê bao và loại. Cả hai chụp lại với các ô khác đã điền đúng, để
+> **chỉ còn đúng một lỗi** cần thấy.
+
+### Thanh máy: 148 hôm qua, 90 hôm nay — không phải lỗi, nhưng cần biết
+
+Thanh máy đếm hóa đơn **theo trạng thái** `QUA_HAN`; bảng tuổi nợ đếm **theo ngày**. Hôm nay
+`test-muc-F.ps1` (một trong 8 script bạn yêu cầu chạy) huỷ rồi lập lại 58 hóa đơn kỳ 6 — hóa đơn mới
+sinh ra ở `CHUA_TT`, nên thanh máy tụt từ 148 xuống **90** dù không hóa đơn nào bớt quá hạn.
+
+`capNhatQuaHan()` chạy lúc **00:05** hằng ngày *hoặc* khi ai đó **mở `/hoa-don`** (`LichChayNenConfig`,
+thiết kế cố ý). Lần mở `/hoa-don` kế tiếp sẽ trả về 148. Tôi **không tự kích hoạt** vì đó là một thao
+tác đổi trạng thái. Hệ quả: 6 ảnh chụp hôm nay (08 · 27 · 35 · 36 · 40 · 63) ghi **90** trên thanh máy,
+55 ảnh hôm qua ghi **148**. Nếu muốn đồng nhất: mở `/hoa-don` một lần rồi chụp lại 6 ảnh đó.
+
+### F. Rail chỉ phủ khung nhìn đầu — đo trên 37 ảnh chụp cả trang có rail
+
+Rail là `position: fixed`, cao bằng khung nhìn. Đo cột x = 60px trên từng ảnh: rail dừng đúng **768px**
+ở **mọi** ảnh. Đối chứng: 9 ảnh cao ≤ 780px ra 100%, 18 ảnh cao > 1500px ra trung bình 35%.
+
+| Mức | Rail phủ | Số ảnh |
+|---|---|--:|
+| **Nặng** | dưới 60% | **20** |
+| Vừa | 60–95% | 8 |
+| Ổn | từ 95% | 9 |
+
+Danh sách ảnh **nặng** (cột tối cụt ngang rõ nhất khi in):
+
+| # | Ảnh | Cao (px) | Rail phủ |
+|---|---|--:|--:|
+| 77 | `77-hoa-don-cua-ky-8.png` | 4530 | 17% |
+| 23 | `23-doi-soat-sat-ranh-gioi-quota.png` | 3986 | 19% |
+| 22 | `22-doi-soat-vuot-quota-data.png` | 3965 | 19% |
+| 70 | `70-doi-soat-ky-8.png` | 3965 | 19% |
+| 47 | `47-bao-cao-top-thue-bao.png` | 3632 | 21% |
+| 28 | `28-danh-sach-hoa-don-ky-5.png` | 2053 | 37% |
+| 75 | `75-danh-sach-hoa-don-tat-ca.png` | 2014 | 38% |
+| 79 | `79-danh-sach-hoa-don-ky-8.png` | 2014 | 38% |
+| 6 | `06-danh-sach-khach-hang.png` | 1970 | 39% |
+| 19 | `19-tra-cuu-cdr.png` | 1962 | 39% |
+| 78 | `78-tra-cuu-cdr-co-bo-loc.png` | 1962 | 39% |
+| 46 | `46-bao-cao-thong-ke-thue-bao.png` | 1889 | 41% |
+| 20 | `20-man-hinh-tinh-cuoc.png` | 1869 | 41% |
+| 33 | `33-danh-sach-thanh-toan.png` | 1825 | 42% |
+| 3 | `03-dashboard-admin.png` | 1750 | 44% |
+| 63 | `63-dashboard-nhanvien.png` | 1650 | 47% |
+| 65 | `65-dashboard-ketoan.png` | 1650 | 47% |
+| 14 | `14-bang-gia.png` | 1526 | 50% |
+| 43 | `43-bao-cao-doanh-thu-ky.png` | 1399 | 55% |
+| 10 | `10-danh-sach-thue-bao.png` | 1370 | 56% |
+
+**Chưa sửa — bạn quyết.** Ba hướng: (a) chấp nhận, rail cụt là tính chất của ảnh cả trang; (b) chụp
+**khung nhìn** thay vì cả trang cho các trang danh sách dài — mất phần dưới nhưng rail liền; (c) chụp
+cả trang rồi cắt bỏ rail bằng `clip` từ x = 232px — mất menu nhưng ảnh sạch. Hướng (c) hợp với báo cáo
+in nhất vì menu đã có riêng ở ảnh 03/63/65.
+
+---
+
 ## Cấu hình chụp
 
 | | |
@@ -71,7 +194,7 @@ Trước khi tin bất kỳ số 0 nào, bộ kiểm tự tạo **hai ảnh mồ
 > vượt ngưỡng 40, và ảnh trắng tuyền bị tính là **100% nội dung**. Phép kiểm trắng **không bao giờ
 > nổ được**. Sửa sang lấy **tâm khoang** (`×16 + 8`) thì mồi nổ đúng.
 
-Kết quả trên **55 ảnh thật**:
+Kết quả trên **60 ảnh tự động** (chạy lại 11/09 sau khi thêm 12 ảnh; 7 ảnh chụp tay cũng qua cùng bộ kiểm):
 
 | Phép kiểm | Kết quả |
 |---|---|
@@ -80,19 +203,21 @@ Kết quả trên **55 ảnh thật**:
 | Ảnh dưới 20 KB | **0** |
 | Ảnh cao dưới 400px | **0** |
 | Trang lỗi bị chụp nhầm | **0** — ảnh 2 (403) và 59 (400) là **cố ý**, đã khai vào danh sách cho phép |
-| Thiếu sổ tay / sổ tay thừa | **0 / 0** |
+| Thiếu sổ tay / sổ tay thừa | **0 / 0** với ảnh tự động — 7 ảnh chụp tay không có sổ tay, đúng bản chất |
+| Ảnh cao dưới 400px — **4 ảnh chụp tay** (51 · 52a · 52b · 80: 161–182px) | Cảnh báo **đúng**: đó là ảnh cắt gọn một dòng console và một biểu tượng. Giữ nguyên phép kiểm, không tắt |
 
 ---
 
-## Bảng đối chiếu — 55 ảnh
+## Bảng đối chiếu — 67 ảnh
 
-| # | Tên file | URL | Vai trò | Cỡ | Kiểu chụp | Ghi chú |
+| # | Tên file | URL / nội dung | Vai trò | Cỡ | Kiểu chụp | Ghi chú |
 |---|---|---|---|--:|---|---|
 | 1 | `01-dang-nhap.png` | `/dang-nhap` | (chua dang nhap) | 59 KB | khung nhìn | — |
 | 2 | `02-trang-403.png` | `/hoa-don` | nhanvien01 | 138 KB | khung nhìn | — |
 | 3 | `03-dashboard-admin.png` | `/` | admin | 561 KB | cả trang | — |
 | 6 | `06-danh-sach-khach-hang.png` | `/khach-hang` | admin | 724 KB | cả trang | — |
 | 7 | `07-form-them-khach-ca-nhan.png` | `/khach-hang/them` | admin | 223 KB | khung nhìn | — |
+| 8 | `08-validation-chan-cccd-sai.png` | `/khach-hang/luu` | admin | 275 KB | cả trang | POST bị từ chối |
 | 9 | `09-chi-tiet-khach-hang.png` | `/khach-hang/1` | admin | 271 KB | cả trang | — |
 | 10 | `10-danh-sach-thue-bao.png` | `/thue-bao` | admin | 625 KB | cả trang | — |
 | 11 | `11-chi-tiet-thue-bao-tra-truoc.png` | `/thue-bao/4` | admin | 265 KB | cả trang | — |
@@ -107,6 +232,7 @@ Kết quả trên **55 ảnh thật**:
 | 22 | `22-doi-soat-vuot-quota-data.png` | `/tinh-cuoc/doi-soat/21/1` | admin | 1627 KB | cả trang | — |
 | 23 | `23-doi-soat-sat-ranh-gioi-quota.png` | `/tinh-cuoc/doi-soat/34/1` | admin | 1674 KB | cả trang | — |
 | 26 | `26-ban-in-a4-bang-doi-soat.png` | `/tinh-cuoc/doi-soat/21/1` | admin | 1792 KB | cả trang | bản in |
+| 27 | `27-modal-canh-bao-chot-ky.png` | `/tinh-cuoc` | admin | 655 KB | cả trang | modal, chưa xác nhận |
 | 28 | `28-danh-sach-hoa-don-ky-5.png` | `/hoa-don?kyCuocId=2` | admin | 916 KB | cả trang | — |
 | 29 | `29-chi-tiet-hoa-don-tra-hai-dot.png` | `/hoa-don/307` | admin | 474 KB | cả trang | — |
 | 30 | `30-cong-no.png` | `/cong-no` | ketoan01 | 530 KB | cả trang | cắt 1366x1250 · chặn cao 21412 -> 1250 px |
@@ -114,7 +240,12 @@ Kết quả trên **55 ảnh thật**:
 | 32 | `32-de-xuat-tam-ngung.png` | `/cong-no` | ketoan01 | 690 KB | cả trang | cắt 1102x1400 · chặn cao 6988 -> 1400 px |
 | 33 | `33-danh-sach-thanh-toan.png` | `/thanh-toan` | ketoan01 | 925 KB | cả trang | — |
 | 34 | `34-form-ghi-nhan-thanh-toan.png` | `/thanh-toan/moi/3123` | ketoan01 | 242 KB | khung nhìn | — |
+| 35 | `35-chan-thu-vuot-so-con-no.png` | `/thanh-toan (POST)` | ketoan01 | 317 KB | cả trang | POST bị từ chối |
+| 36 | `36-chan-huy-hoa-don-ky-da-chot.png` | `POST /tinh-cuoc/2/huy-hoa-don` | admin | 722 KB | cả trang | POST bị từ chối |
+| 37 | `37-hoa-don-pdf.png` | PDF hóa đơn HD202608-000058 | (tự chụp) | 147 KB | chụp tay | Snipping Tool, không qua Playwright |
+| 38 | `38-phieu-thu-pdf.png` | PDF phiếu thu TT20260620-0004 | (tự chụp) | 97 KB | chụp tay | Snipping Tool, không qua Playwright |
 | 39 | `39-danh-sach-giam-tru.png` | `/giam-tru` | admin | 303 KB | cả trang | — |
+| 40 | `40-chan-khai-ca-tien-lan-ty-le.png` | `/giam-tru (POST)` | admin | 292 KB | cả trang | POST bị từ chối |
 | 41 | `41-bien-dong-so-du-tra-truoc.png` | `/tinh-cuoc` | admin | 209 KB | cả trang | cắt 1102x667 |
 | 42 | `42-menu-bao-cao.png` | `/bao-cao` | admin | 392 KB | cả trang | — |
 | 43 | `43-bao-cao-doanh-thu-ky.png` | `/bao-cao/doanh-thu-ky` | admin | 433 KB | cả trang | — |
@@ -124,9 +255,12 @@ Kết quả trên **55 ảnh thật**:
 | 47 | `47-bao-cao-top-thue-bao.png` | `/bao-cao/top-thue-bao?soLuong=50` | admin | 1828 KB | cả trang | — |
 | 48 | `48-bao-cao-san-luong.png` | `/bao-cao/san-luong?kyCuocId=3` | admin | 379 KB | cả trang | — |
 | 50 | `50-ban-in-bao-cao-doanh-thu.png` | `/bao-cao/doanh-thu-ky` | admin | 258 KB | cả trang | bản in |
+| 51 | `51-ket-qua-342-test-tu-dong.png` | Console: Tests run 342, Failures 0 | (tự chụp) | 15 KB | chụp tay | Snipping Tool, không qua Playwright |
+| 52a | `52a-doi-chung-am-do-27-test-4-loi.png` | Console: 27 test, 4 lỗi sau khi gỡ luật | (tự chụp) | 14 KB | chụp tay | Snipping Tool, không qua Playwright |
+| 52b | `52b-doi-chung-am-xanh-27-test-0-loi.png` | Console: 27 test, 0 lỗi sau khôi phục | (tự chụp) | 15 KB | chụp tay | Snipping Tool, không qua Playwright |
 | 59 | `59-trang-loi-400.png` | `/hoa-don/abc` | admin | 176 KB | khung nhìn | — |
 | 61 | `61-rail-thu-gon-duoi-992px.png` | `/` | admin | 206 KB | khung nhìn | — |
-| 63 | `63-dashboard-nhanvien.png` | `/` | nhanvien01 | 480 KB | cả trang | — |
+| 63 | `63-dashboard-nhanvien.png` | `/` | nhanvien01 | 363 KB | cả trang | — |
 | 64 | `64-bao-cao-cong-no.png` | `/bao-cao/cong-no` | ketoan01 | 411 KB | cả trang | — |
 | 65 | `65-dashboard-ketoan.png` | `/` | ketoan01 | 480 KB | cả trang | — |
 | 66 | `66-form-them-khach-doanh-nghiep.png` | `/khach-hang/them` | admin | 223 KB | khung nhìn | — |
@@ -143,27 +277,19 @@ Kết quả trên **55 ảnh thật**:
 | 77 | `77-hoa-don-cua-ky-8.png` | `/tinh-cuoc/ky/8` | admin | 1936 KB | cả trang | — |
 | 78 | `78-tra-cuu-cdr-co-bo-loc.png` | `/cdr?loaiDichVu=DATA&huong=NOI_MANG` | admin | 950 KB | cả trang | — |
 | 79 | `79-danh-sach-hoa-don-ky-8.png` | `/hoa-don?kyCuocId=8` | admin | 925 KB | cả trang | — |
+| 80 | `80-bieu-tuong-desktop.png` | Biểu tượng trên màn hình nền | (tự chụp) | 29 KB | chụp tay | Snipping Tool, không qua Playwright |
+| 81 | `81-cua-so-khoi-dong.png` | Cửa sổ khởi động năm bước | (tự chụp) | 49 KB | chụp tay | Snipping Tool, không qua Playwright |
+
 ---
 
-## Chưa chụp được — 24 mục, kèm lý do
+## Chưa chụp được — 15 mục, kèm lý do
 
-Đặc tả lượt này cấm **mọi thao tác ghi dữ liệu** và cấm chạy 8 script trong `scripts/`. Những mục
-dưới đây đều cần một trong hai thứ đó, hoặc cần công cụ ngoài trình duyệt.
+### Cần ghi dữ liệu thật — không làm
 
-### Cần thao tác GHI dữ liệu — bị cấm ở lượt này
-
-| # | Ảnh | Cần làm gì | Vì sao chưa chụp |
-|---|---|---|---|
-| 17 | Kết quả sinh CDR | Bấm **Sinh dữ liệu** | Sinh CDR = ghi vào `chi_tiet_su_dung` |
-| 21 | Hộp kết quả sau khi chạy | Huỷ rồi lập lại hóa đơn kỳ 6 | Xoá + tạo lại 58 hóa đơn |
-| 27 | Modal cảnh báo chốt kỳ | Bấm **Chốt kỳ** | Nút mở modal, nhưng bấm nhầm một lần là **chốt kỳ vĩnh viễn** — không đáng liều |
-| 36 | Chặn huỷ hóa đơn kỳ đã thu | Bấm **Huỷ hóa đơn** kỳ 5 | Cùng lý do: nếu chốt chặn không nổ thì mất 54 hóa đơn |
-| 8 | Validation chặn CCCD sai | Nhập CCCD 11 số rồi **Lưu** | Gửi form = POST |
-| 35 | Chặn thu vượt số còn nợ | Nhập số lớn hơn còn nợ rồi **Lưu** | Gửi form = POST |
-| 40 | Chặn khai cả tiền lẫn tỷ lệ | Nhập cả hai rồi **Lưu** | Gửi form = POST |
-
-> Bốn mục 8 · 35 · 40 và 27 **sẽ bị chặn** và không ghi được gì — nhưng *"sẽ bị chặn"* là điều
-> đang cần chứng minh, nên không thể lấy nó làm lý do để bấm. Chụp tay ở một lượt được phép ghi.
+| # | Ảnh | Vì sao |
+|---|---|---|
+| 17 | Kết quả sinh CDR | Sinh CDR = ghi vào `chi_tiet_su_dung` |
+| 21 | Hộp kết quả sau khi chạy | Huỷ rồi lập lại 58 hóa đơn kỳ 6 |
 
 ### Cần công cụ ngoài trình duyệt
 
@@ -171,35 +297,24 @@ dưới đây đều cần một trong hai thứ đó, hoặc cần công cụ n
 |---|---|---|
 | 4 | Sơ đồ quan hệ 15 bảng | MySQL Workbench → Reverse Engineer |
 | 5 | Hai view | MySQL Workbench |
-| 37 | Hóa đơn PDF | Mở file PDF tải về |
-| 38 | Phiếu thu PDF | Mở file PDF tải về |
 | 49 | File Excel mở trong Excel | Microsoft Excel |
-| 51 | Kết quả 342 test | Console `mvnw test` |
-| 52 | Test ĐỎ → XANH | Console, và **cần `UPDATE` dữ liệu** |
-| 53 | Test bất biến thanh toán | Console |
-| 54 | Test hạt giống bộ sinh CDR | Console |
-| 55 | Test bất biến điều hướng | Console |
-| 56 | Script đi theo menu | `scripts/test-dieu-huong.ps1` — **cấm chạy lượt này** |
-| 57 | Script rà kỳ rỗng | `scripts/test-ky-rong.ps1` — **cấm chạy lượt này** |
-| 58 | Script trường hợp biên | `scripts/test-bien.ps1` — **cấm chạy lượt này** |
-| 62 | Lịch sử Git toàn dự án | Console `git log --oneline` |
+| 53 · 54 · 55 | Ba lớp test bất biến | Console `mvnw test -Dtest=…` |
+| 56 · 57 · 58 | Ba script giao diện | Console — 15/28/42 đạt, đã chạy ở đợt này, chỉ thiếu ảnh |
+| 62 | Lịch sử Git | Console `git log --oneline` |
 
 ### Không dựng được tình huống
 
 | # | Ảnh | Vì sao |
 |---|---|---|
-| 60 | Trang lỗi 500 có mã sự cố | Không có đường nào ép hệ thống lỗi 500 mà không sửa mã |
+| 60 | Trang lỗi 500 có mã sự cố | Không có đường nào ép lỗi 500 mà không sửa mã |
 
 ### Đã nằm trong ảnh khác
 
 | # | Ảnh | Nằm ở đâu |
 |---|---|---|
-| 24 | Khối 4 — đối chiếu hóa đơn | Trong ảnh **22** (chụp cả trang, cao 3.965px, đủ 4 khối) |
-| 25 | Dòng làm vượt ưu đãi | Trong ảnh **22**, khối 3 |
+| 24 · 25 | Khối 4 đối chiếu · dòng vượt ưu đãi | Trong ảnh **22** (cả trang, đủ 4 khối) |
 
----
-
-## Ảnh bổ sung ngoài danh sách gốc — 17 tấm
+## Ảnh bổ sung ngoài danh sách gốc — 19 tấm
 
 Danh sách gốc không có, nhưng đặc tả lượt này yêu cầu (dashboard cả ba vai trò, form đổi động,
 đủ các tab của chi tiết thuê bao) hoặc bổ sung cho đầy đủ phân hệ:
@@ -220,16 +335,15 @@ Danh sách gốc không có, nhưng đặc tả lượt này yêu cầu (dashboa
 | 76 | Chi tiết thuê bao **trả sau** | Ảnh 11 là trả trước |
 | 77 | Hóa đơn của kỳ 8 | |
 | 78 | Tra cứu CDR **có bộ lọc** | Ảnh 19 chưa lọc |
+| 80 · 81 | Biểu tượng Desktop · cửa sổ khởi động | Chụp tay — cách mở phần mềm bằng một cú nháy đúp (đợt G7), không có trong danh sách gốc |
 
 ---
 
 ## Ghi chú vận hành
 
-**Dung lượng:** tổng **30,5 MB** cho 55 ảnh. Thư mục `docs/screenshots/` **chưa** được thêm vào
-`.gitignore` — đặc tả yêu cầu báo trước khi làm việc đó. Đây là quyết định của bạn:
-
-* **Giữ trong git** — ảnh đi cùng báo cáo, ai clone về cũng có. Kho tăng từ ~5,8 MB lên ~36 MB.
-* **Thêm vào `.gitignore`** — kho gọn, nhưng ảnh chỉ nằm trên máy này.
+**Dung lượng:** tổng **32,9 MB** cho 67 ảnh. Thư mục `docs/screenshots/` **giữ trong git** — quyết
+định ngày 10/09: ảnh là tài liệu của báo cáo, ai clone kho về cũng phải có. `tools-chup-anh/` thì
+vẫn `.gitignore` vì đó là công cụ cá nhân, không phải phần mềm được chấm.
 
 **Dữ liệu sau khi chụp — không suy suyển:**
 

@@ -116,8 +116,18 @@
                 <i class="bi bi-person-plus"></i>
             </div>
         </div>
+        <!--/*
+            Bốn khối tiền dưới đây rào cùng mức với /bao-cao/top-thue-bao/** trong
+            SecurityConfig: chỉ KE_TOAN và ADMIN. Trước đợt này chúng KHÔNG có rào,
+            nên nhân viên giao dịch bị chặn ở /bao-cao/top-thue-bao (403) mà vẫn
+            nhìn được đúng bảng đó ngay trên trang chủ — phân quyền theo nội dung
+            bị hở ở chính màn hình đầu tiên sau đăng nhập.
+
+            Vai trò không được phép nhận một thẻ THAY THẾ cùng khung, nói rõ vì sao
+            không thấy — không để trống, và không làm lưới bốn thẻ vỡ.
+        */-->
         <div class="col-sm-6 col-xl-3">
-            <div class="the-so-lieu vach-on">
+            <div class="the-so-lieu vach-on" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
                 <span class="nhan">Doanh thu kỳ gần nhất</span>
                 <span class="gia-tri" th:if="${dashboard.kyGanNhat != null}"
                       th:text="${@soLieu.tien(dashboard.kyGanNhat.phatSinh)}">0</span>
@@ -129,13 +139,25 @@
                 <span class="phu" th:if="${dashboard.kyGanNhat == null}">chưa lập hóa đơn nào</span>
                 <i class="bi bi-cash-stack"></i>
             </div>
+            <div class="the-so-lieu" sec:authorize="!hasAnyRole('KE_TOAN','ADMIN')">
+                <span class="nhan">Doanh thu kỳ gần nhất</span>
+                <span class="gia-tri trong">—</span>
+                <span class="phu">chỉ Kế toán và Quản trị viên xem được</span>
+                <i class="bi bi-lock"></i>
+            </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="the-so-lieu vach-loi">
+            <div class="the-so-lieu vach-loi" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
                 <span class="nhan">Tổng công nợ</span>
                 <span class="gia-tri" th:text="${@soLieu.tien(dashboard.tongCongNo)}">0</span>
                 <span class="phu">tổng tiền khách còn nợ</span>
                 <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="the-so-lieu" sec:authorize="!hasAnyRole('KE_TOAN','ADMIN')">
+                <span class="nhan">Tổng công nợ</span>
+                <span class="gia-tri trong">—</span>
+                <span class="phu">chỉ Kế toán và Quản trị viên xem được</span>
+                <i class="bi bi-lock"></i>
             </div>
         </div>
     </div>
@@ -180,7 +202,15 @@
     <!--/* ================== HAI BẢNG ================== */-->
     <div class="row g-3">
         <div class="col-lg-7">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm h-100" sec:authorize="!hasAnyRole('KE_TOAN','ADMIN')">
+                <div class="card-header bg-white fw-semibold">Top 5 thuê bao cước cao nhất</div>
+                <div class="card-body text-center text-secondary py-5">
+                    <i class="bi bi-lock d-block fs-2 mb-2"></i>
+                    Mục này có tên khách và số tiền còn nợ, nên chỉ Kế toán và Quản trị viên
+                    xem được.
+                </div>
+            </div>
+            <div class="card shadow-sm h-100" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
                 <div class="card-header bg-white d-flex align-items-center">
                     <strong>Top 5 thuê bao cước cao nhất</strong>
                     <span class="ms-auto small text-secondary" th:if="${dashboard.kyGanNhat != null}"
@@ -216,7 +246,14 @@
             </div>
         </div>
         <div class="col-lg-5">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm h-100" sec:authorize="!hasAnyRole('KE_TOAN','ADMIN')">
+                <div class="card-header bg-white fw-semibold">5 giao dịch thanh toán gần nhất</div>
+                <div class="card-body text-center text-secondary py-5">
+                    <i class="bi bi-lock d-block fs-2 mb-2"></i>
+                    Mục này có số tiền đã thu, nên chỉ Kế toán và Quản trị viên xem được.
+                </div>
+            </div>
+            <div class="card shadow-sm h-100" sec:authorize="hasAnyRole('KE_TOAN','ADMIN')">
                 <div class="card-header bg-white fw-semibold">5 giao dịch thanh toán gần nhất</div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
