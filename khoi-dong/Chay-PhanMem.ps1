@@ -92,6 +92,94 @@ function Test-CongMo ([int] $cong) {
     return [bool] $c
 }
 
+# Tim mysql.exe de THU KET NOI THAT o buoc 3. Uu tien client di kem chinh
+# dich vu MySQL dang chay (cung phien ban, chac chan tuong thich), roi moi
+# den PATH va cac thu muc cai dat thong thuong.
+function Tim-MysqlExe {
+    # 1. Canh mysqld.exe cua dich vu MySQL (doc duong dan tu WMI, cat tham so).
+    $dv = @(Get-CimInstance Win32_Service -Filter "Name LIKE 'mysql%'" -ErrorAction SilentlyContinue |
+            Sort-Object { $_.State -ne 'Running' })   # dich vu dang chay len truoc
+    foreach ($d in $dv) {
+        if ($d.PathName -match '"?([A-Za-z]:\\[^"]*?mysqld\.exe)') {
+            $mysql = Join-Path (Split-Path $Matches[1]) 'mysql.exe'
+            if (Test-Path $mysql) { return $mysql }
+        }
+    }
+    # 2. Tren PATH.
+    $g = Get-Command mysql.exe -ErrorAction SilentlyContinue
+    if ($g) { return $g.Source }
+    # 3. Cac thu muc cai dat quen thuoc.
+    foreach ($mau in @(
+        "$env:ProgramFiles\MySQL\MySQL Server *\bin\mysql.exe",
+        "${env:ProgramFiles(x86)}\MySQL\MySQL Server *\bin\mysql.exe")) {
+        $tim = @(Get-ChildItem $mau -ErrorAction SilentlyContinue | Sort-Object FullName -Descending)
+        if ($tim.Count) { return $tim[0].FullName }
+    }
+    return $null
+}
+
+# ---------------------------------------------------------------------
+# THU KET NOI THAT toi MySQL, dung DUNG thong tin ung dung se dung
+# (user tu MYSQL_USER mac dinh root, mat khau tu MYSQL_PASSWORD).
+#
+# Mat khau di qua bien moi truong MYSQL_PWD cua TIEN TRINH CON — KHONG bao
+# gio nam tren dong lenh (tranh lo qua Task Manager / dong lenh) va KHONG bao
+# gio duoc in ra hay ghi vao file.
+#
+# Tra ve hashtable:
+#   Loai = 'OK'      ket noi va xac thuc thanh cong
+#          'SAI_MK'  ma 1045 — mat khau/user sai
+#          'KHAC'    ma khac (2003 khong ket noi duoc, 1049, 3118 khoa, ...)
+#          'KHONG_KIEM_DUOC'  khong tim thay mysql.exe -> khong the kiem tai day
+#   Ma        so hieu loi MySQL (khi co), de hien cho nguoi phu trach ky thuat
+#   ThongDiep mo ta ngan, KHONG chua mat khau
+#
+# CHU Y: dung 'localhost' giong JDBC cua ung dung. Tren Windows JDBC
+# 'jdbc:mysql://localhost:3306' di bang TCP; mysql.exe -h 127.0.0.1 cung TCP,
+# va grant khop deu la 'root'@'localhost'. Khong chi dinh CSDL — buoc nay
+# kiem XAC THUC, khong kiem CSDL da nap chua (do la viec cua buoc 5).
+# ---------------------------------------------------------------------
+function Test-KetNoiMySQL ([string] $matKhau, [string] $nguoiDung = 'root') {
+    $mysql = Tim-MysqlExe
+    if (-not $mysql) {
+        return @{ Loai = 'KHONG_KIEM_DUOC'; Ma = $null
+                  ThongDiep = 'Khong tim thay mysql.exe de thu ket noi tai buoc nay.' }
+    }
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $mysql
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow  = $true
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError  = $true
+    # -h 127.0.0.1 va SELECT 1: xac thuc thuan tuy, khong dong toi CSDL nao.
+    $psi.Arguments = "-u $nguoiDung -h 127.0.0.1 -P 3306 --connect-timeout=6 --batch --skip-column-names -e ""SELECT 1"""
+    # Mat khau qua MYSQL_PWD cua rieng tien trinh con. Dat ca khi rong ('') de
+    # MySQL bao dung 'using password: NO' — phan biet duoc voi mat khau sai.
+    $psi.EnvironmentVariables['MYSQL_PWD'] = [string] $matKhau
+    try {
+        $p = [System.Diagnostics.Process]::Start($psi)
+        $null = $p.StandardOutput.ReadToEnd()
+        $err  = $p.StandardError.ReadToEnd()
+        if (-not $p.WaitForExit(15000)) {
+            try { $p.Kill() } catch { }
+            return @{ Loai = 'KHAC'; Ma = $null
+                      ThongDiep = 'mysql.exe khong tra loi trong 15 giay.' }
+        }
+        if ($p.ExitCode -eq 0) { return @{ Loai = 'OK'; Ma = $null; ThongDiep = 'Ket noi thanh cong.' } }
+        # Loc canh bao "Unknown OS character set 'cp1258'" — do KHONG phai loi ket noi.
+        $ma = $null
+        if ($err -match 'ERROR\s+(\d+)') { $ma = [int] $Matches[1] }
+        if ($ma -eq 1045) {
+            return @{ Loai = 'SAI_MK'; Ma = 1045; ThongDiep = 'Access denied (1045).' }
+        }
+        return @{ Loai = 'KHAC'; Ma = $ma
+                  ThongDiep = (($err -split "`n" | Where-Object { $_ -match 'ERROR' } | Select-Object -First 1) -replace '\s+', ' ').Trim() }
+    } catch {
+        return @{ Loai = 'KHONG_KIEM_DUOC'; Ma = $null
+                  ThongDiep = "Khong chay duoc mysql.exe: $($_.Exception.Message)" }
+    }
+}
+
 function Mo-TrinhDuyet {
     Ghi ''
     Ghi "  Đang mở trình duyệt vào $diaChi …" 'Cyan'
@@ -208,13 +296,44 @@ if (-not (Test-CongMo 3306)) {
 }
 
 # =====================================================================
-# BUOC 3 — Mat khau MySQL
-# Mat khau KHONG nam trong bat ky file nao. Doc tu bien moi truong, giong het
-# cach ung dung doc no.
+# BUOC 3 — Mat khau MySQL — KIEM KET NOI THAT, khong chi kiem bien co ton tai.
+#
+# Ban cu chi kiem [string]::IsNullOrWhiteSpace($env:MYSQL_PASSWORD): bien CO
+# ton tai la in dau tich xanh roi di tiep. Nhung "bien co gia tri" khong chung
+# minh "gia tri do dung". Nguoi dung thay tich xanh o day roi that bai mai tan
+# buoc 5 — phep kiem bao an toan trong khi thu no canh (ket noi CSDL) dang hong.
+#
+# Nay buoc 3 mo MOT ket noi that bang mysql.exe, dung dung user + mat khau ma
+# ung dung se dung, va CHI in tich xanh khi xac thuc thanh cong. Sai thi DUNG
+# NGAY tai day, khong chay tiep sang buoc 4-5. Mat khau khong bao gio bi in ra.
+#
+# Vi sao mysql.exe chu khong mo TCP doc goi chao: doc goi chao chi chung minh
+# MySQL dang lang nghe (buoc 2 da biet the), KHONG kiem duoc mat khau — dung
+# thu can canh. mysql.exe la client chinh chu, xu ly dung caching_sha2 nhu
+# Connector/J, nen ket qua 1045 cua no bao truoc dung ket qua cua ung dung.
 # =====================================================================
-Tieu 'Bước 3/5 — Kiểm tra mật khẩu kết nối'
+Tieu 'Bước 3/5 — Kiểm tra kết nối tới kho dữ liệu'
 
+$nguoiDung = if ([string]::IsNullOrWhiteSpace($env:MYSQL_USER)) { 'root' } else { $env:MYSQL_USER }
+
+# TH 1 & 3: bien rong trong TIEN TRINH NAY (dung thu ung dung con se nhan).
 if ([string]::IsNullOrWhiteSpace($env:MYSQL_PASSWORD)) {
+    # Phan biet "chua dat bao gio" voi "da dat nhung cua so nay mo truoc do".
+    $daLuu = [Environment]::GetEnvironmentVariable('MYSQL_PASSWORD', 'User')
+    if ([string]::IsNullOrWhiteSpace($daLuu)) {
+        $daLuu = [Environment]::GetEnvironmentVariable('MYSQL_PASSWORD', 'Machine')
+    }
+    if (-not [string]::IsNullOrWhiteSpace($daLuu)) {
+        # TH 3: da co trong may, chi la cua so nay mo TRUOC luc dat. Bam lai
+        # bieu tuong = tien trinh moi = doc duoc bien. Day la cho hay vap nhat.
+        Loi 'Máy đã lưu mật khẩu rồi, nhưng cửa sổ này mở trước lúc đó nên chưa thấy.' @(
+            '1. Đóng cửa sổ này lại.',
+            '2. Bấm lại biểu tượng phần mềm trên Desktop.',
+            '   (Biến môi trường chỉ vào được cửa sổ mở MỚI sau khi đặt — nên chỉ',
+            '    cần mở lại là xong, không phải đặt lại gì.)'
+        )
+    }
+    # TH 1: that su chua dat bao gio.
     Loi 'Máy tính chưa lưu mật khẩu MySQL, nên phần mềm không vào được kho dữ liệu.' @(
         '1. Bấm phím Windows, gõ chữ:  powershell  rồi bấm Enter.',
         '2. Gõ dòng sau, thay phần trong ngoặc bằng mật khẩu MySQL thật:',
@@ -222,11 +341,44 @@ if ([string]::IsNullOrWhiteSpace($env:MYSQL_PASSWORD)) {
         '      setx MYSQL_PASSWORD "mật_khẩu_MySQL_của_bạn"',
         '',
         '3. QUAN TRỌNG: đóng cửa sổ vừa gõ xong lại.',
-        '   Lệnh trên chỉ có hiệu lực với cửa sổ mở MỚI sau đó.',
+        '   Lệnh setx chỉ có hiệu lực với cửa sổ mở MỚI sau đó — đây là chỗ hay nhầm nhất.',
         '4. Bấm lại biểu tượng phần mềm.'
     )
 }
-Dat 'Đã có mật khẩu kết nối.'
+
+# Bien CO gia tri — gio thu ket noi THAT.
+$kn = Test-KetNoiMySQL $env:MYSQL_PASSWORD $nguoiDung
+
+if ($kn.Loai -eq 'SAI_MK') {
+    # TH 2: da dat nhung mat khau sai.
+    Loi 'Mật khẩu MySQL lưu trên máy không đúng, nên MySQL từ chối kết nối (lỗi 1045).' @(
+        '1. Bấm phím Windows, gõ  powershell  rồi bấm Enter.',
+        '2. Đặt lại cho đúng mật khẩu MySQL thật (thay phần trong ngoặc):',
+        '',
+        '      setx MYSQL_PASSWORD "mật_khẩu_MySQL_đúng"',
+        '',
+        '3. Đóng cửa sổ vừa gõ lại — setx chỉ vào được cửa sổ mở MỚI sau đó.',
+        '4. Bấm lại biểu tượng phần mềm để thử lại.',
+        '   (Không chắc mật khẩu? Chạy  khoi-dong\Kiem-Tra-Moi-Truong.ps1  để dò.)'
+    )
+}
+elseif ($kn.Loai -eq 'KHAC') {
+    # TH 3: MySQL tu choi vi ly do khac — neu ro ma loi cho nguoi phu trach.
+    $ma = if ($kn.Ma) { "mã $($kn.Ma)" } else { 'không rõ mã' }
+    Loi "MySQL từ chối kết nối vì một lý do khác ($ma), không phải do mật khẩu." @(
+        '1. Khởi động lại máy tính rồi bấm lại biểu tượng này.',
+        '2. Vẫn vậy thì báo người phụ trách kỹ thuật, kèm dòng này:',
+        "   $($kn.ThongDiep)"
+    )
+}
+elseif ($kn.Loai -eq 'KHONG_KIEM_DUOC') {
+    # Khong tim thay mysql.exe: KHONG chan duong chay (mat khau co the van
+    # dung) — canh bao va di tiep. Buoc 5 van bat duoc loi 1045 neu co.
+    Ghi "  [!] Không tìm thấy mysql.exe để kiểm mật khẩu tại đây — sẽ biết chắc khi khởi động." 'Yellow'
+}
+else {
+    Dat 'Kết nối kho dữ liệu thành công.'
+}
 
 # =====================================================================
 # BUOC 4 — Ban dong goi
