@@ -104,3 +104,101 @@ thiếu `mysql.exe` → KHÔNG_KIỂM_ĐƯỢC. Đủ cả hai chiều — một
   chỉ-đọc, tất cả dừng ở tầng xác thực nên không câu lệnh nào chạm bảng). Dữ liệu do đó không thể
   suy suyển; sẽ đối chứng lại được (7 kỳ · 23.223 CDR · 338 hóa đơn · 161 thanh toán · kỳ 9 rỗng
   `MO`) ngay khi mật khẩu được đặt đúng — đó cũng là việc người dùng cần làm để mở lại phần mềm.
+
+---
+
+## 7. Đặt lại mật khẩu `root` — đợt 18/09/2026
+
+Người dùng **không nhớ** mật khẩu cũ, nên phải đặt lại. Mật khẩu mới là **một chuỗi ngắn do
+người dùng tự chọn** — chấp nhận được vì đây là máy phát triển cục bộ, dữ liệu là dữ liệu mẫu
+tự sinh, và mã nguồn đọc mật khẩu từ biến môi trường chứ không nhúng vào tệp nào.
+
+> Giá trị thật **không ghi ở đây**, cũng không ghi trong bất kỳ tệp nào của kho: nó chỉ nằm
+> trong biến môi trường `MYSQL_PASSWORD` phạm vi User của máy. Tài liệu này cố tình chỉ nói
+> *cách làm*, không nói *giá trị*.
+
+### Vì sao `--init-file` chứ không `--skip-grant-tables`
+
+`--skip-grant-tables` **tắt toàn bộ kiểm tra quyền**: suốt thời gian máy chủ chạy ở chế độ đó,
+*mọi* kết nối vào được với *mọi* quyền. Nó còn cần hai cửa sổ và thao tác tương tác (một cửa sổ
+giữ `mysqld`, một cửa sổ chạy `mysql` để gõ lệnh). `--init-file` ngược lại: máy chủ thực thi
+đúng **một** câu lệnh lúc khởi động, **trước khi** nhận kết nối, rồi chạy bình thường với đầy đủ
+kiểm tra quyền. Ít bề mặt phơi ra hơn, và chạy được trong một khối lệnh không tương tác.
+
+Thêm `--bind-address=127.0.0.1` cho lượt chạy tay để thu hẹp cửa sổ phơi ra còn loopback.
+
+### Ba chi tiết kỹ thuật dễ sai
+
+- **Tệp `.sql` phải thuần ASCII, KHÔNG BOM.** Ba byte BOM `EF BB BF` bị trình phân tích của
+  `mysqld` tính là phần của câu lệnh đầu tiên → lỗi cú pháp. (Ràng buộc BOM của dự án chỉ áp
+  dụng cho tệp *có tiếng Việt*; tệp này không có.)
+- **Mỗi dòng một câu lệnh** — `--init-file` không hỗ trợ `DELIMITER`, nên không viết được thủ
+  tục nhiều dòng để bắt lỗi.
+- **`tam-dat-lai-mk.sql` đã thêm vào `khoi-dong/.gitignore`** trước khi tạo, nên một lần
+  `git add -A` lỡ tay cũng không đưa mật khẩu vào kho. Tệp đã xoá sau khi dùng.
+
+### Dự đoán công bố trước khi chạy
+
+`validate_password` sẽ **không** chặn mật khẩu một ký tự, vì dò `mysql.ibd` của **bản sao lưu**
+(chỉ đọc) thấy `component_validate_password` xuất hiện **0 lần** và `validate_password` **0 lần**,
+trong khi `caching_sha2_password` 8 lần và `root` 255 lần (đối chứng: `grep -a` đọc được nội dung
+thật; chuỗi bịa đặt ra 0 lần) ⇒ component chưa `INSTALL`. **Dự đoán đúng** — log không có 1819,
+nên phương án hai (hạ `validate_password.policy`/`length`) không cần dùng.
+
+### Bằng chứng mật khẩu đã đổi
+
+Lượt chạy tay được tắt bằng `mysqladmin ... shutdown` với mật khẩu mới, mã thoát **0**, và log ghi
+`Received SHUTDOWN from user root` → **chính lệnh tắt máy đó phải xác thực được mới gửi nổi**.
+Sau đó `Normal shutdown` + `Shutdown complete` (InnoDB không phải phục hồi), dịch vụ `MySQL84`
+bật lại `Running`.
+
+### Sao lưu trước khi làm
+
+Dừng dịch vụ **trước** khi chép (chép lúc đang chạy cho bản sao hỏng mà không báo lỗi), rồi
+`robocopy` toàn bộ `datadir` sang `D:\backup-mysql-truoc-G10`. Đối chiếu **từng tệp** (tên + số
+byte) giữa manifest bản gốc và bản sao — không chỉ so tổng:
+
+| | Bản gốc | Bản sao |
+|---|--:|--:|
+| Số tệp | 234 | **234** |
+| Dung lượng | 514,66 MB | **514,66 MB** |
+| Thiếu · thừa · lệch byte | — | **0 · 0 · 0** |
+
+Đối chứng âm cho chính phép đối chiếu (mô phỏng trong bộ nhớ): thêm 1 tệp → báo thừa 1; sửa 1 số
+byte → báo lệch 1; bớt 1 tệp → báo thiếu 1.
+
+### Đối chiếu dữ liệu trước / sau
+
+| Mục | Trước đợt (tài liệu) | Sau đợt (đo thật) |
+|---|--:|--:|
+| Kỳ cước | 7 | **7** |
+| CDR `chi_tiet_su_dung` | 23.223 | **23.223** |
+| `hoa_don` | 338 | **338** |
+| `chi_tiet_hoa_don` | 753 | **753** |
+| `thanh_toan` | 161 | **161** |
+| Khách hàng | 50 | **50** |
+| Kỳ 9/2026 | rỗng `MO` | **`MO` · 0 CDR · 0 hóa đơn** |
+| Doanh thu · đã thu · còn nợ | 135.038.984 · 49.190.687 · 85.848.297 | **khớp từng đồng** |
+| Bốn bất biến | 0 lệch | **0 · 0 · 0 · 0** |
+| `mvnw test` | 343 | **343 PASS** |
+
+Bốn bất biến: `con_no = tong − da_thu` · `da_thu = SUM(thanh_toan)` · sổ cái `so_du` · CDR
+`DA_TINH` không thiếu `bang_gia_cuoc_id`.
+
+### Kiểm chứng biến môi trường và lối tắt
+
+`setx MYSQL_PASSWORD` (phạm vi User) → đọc lại **từ registry trong một tiến trình mới đã gỡ hẳn
+biến thừa kế của tiến trình cha** (nếu còn thừa kế thì phép kiểm không sạch): khớp giá trị mong
+đợi. Chạy `Kiem-Tra-Moi-Truong.ps1` trong tiến trình mới đó → *"Kết nối và xác thực thành công"*;
+**đối chứng âm** cùng phép kiểm với mật khẩu sai → vẫn báo *"Mật khẩu SAI (1045)"*, nên nó không
+phải một phép kiểm luôn xanh.
+
+Lối tắt Desktop `Quản lý thuê bao & tính cước.lnk` đi trọn **năm bước**, Bước 3 in *"Kết nối kho
+dữ liệu thành công"*, trang `/dang-nhap` trả **HTTP 200** (3.144 byte, có ô mật khẩu), trình duyệt
+tự mở. Job Object của G7 còn nguyên tác dụng: giết launcher → `java=0`.
+
+### Cố ý không làm
+
+Không tự nâng quyền (hai khối lệnh cần admin do người dùng chạy) · không `--skip-grant-tables` ·
+không `reset`, không script trong `scripts/` · không sửa tệp ngoài `khoi-dong/` (trừ chính báo cáo
+này) · không ghi mật khẩu vào tệp nào còn lại trong kho.

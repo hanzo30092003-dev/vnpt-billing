@@ -5,3 +5,7 @@ nhat-ky-khoi-dong-loi.log
 
 # File tam luc tao loi tat, chi ton tai vai phan nghin giay.
 loi-tat-tam.lnk
+
+# Tep lenh tam dat lai mat khau MySQL (dot G10). CHUA MAT KHAU -> khong bao gio
+# duoc commit. Bo qua o day de mot lan `git add -A` lo tay cung khong dua no vao.
+tam-dat-lai-mk.sql
