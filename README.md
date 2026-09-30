@@ -11,7 +11,7 @@ dõi công nợ và báo cáo doanh thu.
 > ### ⚠️ Ghi chú về dữ liệu
 > Toàn bộ dữ liệu trong hệ thống là **dữ liệu mẫu tự sinh** phục vụ mục đích học tập.
 > Hệ thống **không** sử dụng dữ liệu thật của bất kỳ nhà mạng nào. Đơn vị phát hành hóa đơn
-> là **Công ty Cổ phần Viễn thông Sông Hậu**, một doanh nghiệp **hư cấu** dựng riêng cho đồ án. Tên khách hàng, số CCCD, mã số thuế và số điện thoại đều do
+> là **Công ty Cổ phần Viễn thông Hanzo**, một doanh nghiệp **hư cấu** dựng riêng cho đồ án. Tên khách hàng, số CCCD, mã số thuế và số điện thoại đều do
 > bộ sinh dữ liệu tạo ra, không tương ứng với người hay tổ chức nào có thật.
 
 ---

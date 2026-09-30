@@ -107,7 +107,7 @@ public class HoaDonPdfService {
         PdfPTable bang = bangKhungRong(new float[]{55, 45});
 
         PdfPCell trai = oTrong();
-        trai.addElement(doan("CÔNG TY CỔ PHẦN VIỄN THÔNG SÔNG HẬU", font.dam(11)));
+        trai.addElement(doan("CÔNG TY CỔ PHẦN VIỄN THÔNG HANZO", font.dam(11)));
         trai.addElement(doan("01 Đại lộ Hòa Bình, Ninh Kiều, Cần Thơ", font.phu(9)));
         trai.addElement(doan("Mã số thuế: 1800000000 · Điện thoại: 1800 6060", font.phu(9)));
         bang.addCell(trai);

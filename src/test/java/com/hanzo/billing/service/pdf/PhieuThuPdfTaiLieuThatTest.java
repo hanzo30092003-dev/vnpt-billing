@@ -72,7 +72,8 @@ class PhieuThuPdfTaiLieuThatTest {
                 .contains(giaoDich.getHoaDon().getKhachHang().getTenKh())
                 .contains(giaoDich.getHoaDon().getThueBao().getSoThueBao())
                 .contains(PhieuThuPdfService.chanTrang(giaoDich))
-                .contains("VIỄN THÔNG SÔNG HẬU")
+                .contains("VIỄN THÔNG HANZO")
+                .doesNotContain("SÔNG HẬU")
                 .doesNotContain("VNPT");
     }
 

@@ -1,5 +1,7 @@
 # BÁO CÁO ĐỢT LÀM LẠI GIAO DIỆN
 
+> ℹ️ Từ 01/10/2026 nhà mạng hư cấu đổi tên thành **Viễn thông Hanzo** (ADR 0001). Tài liệu này giữ tên cũ *Sông Hậu* đúng như tại thời điểm viết.
+
 > Mục tiêu: một **nhân viên giao dịch không rành công nghệ** mở phần mềm lên là tự dùng được,
 > không cần ai hướng dẫn. Đây là phần cuối cùng trước khi demo trước hội đồng.
 

@@ -70,7 +70,8 @@ class PhieuThuPdfServiceTest {
     void chanTrangGhiSoHieuVaConDauNhanBiet() {
         assertThat(vanBan).contains(PhieuThuPdfService.chanTrang(giaoDichMau()));
         assertThat(vanBan).doesNotContain("phục vụ mục đích học tập");
-        assertThat(vanBan).contains("VIỄN THÔNG SÔNG HẬU");
+        assertThat(vanBan).contains("VIỄN THÔNG HANZO");
+        assertThat(vanBan).doesNotContain("SÔNG HẬU");
         assertThat(vanBan).doesNotContain("VNPT");
     }
 

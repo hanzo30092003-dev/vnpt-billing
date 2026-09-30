@@ -4,7 +4,7 @@
 
 > ⚠️ Mở đầu buổi demo, nói rõ **một câu**: *"Toàn bộ dữ liệu trong hệ thống là dữ liệu mẫu tự
 > sinh phục vụ học tập, không phải dữ liệu thật của nhà mạng nào."* Câu này nên nói ngay, vì
-> giao diện có tên "Sông Hậu · Quản lý cước".
+> giao diện có tên "Hanzo · Quản lý cước".
 
 ---
 

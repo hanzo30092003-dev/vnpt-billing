@@ -1,5 +1,7 @@
 # RÀ SOÁT TRƯỚC KHI GHI ĐĨA NỘP
 
+> ℹ️ Từ 01/10/2026 nhà mạng hư cấu đổi tên thành **Viễn thông Hanzo** (ADR 0001). Tài liệu này giữ tên cũ *Sông Hậu* đúng như tại thời điểm viết.
+
 > **Rà soát chỉ đọc.** Không file nào bị xoá, sửa hay di chuyển; không `git commit`. Tài liệu
 > này là thứ duy nhất được tạo ra.
 >

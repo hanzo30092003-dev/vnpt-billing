@@ -11,7 +11,7 @@ quan trọng ngang mã nguồn — sửa code mà không cập nhật tài liệ
 
 > ⚠️ **Dữ liệu:** toàn bộ là **dữ liệu mẫu tự sinh** phục vụ học tập. Hệ thống **không** dùng
 > dữ liệu thật của bất kỳ nhà mạng nào. Đơn vị phát hành hóa đơn là **Công ty Cổ phần Viễn
-> thông Sông Hậu** — một doanh nghiệp **hư cấu** dựng riêng cho đồ án; mã số thuế và số tổng
+> thông Hanzo** — một doanh nghiệp **hư cấu** dựng riêng cho đồ án; mã số thuế và số tổng
 > đài trên chứng từ cũng là số bịa. Tên thư mục và gói Java vẫn giữ chữ `vnpt` vì đó là tên
 > kỹ thuật có từ đầu, không hiện ra cho người dùng.
 
@@ -252,7 +252,7 @@ nên **chỉ còn bản dump** `data-van-hanh.sql`.
 * **Đường tắt "Bỏ qua menu" trong `layout.html` không được bỏ**, và đích `#noi-dung` phải giữ
   `tabindex="-1"` — thiếu nó thì bấm đường tắt chỉ cuộn màn hình chứ tiêu điểm không nhảy vào.
   Đo được: không có đường tắt thì phải bấm Tab **20 lần** mới tới ô nhập đầu tiên, ở mọi trang.
-* **Đơn vị phát hành chứng từ là công ty HƯ CẤU "Công ty Cổ phần Viễn thông Sông Hậu" —
+* **Đơn vị phát hành chứng từ là công ty HƯ CẤU "Công ty Cổ phần Viễn thông Hanzo" —
   không được đổi về tên một nhà mạng có thật.** Đợt G1c gỡ hết dòng cảnh báo *"dữ liệu mẫu"*
   cho tờ hóa đơn trông chuyên nghiệp; làm được điều đó **chỉ vì** bên phát hành là công ty
   bịa, nên tờ giấy không mạo danh ai và không có gì phải cảnh báo. Đổi ngược về "VNPT" mà vẫn
@@ -260,8 +260,10 @@ nên **chỉ còn bản dump** `data-van-hanh.sql`.
   có thật — mà hóa đơn điện thoại ở Việt Nam hay được dùng làm giấy chứng minh nơi cư trú.
   Mã số thuế `1800000000` và tổng đài `1800 6060` cũng là số bịa; tổng đài thật của VNPT là
   `1800 1166`, đừng chép lại. Ba phép kiểm canh cả hai chiều (`contains` tên hư cấu +
-  `doesNotContain("VNPT")`): `HoaDonPdfServiceTest`, `PhieuThuPdfServiceTest`,
-  `PhieuThuPdfTaiLieuThatTest`.
+  `doesNotContain("VNPT")` + `doesNotContain("SÔNG HẬU")`): `HoaDonPdfServiceTest`,
+  `PhieuThuPdfServiceTest`, `PhieuThuPdfTaiLieuThatTest`. *(Tên hư cấu cũ là "Sông Hậu"; đổi
+  thành "Hanzo" ngày 01/10/2026, xem `docs/adr/0001-nhan-dien-hanzo.md`. "KCN Sông Hậu" trong
+  `data-mau.sql` là địa chỉ một khách hàng, không phải tên nhà mạng — giữ nguyên.)*
 * **Chân trang PDF ghi SỐ HIỆU chứng từ, không bỏ trống.** Hóa đơn có thể dài hơn một trang;
   một tờ rời khỏi tập thì số hiệu ở chân trang là thứ duy nhất nói nó thuộc về đâu.
 * **`--thanh-may-cao` KHÔNG được để JavaScript ghi đè.** `.thanh-may` đọc biến đó làm
@@ -281,6 +283,9 @@ nên **chỉ còn bản dump** `data-van-hanh.sql`.
 * **Bảng màu chỉ có MỘT nguồn: `:root` trong `app.css`.** Biểu đồ đọc qua `window.MAU` khai ở
   `app.js` (đọc thẳng từ biến CSS), **không gõ mã màu trong template**. Trước đợt G1, bảy màn
   hình có biểu đồ mỗi cái tự gõ một bộ — đổi bảng màu là quên đúng 4 chỗ.
+  ⚠️ **Tạm thời có HAI nguồn (có chủ đích):** landing và `/dang-nhap` dùng bộ nhận diện Hanzo
+  trong `static/css/tokens.css`, 46 màn hình nghiệp vụ vẫn dùng `:root` của `app.css` cho tới
+  khi xong spec 46 màn hình, rồi gộp về `tokens.css`. Xem spec landing mục 4.6 và ADR 0001.
 * **Thang màu tuổi nợ nằm trong enum `NhomTuoiNo`, và mọi bậc phải đạt AA 4,5:1.** Đây là chỗ
   `kiem-giao-dien.py` **không nhìn tới** vì nó đọc template chứ không đọc mã Java — bậc
   "31–60 ngày" từng là chữ trắng trên `#fd7e14` = **2,57:1** và sống sót qua cả Phase 8. Thêm

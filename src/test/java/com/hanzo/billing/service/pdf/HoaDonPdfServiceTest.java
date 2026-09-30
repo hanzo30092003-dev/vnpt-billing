@@ -141,7 +141,8 @@ class HoaDonPdfServiceTest {
         // Và canh chiều ngược lại: đơn vị phát hành phải là công ty HƯ CẤU của đồ án.
         // Đây là thứ khiến tờ hóa đơn không cần dòng cảnh báo nào — nó không mạo danh ai.
         // Đổi ngược về tên một nhà mạng có thật là tờ giấy này thành hóa đơn giả của họ.
-        assertThat(vanBan).contains("VIỄN THÔNG SÔNG HẬU");
+        assertThat(vanBan).contains("VIỄN THÔNG HANZO");
+        assertThat(vanBan).doesNotContain("SÔNG HẬU");
         assertThat(vanBan).doesNotContain("VNPT");
     }
 

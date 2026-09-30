@@ -48,7 +48,7 @@ public class PhieuThuPdfService {
             writer.setPageEvent(new ChanTrangPdf(font, chanTrang(giaoDich)));
             taiLieu.open();
 
-            taiLieu.add(canhLe("CÔNG TY CỔ PHẦN VIỄN THÔNG SÔNG HẬU", font.dam(10),
+            taiLieu.add(canhLe("CÔNG TY CỔ PHẦN VIỄN THÔNG HANZO", font.dam(10),
                     Element.ALIGN_LEFT, 2f));
             taiLieu.add(canhLe("PHIẾU THU TIỀN", font.dam(15), Element.ALIGN_CENTER, 2f));
             taiLieu.add(canhLe("Số: " + giaoDich.getMaGiaoDich(), font.thuong(10),

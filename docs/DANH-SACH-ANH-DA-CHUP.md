@@ -1,5 +1,7 @@
 # DANH SÁCH ẢNH ĐÃ CHỤP
 
+> ℹ️ Từ 01/10/2026 nhà mạng hư cấu đổi tên thành **Viễn thông Hanzo** (ADR 0001). Tài liệu này giữ tên cũ *Sông Hậu* đúng như tại thời điểm viết.
+
 > Ảnh cho **Chương 5** của báo cáo. Chụp tự động bằng Playwright, ngày **10/09/2026**, trên dữ
 > liệu 7 kỳ · 23.223 CDR · 338 hóa đơn · 161 thanh toán.
 >

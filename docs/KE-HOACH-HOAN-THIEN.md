@@ -1,5 +1,7 @@
 # KẾ HOẠCH HOÀN THIỆN — ĐƯA ĐỒ ÁN TỪ 93% LÊN 100%
 
+> ℹ️ Từ 01/10/2026 nhà mạng hư cấu đổi tên thành **Viễn thông Hanzo** (ADR 0001). Tài liệu này giữ tên cũ *Sông Hậu* đúng như tại thời điểm viết.
+
 > Mục tiêu là **100% ở thang đồ án môn học**, không phải thang sản phẩm thương mại.
 > Nghĩa là: không còn chỗ nào hội đồng chỉ vào được và nói *"cái này hỏng"* hoặc
 > *"cái này khai mà không dùng"*.
