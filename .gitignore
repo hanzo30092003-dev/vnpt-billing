@@ -62,3 +62,6 @@ reset.err
 # Cong cu chup anh - CA NHAN, khong phai mot phan phan mem duoc cham.
 # Dat ngoai san pham nop theo dung yeu cau dot chup anh.
 tools-chup-anh/
+
+# Nhap cua cong cu minh hoa khi thiet ke (mockup, ban thu), khong thuoc san pham
+.superpowers/
