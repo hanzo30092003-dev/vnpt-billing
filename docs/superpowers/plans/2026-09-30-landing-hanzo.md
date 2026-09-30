@@ -8,6 +8,8 @@
 
 **Tech Stack:** Spring Boot 3.5.16 · Thymeleaf · Spring Security · GSAP 3.13.0 (ScrollTrigger, SplitText) tự host · Unbounded / Geist / Geist Mono (woff2 Fontsource) · Playwright + Edge (có sẵn trong `tools-chup-anh/`) · Lighthouse (cài cục bộ, đã được cho phép).
 
+**Thực thi:** theo quy trình HANZO, qua 6 gói lệnh `docs/phases/phase-09.md` … `phase-14.md` (phase-09 làm thẳng, phase-10 → 14 chạy `/ship`). Thông điệp commit lấy theo gói lệnh (`phase-NN: …`), không theo `phase-L*` ghi trong các task dưới đây.
+
 **Spec:** [`docs/superpowers/specs/2026-09-30-landing-hanzo-design.md`](../specs/2026-09-30-landing-hanzo-design.md) · ADR: [`docs/adr/0001-nhan-dien-hanzo.md`](../../adr/0001-nhan-dien-hanzo.md)
 
 ## Global Constraints
