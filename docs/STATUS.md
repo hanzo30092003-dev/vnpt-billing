@@ -1,6 +1,6 @@
 # STATUS · vnpt-billing (Hanzo)
 
-**Cập nhật:** 01/10/2026 · xong phase-09 (nhánh `phase-09-doi-ten-hanzo`, chờ HANZO merge)
+**Cập nhật:** 01/10/2026 · xong phase-09, đã merge vào `main` (chưa push)
 
 ## Bước hiện tại
 
@@ -31,8 +31,7 @@
 
 ## Việc tiếp theo
 
-1. HANZO xem và merge nhánh `phase-09-doi-ten-hanzo` vào `main`.
-2. **phase-10:** mở phiên Claude Code **mới trong thư mục `vnpt-billing`** (để nạp `/ship`), từ `main` tạo nhánh `phase-10-dang-nhap-landing-service`, gõ `/ship docs/phases/phase-10.md`.
+**phase-10:** mở phiên Claude Code **mới trong thư mục `vnpt-billing`** (để nạp `/ship`), từ `main` tạo nhánh `phase-10-dang-nhap-landing-service`, gõ `/ship docs/phases/phase-10.md`.
 
 ## Vướng mắc, cần nhớ
 
