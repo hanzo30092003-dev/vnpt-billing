@@ -71,6 +71,39 @@ mvnw test
 Kết nối MySQL đọc từ biến môi trường `MYSQL_USER` (mặc định `root`) và `MYSQL_PASSWORD` —
 **không** ghi mật khẩu vào mã nguồn.
 
+## Pipeline
+<!-- Dây chuyền /ship (D:\Work\hanzo-studio\pipeline) đọc mục này. Cài ngày 01/10/2026. -->
+- Nhánh gốc: main
+- Lệnh build: `.\mvnw.cmd -B -ntp clean compile`
+- Lệnh test: `.\mvnw.cmd -B -ntp clean test` (hiện 343 test, vài phút)
+- Báo cáo test: `target/surefire-reports/*.txt`, đọc bằng `-Encoding UTF8`
+- Dữ liệu test: **không có CSDL test riêng.** Test tích hợp (`@SpringBootTest`) chạy trên CSDL
+  `vnpt_billing` — đây là **dữ liệu mẫu tự sinh của đồ án**, không phải dữ liệu của khách, nên
+  test được phép **ĐỌC** nó. Test mới nào **GHI** thì bắt buộc `@Transactional` để tự hoàn tác.
+  Test đăng nhập sai dùng tên đăng nhập **không tồn tại** (đăng nhập sai bằng tài khoản thật sẽ
+  tăng bộ đếm sai, 5 lần là khoá tài khoản). Sau mỗi phase, mốc dữ liệu ở mục Invariants phải
+  y nguyên.
+- Chạy app: `.\mvnw.cmd -q -B -ntp package -DskipTests` rồi `java -jar target\billing-0.0.1-SNAPSHOT.jar`
+  → `http://localhost:8080`. **Không** dùng `chay demo` để kiểm (nó chạy jar cũ, không tự đóng
+  gói lại). Cần biến môi trường `MYSQL_PASSWORD` (phạm vi User) và cổng 8080 trống — từng bị
+  dự án QLHS mở từ VS Code chiếm.
+- Trước khi chạy test: **dừng app** (test dùng CSDL thật; `taskkill` tiến trình java của jar).
+
+## Invariants
+<!-- Vi phạm một dòng = Reviewer CHAN. Chi tiết và lý do của từng dòng nằm ở các mục bên dưới. -->
+- Tiền dùng `BigDecimal`, `HALF_UP`, scale 0; chỉ làm tròn ở tầng CDR qua `ThamSoTinhCuoc.lamTronTien`; không `float`/`double` cho tiền.
+- `hoa_don.con_no` chỉ được ghi trong service; màn hình và báo cáo chỉ đọc cột đó.
+- Bốn bất biến luôn 0 dòng lệch: `con_no = tong_thanh_toan − da_thanh_toan` · `da_thanh_toan = SUM(thanh_toan.so_tien)` · `so_du` = sổ cái `bien_dong_so_du` · CDR `DA_TINH` (không miễn phí) có `bang_gia_cuoc_id`.
+- Mốc dữ liệu y nguyên sau mọi phase: 7 kỳ · 23.223 CDR · 338 hóa đơn · 753 chi tiết · 161 thanh toán · kỳ 9/2026 rỗng và `MO` · kỳ 6 và 7 có 0 thanh toán.
+- Không chạy profile `reset`; không tính cước, lập hay huỷ hóa đơn, trừ cước, chốt kỳ trên CSDL thật trừ khi phase ghi rõ.
+- Không mật khẩu, token hay khoá nào trong tệp của kho.
+- Chứng từ do công ty hư cấu phát hành; PDF và HTML không bao giờ chứa `VNPT`.
+- Không đặt `th:if` / `th:unless` / `th:each` / `sec:authorize` cùng thẻ với `th:replace` / `th:insert`.
+- Màn hình có tiền hoặc tên khách chỉ cho `KE_TOAN` + `ADMIN`; trang cho người chưa đăng nhập không có tiền, công nợ, tên khách hay tài khoản mẫu.
+- Tham số `nguon` của form đăng nhập không bao giờ được dùng làm đích chuyển hướng.
+- Không chữ thường trực dưới 13px; cặp chữ/nền đạt 4,5:1 (chữ ≥ 24px: 3:1); màu lấy từ biến CSS, không gõ mã màu trong template.
+- Không sửa `pom.xml`, `application.yml`, `db/**` trừ khi phase ghi rõ.
+
 ## ⚠️ Bẫy môi trường đã gặp
 
 * **Dừng app trước khi `mvnw test`.** Biên dịch lại `target/` làm DevTools restart; ở profile

@@ -65,3 +65,6 @@ tools-chup-anh/
 
 # Nhap cua cong cu minh hoa khi thiet ke (mockup, ban thu), khong thuoc san pham
 .superpowers/
+
+# So ban giao cua day chuyen /ship: ghi chu lam viec, khong phai ma nguon
+.bangiao/
